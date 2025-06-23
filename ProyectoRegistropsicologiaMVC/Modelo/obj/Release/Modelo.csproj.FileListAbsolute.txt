@@ -1,0 +1,6 @@
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Modelo\bin\Release\Modelo.dll
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Modelo\bin\Release\Modelo.pdb
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Modelo\obj\Release\Modelo.csproj.AssemblyReference.cache
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Modelo\obj\Release\Modelo.csproj.CoreCompileInputs.cache
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Modelo\obj\Release\Modelo.dll
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Modelo\obj\Release\Modelo.pdb

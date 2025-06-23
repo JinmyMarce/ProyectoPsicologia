@@ -1,0 +1,9 @@
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\bin\Release\Controlador.dll
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\bin\Release\Controlador.pdb
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\bin\Release\Modelo.dll
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\bin\Release\Modelo.pdb
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\obj\Release\Controlador.csproj.AssemblyReference.cache
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\obj\Release\Controlador.csproj.CoreCompileInputs.cache
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\obj\Release\Controla.6B62700F.Up2Date
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\obj\Release\Controlador.dll
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\obj\Release\Controlador.pdb

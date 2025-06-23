@@ -1,0 +1,9 @@
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\bin\Debug\Controlador.dll
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\bin\Debug\Controlador.pdb
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\obj\Debug\Controlador.csproj.AssemblyReference.cache
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\obj\Debug\Controlador.csproj.CoreCompileInputs.cache
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\obj\Debug\Controlador.dll
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\obj\Debug\Controlador.pdb
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\bin\Debug\Modelo.dll
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\bin\Debug\Modelo.pdb
+C:\Users\FAMILIA--QUISPE\source\repos\ProyectoRegistropsicologiaMVC\Controlador\obj\Debug\Controla.6B62700F.Up2Date

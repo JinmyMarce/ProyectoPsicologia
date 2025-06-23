@@ -1,0 +1,717 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|c:\\users\\familia--quispe\\source\\repos\\proyectoregistropsicologiamvc\\vista\\login.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\login.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|Vista||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|Modelo||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\login.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\login.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\citas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\citas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\mdiparent1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\mdiparent1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\modelo\\cconexion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|solutionrelative:modelo\\cconexion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\guia.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\guia.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\mdiparent1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\mdiparent1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\modificarcontrase\u00F1a.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\modificarcontrase\u00F1a.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\guia.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\guia.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\sesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\sesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\modelo\\csesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|solutionrelative:modelo\\csesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\citas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\citas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\sesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\sesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\visializarerrores.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\visializarerrores.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\registropaciente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\registropaciente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\registropaciente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\registropaciente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\perfilpsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\perfilpsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\nuevopsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\nuevopsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\visualizarcitas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\visualizarcitas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\modelo\\ccita.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|solutionrelative:modelo\\ccita.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\visualizarpacientes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\visualizarpacientes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\visualizarpacientes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\visualizarpacientes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\nuevopsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\nuevopsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{82D54FF6-EFB2-4F9D-A5AD-9C7E062A6109}|Controlador\\Controlador.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\controlador\\controladorpaciente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{82D54FF6-EFB2-4F9D-A5AD-9C7E062A6109}|Controlador\\Controlador.csproj|solutionrelative:controlador\\controladorpaciente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{82D54FF6-EFB2-4F9D-A5AD-9C7E062A6109}|Controlador\\Controlador.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\controlador\\controladorcitas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{82D54FF6-EFB2-4F9D-A5AD-9C7E062A6109}|Controlador\\Controlador.csproj|solutionrelative:controlador\\controladorcitas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\visualizarcitas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\visualizarcitas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\visualizarsesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\visualizarsesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\visualizarsesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\visualizarsesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\reporte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\reporte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\perfilpsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\perfilpsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\visializarerrores.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\visializarerrores.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\reporte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\reporte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\modificarcontrase\u00F1a.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\modificarcontrase\u00F1a.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{82D54FF6-EFB2-4F9D-A5AD-9C7E062A6109}|Controlador\\Controlador.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\controlador\\controladorreporte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{82D54FF6-EFB2-4F9D-A5AD-9C7E062A6109}|Controlador\\Controlador.csproj|solutionrelative:controlador\\controladorreporte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\modelo\\creporte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|solutionrelative:modelo\\creporte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{82D54FF6-EFB2-4F9D-A5AD-9C7E062A6109}|Controlador\\Controlador.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\controlador\\controladorpsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{82D54FF6-EFB2-4F9D-A5AD-9C7E062A6109}|Controlador\\Controlador.csproj|solutionrelative:controlador\\controladorpsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\modelo\\cpsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|solutionrelative:modelo\\cpsicologo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{82D54FF6-EFB2-4F9D-A5AD-9C7E062A6109}|Controlador\\Controlador.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\controlador\\controladorsesiones.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{82D54FF6-EFB2-4F9D-A5AD-9C7E062A6109}|Controlador\\Controlador.csproj|solutionrelative:controlador\\controladorsesiones.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\modelo\\cpaciente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{961198CF-30FA-4AC2-9A3C-0F67DF1C6864}|Modelo\\Modelo.csproj|solutionrelative:modelo\\cpaciente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\vista\\sesion.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F9C3CA3A-25FD-4FC3-B088-F1266370DDE8}|Vista\\Vista.csproj|solutionrelative:vista\\sesion.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorCita.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Controlador\\ControladorCita.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 9,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "Ccita.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Ccita.cs",
+              "RelativeDocumentMoniker": "Modelo\\Ccita.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Ccita.cs",
+              "RelativeToolTip": "Modelo\\Ccita.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAuAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-25T21:36:07.661Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ModificarContrase\u00F1a.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\ModificarContrase\u00F1a.cs",
+              "RelativeDocumentMoniker": "Vista\\ModificarContrase\u00F1a.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\ModificarContrase\u00F1a.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\ModificarContrase\u00F1a.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T22:29:50.837Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Citas.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Citas.cs",
+              "RelativeDocumentMoniker": "Vista\\Citas.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Citas.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\Citas.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T20:30:03.55Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "login.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\login.cs",
+              "RelativeDocumentMoniker": "Vista\\login.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\login.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\login.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-25T21:31:57.927Z",
+              "EditorCaption": " [Dise\u00F1o]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "MDIParent1.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\MDIParent1.cs",
+              "RelativeDocumentMoniker": "Vista\\MDIParent1.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\MDIParent1.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\MDIParent1.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T23:09:27.689Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Cconexion.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Cconexion.cs",
+              "RelativeDocumentMoniker": "Modelo\\Cconexion.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Cconexion.cs",
+              "RelativeToolTip": "Modelo\\Cconexion.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T21:21:10.428Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Guia.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Guia.cs",
+              "RelativeDocumentMoniker": "Vista\\Guia.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Guia.cs",
+              "RelativeToolTip": "Vista\\Guia.cs",
+              "ViewState": "AQIAACUAAAAAAAAAAAAIwDsAAABJAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-01T22:04:05.167Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "login.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\login.cs",
+              "RelativeDocumentMoniker": "Vista\\login.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\login.cs",
+              "RelativeToolTip": "Vista\\login.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAC8AAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T21:00:53.296Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Modelo",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Modelo.csproj",
+              "RelativeDocumentMoniker": "Modelo\\Modelo.csproj",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Modelo.csproj",
+              "RelativeToolTip": "Modelo\\Modelo.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-06-29T20:43:06.407Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "App.config",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\App.config",
+              "RelativeDocumentMoniker": "Vista\\App.config",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\App.config",
+              "RelativeToolTip": "Vista\\App.config",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAzAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
+              "WhenOpened": "2024-06-26T20:56:01.013Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MDIParent1.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\MDIParent1.cs",
+              "RelativeDocumentMoniker": "Vista\\MDIParent1.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\MDIParent1.cs",
+              "RelativeToolTip": "Vista\\MDIParent1.cs",
+              "ViewState": "AQIAABgAAAAAAAAAAAApwCkAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T23:17:05.934Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Vista",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Vista.csproj",
+              "RelativeDocumentMoniker": "Vista\\Vista.csproj",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Vista.csproj",
+              "RelativeToolTip": "Vista\\Vista.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-07-01T23:39:07.095Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Guia.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Guia.cs",
+              "RelativeDocumentMoniker": "Vista\\Guia.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Guia.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\Guia.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-01T22:03:29.665Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Sesion.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Sesion.cs",
+              "RelativeDocumentMoniker": "Vista\\Sesion.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Sesion.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\Sesion.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T21:06:40.656Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Sesion.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Sesion.cs",
+              "RelativeDocumentMoniker": "Vista\\Sesion.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Sesion.cs",
+              "RelativeToolTip": "Vista\\Sesion.cs",
+              "ViewState": "AQIAAHUAAAAAAAAAAAAUwIcAAAAYAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T21:07:56.637Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Csesion.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Csesion.cs",
+              "RelativeDocumentMoniker": "Modelo\\Csesion.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Csesion.cs",
+              "RelativeToolTip": "Modelo\\Csesion.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABAAAAApAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-25T21:36:45.325Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "RegistroPaciente.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\RegistroPaciente.cs",
+              "RelativeDocumentMoniker": "Vista\\RegistroPaciente.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\RegistroPaciente.cs",
+              "RelativeToolTip": "Vista\\RegistroPaciente.cs",
+              "ViewState": "AQIAAGEAAAAAAAAAAAAswHIAAAAYAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T23:35:10.837Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "RegistroPaciente.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\RegistroPaciente.cs",
+              "RelativeDocumentMoniker": "Vista\\RegistroPaciente.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\RegistroPaciente.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\RegistroPaciente.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T23:20:05.678Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "VisializarErrores.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisializarErrores.cs",
+              "RelativeDocumentMoniker": "Vista\\VisializarErrores.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisializarErrores.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\VisializarErrores.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-29T19:17:38.819Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Citas.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Citas.cs",
+              "RelativeDocumentMoniker": "Vista\\Citas.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Citas.cs",
+              "RelativeToolTip": "Vista\\Citas.cs",
+              "ViewState": "AQIAAFUAAAAAAAAAAAAkwGUAAAAYAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T20:40:29.48Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "PerfilPsicologo.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\PerfilPsicologo.cs",
+              "RelativeDocumentMoniker": "Vista\\PerfilPsicologo.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\PerfilPsicologo.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\PerfilPsicologo.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-29T18:57:21.026Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "NuevoPsicologo.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\NuevoPsicologo.cs",
+              "RelativeDocumentMoniker": "Vista\\NuevoPsicologo.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\NuevoPsicologo.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\NuevoPsicologo.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T21:57:04.369Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "VisualizarCitas.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisualizarCitas.cs",
+              "RelativeDocumentMoniker": "Vista\\VisualizarCitas.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisualizarCitas.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\VisualizarCitas.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-28T22:25:25.385Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "VisualizarPacientes.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisualizarPacientes.cs",
+              "RelativeDocumentMoniker": "Vista\\VisualizarPacientes.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisualizarPacientes.cs",
+              "RelativeToolTip": "Vista\\VisualizarPacientes.cs",
+              "ViewState": "AQIAAHEAAAAAAAAAAAAswIIAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-28T21:54:07.261Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "NuevoPsicologo.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\NuevoPsicologo.cs",
+              "RelativeDocumentMoniker": "Vista\\NuevoPsicologo.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\NuevoPsicologo.cs",
+              "RelativeToolTip": "Vista\\NuevoPsicologo.cs",
+              "ViewState": "AQIAAA8AAAAAAAAAAAAtwFAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T22:10:02.039Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "VisualizarPacientes.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisualizarPacientes.cs",
+              "RelativeDocumentMoniker": "Vista\\VisualizarPacientes.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisualizarPacientes.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\VisualizarPacientes.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-28T21:37:11.859Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "ControladorPaciente.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorPaciente.cs",
+              "RelativeDocumentMoniker": "Controlador\\ControladorPaciente.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorPaciente.cs",
+              "RelativeToolTip": "Controlador\\ControladorPaciente.cs",
+              "ViewState": "AQIAAAEAAAAAAAAAAAAowLkAAAAdAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-25T21:58:01.479Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "ControladorCitas.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorCitas.cs",
+              "RelativeDocumentMoniker": "Controlador\\ControladorCitas.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorCitas.cs",
+              "RelativeToolTip": "Controlador\\ControladorCitas.cs",
+              "ViewState": "AQIAAAUAAAAAAAAAAAAowGkAAAAsAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T20:39:48.689Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "VisualizarCitas.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisualizarCitas.cs",
+              "RelativeDocumentMoniker": "Vista\\VisualizarCitas.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisualizarCitas.cs",
+              "RelativeToolTip": "Vista\\VisualizarCitas.cs",
+              "ViewState": "AQIAAFcAAAAAAAAAAAAgwCIAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-28T22:34:55.929Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "visualizarsesion.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\visualizarsesion.cs",
+              "RelativeDocumentMoniker": "Vista\\visualizarsesion.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\visualizarsesion.cs",
+              "RelativeToolTip": "Vista\\visualizarsesion.cs",
+              "ViewState": "AQIAAEgAAAAAAAAAAIAwwFoAAAAMAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-29T18:27:07.217Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "visualizarsesion.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\visualizarsesion.cs",
+              "RelativeDocumentMoniker": "Vista\\visualizarsesion.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\visualizarsesion.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\visualizarsesion.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-28T22:48:07.875Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "Reporte.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Reporte.cs",
+              "RelativeDocumentMoniker": "Vista\\Reporte.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Reporte.cs [Dise\u00F1o]",
+              "RelativeToolTip": "Vista\\Reporte.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T23:44:38.181Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "PerfilPsicologo.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\PerfilPsicologo.cs",
+              "RelativeDocumentMoniker": "Vista\\PerfilPsicologo.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\PerfilPsicologo.cs",
+              "RelativeToolTip": "Vista\\PerfilPsicologo.cs",
+              "ViewState": "AQIAAEgAAAAAAAAAAIAwwFwAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-29T19:07:03.639Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "VisializarErrores.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisializarErrores.cs",
+              "RelativeDocumentMoniker": "Vista\\VisializarErrores.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\VisializarErrores.cs",
+              "RelativeToolTip": "Vista\\VisializarErrores.cs",
+              "ViewState": "AQIAAF0AAAAAAAAAAAAMwG8AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-29T19:21:18.918Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "Reporte.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Reporte.cs",
+              "RelativeDocumentMoniker": "Vista\\Reporte.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Reporte.cs",
+              "RelativeToolTip": "Vista\\Reporte.cs",
+              "ViewState": "AQIAACoAAAAAAAAAAAAewD8AAAAYAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T23:46:57.974Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "ModificarContrase\u00F1a.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\ModificarContrase\u00F1a.cs",
+              "RelativeDocumentMoniker": "Vista\\ModificarContrase\u00F1a.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\ModificarContrase\u00F1a.cs",
+              "RelativeToolTip": "Vista\\ModificarContrase\u00F1a.cs",
+              "ViewState": "AQIAAEAAAAAAAAAAAAAqwFAAAAAUAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T22:36:43.078Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "ControladorReporte.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorReporte.cs",
+              "RelativeDocumentMoniker": "Controlador\\ControladorReporte.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorReporte.cs",
+              "RelativeToolTip": "Controlador\\ControladorReporte.cs",
+              "ViewState": "AQIAAFoAAAAAAAAAAAAUwHMAAAAOAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T23:46:26.914Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "ControladorPsicologo.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorPsicologo.cs",
+              "RelativeDocumentMoniker": "Controlador\\ControladorPsicologo.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorPsicologo.cs",
+              "RelativeToolTip": "Controlador\\ControladorPsicologo.cs",
+              "ViewState": "AQIAAI4AAAAAAAAAAAAUwLUAAAAJAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T21:10:43.906Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "Creporte.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Creporte.cs",
+              "RelativeDocumentMoniker": "Modelo\\Creporte.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Creporte.cs",
+              "RelativeToolTip": "Modelo\\Creporte.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T23:56:25.716Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "Cpsicologo.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Cpsicologo.cs",
+              "RelativeDocumentMoniker": "Modelo\\Cpsicologo.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Cpsicologo.cs",
+              "RelativeToolTip": "Modelo\\Cpsicologo.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAAaAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-25T21:35:18.498Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "ControladorSesiones.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorSesiones.cs",
+              "RelativeDocumentMoniker": "Controlador\\ControladorSesiones.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorSesiones.cs",
+              "RelativeToolTip": "Controlador\\ControladorSesiones.cs",
+              "ViewState": "AQIAAEUAAAAAAAAAAAAowC4AAAAJAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T21:31:11.218Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "Cpaciente.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Cpaciente.cs",
+              "RelativeDocumentMoniker": "Modelo\\Cpaciente.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Modelo\\Cpaciente.cs",
+              "RelativeToolTip": "Modelo\\Cpaciente.cs",
+              "ViewState": "AQIAAAcAAAAAAAAAAAAUwBAAAAAsAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-25T21:34:32.319Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "Sesion.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Sesion.Designer.cs",
+              "RelativeDocumentMoniker": "Vista\\Sesion.Designer.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Vista\\Sesion.Designer.cs",
+              "RelativeToolTip": "Vista\\Sesion.Designer.cs",
+              "ViewState": "AQIAABYAAAAAAAAAAAAgwBgBAAAyAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T23:13:27.489Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "ControladorCita.cs",
+              "DocumentMoniker": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorCita.cs",
+              "RelativeDocumentMoniker": "Controlador\\ControladorCita.cs",
+              "ToolTip": "C:\\Users\\FAMILIA--QUISPE\\source\\repos\\ProyectoRegistropsicologiaMVC\\Controlador\\ControladorCita.cs",
+              "RelativeToolTip": "Controlador\\ControladorCita.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAIBZwAwAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T20:48:12.422Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
