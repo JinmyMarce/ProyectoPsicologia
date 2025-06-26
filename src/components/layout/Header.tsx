@@ -33,7 +33,7 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={onMenuClick}
             className="text-gray-600 hover:bg-gray-100 lg:hidden"
           >
@@ -49,7 +49,7 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
           {/* Notificaciones */}
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             className="text-gray-600 hover:bg-gray-100 relative"
           >
             <Bell className="w-5 h-5" />
@@ -77,7 +77,7 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
             <div className="relative group">
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 className="text-gray-600 hover:bg-gray-100 rounded-full w-9 h-9"
               >
                 <User className="w-5 h-5" />
@@ -90,7 +90,7 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
                     <p className="text-sm font-semibold text-gray-800">{user?.name}</p>
                     <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                   </div>
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
+                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2" onClick={() => window.location.href = '/configuracion-cuenta'}>
                     <Settings className="w-4 h-4" />
                     <span>Configuración</span>
                   </button>

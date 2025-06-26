@@ -52,19 +52,19 @@ const menuItems: MenuItem[] = [
     label: 'Historial de Citas',
     icon: Clock,
     page: 'appointments/history',
-    roles: ['student']
+    roles: ['student', 'admin', 'psychologist']
   },
   {
     label: 'Calendario de Citas',
     icon: Calendar,
     page: 'appointments/calendar',
-    roles: ['super_admin', 'admin', 'psychologist']
+    roles: ['admin', 'psychologist']
   },
   {
     label: 'Historial de Citas',
     icon: Clock,
     page: 'appointments/history',
-    roles: ['super_admin', 'admin', 'psychologist']
+    roles: ['admin', 'psychologist']
   },
   {
     label: 'Registro de Pacientes',
@@ -106,13 +106,13 @@ const menuItems: MenuItem[] = [
     label: 'Horarios',
     icon: Clock,
     page: 'schedule',
-    roles: ['super_admin', 'admin', 'psychologist']
+    roles: ['admin', 'psychologist']
   },
   {
     label: 'Notificaciones',
     icon: Bell,
     page: 'notifications',
-    roles: ['super_admin', 'admin', 'psychologist', 'student']
+    roles: ['admin', 'psychologist', 'student']
   },
   {
     label: 'Reportes',

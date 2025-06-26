@@ -44,10 +44,10 @@ class ReportController extends Controller
         // Rendimiento de psicólogos
         $psychologistPerformance = User::where('role', 'psychologist')
             ->where('active', true)
-            ->withCount(['citas as appointments' => function($query) use ($dateFrom, $dateTo) {
+            ->withCount(['psychologistCitas as appointments' => function($query) use ($dateFrom, $dateTo) {
                 $query->whereBetween('fecha', [$dateFrom, $dateTo]);
             }])
-            ->withCount(['citas as completed_appointments' => function($query) use ($dateFrom, $dateTo) {
+            ->withCount(['psychologistCitas as completed_appointments' => function($query) use ($dateFrom, $dateTo) {
                 $query->whereBetween('fecha', [$dateFrom, $dateTo])
                       ->where('estado', 'completada');
             }])
@@ -60,27 +60,10 @@ class ReportController extends Controller
                 return [
                     'name' => $psychologist->name,
                     'appointments' => $psychologist->appointments,
-                    'rating' => 4.5, // Mock rating
+                    'rating' => $psychologist->rating ?? 4.5,
                     'completionRate' => round($completionRate, 2)
                 ];
             });
-
-        // Tipos de citas
-        $appointmentTypes = Cita::selectRaw('
-            tipo as type,
-            COUNT(*) as count
-        ')
-        ->whereBetween('fecha', [$dateFrom, $dateTo])
-        ->groupBy('tipo')
-        ->get()
-        ->map(function($type) use ($totalAppointments) {
-            $percentage = $totalAppointments > 0 ? ($type->count / $totalAppointments) * 100 : 0;
-            return [
-                'type' => $type->type,
-                'count' => $type->count,
-                'percentage' => round($percentage, 2)
-            ];
-        });
 
         return response()->json([
             'success' => true,
@@ -94,8 +77,7 @@ class ReportController extends Controller
                 'totalStudents' => $totalStudents,
                 'averageRating' => 4.2, // Mock rating
                 'monthlyData' => $monthlyData,
-                'psychologistPerformance' => $psychologistPerformance,
-                'appointmentTypes' => $appointmentTypes
+                'psychologistPerformance' => $psychologistPerformance
             ]
         ]);
     }
@@ -142,7 +124,7 @@ class ReportController extends Controller
 
     public function psychologists(Request $request)
     {
-        $query = User::where('role', 'psychologist')->withCount('citas');
+        $query = User::where('role', 'psychologist')->withCount('psychologistCitas');
 
         // Filtros
         if ($request->has('active') && $request->active !== null) {
@@ -150,7 +132,7 @@ class ReportController extends Controller
         }
 
         if ($request->has('date_from') && $request->date_from) {
-            $query->withCount(['citas as appointments_in_period' => function($q) use ($request) {
+            $query->withCount(['psychologistCitas as appointments_in_period' => function($q) use ($request) {
                 $q->where('fecha', '>=', $request->date_from);
             }]);
         }

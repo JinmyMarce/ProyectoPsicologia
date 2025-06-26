@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Appointment;
+use App\Models\Cita;
 use App\Models\User;
 use App\Models\Psychologist;
 use Illuminate\Http\Request;
@@ -15,21 +15,21 @@ class AppointmentController extends Controller
     public function index()
     {
         try {
-            $appointments = Appointment::with(['user', 'psychologist'])
+            $appointments = Cita::with(['student', 'psychologist'])
                 ->orderBy('created_at', 'desc')
                 ->get()
                 ->map(function ($appointment) {
                     return [
                         'id' => $appointment->id,
-                        'user_email' => $appointment->user_email,
-                        'user_name' => $appointment->user->name ?? 'N/A',
+                        'student_id' => $appointment->student_id,
+                        'student_name' => $appointment->student->name ?? 'N/A',
                         'psychologist_id' => $appointment->psychologist_id,
                         'psychologist_name' => $appointment->psychologist->name ?? 'N/A',
-                        'date' => $appointment->date,
-                        'time' => $appointment->time,
-                        'reason' => $appointment->reason,
-                        'notes' => $appointment->notes,
-                        'status' => $appointment->status,
+                        'fecha' => $appointment->fecha,
+                        'hora' => $appointment->hora,
+                        'motivo_consulta' => $appointment->motivo_consulta,
+                        'notas' => $appointment->notas,
+                        'estado' => $appointment->estado,
                         'created_at' => $appointment->created_at,
                         'updated_at' => $appointment->updated_at,
                     ];
@@ -41,25 +41,27 @@ class AppointmentController extends Controller
         }
     }
 
-    public function getUserAppointments($userEmail)
+    public function getUserAppointments($studentEmail)
     {
         try {
-            $appointments = Appointment::with(['user', 'psychologist'])
-                ->where('user_email', $userEmail)
+            $appointments = Cita::with(['student', 'psychologist'])
+                ->whereHas('student', function($q) use ($studentEmail) {
+                    $q->where('email', $studentEmail);
+                })
                 ->orderBy('created_at', 'desc')
                 ->get()
                 ->map(function ($appointment) {
                     return [
                         'id' => $appointment->id,
-                        'user_email' => $appointment->user_email,
-                        'user_name' => $appointment->user->name ?? 'N/A',
+                        'student_id' => $appointment->student_id,
+                        'student_name' => $appointment->student->name ?? 'N/A',
                         'psychologist_id' => $appointment->psychologist_id,
                         'psychologist_name' => $appointment->psychologist->name ?? 'N/A',
-                        'date' => $appointment->date,
-                        'time' => $appointment->time,
-                        'reason' => $appointment->reason,
-                        'notes' => $appointment->notes,
-                        'status' => $appointment->status,
+                        'fecha' => $appointment->fecha,
+                        'hora' => $appointment->hora,
+                        'motivo_consulta' => $appointment->motivo_consulta,
+                        'notas' => $appointment->notas,
+                        'estado' => $appointment->estado,
                         'created_at' => $appointment->created_at,
                         'updated_at' => $appointment->updated_at,
                     ];
@@ -67,7 +69,7 @@ class AppointmentController extends Controller
 
             return response()->json($appointments);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error al obtener las citas del usuario: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Error al obtener las citas del estudiante: ' . $e->getMessage()], 500);
         }
     }
 
@@ -75,23 +77,23 @@ class AppointmentController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'user_email' => 'required|email|exists:users,email',
-                'psychologist_id' => 'required|exists:psychologists,id',
-                'date' => 'required|date|after_or_equal:today',
-                'time' => 'required|string',
-                'reason' => 'required|string|max:500',
-                'notes' => 'nullable|string|max:1000',
-                'status' => 'required|in:pending,confirmed,completed,cancelled',
+                'student_id' => 'required|exists:users,id',
+                'psychologist_id' => 'required|exists:users,id',
+                'fecha' => 'required|date|after_or_equal:today',
+                'hora' => 'required|string',
+                'motivo_consulta' => 'required|string|max:500',
+                'notas' => 'nullable|string|max:1000',
+                'estado' => 'required|in:pendiente,confirmada,completada,cancelada',
             ]);
 
             if ($validator->fails()) {
                 return response()->json(['message' => 'Datos inválidos', 'errors' => $validator->errors()], 422);
             }
 
-            // Verificar si el usuario existe y es un estudiante
-            $user = User::where('email', $request->user_email)->first();
+            // Verificar si el estudiante existe
+            $user = User::find($request->student_id);
             if (!$user) {
-                return response()->json(['message' => 'Usuario no encontrado'], 404);
+                return response()->json(['message' => 'Estudiante no encontrado'], 404);
             }
 
             if ($user->role !== 'student') {
@@ -99,17 +101,17 @@ class AppointmentController extends Controller
             }
 
             // Verificar si el psicólogo existe
-            $psychologist = Psychologist::find($request->psychologist_id);
-            if (!$psychologist) {
+            $psychologist = User::find($request->psychologist_id);
+            if (!$psychologist || $psychologist->role !== 'psychologist') {
                 return response()->json(['message' => 'Psicólogo no encontrado'], 404);
             }
 
-            // Verificar si ya existe una cita para el mismo usuario, psicólogo, fecha y hora
-            $existingAppointment = Appointment::where('user_email', $request->user_email)
+            // Verificar si ya existe una cita para el mismo estudiante, psicólogo, fecha y hora
+            $existingAppointment = Cita::where('student_id', $request->student_id)
                 ->where('psychologist_id', $request->psychologist_id)
-                ->where('date', $request->date)
-                ->where('time', $request->time)
-                ->where('status', '!=', 'cancelled')
+                ->where('fecha', $request->fecha)
+                ->where('hora', $request->hora)
+                ->where('estado', '!=', 'cancelada')
                 ->first();
 
             if ($existingAppointment) {
@@ -117,41 +119,41 @@ class AppointmentController extends Controller
             }
 
             // Verificar si el horario está disponible
-            $conflictingAppointment = Appointment::where('psychologist_id', $request->psychologist_id)
-                ->where('date', $request->date)
-                ->where('time', $request->time)
-                ->where('status', '!=', 'cancelled')
+            $conflictingAppointment = Cita::where('psychologist_id', $request->psychologist_id)
+                ->where('fecha', $request->fecha)
+                ->where('hora', $request->hora)
+                ->where('estado', '!=', 'cancelada')
                 ->first();
 
             if ($conflictingAppointment) {
                 return response()->json(['message' => 'Este horario no está disponible'], 409);
             }
 
-            $appointment = Appointment::create([
-                'user_email' => $request->user_email,
+            $appointment = Cita::create([
+                'student_id' => $request->student_id,
                 'psychologist_id' => $request->psychologist_id,
-                'date' => $request->date,
-                'time' => $request->time,
-                'reason' => $request->reason,
-                'notes' => $request->notes,
-                'status' => $request->status,
+                'fecha' => $request->fecha,
+                'hora' => $request->hora,
+                'motivo_consulta' => $request->motivo_consulta,
+                'notas' => $request->notas,
+                'estado' => $request->estado,
             ]);
 
-            $appointment->load(['user', 'psychologist']);
+            $appointment->load(['student', 'psychologist']);
 
             return response()->json([
                 'message' => 'Cita creada exitosamente',
                 'appointment' => [
                     'id' => $appointment->id,
-                    'user_email' => $appointment->user_email,
-                    'user_name' => $appointment->user->name ?? 'N/A',
+                    'student_id' => $appointment->student_id,
+                    'student_name' => $appointment->student->name ?? 'N/A',
                     'psychologist_id' => $appointment->psychologist_id,
                     'psychologist_name' => $appointment->psychologist->name ?? 'N/A',
-                    'date' => $appointment->date,
-                    'time' => $appointment->time,
-                    'reason' => $appointment->reason,
-                    'notes' => $appointment->notes,
-                    'status' => $appointment->status,
+                    'fecha' => $appointment->fecha,
+                    'hora' => $appointment->hora,
+                    'motivo_consulta' => $appointment->motivo_consulta,
+                    'notas' => $appointment->notas,
+                    'estado' => $appointment->estado,
                     'created_at' => $appointment->created_at,
                     'updated_at' => $appointment->updated_at,
                 ]
@@ -165,7 +167,7 @@ class AppointmentController extends Controller
     public function show($id)
     {
         try {
-            $appointment = Appointment::with(['user', 'psychologist'])->find($id);
+            $appointment = Cita::with(['student', 'psychologist'])->find($id);
             
             if (!$appointment) {
                 return response()->json(['message' => 'Cita no encontrada'], 404);
@@ -173,15 +175,15 @@ class AppointmentController extends Controller
 
             return response()->json([
                 'id' => $appointment->id,
-                'user_email' => $appointment->user_email,
-                'user_name' => $appointment->user->name ?? 'N/A',
+                'student_id' => $appointment->student_id,
+                'student_name' => $appointment->student->name ?? 'N/A',
                 'psychologist_id' => $appointment->psychologist_id,
                 'psychologist_name' => $appointment->psychologist->name ?? 'N/A',
-                'date' => $appointment->date,
-                'time' => $appointment->time,
-                'reason' => $appointment->reason,
-                'notes' => $appointment->notes,
-                'status' => $appointment->status,
+                'fecha' => $appointment->fecha,
+                'hora' => $appointment->hora,
+                'motivo_consulta' => $appointment->motivo_consulta,
+                'notas' => $appointment->notas,
+                'estado' => $appointment->estado,
                 'created_at' => $appointment->created_at,
                 'updated_at' => $appointment->updated_at,
             ]);
@@ -194,20 +196,20 @@ class AppointmentController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $appointment = Appointment::find($id);
+            $appointment = Cita::find($id);
             
             if (!$appointment) {
                 return response()->json(['message' => 'Cita no encontrada'], 404);
             }
 
             $validator = Validator::make($request->all(), [
-                'user_email' => 'sometimes|required|email|exists:users,email',
-                'psychologist_id' => 'sometimes|required|exists:psychologists,id',
-                'date' => 'sometimes|required|date|after_or_equal:today',
-                'time' => 'sometimes|required|string',
-                'reason' => 'sometimes|required|string|max:500',
-                'notes' => 'nullable|string|max:1000',
-                'status' => 'sometimes|required|in:pending,confirmed,completed,cancelled',
+                'student_id' => 'sometimes|required|exists:users,id',
+                'psychologist_id' => 'sometimes|required|exists:users,id',
+                'fecha' => 'sometimes|required|date|after_or_equal:today',
+                'hora' => 'sometimes|required|string',
+                'motivo_consulta' => 'sometimes|required|string|max:500',
+                'notas' => 'nullable|string|max:1000',
+                'estado' => 'sometimes|required|in:pendiente,confirmada,completada,cancelada',
             ]);
 
             if ($validator->fails()) {
@@ -215,24 +217,24 @@ class AppointmentController extends Controller
             }
 
             $appointment->update($request->only([
-                'user_email', 'psychologist_id', 'date', 'time', 'reason', 'notes', 'status'
+                'student_id', 'psychologist_id', 'fecha', 'hora', 'motivo_consulta', 'notas', 'estado'
             ]));
 
-            $appointment->load(['user', 'psychologist']);
+            $appointment->load(['student', 'psychologist']);
 
             return response()->json([
                 'message' => 'Cita actualizada exitosamente',
                 'appointment' => [
                     'id' => $appointment->id,
-                    'user_email' => $appointment->user_email,
-                    'user_name' => $appointment->user->name ?? 'N/A',
+                    'student_id' => $appointment->student_id,
+                    'student_name' => $appointment->student->name ?? 'N/A',
                     'psychologist_id' => $appointment->psychologist_id,
                     'psychologist_name' => $appointment->psychologist->name ?? 'N/A',
-                    'date' => $appointment->date,
-                    'time' => $appointment->time,
-                    'reason' => $appointment->reason,
-                    'notes' => $appointment->notes,
-                    'status' => $appointment->status,
+                    'fecha' => $appointment->fecha,
+                    'hora' => $appointment->hora,
+                    'motivo_consulta' => $appointment->motivo_consulta,
+                    'notas' => $appointment->notas,
+                    'estado' => $appointment->estado,
                     'created_at' => $appointment->created_at,
                     'updated_at' => $appointment->updated_at,
                 ]
@@ -246,7 +248,7 @@ class AppointmentController extends Controller
     public function destroy($id)
     {
         try {
-            $appointment = Appointment::find($id);
+            $appointment = Cita::find($id);
             
             if (!$appointment) {
                 return response()->json(['message' => 'Cita no encontrada'], 404);
@@ -264,13 +266,13 @@ class AppointmentController extends Controller
     public function confirm($id)
     {
         try {
-            $appointment = Appointment::find($id);
+            $appointment = Cita::find($id);
             
             if (!$appointment) {
                 return response()->json(['message' => 'Cita no encontrada'], 404);
             }
 
-            $appointment->update(['status' => 'confirmed']);
+            $appointment->update(['estado' => 'confirmada']);
 
             return response()->json(['message' => 'Cita confirmada exitosamente']);
 
@@ -282,13 +284,13 @@ class AppointmentController extends Controller
     public function cancel($id)
     {
         try {
-            $appointment = Appointment::find($id);
+            $appointment = Cita::find($id);
             
             if (!$appointment) {
                 return response()->json(['message' => 'Cita no encontrada'], 404);
             }
 
-            $appointment->update(['status' => 'cancelled']);
+            $appointment->update(['estado' => 'cancelada']);
 
             return response()->json(['message' => 'Cita cancelada exitosamente']);
 
@@ -300,13 +302,13 @@ class AppointmentController extends Controller
     public function complete($id)
     {
         try {
-            $appointment = Appointment::find($id);
+            $appointment = Cita::find($id);
             
             if (!$appointment) {
                 return response()->json(['message' => 'Cita no encontrada'], 404);
             }
 
-            $appointment->update(['status' => 'completed']);
+            $appointment->update(['estado' => 'completada']);
 
             return response()->json(['message' => 'Cita completada exitosamente']);
 
@@ -319,8 +321,8 @@ class AppointmentController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'psychologist_id' => 'required|exists:psychologists,id',
-                'date' => 'required|date|after_or_equal:today',
+                'psychologist_id' => 'required|exists:users,id',
+                'fecha' => 'required|date|after_or_equal:today',
             ]);
 
             if ($validator->fails()) {
@@ -328,7 +330,7 @@ class AppointmentController extends Controller
             }
 
             $psychologistId = $request->psychologist_id;
-            $date = $request->date;
+            $fecha = $request->fecha;
 
             // Horarios disponibles (de 8:00 AM a 6:00 PM)
             $availableTimes = [
@@ -337,10 +339,10 @@ class AppointmentController extends Controller
             ];
 
             // Obtener citas existentes para el psicólogo en esa fecha
-            $existingAppointments = Appointment::where('psychologist_id', $psychologistId)
-                ->where('date', $date)
-                ->where('status', '!=', 'cancelled')
-                ->pluck('time')
+            $existingAppointments = Cita::where('psychologist_id', $psychologistId)
+                ->where('fecha', $fecha)
+                ->where('estado', '!=', 'cancelada')
+                ->pluck('hora')
                 ->toArray();
 
             $slots = [];

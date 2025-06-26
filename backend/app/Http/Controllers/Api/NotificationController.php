@@ -224,53 +224,77 @@ class NotificationController extends Controller
         ]);
     }
 
+    /**
+     * Obtener preferencias de notificaciones del usuario autenticado
+     */
+    public function getPreferences()
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        // Por ahora retornamos preferencias por defecto
+        // En el futuro se pueden almacenar en la base de datos
+        $preferences = [
+            'email_notifications' => true,
+            'app_notifications' => true,
+            'appointment_reminders' => true,
+            'status_changes' => true,
+            'weekly_reports' => false,
+            'marketing_emails' => false,
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $preferences
+        ]);
+    }
+
+    /**
+     * Actualizar preferencias de notificaciones del usuario autenticado
+     */
     public function updatePreferences(Request $request)
     {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+        }
+
         $validator = Validator::make($request->all(), [
             'email_notifications' => 'boolean',
-            'push_notifications' => 'boolean',
+            'app_notifications' => 'boolean',
             'appointment_reminders' => 'boolean',
-            'status_updates' => 'boolean',
-            'system_notifications' => 'boolean',
+            'status_changes' => 'boolean',
+            'weekly_reports' => 'boolean',
+            'marketing_emails' => 'boolean',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error de validación',
+                'message' => 'Datos de entrada inválidos',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        $user = auth()->user();
-        $user->update($request->only([
-            'email_notifications',
-            'push_notifications',
-            'appointment_reminders',
-            'status_updates',
-            'system_notifications'
-        ]));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Preferencias actualizadas exitosamente'
+        // Por ahora solo validamos, en el futuro se pueden guardar en la base de datos
+        $preferences = $request->only([
+            'email_notifications', 'app_notifications', 'appointment_reminders',
+            'status_changes', 'weekly_reports', 'marketing_emails'
         ]);
-    }
-
-    public function getPreferences()
-    {
-        $user = auth()->user();
-        
-        $preferences = [
-            'email_notifications' => $user->email_notifications ?? true,
-            'push_notifications' => $user->push_notifications ?? true,
-            'appointment_reminders' => $user->appointment_reminders ?? true,
-            'status_updates' => $user->status_updates ?? true,
-            'system_notifications' => $user->system_notifications ?? true,
-        ];
 
         return response()->json([
             'success' => true,
+            'message' => 'Preferencias actualizadas exitosamente',
             'data' => $preferences
         ]);
     }

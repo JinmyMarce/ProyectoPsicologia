@@ -54,9 +54,13 @@ class PsychologistController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'apellido_paterno' => 'required|string|max:255',
+            'apellido_materno' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'specialization' => 'required|string|max:255',
+            'celular' => 'required|string|max:20',
+            'fecha_nacimiento' => 'required|date',
             'verified' => 'boolean',
         ]);
 
@@ -90,10 +94,14 @@ class PsychologistController extends Controller
 
             $psychologist = User::create([
                 'name' => $request->name,
+                'apellido_paterno' => $request->apellido_paterno,
+                'apellido_materno' => $request->apellido_materno,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => 'psychologist',
                 'specialization' => $request->specialization,
+                'celular' => $request->celular,
+                'fecha_nacimiento' => $request->fecha_nacimiento,
                 'rating' => 0.00,
                 'total_appointments' => 0,
                 'verified' => $request->verified ?? false,
@@ -173,8 +181,12 @@ class PsychologistController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
+            'apellido_paterno' => 'sometimes|required|string|max:255',
+            'apellido_materno' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email|unique:users,email,' . $id,
             'specialization' => 'sometimes|required|string|max:255',
+            'celular' => 'sometimes|required|string|max:20',
+            'fecha_nacimiento' => 'sometimes|required|date',
             'verified' => 'sometimes|boolean',
             'password' => 'sometimes|required|string|min:6',
         ]);
@@ -190,7 +202,7 @@ class PsychologistController extends Controller
         try {
             DB::beginTransaction();
 
-            $updateData = $request->only(['name', 'specialization', 'verified']);
+            $updateData = $request->only(['name', 'apellido_paterno', 'apellido_materno', 'specialization', 'celular', 'fecha_nacimiento', 'verified']);
             
             if ($request->has('email')) {
                 // Verificar que sea un email personal

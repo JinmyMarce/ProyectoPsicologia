@@ -5,7 +5,7 @@ import { DivideIcon as LucideIcon } from 'lucide-react';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
-  icon?: LucideIcon;
+  icon?: typeof LucideIcon;
   iconPosition?: 'left' | 'right';
   loading?: boolean;
 }
@@ -33,7 +33,7 @@ export function Button({
           'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500': variant === 'danger',
         },
         {
-          'px-3 py-1.5 text-sm': size === 'sm',
+          'px-3 py-1.5 text-xs': size === 'sm',
           'px-4 py-2 text-sm': size === 'md',
           'px-6 py-3 text-base': size === 'lg',
         },

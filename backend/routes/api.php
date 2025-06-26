@@ -13,6 +13,9 @@ use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\PsychologicalSessionController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\SessionController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\ExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +39,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/verify', [AuthController::class, 'verifyToken']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/profile', [AuthController::class, 'profile']);
+    
+    // Rutas del dashboard
+    Route::get('/dashboard', [DashboardController::class, 'dashboard']);
+    Route::get('/dashboard/student', [DashboardController::class, 'studentDashboard']);
+    Route::get('/dashboard/psychologist', [DashboardController::class, 'psychologistDashboard']);
+    Route::get('/dashboard/super-admin', [DashboardController::class, 'superAdminDashboard']);
+    
+    // Rutas de búsqueda
+    Route::get('/search/psychologists', [SearchController::class, 'searchPsychologists']);
+    Route::get('/search/appointments', [SearchController::class, 'searchAppointments']);
+    Route::get('/search/sessions', [SearchController::class, 'searchSessions']);
+    Route::get('/search/global', [SearchController::class, 'globalSearch']);
+    
+    // Rutas de exportación
+    Route::get('/export/appointments', [ExportController::class, 'exportAppointments']);
+    Route::get('/export/psychologists', [ExportController::class, 'exportPsychologists']);
+    Route::get('/export/sessions', [ExportController::class, 'exportSessions']);
+    Route::get('/export/system-report', [ExportController::class, 'exportSystemReport']);
     
     // Rutas para citas
     Route::apiResource('citas', CitaController::class);
@@ -66,6 +87,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/change-password', [UserController::class, 'changePassword']);
         Route::post('/{id}/send-verification', [UserController::class, 'sendVerificationEmail']);
         Route::get('/stats', [UserController::class, 'stats']);
+        
+        // Rutas para perfil del usuario autenticado
+        Route::put('/profile/update', [UserController::class, 'updateProfile']);
+        Route::post('/profile/change-password', [UserController::class, 'changeOwnPassword']);
     });
 
     // Rutas para gestión de pacientes

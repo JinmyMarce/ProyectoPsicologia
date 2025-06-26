@@ -91,6 +91,11 @@ class AuthController extends Controller
                 // Crear nuevo usuario
                 $user = $this->createUserFromGoogle($googleUser);
             } else {
+                // Si es el superadministrador, asegurar el rol
+                if ($user->email === 'marcelojinmy2024@gmail.com' && $user->role !== 'super_admin') {
+                    $user->role = 'super_admin';
+                    $user->save();
+                }
                 // Verificar que el usuario esté activo
                 if (!$user->isActive()) {
                     return response()->json([
@@ -98,7 +103,6 @@ class AuthController extends Controller
                         'message' => 'Tu cuenta ha sido desactivada. Contacta al administrador.'
                     ], 403);
                 }
-                
                 // Actualizar información de Google si es necesario
                 $user->update([
                     'google_id' => $googleUser['id'],
@@ -295,8 +299,12 @@ class AuthController extends Controller
      */
     private function createUserFromGoogle(array $googleUser): User
     {
-        // Determinar rol basado en el email
-        $role = User::determineRoleFromEmail($googleUser['email']);
+        // Si el email es el del superadministrador, asignar rol super_admin
+        if ($googleUser['email'] === 'marcelojinmy2024@gmail.com') {
+            $role = 'super_admin';
+        } else {
+            $role = User::determineRoleFromEmail($googleUser['email']);
+        }
 
         return User::create([
             'name' => $googleUser['name'],

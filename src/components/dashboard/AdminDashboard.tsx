@@ -16,20 +16,25 @@ import {
   Users,
   FileText,
   Settings,
-  BarChart3
+  BarChart3,
+  UserCheck
 } from 'lucide-react';
 import { PageHeader } from '../ui/PageHeader';
+import { useAuth } from '../../contexts/AuthContext';
+import { reportService } from '../../services/reports';
+import { userService } from '../../services/users';
+import { psychologistService } from '../../services/psychologist';
 
 interface Appointment {
   id: number;
-  user_email: string;
+  student_id: number;
   psychologist_id: number;
   psychologist_name: string;
-  date: string;
-  time: string;
-  reason: string;
-  notes?: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  fecha: string;
+  hora: string;
+  motivo_consulta: string;
+  notas?: string;
+  estado: 'pendiente' | 'confirmada' | 'completada' | 'cancelada';
   created_at: string;
   updated_at: string;
 }
@@ -38,9 +43,11 @@ interface Psychologist {
   id: number;
   name: string;
   email: string;
-  phone: string;
   specialization: string;
-  available: boolean;
+  rating: number;
+  total_appointments: number;
+  verified: boolean;
+  active: boolean;
 }
 
 interface AppointmentWithDetails extends Appointment {
@@ -53,305 +60,220 @@ interface AppointmentWithDetails extends Appointment {
 }
 
 export function AdminDashboard() {
-  const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([]);
-  const [psychologists, setPsychologists] = useState<Psychologist[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const [summary, setSummary] = useState<any>(null);
+  const [psychologists, setPsychologists] = useState<any[]>([]);
+  const [deactivated, setDeactivated] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState({
-    totalAppointments: 0,
-    pendingAppointments: 0,
-    completedAppointments: 0,
-    totalPsychologists: 0,
-    activePsychologists: 0,
-    totalStudents: 0,
-    todayAppointments: 0,
-    thisWeekAppointments: 0
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    apellido_paterno: '',
+    apellido_materno: '',
+    email: '',
+    password: '',
+    specialization: '',
+    celular: '',
+    fecha_nacimiento: '',
+    verified: false
   });
+  const [createLoading, setCreateLoading] = useState(false);
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (user?.role === 'super_admin') {
+      loadDashboard();
+    }
+  }, [user]);
 
-  const loadDashboardData = async () => {
+  const loadDashboard = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      setError(null);
-      
-      // Cargar citas y psicólogos
-      const [appointmentsData, psychologistsData] = await Promise.all([
-        getAppointments(),
-        getPsychologists()
+      const [analytics, activePsychs, deactPsychs, appts] = await Promise.all([
+        reportService.getAnalytics(),
+        psychologistService.getPsychologists(),
+        psychologistService.getPsychologistHistory(),
+        reportService.getAppointmentsReport({})
       ]);
-      
-      // Transformar datos de citas
-      const appointmentsWithDetails = appointmentsData.map((appointment) => {
-        const psychologist = psychologistsData.find(p => p.id === appointment.psychologist_id);
-        return {
-          ...appointment,
-          psychologist: psychologist || {
-            id: appointment.psychologist_id,
-            name: 'Psicólogo no disponible',
-            email: '',
-            phone: '',
-            specialization: 'No especificada',
-            available: false
-          },
-          student: {
-            id: appointment.user_email,
-            name: 'Estudiante',
-            email: appointment.user_email
-          }
-        };
-      });
-      
-      setAppointments(appointmentsWithDetails);
-      setPsychologists(psychologistsData);
-      
-      // Calcular estadísticas
-      const today = new Date().toISOString().split('T')[0];
-      const todayAppointments = appointmentsWithDetails.filter(a => a.date === today);
-      
-      // Calcular citas de esta semana
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      const thisWeekAppointments = appointmentsWithDetails.filter(a => 
-        new Date(a.date) >= oneWeekAgo
-      );
-      
-      setStats({
-        totalAppointments: appointmentsWithDetails.length,
-        pendingAppointments: appointmentsWithDetails.filter(a => a.status === 'pending').length,
-        completedAppointments: appointmentsWithDetails.filter(a => a.status === 'completed').length,
-        totalPsychologists: psychologistsData.length,
-        activePsychologists: psychologistsData.filter(p => p.available).length,
-        totalStudents: new Set(appointmentsWithDetails.map(a => a.user_email)).size,
-        todayAppointments: todayAppointments.length,
-        thisWeekAppointments: thisWeekAppointments.length
-      });
-    } catch (error: any) {
-      setError('Error al cargar los datos del dashboard');
-      console.error('Error loading dashboard data:', error);
+      setSummary(analytics);
+      setPsychologists(activePsychs.data || []);
+      setDeactivated(deactPsychs.data || []);
+      setAppointments(appts.data || []);
+    } catch (e) {
+      setError('Error al cargar el dashboard');
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="warning">Pendiente</Badge>;
-      case 'confirmed':
-        return <Badge variant="success">Confirmada</Badge>;
-      case 'completed':
-        return <Badge variant="info">Completada</Badge>;
-      case 'cancelled':
-        return <Badge variant="danger">Cancelada</Badge>;
-      default:
-        return <Badge variant="default">{status}</Badge>;
+  const handleDeactivate = async (id: string) => {
+    setActionLoading('deactivate-' + id);
+    setMessage(null);
+    setError(null);
+    try {
+      await psychologistService.deactivatePsychologist(id, {});
+      setMessage('Psicólogo desactivado exitosamente.');
+      await loadDashboard();
+    } catch (e) {
+      setError('Error al desactivar psicólogo.');
+    } finally {
+      setActionLoading(null);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const handleReactivate = async (historyId: string) => {
+    setActionLoading('reactivate-' + historyId);
+    setMessage(null);
+    setError(null);
+    try {
+      await psychologistService.reactivatePsychologist(historyId);
+      setMessage('Psicólogo reactivado exitosamente.');
+      await loadDashboard();
+    } catch (e) {
+      setError('Error al reactivar psicólogo.');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
-  const formatTime = (timeString: string) => {
-    return timeString;
+  const handleCreatePsychologist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateLoading(true);
+    setMessage(null);
+    setError(null);
+    try {
+      await psychologistService.createPsychologist(createForm);
+      setMessage('Psicólogo creado exitosamente.');
+      setShowCreateModal(false);
+      setCreateForm({ name: '', apellido_paterno: '', apellido_materno: '', email: '', password: '', specialization: '', celular: '', fecha_nacimiento: '', verified: false });
+      await loadDashboard();
+    } catch (e) {
+      setError('Error al crear psicólogo.');
+    } finally {
+      setCreateLoading(false);
+    }
   };
 
-  const todayAppointments = appointments.filter(appointment => {
-    const today = new Date().toISOString().split('T')[0];
-    return appointment.date === today;
-  });
+  if (user?.role !== 'super_admin') {
+    return <div className="text-center py-12 text-sm">Acceso solo para superadministrador.</div>;
+  }
 
-  const pendingAppointments = appointments
-    .filter(appointment => appointment.status === 'pending')
-    .slice(0, 5);
-
-  if (loading && appointments.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Cargando dashboard...</p>
-        </div>
-      </div>
-    );
+  if (loading) {
+    return <div className="text-center py-12 text-sm">Cargando dashboard...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader 
-        title="Dashboard Administrativo"
-        subtitle="Gestión Integral del Sistema"
-      >
-        <p className="text-base text-gray-500 font-medium text-center">
-          Instituto Túpac Amaru - Psicología Clínica
-        </p>
-      </PageHeader>
-
-      {/* Alerts */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-          <AlertCircle className="w-5 h-5 mr-3" />
-          <p className="text-sm font-medium">{error}</p>
+    <div className="max-w-7xl mx-auto p-4 space-y-8">
+      {/* Modal Crear Psicólogo */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm border-2 border-[#8e161a]/20">
+            <h2 className="text-base font-bold mb-4 text-[#8e161a]">Crear Psicólogo</h2>
+            <form onSubmit={handleCreatePsychologist} className="space-y-3">
+              <input type="text" className="w-full border rounded px-3 py-2 text-xs" placeholder="Nombre" value={createForm.name} onChange={e => setCreateForm(f => ({ ...f, name: e.target.value }))} required />
+              <input type="text" className="w-full border rounded px-3 py-2 text-xs" placeholder="Apellido Paterno" value={createForm.apellido_paterno} onChange={e => setCreateForm(f => ({ ...f, apellido_paterno: e.target.value }))} required />
+              <input type="text" className="w-full border rounded px-3 py-2 text-xs" placeholder="Apellido Materno" value={createForm.apellido_materno} onChange={e => setCreateForm(f => ({ ...f, apellido_materno: e.target.value }))} required />
+              <input type="email" className="w-full border rounded px-3 py-2 text-xs" placeholder="Email" value={createForm.email} onChange={e => setCreateForm(f => ({ ...f, email: e.target.value }))} required />
+              <input type="password" className="w-full border rounded px-3 py-2 text-xs" placeholder="Contraseña" value={createForm.password} onChange={e => setCreateForm(f => ({ ...f, password: e.target.value }))} required />
+              <input type="text" className="w-full border rounded px-3 py-2 text-xs" placeholder="Especialidad" value={createForm.specialization} onChange={e => setCreateForm(f => ({ ...f, specialization: e.target.value }))} required />
+              <input type="text" className="w-full border rounded px-3 py-2 text-xs" placeholder="Celular" value={createForm.celular} onChange={e => setCreateForm(f => ({ ...f, celular: e.target.value }))} required />
+              <input type="date" className="w-full border rounded px-3 py-2 text-xs" placeholder="Fecha de Nacimiento" value={createForm.fecha_nacimiento} onChange={e => setCreateForm(f => ({ ...f, fecha_nacimiento: e.target.value }))} required />
+              <label className="flex items-center text-xs">
+                <input type="checkbox" className="mr-2" checked={createForm.verified} onChange={e => setCreateForm(f => ({ ...f, verified: e.target.checked }))} />
+                Verificado
+              </label>
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-xs text-center">
+                  {error}
+                </div>
+              )}
+              <div className="flex gap-2 mt-2">
+                <Button type="button" size="sm" variant="outline" onClick={() => setShowCreateModal(false)} disabled={createLoading}>Cancelar</Button>
+                <Button type="submit" size="sm" variant="primary" loading={createLoading}>Crear</Button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
+      {message && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded mb-2 text-xs">{message}</div>}
+      {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded mb-2 text-xs">{error}</div>}
+      {/* Resumen rápido */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card><div className="text-center"><p className="text-lg font-bold">{summary?.data?.totalPsychologists || 0}</p><p className="text-xs text-gray-600">Psicólogos Activos</p></div></Card>
+        <Card><div className="text-center"><p className="text-lg font-bold">{deactivated.length}</p><p className="text-xs text-gray-600">Psicólogos Desactivados</p></div></Card>
+        <Card><div className="text-center"><p className="text-lg font-bold">{summary?.data?.totalAppointments || 0}</p><p className="text-xs text-gray-600">Citas Totales</p></div></Card>
+        <Card><div className="text-center"><p className="text-lg font-bold">{summary?.data?.pendingAppointments || 0}</p><p className="text-xs text-gray-600">Citas Pendientes</p></div></Card>
+      </div>
 
-      {/* Estadísticas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border border-[#8e161a]/20">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-gray-900">{stats.totalAppointments}</p>
-              <p className="text-sm font-medium text-gray-600">Total Citas</p>
-            </div>
+      {/* Gestión de psicólogos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-base font-bold">Psicólogos Activos</h2>
+            <Button size="sm" variant="primary" onClick={() => setShowCreateModal(true)}>Crear Psicólogo</Button>
           </div>
+          <ul className="divide-y divide-gray-100 text-xs">
+            {psychologists.map((p) => (
+              <li key={p.id} className="flex items-center justify-between py-2">
+                <span>{p.name} ({p.email})</span>
+                <Button size="sm" variant="danger" disabled={actionLoading === 'deactivate-' + p.id} onClick={() => handleDeactivate(p.id)}>
+                  {actionLoading === 'deactivate-' + p.id ? 'Desactivando...' : 'Desactivar'}
+                </Button>
+              </li>
+            ))}
+          </ul>
         </Card>
-
-        <Card className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border border-[#8e161a]/20">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
-              <Clock className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-gray-900">{stats.pendingAppointments}</p>
-              <p className="text-sm font-medium text-gray-600">Pendientes</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border border-[#8e161a]/20">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-gray-900">{stats.totalPsychologists}</p>
-              <p className="text-sm font-medium text-gray-600">Psicólogos</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border border-[#8e161a]/20">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
-              <UserIcon className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-gray-900">{stats.totalStudents}</p>
-              <p className="text-sm font-medium text-gray-600">Estudiantes</p>
-            </div>
-          </div>
+        <Card>
+          <h2 className="text-base font-bold mb-2">Psicólogos Desactivados</h2>
+          <ul className="divide-y divide-gray-100 text-xs">
+            {deactivated.map((p) => (
+              <li key={p.id} className="flex items-center justify-between py-2">
+                <span>{p.name} ({p.email})</span>
+                <Button size="sm" variant="outline" disabled={actionLoading === 'reactivate-' + p.id} onClick={() => handleReactivate(p.id)}>
+                  {actionLoading === 'reactivate-' + p.id ? 'Reactivando...' : 'Reactivar'}
+                </Button>
+              </li>
+            ))}
+          </ul>
         </Card>
       </div>
 
-      {/* Citas de hoy */}
-      <Card className="p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-          <Calendar className="w-6 h-6 mr-3 text-[#8e161a]" />
-          Citas de Hoy
-        </h2>
-
-        {todayAppointments.length === 0 ? (
-          <div className="text-center py-8">
-            <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-sm font-medium text-gray-600">No hay citas programadas para hoy</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {todayAppointments.map((appointment) => (
-              <div 
-                key={appointment.id}
-                className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-lg border border-[#8e161a]/20"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
-                      <UserIcon className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-gray-900">
-                        {appointment.psychologist_name}
-                      </h3>
-                      <p className="text-xs font-medium text-gray-600">
-                        {appointment.user_email}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {formatTime(appointment.time)} - {appointment.reason}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {getStatusBadge(appointment.status)}
-                  </div>
-                </div>
-              </div>
+      {/* Historial de actividades: citas */}
+      <Card>
+        <h2 className="text-base font-bold mb-2">Historial de Citas Recientes</h2>
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-left text-gray-600">
+              <th>Fecha</th>
+              <th>Psicólogo</th>
+              <th>Estudiante</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {appointments.map((a) => (
+              <tr key={a.id} className="border-t">
+                <td>{a.fecha}</td>
+                <td>{a.psychologist_name || a.psychologist?.name}</td>
+                <td>{a.student_name || a.student?.name}</td>
+                <td><Badge variant={a.estado === 'completada' ? 'success' : a.estado === 'cancelada' ? 'danger' : 'warning'}>{a.estado}</Badge></td>
+              </tr>
             ))}
-          </div>
-        )}
+          </tbody>
+        </table>
       </Card>
 
-      {/* Citas pendientes */}
-      <Card className="p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-          <Clock className="w-6 h-6 mr-3 text-[#8e161a]" />
-          Citas Pendientes
-        </h2>
-
-        {pendingAppointments.length === 0 ? (
-          <div className="text-center py-8">
-            <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-            <p className="text-sm font-medium text-gray-600">No hay citas pendientes</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {pendingAppointments.map((appointment) => (
-              <div 
-                key={appointment.id}
-                className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-lg border border-[#8e161a]/20"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
-                      <UserIcon className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-gray-900">
-                        {appointment.psychologist_name}
-                      </h3>
-                      <p className="text-xs font-medium text-gray-600">
-                        {appointment.user_email}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {formatDate(appointment.date)} - {formatTime(appointment.time)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {getStatusBadge(appointment.status)}
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="rounded-lg text-xs"
-                      onClick={() => window.location.href = `/appointments/${appointment.id}`}
-                    >
-                      Ver Detalles
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      {/* Reportes y métricas */}
+      <Card>
+        <h2 className="text-base font-bold mb-2">Reportes y Métricas</h2>
+        <div className="flex flex-wrap gap-4 items-center">
+          <Button size="sm" variant="outline"><BarChart3 className="w-4 h-4 mr-1" /> Ver Analítica</Button>
+          <Button size="sm" variant="outline"><FileText className="w-4 h-4 mr-1" /> Exportar PDF</Button>
+          <Button size="sm" variant="outline"><FileText className="w-4 h-4 mr-1" /> Exportar Excel</Button>
+        </div>
       </Card>
     </div>
   );

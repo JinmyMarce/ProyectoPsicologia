@@ -3,9 +3,13 @@ import { AUTH_CONFIG } from '../config/auth';
 
 export interface CreatePsychologistData {
   name: string;
+  apellido_paterno: string;
+  apellido_materno: string;
   email: string;
   password: string;
   specialization: string;
+  celular: string;
+  fecha_nacimiento: string;
   verified?: boolean;
 }
 

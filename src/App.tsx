@@ -10,6 +10,7 @@ import { AppointmentBooking } from './components/appointments/AppointmentBooking
 import { AppointmentCalendar } from './components/appointments/AppointmentCalendar';
 import { AppointmentHistory } from './components/appointments/AppointmentHistory';
 import { UserManagement } from './components/admin/UserManagement';
+import { PsychologistManagement } from './components/admin/PsychologistManagement';
 import { NotificationCenter } from './components/notifications/NotificationCenter';
 import { ReportsAnalytics } from './components/reports/ReportsAnalytics';
 import { ScheduleManager } from './components/psychologist/ScheduleManager';
@@ -17,9 +18,11 @@ import { PatientRegistration } from './components/patients/PatientRegistration';
 import { PatientList } from './components/patients/PatientList';
 import { SessionRegistration } from './components/sessions/SessionRegistration';
 import { SessionList } from './components/sessions/SessionList';
+import ConfiguracionCuenta from './pages/configuracion-cuenta';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function AppContent() {
-  const { user, isLoading } = useAuth();
+  const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -42,7 +45,7 @@ function AppContent() {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -88,6 +91,8 @@ function AppContent() {
         return <AppointmentHistory />;
       case 'users':
         return <UserManagement />;
+      case 'psychologists':
+        return <PsychologistManagement />;
       case 'notifications':
         return <NotificationCenter />;
       case 'reports':
@@ -102,6 +107,8 @@ function AppContent() {
         return <SessionRegistration />;
       case 'sessions':
         return <SessionList />;
+      case 'configuracion-cuenta':
+        return <ConfiguracionCuenta />;
       default:
         return <StudentDashboard />;
     }
@@ -134,7 +141,12 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/configuracion-cuenta" element={<ConfiguracionCuenta />} />
+          <Route path="/*" element={<AppContent />} />
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }

@@ -20,6 +20,8 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'apellido_paterno',
+        'apellido_materno',
         'email',
         'password',
         'role',
@@ -33,7 +35,9 @@ class User extends Authenticatable
         'specialization',
         'rating',
         'total_appointments',
-        'dni'
+        'dni',
+        'celular',
+        'fecha_nacimiento'
     ];
 
     /**
@@ -59,6 +63,7 @@ class User extends Authenticatable
             'verified' => 'boolean',
             'active' => 'boolean',
             'rating' => 'decimal:2',
+            'fecha_nacimiento' => 'date',
         ];
     }
 
@@ -148,6 +153,8 @@ class User extends Authenticatable
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'apellido_paterno' => $this->apellido_paterno,
+            'apellido_materno' => $this->apellido_materno,
             'email' => $this->email,
             'role' => $this->role,
             'avatar' => $this->avatar,
@@ -159,6 +166,8 @@ class User extends Authenticatable
             'specialization' => $this->specialization,
             'rating' => $this->rating,
             'total_appointments' => $this->total_appointments,
+            'celular' => $this->celular,
+            'fecha_nacimiento' => $this->fecha_nacimiento,
         ];
     }
 

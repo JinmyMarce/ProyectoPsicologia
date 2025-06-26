@@ -330,21 +330,124 @@ class UserController extends Controller
     {
         $stats = [
             'total_users' => User::count(),
+            'students' => User::where('role', 'student')->count(),
+            'psychologists' => User::where('role', 'psychologist')->count(),
+            'admins' => User::where('role', 'admin')->count(),
+            'super_admins' => User::where('role', 'super_admin')->count(),
             'active_users' => User::where('active', true)->count(),
             'inactive_users' => User::where('active', false)->count(),
             'verified_users' => User::where('verified', true)->count(),
-            'unverified_users' => User::where('verified', false)->count(),
-            'by_role' => [
-                'students' => User::where('role', 'student')->count(),
-                'psychologists' => User::where('role', 'psychologist')->count(),
-                'admins' => User::where('role', 'admin')->count(),
-                'super_admins' => User::where('role', 'super_admin')->count(),
-            ]
         ];
 
         return response()->json([
             'success' => true,
             'data' => $stats
         ]);
+    }
+
+    /**
+     * Actualizar perfil del usuario autenticado
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'email' => ['sometimes', 'email', Rule::unique('users')->ignore($user->id)],
+            'apellido_paterno' => 'sometimes|string|max:255',
+            'apellido_materno' => 'sometimes|string|max:255',
+            'specialization' => 'nullable|string|max:255',
+            'celular' => 'sometimes|string|max:20',
+            'fecha_nacimiento' => 'sometimes|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos de entrada inválidos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user->update($request->only([
+                'name', 'email', 'apellido_paterno', 'apellido_materno', 
+                'specialization', 'celular', 'fecha_nacimiento'
+            ]));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Perfil actualizado exitosamente',
+                'data' => $user->toApiArray()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el perfil: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Cambiar contraseña del usuario autenticado
+     */
+    public function changeOwnPassword(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+            'new_password_confirmation' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos de entrada inválidos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Verificar contraseña actual
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La contraseña actual es incorrecta'
+            ], 400);
+        }
+
+        try {
+            $user->update([
+                'password' => Hash::make($request->new_password)
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Contraseña cambiada exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cambiar la contraseña: ' . $e->getMessage()
+            ], 500);
+        }
     }
 } 

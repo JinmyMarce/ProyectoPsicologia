@@ -2,35 +2,37 @@ import { apiClient } from './apiClient';
 
 export interface Appointment {
   id: number;
-  user_email: string;
+  student_id: number;
   psychologist_id: number;
   psychologist_name: string;
-  date: string;
-  time: string;
-  reason: string;
-  notes?: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  fecha: string;
+  hora: string;
+  motivo_consulta: string;
+  notas?: string;
+  estado: 'pendiente' | 'confirmada' | 'completada' | 'cancelada';
   created_at: string;
   updated_at: string;
 }
 
 export interface CreateAppointmentData {
-  user_email: string;
+  student_id: number;
   psychologist_id: number;
-  date: string;
-  time: string;
-  reason: string;
-  notes?: string;
-  status: string;
+  fecha: string;
+  hora: string;
+  motivo_consulta: string;
+  notas?: string;
+  estado: string;
 }
 
 export interface Psychologist {
   id: number;
   name: string;
   email: string;
-  phone: string;
   specialization: string;
-  available: boolean;
+  rating: number;
+  total_appointments: number;
+  verified: boolean;
+  active: boolean;
 }
 
 export interface TimeSlot {
@@ -114,10 +116,10 @@ export const getPsychologists = async (): Promise<Psychologist[]> => {
 };
 
 // Obtener horarios disponibles
-export const getAvailableSlots = async (psychologistId: number, date: string): Promise<TimeSlot[]> => {
+export const getAvailableSlots = async (psychologistId: number, fecha: string): Promise<TimeSlot[]> => {
   try {
     const response = await apiClient.get(`/appointments/available-slots`, {
-      params: { psychologist_id: psychologistId, date }
+      params: { psychologist_id: psychologistId, fecha }
     });
     return response.data;
   } catch (error) {
