@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PsychologistController extends Controller
 {
@@ -40,6 +41,23 @@ class PsychologistController extends Controller
     }
 
     /**
+     * Listar todos los psicólogos activos (público)
+     */
+    public function indexPublic(): JsonResponse
+    {
+        $psychologists = User::psychologists()
+            ->active()
+            ->select('id', 'name', 'email')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $psychologists
+        ]);
+    }
+
+    /**
      * Crear un nuevo psicólogo
      */
     public function store(Request $request): JsonResponse
@@ -57,7 +75,7 @@ class PsychologistController extends Controller
             'apellido_paterno' => 'required|string|max:255',
             'apellido_materno' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'password' => 'nullable|string|min:6',
             'specialization' => 'required|string|max:255',
             'celular' => 'required|string|max:20',
             'fecha_nacimiento' => 'required|date',
@@ -92,12 +110,11 @@ class PsychologistController extends Controller
         try {
             DB::beginTransaction();
 
-            $psychologist = User::create([
+            $userData = [
                 'name' => $request->name,
                 'apellido_paterno' => $request->apellido_paterno,
                 'apellido_materno' => $request->apellido_materno,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
                 'role' => 'psychologist',
                 'specialization' => $request->specialization,
                 'celular' => $request->celular,
@@ -106,7 +123,14 @@ class PsychologistController extends Controller
                 'total_appointments' => 0,
                 'verified' => $request->verified ?? false,
                 'active' => true,
-            ]);
+            ];
+
+            // Si se proporciona contraseña, la hasheamos; si no, dejamos password como null
+            if ($request->password) {
+                $userData['password'] = Hash::make($request->password);
+            }
+
+            $psychologist = User::create($userData);
 
             DB::commit();
 
@@ -118,9 +142,13 @@ class PsychologistController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error creating psychologist: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear el psicólogo'
+                'message' => 'Error al crear el psicólogo: ' . $e->getMessage()
             ], 500);
         }
     }

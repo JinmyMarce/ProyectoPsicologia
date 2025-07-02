@@ -31,6 +31,24 @@ class AuthController extends Controller
             ], 422);
         }
 
+        // Verificar si el usuario existe y tiene contraseña
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Credenciales inválidas'
+            ], 401);
+        }
+
+        // Si el usuario no tiene contraseña, debe usar Google OAuth
+        if (!$user->password) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta cuenta requiere autenticación con Google. Por favor, usa "Continuar con Google".'
+            ], 401);
+        }
+
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
@@ -68,11 +86,14 @@ class AuthController extends Controller
      */
     public function loginWithGoogle(Request $request): JsonResponse
     {
+        \Log::info('Iniciando login con Google', ['request_data' => $request->all()]);
+        
         $validator = Validator::make($request->all(), [
             'token' => 'required|string',
         ]);
 
         if ($validator->fails()) {
+            \Log::error('Validación fallida en login con Google', ['errors' => $validator->errors()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Token de Google requerido',
@@ -83,35 +104,45 @@ class AuthController extends Controller
         try {
             // Verificar token de Google
             $googleUser = $this->verifyGoogleToken($request->token);
+            \Log::info('Token de Google verificado', ['email' => $googleUser['email']]);
             
             // Buscar usuario existente
             $user = User::where('email', $googleUser['email'])->first();
 
             if (!$user) {
+                \Log::info('Usuario no encontrado, creando nuevo usuario', ['email' => $googleUser['email']]);
                 // Crear nuevo usuario
                 $user = $this->createUserFromGoogle($googleUser);
             } else {
+                \Log::info('Usuario encontrado', ['email' => $user->email, 'role' => $user->role, 'active' => $user->active]);
+                
                 // Si es el superadministrador, asegurar el rol
                 if ($user->email === 'marcelojinmy2024@gmail.com' && $user->role !== 'super_admin') {
                     $user->role = 'super_admin';
                     $user->save();
+                    \Log::info('Rol actualizado a super_admin');
                 }
+                
                 // Verificar que el usuario esté activo
                 if (!$user->isActive()) {
+                    \Log::warning('Usuario inactivo intentando login', ['email' => $user->email]);
                     return response()->json([
                         'success' => false,
                         'message' => 'Tu cuenta ha sido desactivada. Contacta al administrador.'
                     ], 403);
                 }
+                
                 // Actualizar información de Google si es necesario
                 $user->update([
                     'google_id' => $googleUser['id'],
                     'avatar' => $googleUser['picture'],
                     'verified' => true,
                 ]);
+                \Log::info('Información de Google actualizada');
             }
 
             $token = $user->createToken('auth-token')->plainTextToken;
+            \Log::info('Token de autenticación creado exitosamente', ['user_id' => $user->id]);
 
             return response()->json([
                 'success' => true,
@@ -123,6 +154,10 @@ class AuthController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('Error en login con Google', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error al autenticar con Google: ' . $e->getMessage()
@@ -275,22 +310,60 @@ class AuthController extends Controller
     }
 
     /**
+     * Endpoint de prueba para verificar configuración de Google
+     */
+    public function testGoogleConfig(): JsonResponse
+    {
+        $clientId = config('services.google.client_id');
+        $clientSecret = config('services.google.client_secret');
+        $redirectUri = config('services.google.redirect');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'client_id' => $clientId ? 'Configurado' : 'No configurado',
+                'client_secret' => $clientSecret ? 'Configurado' : 'No configurado',
+                'redirect_uri' => $redirectUri,
+                'env_file' => file_exists(base_path('.env')) ? 'Existe' : 'No existe'
+            ]
+        ]);
+    }
+
+    /**
      * Verificar token de Google
      */
     private function verifyGoogleToken(string $token): array
     {
-        $response = file_get_contents("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" . $token);
+        // Log para debugging
+        \Log::info('Verificando token de Google:', ['token_length' => strlen($token)]);
+        
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 10,
+                'ignore_errors' => true
+            ]
+        ]);
+        
+        $response = file_get_contents("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" . $token, false, $context);
         
         if (!$response) {
-            throw new \Exception('Error al verificar token de Google');
+            \Log::error('Error al obtener respuesta de Google API');
+            throw new \Exception('Error al verificar token de Google: No se pudo conectar con Google');
         }
 
         $userData = json_decode($response, true);
 
-        if (!$userData || !isset($userData['email'])) {
-            throw new \Exception('Token de Google inválido');
+        if (!$userData) {
+            \Log::error('Error al decodificar respuesta de Google:', ['response' => $response]);
+            throw new \Exception('Error al procesar respuesta de Google');
         }
 
+        if (!isset($userData['email'])) {
+            \Log::error('Token de Google inválido - sin email:', $userData);
+            throw new \Exception('Token de Google inválido: Email no encontrado');
+        }
+
+        \Log::info('Token de Google verificado exitosamente:', ['email' => $userData['email']]);
         return $userData;
     }
 

@@ -332,10 +332,15 @@ class AppointmentController extends Controller
             $psychologistId = $request->psychologist_id;
             $fecha = $request->fecha;
 
-            // Horarios disponibles (de 8:00 AM a 6:00 PM)
+            // Validar solo días de lunes a viernes
+            $dayOfWeek = date('N', strtotime($fecha)); // 1 (lunes) - 7 (domingo)
+            if ($dayOfWeek > 5) {
+                return response()->json([], 200); // No hay horarios disponibles sábados y domingos
+            }
+
+            // Horarios disponibles (de 8:00 AM a 2:00 PM)
             $availableTimes = [
-                '08:00', '09:00', '10:00', '11:00', '12:00',
-                '14:00', '15:00', '16:00', '17:00', '18:00'
+                '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00'
             ];
 
             // Obtener citas existentes para el psicólogo en esa fecha
@@ -345,12 +350,21 @@ class AppointmentController extends Controller
                 ->pluck('hora')
                 ->toArray();
 
+            // Integrar aquí la consulta a la tabla de bloqueos de horarios del psicólogo (feriados, reuniones, etc.)
+            $blockedSlots = \App\Models\Schedule::where('psychologist_id', $psychologistId)
+                ->where('date', $fecha)
+                ->where(function($q) {
+                    $q->where('is_blocked', true)->orWhere('is_available', false);
+                })
+                ->pluck('start_time')
+                ->toArray();
+
             $slots = [];
             foreach ($availableTimes as $index => $time) {
                 $slots[] = [
                     'id' => $index + 1,
                     'time' => $time,
-                    'available' => !in_array($time, $existingAppointments)
+                    'available' => !in_array($time, $existingAppointments) && !in_array($time, $blockedSlots)
                 ];
             }
 

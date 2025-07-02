@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ExportController;
+use App\Http\Controllers\Api\PsychologistAvailabilityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -194,4 +195,36 @@ Route::get('/test', function () {
         'success' => true,
         'message' => 'API funcionando correctamente'
     ]);
+});
+
+// Ruta de prueba para verificar configuración de Google
+Route::get('/auth/google/config', [AuthController::class, 'testGoogleConfig']);
+
+// Ruta de prueba POST para verificar que las peticiones POST funcionan
+Route::post('/test-post', function (Request $request) {
+    return response()->json([
+        'success' => true,
+        'message' => 'POST funcionando correctamente',
+        'data' => $request->all()
+    ]);
+});
+
+Route::get('/psychologists', [PsychologistController::class, 'indexPublic']);
+Route::get('/psychologists/{id}/availability', [PsychologistAvailabilityController::class, '__invoke']);
+
+// Ruta de prueba para crear psicólogos sin autenticación
+Route::post('/test-psychologist', function (Request $request) {
+    try {
+        $data = $request->all();
+        return response()->json([
+            'success' => true,
+            'message' => 'Datos recibidos correctamente',
+            'data' => $data
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ], 500);
+    }
 }); 
