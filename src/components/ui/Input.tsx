@@ -30,7 +30,7 @@ export function Input({
         )}
         <input
           className={clsx(
-            'w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200',
+            'w-full px-4 py-2 border-2 border-cyan-300/60 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-violet-400 transition-all duration-300 glass animate-fade-in-up animate-gradient-shift bg-white/40 backdrop-blur-lg text-gray-900 placeholder:text-cyan-700/60',
             {
               'pl-10': Icon && iconPosition === 'left',
               'pr-10': Icon && iconPosition === 'right',

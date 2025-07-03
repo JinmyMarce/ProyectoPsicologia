@@ -5,6 +5,7 @@ import { Input } from '../ui/Input';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { psychologicalSessionsService, PsychologicalSession } from '../../services/psychologicalSessions';
+import clsx from 'clsx';
 
 export function SessionList() {
   const [sessions, setSessions] = useState<PsychologicalSession[]>([]);
@@ -124,8 +125,8 @@ export function SessionList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f2f3c6] via-[#d3b7a0] to-[#8e161a] p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[#18181b] via-[#23272f] to-[#1a2233] animate-gradient-shift p-6 flex flex-col items-center justify-center">
+      <div className="w-full max-w-5xl mx-auto space-y-8 animate-fade-in-up">
         <Card className="shadow-2xl rounded-3xl border-0 bg-white/95 backdrop-blur-md overflow-hidden" padding="lg">
           {/* Header con icono grande */}
           <div className="text-center mb-8 bg-gradient-to-r from-[#8e161a]/10 to-[#d3b7a0]/10 p-8 rounded-t-3xl">
@@ -269,7 +270,7 @@ export function SessionList() {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                         <div className="flex items-center justify-center">
                           <RefreshCw className="w-8 h-8 animate-spin mr-3" />
                           <span className="text-lg font-semibold">Cargando sesiones...</span>
@@ -278,13 +279,13 @@ export function SessionList() {
                     </tr>
                   ) : sessions.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                         <span className="text-lg font-semibold">No se encontraron sesiones</span>
                       </td>
                     </tr>
                   ) : (
-                    sessions.map((session) => (
-                      <tr key={session.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200">
+                    sessions.map((session, idx) => (
+                      <tr key={session.id} className={clsx("border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 animate-fade-in-up hover-lift", `animation-delay-${(idx%6+1)*100}`)}>
                         <td className="px-6 py-4">
                           <div>
                             <p className="font-bold text-lg">{session.patient?.name || 'N/A'}</p>

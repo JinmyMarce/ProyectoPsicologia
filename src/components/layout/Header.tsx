@@ -28,8 +28,8 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="flex items-center justify-between px-4 h-16">
+    <header className="bg-white/30 backdrop-blur-xl border-b-2 border-cyan-400/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] animate-fade-in-up animate-gradient-shift">
+      <div className="flex items-center justify-between px-4 h-20">
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
@@ -50,7 +50,7 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-600 hover:bg-gray-100 relative"
+            className="text-cyan-600 hover:bg-cyan-100/40 relative transition-all duration-300 hover:scale-110 hover:shadow-[0_0_16px_2px_rgba(56,189,248,0.3)]"
           >
             <Bell className="w-5 h-5" />
             {notifications > 0 && (
@@ -78,13 +78,13 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-600 hover:bg-gray-100 rounded-full w-9 h-9"
+                className="text-cyan-600 hover:bg-cyan-100/40 rounded-full w-10 h-10 transition-all duration-300 hover:scale-110 hover:shadow-[0_0_16px_2px_rgba(56,189,248,0.3)]"
               >
                 <User className="w-5 h-5" />
               </Button>
               
               {/* Dropdown menu */}
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="absolute right-0 mt-2 w-64 bg-white/60 backdrop-blur-xl rounded-2xl shadow-2xl border-2 border-cyan-400/30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 animate-fade-in-up animate-gradient-shift">
                 <div className="py-1">
                   <div className="px-4 py-2 border-b border-gray-100">
                     <p className="text-sm font-semibold text-gray-800">{user?.name}</p>

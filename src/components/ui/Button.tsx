@@ -24,13 +24,13 @@ export function Button({
   return (
     <button
       className={clsx(
-        'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed glass animate-fade-in-up animate-gradient-shift shadow-lg',
         {
-          'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500': variant === 'primary',
-          'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500': variant === 'secondary',
-          'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-500': variant === 'outline',
-          'text-gray-700 hover:bg-gray-100 focus:ring-blue-500': variant === 'ghost',
-          'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500': variant === 'danger',
+          'bg-gradient-to-r from-[#8e161a] via-cyan-500 to-violet-600 text-white hover:from-cyan-500 hover:to-violet-700 focus:ring-cyan-400 hover:shadow-[0_0_16px_4px_rgba(56,189,248,0.4)] hover:scale-105': variant === 'primary',
+          'bg-gradient-to-r from-gray-100 via-white to-gray-200 text-gray-900 hover:from-cyan-100 hover:to-violet-100 focus:ring-violet-300 hover:shadow-[0_0_12px_2px_rgba(139,92,246,0.2)] hover:scale-105': variant === 'secondary',
+          'border-2 border-cyan-400 bg-white/60 text-cyan-700 hover:bg-cyan-50 focus:ring-cyan-400 hover:shadow-[0_0_12px_2px_rgba(56,189,248,0.2)] hover:scale-105': variant === 'outline',
+          'text-cyan-700 hover:bg-cyan-50 focus:ring-cyan-400 hover:shadow-[0_0_12px_2px_rgba(56,189,248,0.2)] hover:scale-105': variant === 'ghost',
+          'bg-gradient-to-r from-red-600 via-pink-500 to-violet-600 text-white hover:from-pink-500 hover:to-violet-700 focus:ring-pink-400 hover:shadow-[0_0_16px_4px_rgba(236,72,153,0.4)] hover:scale-105': variant === 'danger',
         },
         {
           'px-3 py-1.5 text-xs': size === 'sm',

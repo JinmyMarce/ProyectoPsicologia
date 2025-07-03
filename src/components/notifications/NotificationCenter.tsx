@@ -223,186 +223,188 @@ export function NotificationCenter() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Centro de Notificaciones</h1>
-        <p className="text-gray-600">Gestiona todas tus notificaciones</p>
-      </div>
-
-      {/* Alerts */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-          <AlertCircle className="w-5 h-5 mr-2" />
-          {error}
+    <div className="min-h-screen bg-gradient-to-br from-[#8e161a] via-cyan-400/30 to-violet-700/40 animate-gradient-shift p-6 flex flex-col items-center justify-center">
+      <div className="w-full max-w-3xl mx-auto space-y-8 animate-fade-in-up">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Centro de Notificaciones</h1>
+          <p className="text-gray-600">Gestiona todas tus notificaciones</p>
         </div>
-      )}
 
-      {/* Controles */}
-      <Card className="p-6">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Bell className="w-5 h-5 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">
-                {unreadCount} no leída{unreadCount !== 1 ? 's' : ''}
-              </span>
+        {/* Alerts */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
+            <AlertCircle className="w-5 h-5 mr-2" />
+            {error}
+          </div>
+        )}
+
+        {/* Controles */}
+        <Card className="p-6">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">
+                  {unreadCount} no leída{unreadCount !== 1 ? 's' : ''}
+                </span>
+              </div>
+              
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value as any)}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Todas</option>
+                <option value="unread">No leídas</option>
+                <option value="read">Leídas</option>
+              </select>
             </div>
             
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Todas</option>
-              <option value="unread">No leídas</option>
-              <option value="read">Leídas</option>
-            </select>
+            <div className="flex gap-2">
+              <Button
+                onClick={markAllAsRead}
+                variant="outline"
+                size="sm"
+                disabled={unreadCount === 0}
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Marcar todas como leídas
+              </Button>
+              
+              <Button
+                onClick={clearAllNotifications}
+                variant="outline"
+                size="sm"
+                disabled={notifications.length === 0}
+                className="text-red-600 border-red-300 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Limpiar todo
+              </Button>
+            </div>
           </div>
-          
-          <div className="flex gap-2">
-            <Button
-              onClick={markAllAsRead}
-              variant="outline"
-              size="sm"
-              disabled={unreadCount === 0}
-            >
-              <Check className="w-4 h-4 mr-2" />
-              Marcar todas como leídas
-            </Button>
-            
-            <Button
-              onClick={clearAllNotifications}
-              variant="outline"
-              size="sm"
-              disabled={notifications.length === 0}
-              className="text-red-600 border-red-300 hover:bg-red-50"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Limpiar todo
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Lista de notificaciones */}
-      {filteredNotifications.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {notifications.length === 0 ? 'No tienes notificaciones' : 'No hay notificaciones con este filtro'}
-          </h3>
-          <p className="text-gray-600">
-            {notifications.length === 0 
-              ? 'Cuando recibas notificaciones, aparecerán aquí.'
-              : 'Intenta cambiar el filtro para ver más notificaciones.'
-            }
-          </p>
         </Card>
-      ) : (
-        <div className="space-y-3">
-          {filteredNotifications.map((notification) => (
-            <Card 
-              key={notification.id} 
-              className={`p-4 transition-all hover:shadow-md ${
-                !notification.read ? 'border-l-4 border-l-blue-500 bg-blue-50' : ''
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                {/* Icono */}
-                <div className="flex-shrink-0 mt-1">
-                  {getNotificationIcon(notification.type)}
-                </div>
-                
-                {/* Contenido */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <h3 className={`font-medium ${
-                        !notification.read ? 'text-gray-900' : 'text-gray-700'
-                      }`}>
-                        {notification.title}
-                      </h3>
-                      {getNotificationBadge(notification.type)}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">
-                        {formatTimeAgo(notification.createdAt)}
-                      </span>
-                      
-                      {!notification.read && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      )}
-                    </div>
+
+        {/* Lista de notificaciones */}
+        {filteredNotifications.length === 0 ? (
+          <Card className="p-12 text-center">
+            <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {notifications.length === 0 ? 'No tienes notificaciones' : 'No hay notificaciones con este filtro'}
+            </h3>
+            <p className="text-gray-600">
+              {notifications.length === 0 
+                ? 'Cuando recibas notificaciones, aparecerán aquí.'
+                : 'Intenta cambiar el filtro para ver más notificaciones.'
+              }
+            </p>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {filteredNotifications.map((notification) => (
+              <Card 
+                key={notification.id} 
+                className={`p-4 transition-all hover:shadow-md ${
+                  !notification.read ? 'border-l-4 border-l-blue-500 bg-blue-50' : ''
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  {/* Icono */}
+                  <div className="flex-shrink-0 mt-1">
+                    {getNotificationIcon(notification.type)}
                   </div>
                   
-                  <p className="text-sm text-gray-600 mb-3">
-                    {notification.message}
-                  </p>
-                  
-                  <div className="flex gap-2">
-                    {!notification.read && (
+                  {/* Contenido */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className={`font-medium ${
+                          !notification.read ? 'text-gray-900' : 'text-gray-700'
+                        }`}>
+                          {notification.title}
+                        </h3>
+                        {getNotificationBadge(notification.type)}
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">
+                          {formatTimeAgo(notification.createdAt)}
+                        </span>
+                        
+                        {!notification.read && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 mb-3">
+                      {notification.message}
+                    </p>
+                    
+                    <div className="flex gap-2">
+                      {!notification.read && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => markAsRead(notification.id)}
+                          className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                        >
+                          <Check className="w-4 h-4 mr-1" />
+                          Marcar como leída
+                        </Button>
+                      )}
+                      
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => markAsRead(notification.id)}
-                        className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                        onClick={() => deleteNotification(notification.id)}
+                        className="text-red-600 border-red-300 hover:bg-red-50"
                       >
-                        <Check className="w-4 h-4 mr-1" />
-                        Marcar como leída
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Eliminar
                       </Button>
-                    )}
-                    
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => deleteNotification(notification.id)}
-                      className="text-red-600 border-red-300 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Eliminar
-                    </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Estadísticas */}
-      {notifications.length > 0 && (
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumen</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {notifications.length}
-              </div>
-              <div className="text-sm text-gray-600">Total</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                {unreadCount}
-              </div>
-              <div className="text-sm text-gray-600">No leídas</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {notifications.filter(n => n.read).length}
-              </div>
-              <div className="text-sm text-gray-600">Leídas</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
-                {notifications.filter(n => n.type === 'appointment').length}
-              </div>
-              <div className="text-sm text-gray-600">Citas</div>
-            </div>
+              </Card>
+            ))}
           </div>
-        </Card>
-      )}
+        )}
+
+        {/* Estadísticas */}
+        {notifications.length > 0 && (
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumen</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {notifications.length}
+                </div>
+                <div className="text-sm text-gray-600">Total</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600">
+                  {unreadCount}
+                </div>
+                <div className="text-sm text-gray-600">No leídas</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {notifications.filter(n => n.read).length}
+                </div>
+                <div className="text-sm text-gray-600">Leídas</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {notifications.filter(n => n.type === 'appointment').length}
+                </div>
+                <div className="text-sm text-gray-600">Citas</div>
+              </div>
+            </div>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

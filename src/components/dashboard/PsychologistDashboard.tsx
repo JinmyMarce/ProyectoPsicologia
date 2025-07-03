@@ -176,189 +176,193 @@ export function PsychologistDashboard() {
 
   if (loading && appointments.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Cargando dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-[#8e161a] via-cyan-400/30 to-violet-700/40 animate-gradient-shift p-6 flex flex-col items-center justify-center">
+        <div className="w-full max-w-6xl mx-auto space-y-8 animate-fade-in-up">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+            <p className="text-gray-600">Cargando dashboard...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <PageHeader 
-        title="Dashboard del Psicólogo"
-        subtitle="Gestión de Citas y Pacientes"
-      >
-        <p className="text-xl text-gray-500 font-semibold text-center">
-          Instituto Túpac Amaru - Psicología Clínica
-        </p>
-      </PageHeader>
+    <div className="min-h-screen bg-gradient-to-br from-[#8e161a] via-cyan-400/30 to-violet-700/40 animate-gradient-shift p-6 flex flex-col items-center justify-center">
+      <div className="w-full max-w-6xl mx-auto space-y-8 animate-fade-in-up">
+        <PageHeader 
+          title="Dashboard del Psicólogo"
+          subtitle="Gestión de Citas y Pacientes"
+        >
+          <p className="text-xl text-gray-500 font-semibold text-center">
+            Instituto Túpac Amaru - Psicología Clínica
+          </p>
+        </PageHeader>
 
-      {/* Alerts */}
-      {error && (
-        <div className="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-2xl flex items-center">
-          <AlertCircle className="w-8 h-8 mr-4" />
-          <p className="text-xl font-bold">{error}</p>
-        </div>
-      )}
-
-      {/* Estadísticas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <Card className="p-8 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border-2 border-[#8e161a]/20">
-          <div className="flex items-center space-x-6">
-            <div className="w-16 h-16 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-2xl flex items-center justify-center">
-              <Calendar className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-gray-900">{stats.total}</p>
-              <p className="text-lg font-bold text-gray-600">Total Citas</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-8 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border-2 border-[#8e161a]/20">
-          <div className="flex items-center space-x-6">
-            <div className="w-16 h-16 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-2xl flex items-center justify-center">
-              <Clock className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-gray-900">{stats.today}</p>
-              <p className="text-lg font-bold text-gray-600">Citas Hoy</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-8 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border-2 border-[#8e161a]/20">
-          <div className="flex items-center space-x-6">
-            <div className="w-16 h-16 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-2xl flex items-center justify-center">
-              <CheckCircle className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-gray-900">{stats.completed}</p>
-              <p className="text-lg font-bold text-gray-600">Completadas</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Citas de hoy */}
-      <Card className="p-8">
-        <h2 className="text-4xl font-black text-gray-900 mb-8 flex items-center">
-          <Calendar className="w-12 h-12 mr-6 text-[#8e161a]" />
-          Citas de Hoy
-        </h2>
-
-        {todayAppointments.length === 0 ? (
-          <div className="text-center py-12">
-            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-xl font-bold text-gray-600">No hay citas programadas para hoy</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {todayAppointments.map((appointment) => (
-              <div 
-                key={appointment.id}
-                className="p-6 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-2xl border-2 border-[#8e161a]/20"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-6">
-                    <div className="w-12 h-12 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-xl flex items-center justify-center">
-                      <User className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-black text-gray-900">
-                        {appointment.student.name}
-                      </h3>
-                      <p className="text-lg font-semibold text-gray-600">
-                        {appointment.student.email}
-                      </p>
-                      <p className="text-base text-gray-500">
-                        {formatTime(appointment.time)} - {appointment.reason}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    {getStatusBadge(appointment.status)}
-                    <Button 
-                      variant="outline"
-                      className="rounded-xl"
-                      onClick={() => handleUpdateAppointmentStatus(appointment.id, 'completed')}
-                    >
-                      Completar
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {/* Alerts */}
+        {error && (
+          <div className="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-2xl flex items-center">
+            <AlertCircle className="w-8 h-8 mr-4" />
+            <p className="text-xl font-bold">{error}</p>
           </div>
         )}
-      </Card>
 
-      {/* Próximas citas */}
-      <Card className="p-8">
-        <h2 className="text-4xl font-black text-gray-900 mb-8 flex items-center">
-          <Clock className="w-12 h-12 mr-6 text-[#8e161a]" />
-          Próximas Citas
-        </h2>
+        {/* Estadísticas principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <Card className="p-8 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border-2 border-[#8e161a]/20">
+            <div className="flex items-center space-x-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-2xl flex items-center justify-center">
+                <Calendar className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-gray-900">{stats.total}</p>
+                <p className="text-lg font-bold text-gray-600">Total Citas</p>
+              </div>
+            </div>
+          </Card>
 
-        {upcomingAppointments.length === 0 ? (
-          <div className="text-center py-12">
-            <Clock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-xl font-bold text-gray-600">No hay citas próximas</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {upcomingAppointments.map((appointment) => (
-              <div 
-                key={appointment.id}
-                className="p-6 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-2xl border-2 border-[#8e161a]/20"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-6">
-                    <div className="w-12 h-12 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-xl flex items-center justify-center">
-                      <User className="w-6 h-6 text-white" />
+          <Card className="p-8 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border-2 border-[#8e161a]/20">
+            <div className="flex items-center space-x-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-2xl flex items-center justify-center">
+                <Clock className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-gray-900">{stats.today}</p>
+                <p className="text-lg font-bold text-gray-600">Citas Hoy</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-8 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border-2 border-[#8e161a]/20">
+            <div className="flex items-center space-x-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-2xl flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-gray-900">{stats.completed}</p>
+                <p className="text-lg font-bold text-gray-600">Completadas</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Citas de hoy */}
+        <Card className="p-8">
+          <h2 className="text-4xl font-black text-gray-900 mb-8 flex items-center">
+            <Calendar className="w-12 h-12 mr-6 text-[#8e161a]" />
+            Citas de Hoy
+          </h2>
+
+          {todayAppointments.length === 0 ? (
+            <div className="text-center py-12">
+              <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-xl font-bold text-gray-600">No hay citas programadas para hoy</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {todayAppointments.map((appointment) => (
+                <div 
+                  key={appointment.id}
+                  className="p-6 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-2xl border-2 border-[#8e161a]/20"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-xl flex items-center justify-center">
+                        <User className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black text-gray-900">
+                          {appointment.student.name}
+                        </h3>
+                        <p className="text-lg font-semibold text-gray-600">
+                          {appointment.student.email}
+                        </p>
+                        <p className="text-base text-gray-500">
+                          {formatTime(appointment.time)} - {appointment.reason}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-black text-gray-900">
-                        {appointment.student.name}
-                      </h3>
-                      <p className="text-lg font-semibold text-gray-600">
-                        {appointment.student.email}
-                      </p>
-                      <p className="text-base text-gray-500">
-                        {formatDate(appointment.date)} - {formatTime(appointment.time)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    {getStatusBadge(appointment.status)}
-                    <div className="flex space-x-2">
-                      {appointment.status === 'pending' && (
-                        <Button 
-                          variant="outline"
-                          className="rounded-xl"
-                          onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
-                        >
-                          Confirmar
-                        </Button>
-                      )}
+                    <div className="flex items-center space-x-4">
+                      {getStatusBadge(appointment.status)}
                       <Button 
                         variant="outline"
                         className="rounded-xl"
-                        onClick={() => window.location.href = `/appointments/${appointment.id}`}
+                        onClick={() => handleUpdateAppointmentStatus(appointment.id, 'completed')}
                       >
-                        Ver Detalles
+                        Completar
                       </Button>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        {/* Próximas citas */}
+        <Card className="p-8">
+          <h2 className="text-4xl font-black text-gray-900 mb-8 flex items-center">
+            <Clock className="w-12 h-12 mr-6 text-[#8e161a]" />
+            Próximas Citas
+          </h2>
+
+          {upcomingAppointments.length === 0 ? (
+            <div className="text-center py-12">
+              <Clock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-xl font-bold text-gray-600">No hay citas próximas</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {upcomingAppointments.map((appointment) => (
+                <div 
+                  key={appointment.id}
+                  className="p-6 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-2xl border-2 border-[#8e161a]/20"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-6">
+                      <div className="w-12 h-12 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-xl flex items-center justify-center">
+                        <User className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black text-gray-900">
+                          {appointment.student.name}
+                        </h3>
+                        <p className="text-lg font-semibold text-gray-600">
+                          {appointment.student.email}
+                        </p>
+                        <p className="text-base text-gray-500">
+                          {formatDate(appointment.date)} - {formatTime(appointment.time)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      {getStatusBadge(appointment.status)}
+                      <div className="flex space-x-2">
+                        {appointment.status === 'pending' && (
+                          <Button 
+                            variant="outline"
+                            className="rounded-xl"
+                            onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
+                          >
+                            Confirmar
+                          </Button>
+                        )}
+                        <Button 
+                          variant="outline"
+                          className="rounded-xl"
+                          onClick={() => window.location.href = `/appointments/${appointment.id}`}
+                        >
+                          Ver Detalles
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }

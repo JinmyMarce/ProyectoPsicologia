@@ -163,19 +163,18 @@ export function Sidebar({
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 left-0 h-full bg-gradient-to-b from-[#8e161a] to-[#a52a2a] 
-        shadow-xl z-50 transform transition-all duration-300 ease-in-out border-r-2 border-[#d3b7a0]/20
+        fixed top-0 left-0 h-full bg-gradient-to-b from-[#8e161a]/80 via-cyan-400/40 to-violet-700/60 backdrop-blur-2xl shadow-2xl border-r-4 border-cyan-400/30 animate-gradient-shift animate-fade-in-up z-50
         ${isCollapsed ? 'w-20' : 'w-64'}
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0
       `}>
         <div className="flex flex-col h-full">
           {/* Header del sidebar */}
-          <div className={`p-4 text-center border-b border-white/10 bg-black/20 transition-all duration-300`}>
+          <div className={`p-4 text-center border-b border-white/10 bg-white/10 rounded-b-2xl shadow-lg animate-fade-in-up transition-all duration-300`}>
             <img 
               src="/images/icons/psicologia.png"
               alt="Logo Institucional"
-              className={`object-contain mx-auto transition-all duration-300 ${isCollapsed ? 'w-10 h-10' : 'w-56 h-56'}`}
+              className={`object-contain mx-auto transition-all duration-300 drop-shadow-[0_0_24px_cyan] ${isCollapsed ? 'w-12 h-12' : 'w-32 h-32'}`}
             />
             {!isCollapsed && (
               <div className="mt-2">
@@ -191,11 +190,12 @@ export function Sidebar({
 
           {/* Menú */}
           <nav className="flex-1 flex flex-col justify-center p-4 space-y-3">
-            {filteredMenuItems.map((item) => (
+            {filteredMenuItems.map((item, idx) => (
               <Button
                 key={item.page}
                 variant="ghost"
-                className="w-full justify-start text-white/90 hover:bg-white/10 hover:text-white transition-all duration-200 group rounded-lg py-3 px-4"
+                className="w-full justify-start text-white/90 hover:bg-cyan-400/20 hover:text-cyan-200 transition-all duration-300 group rounded-xl py-3 px-4 animate-fade-in-up hover:scale-105 hover:shadow-[0_0_16px_2px_rgba(56,189,248,0.3)]"
+                style={{ animationDelay: `${idx * 80}ms` }}
                 onClick={() => handleItemClick(item.page)}
               >
                 <item.icon className="w-5 h-5 flex-shrink-0" />

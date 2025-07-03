@@ -150,223 +150,225 @@ export function AppointmentBooking() {
   };
 
   return (
-    <div className="space-y-8">
-      <PageHeader 
-        title="Agendar Cita"
-        subtitle="Sistema de Gestión de Citas Psicológicas"
-      >
-        <p className="text-xl text-gray-500 font-semibold text-center">
-          Instituto Túpac Amaru
-        </p>
-      </PageHeader>
+    <div className="min-h-screen bg-gradient-to-br from-[#8e161a] via-cyan-400/30 to-violet-700/40 animate-gradient-shift p-6 flex flex-col items-center justify-center">
+      <div className="w-full max-w-4xl mx-auto space-y-8 animate-fade-in-up">
+        <PageHeader 
+          title="Agendar Cita"
+          subtitle="Sistema de Gestión de Citas Psicológicas"
+        >
+          <p className="text-xl text-gray-500 font-semibold text-center">
+            Instituto Túpac Amaru
+          </p>
+        </PageHeader>
 
-      {/* Mensajes de estado */}
-      {error && (
-        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 flex items-center space-x-4">
-          <AlertCircle className="w-8 h-8 text-red-600" />
-          <p className="text-red-800 font-bold text-lg">{error}</p>
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 flex items-center space-x-4">
-          <CheckCircle className="w-8 h-8 text-green-600" />
-          <p className="text-green-800 font-bold text-lg">{success}</p>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Selección de Psicólogo */}
-        <Card className="p-8">
-          <h2 className="text-3xl font-black text-gray-900 mb-6 flex items-center">
-            <User className="w-10 h-10 mr-4 text-[#8e161a]" />
-            Seleccionar Psicólogo
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {psychologists.map((psychologist) => (
-              <div
-                key={psychologist.id}
-                className={`p-6 rounded-2xl border-4 cursor-pointer transition-all duration-300 hover:shadow-2xl ${
-                  selectedPsychologist?.id === psychologist.id
-                    ? 'border-[#8e161a] bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 shadow-2xl'
-                    : 'border-gray-200 hover:border-[#8e161a]/50 bg-white'
-                }`}
-                onClick={() => handlePsychologistSelect(psychologist)}
-              >
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <User className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-xl font-black text-gray-900 mb-2">{psychologist.name}</h3>
-                  <p className="text-gray-600 font-semibold mb-2">{psychologist.specialization}</p>
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-500 flex items-center justify-center">
-                      <Mail className="w-4 h-4 mr-2" />
-                      {psychologist.email}
-                    </p>
-                    <p className="text-sm text-gray-500 flex items-center justify-center">
-                      <Phone className="w-4 h-4 mr-2" />
-                      {psychologist.phone}
-                    </p>
-                  </div>
-                  <Badge 
-                    variant={psychologist.available ? "success" : "warning"}
-                    className="mt-4"
-                  >
-                    {psychologist.available ? 'Disponible' : 'No disponible'}
-                  </Badge>
-                </div>
-              </div>
-            ))}
+        {/* Mensajes de estado */}
+        {error && (
+          <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 flex items-center space-x-4">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+            <p className="text-red-800 font-bold text-lg">{error}</p>
           </div>
-        </Card>
+        )}
 
-        {/* Selección de Fecha y Hora */}
-        {(selectedPsychologist && selectedPsychologist.available) && (
+        {success && (
+          <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 flex items-center space-x-4">
+            <CheckCircle className="w-8 h-8 text-green-600" />
+            <p className="text-green-800 font-bold text-lg">{success}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Selección de Psicólogo */}
           <Card className="p-8">
             <h2 className="text-3xl font-black text-gray-900 mb-6 flex items-center">
-              <Calendar className="w-10 h-10 mr-4 text-[#8e161a]" />
-              Seleccionar Fecha y Hora
+              <User className="w-10 h-10 mr-4 text-[#8e161a]" />
+              Seleccionar Psicólogo
             </h2>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Fecha */}
-              <div>
-                <label className="block text-xl font-bold text-gray-700 mb-4">
-                  Fecha de la cita
-                </label>
-                <input
-                  type="date"
-                  min={getMinDate()}
-                  max={getMaxDate()}
-                  value={selectedDate}
-                  onChange={(e) => handleDateSelect(e.target.value)}
-                  className="w-full p-4 border-2 border-gray-300 rounded-2xl text-lg font-semibold focus:border-[#8e161a] focus:ring-4 focus:ring-[#8e161a]/20 transition-all duration-300"
-                />
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {psychologists.map((psychologist) => (
+                <div
+                  key={psychologist.id}
+                  className={`p-6 rounded-2xl border-4 cursor-pointer transition-all duration-300 hover:shadow-2xl ${
+                    selectedPsychologist?.id === psychologist.id
+                      ? 'border-[#8e161a] bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 shadow-2xl'
+                      : 'border-gray-200 hover:border-[#8e161a]/50 bg-white'
+                  }`}
+                  onClick={() => handlePsychologistSelect(psychologist)}
+                >
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <User className="w-10 h-10 text-white" />
+                    </div>
+                    <h3 className="text-xl font-black text-gray-900 mb-2">{psychologist.name}</h3>
+                    <p className="text-gray-600 font-semibold mb-2">{psychologist.specialization}</p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-500 flex items-center justify-center">
+                        <Mail className="w-4 h-4 mr-2" />
+                        {psychologist.email}
+                      </p>
+                      <p className="text-sm text-gray-500 flex items-center justify-center">
+                        <Phone className="w-4 h-4 mr-2" />
+                        {psychologist.phone}
+                      </p>
+                    </div>
+                    <Badge 
+                      variant={psychologist.available ? "success" : "warning"}
+                      className="mt-4"
+                    >
+                      {psychologist.available ? 'Disponible' : 'No disponible'}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
 
-              {/* Hora */}
-              {selectedDate && (
+          {/* Selección de Fecha y Hora */}
+          {(selectedPsychologist && selectedPsychologist.available) && (
+            <Card className="p-8">
+              <h2 className="text-3xl font-black text-gray-900 mb-6 flex items-center">
+                <Calendar className="w-10 h-10 mr-4 text-[#8e161a]" />
+                Seleccionar Fecha y Hora
+              </h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Fecha */}
                 <div>
                   <label className="block text-xl font-bold text-gray-700 mb-4">
-                    Hora de la cita
+                    Fecha de la cita
                   </label>
-                  <div className="grid grid-cols-3 gap-4">
-                    {availableSlots.map((slot) => (
-                      <button
-                        key={slot.id}
-                        type="button"
-                        onClick={() => handleTimeSelect(slot.time)}
-                        disabled={!slot.available}
-                        className={`p-4 rounded-2xl border-2 font-bold text-lg transition-all duration-300 ${
-                          selectedTime === slot.time
-                            ? 'border-[#8e161a] bg-[#8e161a] text-white shadow-2xl'
-                            : slot.available
-                            ? 'border-gray-300 hover:border-[#8e161a] hover:bg-[#8e161a]/5'
-                            : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                        }`}
-                      >
-                        {slot.time}
-                      </button>
-                    ))}
-                  </div>
+                  <input
+                    type="date"
+                    min={getMinDate()}
+                    max={getMaxDate()}
+                    value={selectedDate}
+                    onChange={(e) => handleDateSelect(e.target.value)}
+                    className="w-full p-4 border-2 border-gray-300 rounded-2xl text-lg font-semibold focus:border-[#8e161a] focus:ring-4 focus:ring-[#8e161a]/20 transition-all duration-300"
+                  />
                 </div>
-              )}
-            </div>
-          </Card>
-        )}
 
-        {/* Información de la Cita */}
-        {(selectedPsychologist && selectedDate && selectedTime) && (
-          <Card className="p-8">
-            <h2 className="text-3xl font-black text-gray-900 mb-6 flex items-center">
-              <Plus className="w-10 h-10 mr-4 text-[#8e161a]" />
-              Información de la Cita
-            </h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div>
-                <label className="block text-xl font-bold text-gray-700 mb-4">
-                  Motivo de la consulta
-                </label>
-                <textarea
-                  value={formData.reason}
-                  onChange={(e) => setFormData(prev => ({ ...prev, reason: e.target.value }))}
-                  rows={4}
-                  className="w-full p-4 border-2 border-gray-300 rounded-2xl text-lg font-semibold focus:border-[#8e161a] focus:ring-4 focus:ring-[#8e161a]/20 transition-all duration-300 resize-none"
-                  placeholder="Describe el motivo de tu consulta..."
-                  required
-                />
+                {/* Hora */}
+                {selectedDate && (
+                  <div>
+                    <label className="block text-xl font-bold text-gray-700 mb-4">
+                      Hora de la cita
+                    </label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {availableSlots.map((slot) => (
+                        <button
+                          key={slot.id}
+                          type="button"
+                          onClick={() => handleTimeSelect(slot.time)}
+                          disabled={!slot.available}
+                          className={`p-4 rounded-2xl border-2 font-bold text-lg transition-all duration-300 ${
+                            selectedTime === slot.time
+                              ? 'border-[#8e161a] bg-[#8e161a] text-white shadow-2xl'
+                              : slot.available
+                              ? 'border-gray-300 hover:border-[#8e161a] hover:bg-[#8e161a]/5'
+                              : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {slot.time}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
+          {/* Información de la Cita */}
+          {(selectedPsychologist && selectedDate && selectedTime) && (
+            <Card className="p-8">
+              <h2 className="text-3xl font-black text-gray-900 mb-6 flex items-center">
+                <Plus className="w-10 h-10 mr-4 text-[#8e161a]" />
+                Información de la Cita
+              </h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                  <label className="block text-xl font-bold text-gray-700 mb-4">
+                    Motivo de la consulta
+                  </label>
+                  <textarea
+                    value={formData.reason}
+                    onChange={(e) => setFormData(prev => ({ ...prev, reason: e.target.value }))}
+                    rows={4}
+                    className="w-full p-4 border-2 border-gray-300 rounded-2xl text-lg font-semibold focus:border-[#8e161a] focus:ring-4 focus:ring-[#8e161a]/20 transition-all duration-300 resize-none"
+                    placeholder="Describe el motivo de tu consulta..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xl font-bold text-gray-700 mb-4">
+                    Notas adicionales (opcional)
+                  </label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                    rows={4}
+                    className="w-full p-4 border-2 border-gray-300 rounded-2xl text-lg font-semibold focus:border-[#8e161a] focus:ring-4 focus:ring-[#8e161a]/20 transition-all duration-300 resize-none"
+                    placeholder="Información adicional que consideres importante..."
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xl font-bold text-gray-700 mb-4">
-                  Notas adicionales (opcional)
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  rows={4}
-                  className="w-full p-4 border-2 border-gray-300 rounded-2xl text-lg font-semibold focus:border-[#8e161a] focus:ring-4 focus:ring-[#8e161a]/20 transition-all duration-300 resize-none"
-                  placeholder="Información adicional que consideres importante..."
-                />
-              </div>
-            </div>
-
-            {/* Resumen de la cita */}
-            <div className="mt-8 p-6 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-2xl border-2 border-[#8e161a]/20">
-              <h3 className="text-2xl font-black text-gray-900 mb-4">Resumen de la Cita</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="flex items-center space-x-4">
-                  <User className="w-8 h-8 text-[#8e161a]" />
-                  <div>
-                    <p className="text-sm text-gray-600 font-semibold">Psicólogo</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedPsychologist.name}</p>
+              {/* Resumen de la cita */}
+              <div className="mt-8 p-6 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-2xl border-2 border-[#8e161a]/20">
+                <h3 className="text-2xl font-black text-gray-900 mb-4">Resumen de la Cita</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="flex items-center space-x-4">
+                    <User className="w-8 h-8 text-[#8e161a]" />
+                    <div>
+                      <p className="text-sm text-gray-600 font-semibold">Psicólogo</p>
+                      <p className="text-lg font-bold text-gray-900">{selectedPsychologist.name}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <Calendar className="w-8 h-8 text-[#8e161a]" />
-                  <div>
-                    <p className="text-sm text-gray-600 font-semibold">Fecha</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedDate}</p>
+                  <div className="flex items-center space-x-4">
+                    <Calendar className="w-8 h-8 text-[#8e161a]" />
+                    <div>
+                      <p className="text-sm text-gray-600 font-semibold">Fecha</p>
+                      <p className="text-lg font-bold text-gray-900">{selectedDate}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <Clock className="w-8 h-8 text-[#8e161a]" />
-                  <div>
-                    <p className="text-sm text-gray-600 font-semibold">Hora</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedTime}</p>
+                  <div className="flex items-center space-x-4">
+                    <Clock className="w-8 h-8 text-[#8e161a]" />
+                    <div>
+                      <p className="text-sm text-gray-600 font-semibold">Hora</p>
+                      <p className="text-lg font-bold text-gray-900">{selectedTime}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Card>
-        )}
+            </Card>
+          )}
 
-        {/* Botón de envío */}
-        {(selectedPsychologist && selectedDate && selectedTime && formData.reason) && (
-          <div className="text-center">
-            <Button
-              type="submit"
-              disabled={loading}
-              className="px-16 py-6 text-2xl font-black rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
-            >
-              {loading ? (
-                <div className="flex items-center space-x-4">
-                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Agendando cita...</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-4">
-                  <CheckCircle className="w-8 h-8" />
-                  <span>Confirmar Cita</span>
-                </div>
-              )}
-            </Button>
-          </div>
-        )}
-      </form>
+          {/* Botón de envío */}
+          {(selectedPsychologist && selectedDate && selectedTime && formData.reason) && (
+            <div className="text-center">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="px-16 py-6 text-2xl font-black rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
+              >
+                {loading ? (
+                  <div className="flex items-center space-x-4">
+                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Agendando cita...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-4">
+                    <CheckCircle className="w-8 h-8" />
+                    <span>Confirmar Cita</span>
+                  </div>
+                )}
+              </Button>
+            </div>
+          )}
+        </form>
+      </div>
     </div>
   );
 }

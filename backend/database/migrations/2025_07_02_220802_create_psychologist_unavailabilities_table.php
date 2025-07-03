@@ -13,14 +13,7 @@ return new class extends Migration
     {
         Schema::create('psychologist_unavailabilities', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('psychologist_id');
-            $table->date('date');
-            $table->time('start_time')->nullable();
-            $table->time('end_time')->nullable();
-            $table->string('motivo')->nullable();
             $table->timestamps();
-
-            $table->foreign('psychologist_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

@@ -12,13 +12,13 @@ export function Card({ children, className, padding = 'md', hoverable = false }:
   return (
     <div
       className={clsx(
-        'bg-white rounded-xl border border-gray-200 shadow-sm',
+        'bg-white/30 backdrop-blur-2xl border border-violet-400/40 shadow-2xl rounded-2xl glass animate-fade-in-up animate-gradient-shift transition-all duration-300',
         {
           'p-0': padding === 'none',
           'p-4': padding === 'sm',
           'p-6': padding === 'md',
           'p-8': padding === 'lg',
-          'transition-all duration-200 hover:shadow-md hover:border-gray-300': hoverable,
+          'hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] hover:border-cyan-400/60 hover:animate-pulse-glow hover:scale-105': hoverable,
         },
         className
       )}

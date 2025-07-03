@@ -5,6 +5,7 @@ import { Input } from '../ui/Input';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { patientsService, Patient } from '../../services/patients';
+import clsx from 'clsx';
 
 export function PatientList() {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -83,8 +84,8 @@ export function PatientList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f2f3c6] via-[#d3b7a0] to-[#8e161a] p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[#18181b] via-[#23272f] to-[#1a2233] animate-gradient-shift p-6 flex flex-col items-center justify-center">
+      <div className="w-full max-w-5xl mx-auto space-y-8 animate-fade-in-up">
         <Card className="shadow-2xl rounded-3xl border-0 bg-white/95 backdrop-blur-md overflow-hidden" padding="lg">
           {/* Header con icono grande */}
           <div className="text-center mb-8 bg-gradient-to-r from-[#8e161a]/10 to-[#d3b7a0]/10 p-8 rounded-t-3xl">
@@ -184,8 +185,8 @@ export function PatientList() {
                       </td>
                     </tr>
                   ) : (
-                    patients.map((patient) => (
-                      <tr key={patient.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200">
+                    patients.map((patient, idx) => (
+                      <tr key={patient.id} className={clsx("border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 animate-fade-in-up hover-lift", `animation-delay-${(idx%6+1)*100}`)}>
                         <td className="px-6 py-4 font-semibold text-lg">{patient.dni}</td>
                         <td className="px-6 py-4 text-lg">{patient.name}</td>
                         <td className="px-6 py-4 text-gray-600 text-lg">{patient.email}</td>
