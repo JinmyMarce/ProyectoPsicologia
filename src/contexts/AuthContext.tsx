@@ -13,6 +13,7 @@ interface AuthContextType {
   error: string | null;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
+  updateUser: (updatedUser: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,7 +27,8 @@ const mockUsers: User[] = [
     role: 'psychologist',
     verified: true,
     active: true,
-    avatar: 'https://images.pexels.com/photos/5452201/pexels-photo-5452201.jpeg?auto=compress&cs=tinysrgb&w=400'
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z'
   },
   {
     id: '2',
@@ -35,7 +37,8 @@ const mockUsers: User[] = [
     role: 'student',
     verified: true,
     active: true,
-    avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400'
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z'
   },
   {
     id: '3',
@@ -44,7 +47,8 @@ const mockUsers: User[] = [
     role: 'admin',
     verified: true,
     active: true,
-    avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400'
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z'
   },
   {
     id: '4',
@@ -53,7 +57,8 @@ const mockUsers: User[] = [
     role: 'super_admin',
     verified: true,
     active: true,
-    avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400'
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z'
   }
 ];
 
@@ -185,6 +190,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearSession();
   };
 
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -195,7 +205,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       error,
       setUser,
-      setToken
+      setToken,
+      updateUser
     }}>
       {children}
     </AuthContext.Provider>

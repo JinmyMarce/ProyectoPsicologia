@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getAppointments, getPsychologists } from '../../services/appointments';
+import { getUserAppointments, getPsychologists } from '../../services/appointments';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
+import { Modal } from '../ui/Modal';
 import { Badge } from '../ui/Badge';
 import { 
   Calendar, 
@@ -56,7 +57,7 @@ export function AppointmentCalendar() {
       setError(null);
       
       const [appointmentsData, psychologistsData] = await Promise.all([
-        getAppointments(),
+        getUserAppointments(),
         getPsychologists()
       ]);
       

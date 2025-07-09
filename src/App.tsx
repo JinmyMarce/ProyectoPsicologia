@@ -3,9 +3,12 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginForm } from './components/auth/LoginForm';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
-import { AdminDashboard } from './components/dashboard/AdminDashboard';
-import { PsychologistDashboard } from './components/dashboard/PsychologistDashboard';
+import { AdminDashboard } from './components/admin/AdminDashboard';
+import { PsychologistDashboard } from './components/psychologist/PsychologistDashboard';
+import { SuperAdminDashboard } from './components/super-admin/SuperAdminDashboard';
 import { StudentDashboard } from './components/dashboard/StudentDashboard';
+import { UserProfile } from './components/profile/UserProfile';
+import AppointmentsPage from './components/appointments';
 import { AppointmentBooking } from './components/appointments/AppointmentBooking';
 import { AppointmentCalendar } from './components/appointments/AppointmentCalendar';
 import { AppointmentHistory } from './components/appointments/AppointmentHistory';
@@ -19,7 +22,7 @@ import { SessionRegistration } from './components/sessions/SessionRegistration';
 import { SessionList } from './components/sessions/SessionList';
 
 function AppContent() {
-  const { user, isLoading } = useAuth();
+  const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -42,7 +45,7 @@ function AppContent() {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -71,14 +74,15 @@ function AppContent() {
       case 'dashboard':
         switch (user.role) {
           case 'super_admin':
+            return <SuperAdminDashboard />;
           case 'admin':
             return <AdminDashboard />;
           case 'psychologist':
             return <PsychologistDashboard />;
           case 'student':
-            return <StudentDashboard />;
+            return <StudentDashboard onPageChange={handlePageChange} />;
           default:
-            return <StudentDashboard />;
+            return <div>Rol no reconocido</div>;
         }
       case 'appointments':
         return <AppointmentBooking />;
@@ -86,6 +90,8 @@ function AppContent() {
         return <AppointmentCalendar />;
       case 'appointments/history':
         return <AppointmentHistory />;
+      case 'profile':
+        return <UserProfile onPageChange={handlePageChange} />;
       case 'users':
         return <UserManagement />;
       case 'notifications':
@@ -103,7 +109,7 @@ function AppContent() {
       case 'sessions':
         return <SessionList />;
       default:
-        return <StudentDashboard />;
+        return <StudentDashboard onPageChange={handlePageChange} />;
     }
   };
 
@@ -131,11 +137,15 @@ function AppContent() {
   );
 }
 
+import { BrowserRouter } from 'react-router-dom';
+
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

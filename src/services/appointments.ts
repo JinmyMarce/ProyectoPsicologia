@@ -21,7 +21,7 @@ export interface CreateAppointmentData {
   time: string;
   reason: string;
   notes?: string;
-  status: string;
+  status?: string;
 }
 
 export interface Psychologist {
@@ -39,23 +39,24 @@ export interface TimeSlot {
   available: boolean;
 }
 
-// Obtener todas las citas
+// Obtener todas las citas (solo admin/super_admin)
 export const getAppointments = async (): Promise<Appointment[]> => {
   try {
-    const response = await apiClient.get('/appointments');
-    return response.data;
-  } catch (error) {
+    const response = await apiClient.get('/citas');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
     console.error('Error fetching appointments:', error);
     throw new Error('Error al obtener las citas');
   }
 };
 
-// Obtener citas por usuario
-export const getUserAppointments = async (userEmail: string): Promise<Appointment[]> => {
+// Obtener citas del usuario autenticado
+export const getUserAppointments = async (): Promise<Appointment[]> => {
   try {
-    const response = await apiClient.get(`/appointments/user/${encodeURIComponent(userEmail)}`);
-    return response.data;
-  } catch (error) {
+    // Usar la ruta específica para obtener citas del usuario actual
+    const response = await apiClient.get('/appointments');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
     console.error('Error fetching user appointments:', error);
     throw new Error('Error al obtener las citas del usuario');
   }
@@ -65,11 +66,14 @@ export const getUserAppointments = async (userEmail: string): Promise<Appointmen
 export const createAppointment = async (appointmentData: CreateAppointmentData): Promise<Appointment> => {
   try {
     const response = await apiClient.post('/appointments', appointmentData);
-    return response.data;
-  } catch (error: any) {
+    return response.data.data || response.data;
+  } catch (error: unknown) {
     console.error('Error creating appointment:', error);
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
     throw new Error('Error al crear la cita');
   }
@@ -79,11 +83,14 @@ export const createAppointment = async (appointmentData: CreateAppointmentData):
 export const updateAppointment = async (id: number, appointmentData: Partial<CreateAppointmentData>): Promise<Appointment> => {
   try {
     const response = await apiClient.put(`/appointments/${id}`, appointmentData);
-    return response.data;
-  } catch (error: any) {
+    return response.data.data || response.data;
+  } catch (error: unknown) {
     console.error('Error updating appointment:', error);
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
     throw new Error('Error al actualizar la cita');
   }
@@ -93,10 +100,13 @@ export const updateAppointment = async (id: number, appointmentData: Partial<Cre
 export const deleteAppointment = async (id: number): Promise<void> => {
   try {
     await apiClient.delete(`/appointments/${id}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting appointment:', error);
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
     throw new Error('Error al eliminar la cita');
   }
@@ -105,9 +115,9 @@ export const deleteAppointment = async (id: number): Promise<void> => {
 // Obtener psicólogos disponibles
 export const getPsychologists = async (): Promise<Psychologist[]> => {
   try {
-    const response = await apiClient.get('/psychologists');
-    return response.data;
-  } catch (error) {
+    const response = await apiClient.get('/citas/psychologists/available');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
     console.error('Error fetching psychologists:', error);
     throw new Error('Error al obtener los psicólogos');
   }
@@ -119,8 +129,8 @@ export const getAvailableSlots = async (psychologistId: number, date: string): P
     const response = await apiClient.get(`/appointments/available-slots`, {
       params: { psychologist_id: psychologistId, date }
     });
-    return response.data;
-  } catch (error) {
+    return response.data.data || response.data;
+  } catch (error: unknown) {
     console.error('Error fetching available slots:', error);
     throw new Error('Error al obtener los horarios disponibles');
   }
@@ -130,11 +140,14 @@ export const getAvailableSlots = async (psychologistId: number, date: string): P
 export const confirmAppointment = async (id: number): Promise<Appointment> => {
   try {
     const response = await apiClient.patch(`/appointments/${id}/confirm`);
-    return response.data;
-  } catch (error: any) {
+    return response.data.data || response.data;
+  } catch (error: unknown) {
     console.error('Error confirming appointment:', error);
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
     throw new Error('Error al confirmar la cita');
   }
@@ -144,11 +157,14 @@ export const confirmAppointment = async (id: number): Promise<Appointment> => {
 export const cancelAppointment = async (id: number): Promise<Appointment> => {
   try {
     const response = await apiClient.patch(`/appointments/${id}/cancel`);
-    return response.data;
-  } catch (error: any) {
+    return response.data.data || response.data;
+  } catch (error: unknown) {
     console.error('Error cancelling appointment:', error);
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
     throw new Error('Error al cancelar la cita');
   }
@@ -158,12 +174,37 @@ export const cancelAppointment = async (id: number): Promise<Appointment> => {
 export const completeAppointment = async (id: number): Promise<Appointment> => {
   try {
     const response = await apiClient.patch(`/appointments/${id}/complete`);
-    return response.data;
-  } catch (error: any) {
+    return response.data.data || response.data;
+  } catch (error: unknown) {
     console.error('Error completing appointment:', error);
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
     throw new Error('Error al completar la cita');
+  }
+};
+
+// Obtener citas del psicólogo
+export const getPsychologistAppointments = async (): Promise<Appointment[]> => {
+  try {
+    const response = await apiClient.get('/citas');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching psychologist appointments:', error);
+    throw new Error('Error al obtener las citas del psicólogo');
+  }
+};
+
+// Obtener estadísticas del psicólogo
+export const getPsychologistStats = async (): Promise<any> => {
+  try {
+    const response = await apiClient.get('/citas/stats');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching psychologist stats:', error);
+    throw new Error('Error al obtener las estadísticas del psicólogo');
   }
 }; 

@@ -149,7 +149,7 @@ class ScheduleController extends Controller
                     ->exists();
 
                 if ($conflicts) {
-                    $errors[] = "Conflicto en el horario {$index + 1}";
+                    $errors[] = "Conflicto en el horario " . ($index + 1);
                     continue;
                 }
 
@@ -164,7 +164,7 @@ class ScheduleController extends Controller
 
                 $createdSchedules[] = $schedule;
             } catch (\Exception $e) {
-                $errors[] = "Error en el horario {$index + 1}: " . $e->getMessage();
+                $errors[] = "Error en el horario " . ($index + 1) . ": " . $e->getMessage();
             }
         }
 

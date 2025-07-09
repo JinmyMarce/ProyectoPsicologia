@@ -12,7 +12,7 @@ use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\PsychologicalSessionController;
 use App\Http\Controllers\Api\AppointmentController;
-use App\Http\Controllers\Api\SessionController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -153,15 +153,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/appointments/{id}/confirm', [AppointmentController::class, 'confirm']);
     Route::patch('/appointments/{id}/cancel', [AppointmentController::class, 'cancel']);
     Route::patch('/appointments/{id}/complete', [AppointmentController::class, 'complete']);
-    Route::get('/appointments/available-slots', [AppointmentController::class, 'getAvailableSlots']);
 
-    // Rutas para sesiones psicológicas
-    Route::get('/sessions', [SessionController::class, 'index']);
-    Route::post('/sessions', [SessionController::class, 'store']);
-    Route::get('/sessions/{id}', [SessionController::class, 'show']);
-    Route::put('/sessions/{id}', [SessionController::class, 'update']);
-    Route::delete('/sessions/{id}', [SessionController::class, 'destroy']);
 });
+
+// Ruta pública para obtener slots disponibles
+Route::get('/appointments/available-slots', [AppointmentController::class, 'getAvailableSlots']);
 
 // Ruta de prueba para verificar que la API funciona
 Route::get('/test', function () {

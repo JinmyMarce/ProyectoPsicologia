@@ -4,11 +4,11 @@ import { Card, CardHeader, CardTitle, CardDescription } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
-import { userService, UserFilters } from '../../services/users';
-import { User, CreateUserData, UpdateUserData } from '../../types';
+import { getUsers, getUserStats, deactivateUser, reactivateUser, deleteUser } from '../../services/users';
+import type { User as UserType } from '../../types';
 
 export function UserManagement() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,31 +17,35 @@ export function UserManagement() {
   const [showAddUser, setShowAddUser] = useState(false);
   const [showEditUser, setShowEditUser] = useState(false);
   const [showUserHistory, setShowUserHistory] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [stats, setStats] = useState<any>(null);
+
+  function mapUser(u: any): UserType {
+    return {
+      ...u,
+      active: typeof u.active === 'boolean' ? u.active : true,
+      verified: typeof u.verified === 'boolean' ? u.verified : true
+    };
+  }
 
   // Cargar usuarios
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const filters: UserFilters = {};
-      
+      let allUsers = await getUsers();
+      allUsers = allUsers.map(mapUser);
       if (roleFilter !== 'all') {
-        filters.role = roleFilter;
+        allUsers = allUsers.filter(u => u.role === roleFilter);
       }
-      
       if (statusFilter !== 'all') {
-        filters.active = statusFilter === 'active';
+        allUsers = allUsers.filter(u => (statusFilter === 'active' ? u.active : !u.active));
       }
-      
       if (searchTerm) {
-        filters.search = searchTerm;
+        allUsers = allUsers.filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase()));
       }
-
-      const response = await userService.getUsers(filters);
-      setUsers(response.data || []);
-    } catch (err: any) {
-      setError(err.message);
+      setUsers(allUsers);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al cargar usuarios');
     } finally {
       setLoading(false);
     }
@@ -50,9 +54,9 @@ export function UserManagement() {
   // Cargar estadísticas
   const loadStats = async () => {
     try {
-      const response = await userService.getUserStats();
-      setStats(response.data);
-    } catch (err: any) {
+      const statsData = await getUserStats();
+      setStats(statsData);
+    } catch (err: unknown) {
       console.error('Error loading stats:', err);
     }
   };
@@ -62,12 +66,12 @@ export function UserManagement() {
     loadStats();
   }, [searchTerm, roleFilter, statusFilter]);
 
-  const getStatusBadge = (user: User) => {
+  const getStatusBadge = (user: UserType) => {
     if (!user.active) {
-      return <Badge variant="warning">Inactivo</Badge>;
+      return <Badge variant="danger">Inactivo</Badge>;
     }
     if (!user.verified) {
-      return <Badge variant="info">Pendiente</Badge>;
+      return <Badge variant="warning">Pendiente</Badge>;
     }
     return <Badge variant="success">Activo</Badge>;
   };
@@ -87,44 +91,35 @@ export function UserManagement() {
     }
   };
 
-  const handleDeactivateUser = async (userId: string, reason: string) => {
+  const handleDeactivateUser = async (userId: string) => {
     try {
-      await userService.deactivateUser(userId, reason);
+      await deactivateUser(Number(userId));
       loadUsers();
       loadStats();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al desactivar usuario');
     }
   };
 
   const handleReactivateUser = async (userId: string) => {
     try {
-      await userService.reactivateUser(userId);
+      await reactivateUser(Number(userId));
       loadUsers();
       loadStats();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al reactivar usuario');
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
       try {
-        await userService.deleteUser(userId);
+        await deleteUser(Number(userId));
         loadUsers();
         loadStats();
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Error al eliminar usuario');
       }
-    }
-  };
-
-  const handleSendVerification = async (userId: string) => {
-    try {
-      await userService.sendVerificationEmail(userId);
-      alert('Email de verificación enviado exitosamente');
-    } catch (err: any) {
-      setError(err.message);
     }
   };
 
@@ -326,7 +321,9 @@ export function UserManagement() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleSendVerification(user.id)}
+                          onClick={() => {
+                            // Implementar la lógica para enviar verificación por email
+                          }}
                           icon={Mail}
                         >
                           Verificar
@@ -340,7 +337,7 @@ export function UserManagement() {
                           onClick={() => {
                             const reason = prompt('Motivo de desactivación:');
                             if (reason) {
-                              handleDeactivateUser(user.id, reason);
+                              handleDeactivateUser(user.id);
                             }
                           }}
                           icon={UserX}

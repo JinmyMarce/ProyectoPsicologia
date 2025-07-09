@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, MapPin, Phone, Mail, Plus, X, CheckCircle, AlertCircle } from 'lucide-react';
-import { Button } from '../ui/Button';
-import { Card } from '../ui/Card';
-import { Badge } from '../ui/Badge';
+import { Calendar, Clock, User, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { createAppointment, getPsychologists, getAvailableSlots } from '../../services/appointments';
+import { createAppointment, getPsychologists, getUserAppointments, getAvailableSlots } from '../../services/appointments';
 import { PageHeader } from '../ui/PageHeader';
+import { CalendarAvailability } from './CalendarAvailability';
+import { BookAppointmentModal } from './BookAppointmentModal';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 
 interface Psychologist {
   id: number;
@@ -22,110 +24,155 @@ interface TimeSlot {
   available: boolean;
 }
 
-interface AppointmentForm {
-  psychologist_id: number;
+interface Appointment {
+  id: number;
+  user_email: string;
+  psychologist_name: string;
   date: string;
   time: string;
   reason: string;
-  notes: string;
+  status: string;
+  created_at: string;
 }
 
 export function AppointmentBooking() {
   const { user } = useAuth();
-  const [psychologists, setPsychologists] = useState<Psychologist[]>([]);
+  const [psychologist, setPsychologist] = useState<Psychologist | null>(null);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
-  const [selectedPsychologist, setSelectedPsychologist] = useState<Psychologist | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [formData, setFormData] = useState<AppointmentForm>({
-    psychologist_id: 0,
-    date: '',
-    time: '',
-    reason: '',
-    notes: ''
-  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isFirstAppointment, setIsFirstAppointment] = useState<boolean | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalDate, setModalDate] = useState('');
+  const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    loadPsychologists();
+    loadInitialData();
   }, []);
 
   useEffect(() => {
-    if (selectedPsychologist && selectedDate) {
-      loadAvailableSlots(selectedPsychologist.id, selectedDate);
+    if (psychologist && modalOpen && modalDate) {
+      loadAvailableSlots(psychologist.id, modalDate);
     }
-  }, [selectedPsychologist, selectedDate]);
+  }, [psychologist, modalOpen, modalDate]);
 
-  const loadPsychologists = async () => {
+  const loadInitialData = async () => {
+    try {
+      setLoadingData(true);
+      setError('');
+      
+      // Cargar psicólogo y citas del usuario en paralelo
+      const [psychologistData, appointmentsData] = await Promise.all([
+        loadPsychologist(),
+        loadUserAppointments()
+      ]);
+      
+      // Verificar si es la primera cita
+      setIsFirstAppointment(appointmentsData.length === 0);
+      
+      // Obtener las 3 citas más recientes
+      const recent = appointmentsData
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 3);
+      setRecentAppointments(recent);
+      
+    } catch (error) {
+      console.error('Error cargando datos iniciales:', error);
+      setError('Error al cargar los datos iniciales');
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  const loadPsychologist = async () => {
     try {
       const data = await getPsychologists();
-      setPsychologists(data);
+      if (Array.isArray(data) && data.length > 0) {
+        setPsychologist(data[0]);
+        return data[0];
+      } else {
+        setError('No hay psicólogo disponible');
+        return null;
+      }
     } catch (error) {
-      console.error('Error cargando psicólogos:', error);
-      setError('Error al cargar los psicólogos disponibles');
+      console.error('Error cargando psicólogo:', error);
+      setError('Error al cargar el psicólogo disponible');
+      setPsychologist(null);
+      return null;
+    }
+  };
+
+  const loadUserAppointments = async () => {
+    try {
+      const appointments = await getUserAppointments();
+      return appointments;
+    } catch (error) {
+      console.error('Error cargando citas del usuario:', error);
+      return [];
     }
   };
 
   const loadAvailableSlots = async (psychologistId: number, date: string) => {
     try {
       const slots = await getAvailableSlots(psychologistId, date);
-      setAvailableSlots(slots);
+      setAvailableSlots(Array.isArray(slots) ? slots : []);
     } catch (error) {
       console.error('Error cargando horarios:', error);
       setError('Error al cargar los horarios disponibles');
+      setAvailableSlots([]);
     }
   };
 
-  const handlePsychologistSelect = (psychologist: Psychologist) => {
-    setSelectedPsychologist(psychologist);
-    setFormData(prev => ({ ...prev, psychologist_id: psychologist.id }));
-    setSelectedTime('');
-  };
-
   const handleDateSelect = (date: string) => {
-    setSelectedDate(date);
-    setFormData(prev => ({ ...prev, date }));
-    setSelectedTime('');
+    setModalDate(date);
+    setModalOpen(true);
   };
 
-  const handleTimeSelect = (time: string) => {
-    setSelectedTime(time);
-    setFormData(prev => ({ ...prev, time }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleBookFromModal = async (time: string, reason: string) => {
     setLoading(true);
     setError('');
     setSuccess('');
-
+    
     try {
       if (!user?.email) {
         throw new Error('Usuario no autenticado');
       }
+      if (!psychologist) {
+        throw new Error('No hay psicólogo disponible');
+      }
+      if (!modalDate) {
+        throw new Error('Debes seleccionar una fecha');
+      }
+      if (!time) {
+        throw new Error('Debes seleccionar una hora disponible');
+      }
+      if (isFirstAppointment && !reason.trim()) {
+        throw new Error('El motivo de la cita es obligatorio');
+      }
 
       const appointmentData = {
-        ...formData,
+        psychologist_id: psychologist.id,
+        date: modalDate,
+        time,
+        reason,
+        notes: '',
         user_email: user.email,
         status: 'pending'
       };
 
       await createAppointment(appointmentData);
       setSuccess('Cita agendada exitosamente');
-      
-      // Limpiar formulario
-      setFormData({
-        psychologist_id: 0,
-        date: '',
-        time: '',
-        reason: '',
-        notes: ''
-      });
-      setSelectedPsychologist(null);
+      setModalOpen(false);
+      setModalDate('');
+      setAvailableSlots([]);
       setSelectedDate('');
-      setSelectedTime('');
+
+      // Recargar datos para actualizar la lista de citas recientes
+      await loadInitialData();
+
     } catch (error: any) {
       setError(error.message || 'Error al agendar la cita');
     } finally {
@@ -133,21 +180,46 @@ export function AppointmentBooking() {
     }
   };
 
-  const getCurrentDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'warning';
+      case 'confirmed':
+        return 'success';
+      case 'completed':
+        return 'info';
+      case 'cancelled':
+        return 'danger';
+      default:
+        return 'default';
+    }
   };
 
-  const getMinDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'Pendiente';
+      case 'confirmed':
+        return 'Confirmada';
+      case 'completed':
+        return 'Completada';
+      case 'cancelled':
+        return 'Cancelada';
+      default:
+        return status;
+    }
   };
 
-  const getMaxDate = () => {
-    const maxDate = new Date();
-    maxDate.setMonth(maxDate.getMonth() + 2);
-    return maxDate.toISOString().split('T')[0];
-  };
+  if (loadingData) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[#8e161a]/30 border-t-[#8e161a] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-semibold">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -175,198 +247,142 @@ export function AppointmentBooking() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Selección de Psicólogo */}
-        <Card className="p-8">
-          <h2 className="text-3xl font-black text-gray-900 mb-6 flex items-center">
-            <User className="w-10 h-10 mr-4 text-[#8e161a]" />
-            Seleccionar Psicólogo
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {psychologists.map((psychologist) => (
-              <div
-                key={psychologist.id}
-                className={`p-6 rounded-2xl border-4 cursor-pointer transition-all duration-300 hover:shadow-2xl ${
-                  selectedPsychologist?.id === psychologist.id
-                    ? 'border-[#8e161a] bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 shadow-2xl'
-                    : 'border-gray-200 hover:border-[#8e161a]/50 bg-white'
-                }`}
-                onClick={() => handlePsychologistSelect(psychologist)}
-              >
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <User className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-xl font-black text-gray-900 mb-2">{psychologist.name}</h3>
-                  <p className="text-gray-600 font-semibold mb-2">{psychologist.specialization}</p>
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-500 flex items-center justify-center">
-                      <Mail className="w-4 h-4 mr-2" />
-                      {psychologist.email}
-                    </p>
-                    <p className="text-sm text-gray-500 flex items-center justify-center">
-                      <Phone className="w-4 h-4 mr-2" />
-                      {psychologist.phone}
-                    </p>
-                  </div>
-                  <Badge 
-                    variant={psychologist.available ? "success" : "warning"}
-                    className="mt-4"
-                  >
-                    {psychologist.available ? 'Disponible' : 'No disponible'}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Selección de Fecha y Hora */}
-        {(selectedPsychologist && selectedPsychologist.available) && (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Calendario para agendar cita */}
+        <div className="lg:col-span-2">
           <Card className="p-8">
             <h2 className="text-3xl font-black text-gray-900 mb-6 flex items-center">
               <Calendar className="w-10 h-10 mr-4 text-[#8e161a]" />
-              Seleccionar Fecha y Hora
+              Agenda tu cita
             </h2>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Fecha */}
-              <div>
-                <label className="block text-xl font-bold text-gray-700 mb-4">
-                  Fecha de la cita
-                </label>
-                <input
-                  type="date"
-                  min={getMinDate()}
-                  max={getMaxDate()}
-                  value={selectedDate}
-                  onChange={(e) => handleDateSelect(e.target.value)}
-                  className="w-full p-4 border-2 border-gray-300 rounded-2xl text-lg font-semibold focus:border-[#8e161a] focus:ring-4 focus:ring-[#8e161a]/20 transition-all duration-300"
-                />
-              </div>
-
-              {/* Hora */}
-              {selectedDate && (
-                <div>
-                  <label className="block text-xl font-bold text-gray-700 mb-4">
-                    Hora de la cita
-                  </label>
-                  <div className="grid grid-cols-3 gap-4">
-                    {availableSlots.map((slot) => (
-                      <button
-                        key={slot.id}
-                        type="button"
-                        onClick={() => handleTimeSelect(slot.time)}
-                        disabled={!slot.available}
-                        className={`p-4 rounded-2xl border-2 font-bold text-lg transition-all duration-300 ${
-                          selectedTime === slot.time
-                            ? 'border-[#8e161a] bg-[#8e161a] text-white shadow-2xl'
-                            : slot.available
-                            ? 'border-gray-300 hover:border-[#8e161a] hover:bg-[#8e161a]/5'
-                            : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                        }`}
-                      >
-                        {slot.time}
-                      </button>
-                    ))}
+            {psychologist && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-lg border border-[#8e161a]/20">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
+                    <User className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Dr. {psychologist.name}</h3>
+                    <p className="text-sm text-gray-600">{psychologist.specialization}</p>
+                    <p className="text-xs text-gray-500">{psychologist.email}</p>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            <CalendarAvailability
+              psychologistId={psychologist ? psychologist.id.toString() : ''}
+              selectedDate={selectedDate}
+              onDateSelect={handleDateSelect}
+            />
           </Card>
-        )}
+        </div>
 
-        {/* Información de la Cita */}
-        {(selectedPsychologist && selectedDate && selectedTime) && (
-          <Card className="p-8">
-            <h2 className="text-3xl font-black text-gray-900 mb-6 flex items-center">
-              <Plus className="w-10 h-10 mr-4 text-[#8e161a]" />
-              Información de la Cita
-            </h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Panel lateral con información */}
+        <div className="space-y-6">
+          {/* Información del usuario */}
+          <Card className="p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+              <User className="w-5 h-5 mr-2 text-[#8e161a]" />
+              Información Personal
+            </h3>
+            <div className="space-y-3">
               <div>
-                <label className="block text-xl font-bold text-gray-700 mb-4">
-                  Motivo de la consulta
-                </label>
-                <textarea
-                  value={formData.reason}
-                  onChange={(e) => setFormData(prev => ({ ...prev, reason: e.target.value }))}
-                  rows={4}
-                  className="w-full p-4 border-2 border-gray-300 rounded-2xl text-lg font-semibold focus:border-[#8e161a] focus:ring-4 focus:ring-[#8e161a]/20 transition-all duration-300 resize-none"
-                  placeholder="Describe el motivo de tu consulta..."
-                  required
-                />
+                <p className="text-sm font-medium text-gray-600">Nombre</p>
+                <p className="text-base font-semibold text-gray-900">{user?.name}</p>
               </div>
-
               <div>
-                <label className="block text-xl font-bold text-gray-700 mb-4">
-                  Notas adicionales (opcional)
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  rows={4}
-                  className="w-full p-4 border-2 border-gray-300 rounded-2xl text-lg font-semibold focus:border-[#8e161a] focus:ring-4 focus:ring-[#8e161a]/20 transition-all duration-300 resize-none"
-                  placeholder="Información adicional que consideres importante..."
-                />
+                <p className="text-sm font-medium text-gray-600">Email</p>
+                <p className="text-base font-semibold text-gray-900">{user?.email}</p>
               </div>
-            </div>
-
-            {/* Resumen de la cita */}
-            <div className="mt-8 p-6 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-2xl border-2 border-[#8e161a]/20">
-              <h3 className="text-2xl font-black text-gray-900 mb-4">Resumen de la Cita</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="flex items-center space-x-4">
-                  <User className="w-8 h-8 text-[#8e161a]" />
-                  <div>
-                    <p className="text-sm text-gray-600 font-semibold">Psicólogo</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedPsychologist.name}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <Calendar className="w-8 h-8 text-[#8e161a]" />
-                  <div>
-                    <p className="text-sm text-gray-600 font-semibold">Fecha</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedDate}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <Clock className="w-8 h-8 text-[#8e161a]" />
-                  <div>
-                    <p className="text-sm text-gray-600 font-semibold">Hora</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedTime}</p>
-                  </div>
-                </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Rol</p>
+                <p className="text-base font-semibold text-gray-900 capitalize">{user?.role}</p>
               </div>
             </div>
           </Card>
-        )}
 
-        {/* Botón de envío */}
-        {(selectedPsychologist && selectedDate && selectedTime && formData.reason) && (
-          <div className="text-center">
-            <Button
-              type="submit"
-              disabled={loading}
-              className="px-16 py-6 text-2xl font-black rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
-            >
-              {loading ? (
-                <div className="flex items-center space-x-4">
-                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Agendando cita...</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-4">
-                  <CheckCircle className="w-8 h-8" />
-                  <span>Confirmar Cita</span>
-                </div>
-              )}
-            </Button>
-          </div>
-        )}
-      </form>
+          {/* Citas recientes */}
+          <Card className="p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+              <Clock className="w-5 h-5 mr-2 text-[#8e161a]" />
+              Citas Recientes
+            </h3>
+            
+            {recentAppointments.length === 0 ? (
+              <div className="text-center py-4">
+                <Calendar className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-600">No tienes citas recientes</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentAppointments.map((appointment) => (
+                  <div 
+                    key={appointment.id}
+                    className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold text-gray-900">
+                        Dr. {appointment.psychologist_name}
+                      </h4>
+                      <Badge variant={getStatusColor(appointment.status)} className="text-xs">
+                        {getStatusText(appointment.status)}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-gray-600 space-y-1">
+                      <p>📅 {new Date(appointment.date).toLocaleDateString('es-ES')}</p>
+                      <p>🕐 {appointment.time}</p>
+                      <p>💬 {appointment.reason}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+
+          {/* Información importante */}
+          <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-blue-600" />
+              Información Importante
+            </h3>
+            <div className="space-y-3 text-sm text-gray-700">
+              <div className="flex items-start space-x-2">
+                <span className="text-blue-600">•</span>
+                <p>Las citas se confirman automáticamente</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-blue-600">•</span>
+                <p>Puedes cancelar hasta 24 horas antes</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-blue-600">•</span>
+                <p>Llega 10 minutos antes de tu cita</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-blue-600">•</span>
+                <p>Trae tu documento de identidad</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <BookAppointmentModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setModalDate('');
+          setAvailableSlots([]);
+        }}
+        onBook={handleBookFromModal}
+        date={modalDate}
+        availableSlots={availableSlots}
+        isFirstAppointment={isFirstAppointment === true}
+        loading={loading}
+        error={error}
+      />
     </div>
   );
 }

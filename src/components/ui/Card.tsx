@@ -1,5 +1,5 @@
 import React from 'react';
-import { clsx } from 'clsx';
+import { cn } from '../../lib/utils';
 
 interface CardProps {
   children: React.ReactNode;
@@ -11,7 +11,7 @@ interface CardProps {
 export function Card({ children, className, padding = 'md', hoverable = false }: CardProps) {
   return (
     <div
-      className={clsx(
+      className={cn(
         'bg-white rounded-xl border border-gray-200 shadow-sm',
         {
           'p-0': padding === 'none',
@@ -30,7 +30,7 @@ export function Card({ children, className, padding = 'md', hoverable = false }:
 
 export function CardHeader({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={clsx('mb-4', className)}>
+    <div className={cn('mb-4', className)}>
       {children}
     </div>
   );
@@ -38,7 +38,7 @@ export function CardHeader({ children, className }: { children: React.ReactNode;
 
 export function CardTitle({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <h3 className={clsx('text-lg font-semibold text-gray-900', className)}>
+    <h3 className={cn('text-lg font-semibold text-gray-900', className)}>
       {children}
     </h3>
   );
@@ -46,7 +46,7 @@ export function CardTitle({ children, className }: { children: React.ReactNode; 
 
 export function CardDescription({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <p className={clsx('text-sm text-gray-600 mt-1', className)}>
+    <p className={cn('text-sm text-gray-600 mt-1', className)}>
       {children}
     </p>
   );

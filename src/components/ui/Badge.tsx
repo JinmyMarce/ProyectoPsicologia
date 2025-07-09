@@ -1,5 +1,5 @@
 import React from 'react';
-import { clsx } from '../../utils/clsx';
+import { cn } from '../../lib/utils';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ export function Badge({ children, variant = 'default', className }: BadgeProps) 
   };
 
   return (
-    <span className={clsx(baseClasses, variantClasses[variant], className)}>
+    <span className={cn(baseClasses, variantClasses[variant], className)}>
       {children}
     </span>
   );

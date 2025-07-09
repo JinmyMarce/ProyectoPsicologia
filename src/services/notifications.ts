@@ -1,153 +1,201 @@
 import { apiClient } from './apiClient';
-import { Notification } from '../types';
 
-export interface NotificationFilters {
-  type?: string;
-  read?: boolean;
-  page?: number;
-  per_page?: number;
-}
-
-export interface CreateNotificationData {
-  userId: string;
-  type: 'appointment' | 'reminder' | 'status' | 'system';
+export interface Notification {
+  id: number;
+  user_id: number;
   title: string;
   message: string;
+  type: 'info' | 'success' | 'warning' | 'error' | 'appointment' | 'reminder';
+  read_at?: string;
+  created_at: string;
+  updated_at: string;
+  data?: Record<string, unknown>;
 }
 
-export const notificationService = {
-  // Obtener todas las notificaciones del usuario actual
-  async getNotifications(filters: NotificationFilters = {}) {
-    try {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
-        }
-      });
+export interface NotificationPreferences {
+  email_notifications: boolean;
+  push_notifications: boolean;
+  appointment_reminders: boolean;
+  status_updates: boolean;
+  marketing_emails: boolean;
+}
 
-      const response = await apiClient.get(`/notifications?${params.toString()}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al obtener notificaciones');
-    }
-  },
+// Obtener notificaciones del usuario
+export const getNotifications = async (): Promise<Notification[]> => {
+  try {
+    const response = await apiClient.get('/notifications');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching notifications:', error);
+    throw new Error('Error al obtener las notificaciones');
+  }
+};
 
-  // Obtener una notificación específica
-  async getNotification(id: string) {
-    try {
-      const response = await apiClient.get(`/notifications/${id}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al obtener notificación');
-    }
-  },
+// Obtener notificación específica
+export const getNotification = async (id: number): Promise<Notification> => {
+  try {
+    const response = await apiClient.get(`/notifications/${id}`);
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching notification:', error);
+    throw new Error('Error al obtener la notificación');
+  }
+};
 
-  // Marcar notificación como leída
-  async markAsRead(id: string) {
-    try {
-      const response = await apiClient.post(`/notifications/${id}/read`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al marcar como leída');
+// Marcar notificación como leída
+export const markNotificationAsRead = async (id: number): Promise<void> => {
+  try {
+    await apiClient.post(`/notifications/${id}/read`);
+  } catch (error: unknown) {
+    console.error('Error marking notification as read:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al marcar la notificación como leída');
+  }
+};
 
-  // Marcar todas las notificaciones como leídas
-  async markAllAsRead() {
-    try {
-      const response = await apiClient.post('/notifications/mark-all-read');
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al marcar todas como leídas');
+// Marcar todas las notificaciones como leídas
+export const markAllNotificationsAsRead = async (): Promise<void> => {
+  try {
+    await apiClient.post('/notifications/mark-all-read');
+  } catch (error: unknown) {
+    console.error('Error marking all notifications as read:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al marcar todas las notificaciones como leídas');
+  }
+};
 
-  // Eliminar una notificación
-  async deleteNotification(id: string) {
-    try {
-      const response = await apiClient.delete(`/notifications/${id}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al eliminar notificación');
+// Eliminar notificación
+export const deleteNotification = async (id: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/notifications/${id}`);
+  } catch (error: unknown) {
+    console.error('Error deleting notification:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al eliminar la notificación');
+  }
+};
 
-  // Eliminar todas las notificaciones
-  async deleteAllNotifications() {
-    try {
-      const response = await apiClient.delete('/notifications');
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al eliminar todas las notificaciones');
+// Eliminar todas las notificaciones
+export const deleteAllNotifications = async (): Promise<void> => {
+  try {
+    await apiClient.delete('/notifications');
+  } catch (error: unknown) {
+    console.error('Error deleting all notifications:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al eliminar todas las notificaciones');
+  }
+};
 
-  // Crear una nueva notificación (solo para admins)
-  async createNotification(notificationData: CreateNotificationData) {
-    try {
-      const response = await apiClient.post('/notifications', notificationData);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al crear notificación');
+// Crear notificación
+export const createNotification = async (notificationData: {
+  title: string;
+  message: string;
+  type: string;
+  user_id?: number;
+  data?: Record<string, unknown>;
+}): Promise<Notification> => {
+  try {
+    const response = await apiClient.post('/notifications', notificationData);
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error creating notification:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al crear la notificación');
+  }
+};
 
-  // Obtener estadísticas de notificaciones
-  async getNotificationStats() {
-    try {
-      const response = await apiClient.get('/notifications/stats');
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al obtener estadísticas');
-    }
-  },
+// Obtener estadísticas de notificaciones
+export const getNotificationStats = async (): Promise<Record<string, unknown>> => {
+  try {
+    const response = await apiClient.get('/notifications/stats');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching notification stats:', error);
+    throw new Error('Error al obtener estadísticas de notificaciones');
+  }
+};
 
-  // Enviar notificación de recordatorio de cita
-  async sendAppointmentReminder(appointmentId: string) {
-    try {
-      const response = await apiClient.post(`/notifications/appointment-reminder/${appointmentId}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al enviar recordatorio');
+// Enviar recordatorio de cita
+export const sendAppointmentReminder = async (appointmentId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/notifications/appointment-reminder/${appointmentId}`);
+  } catch (error: unknown) {
+    console.error('Error sending appointment reminder:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al enviar recordatorio de cita');
+  }
+};
 
-  // Enviar notificación de cambio de estado de cita
-  async sendAppointmentStatusChange(appointmentId: string, status: string) {
-    try {
-      const response = await apiClient.post(`/notifications/appointment-status/${appointmentId}`, {
-        status
-      });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al enviar notificación de estado');
+// Enviar notificación de cambio de estado de cita
+export const sendAppointmentStatusChange = async (appointmentId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/notifications/appointment-status/${appointmentId}`);
+  } catch (error: unknown) {
+    console.error('Error sending appointment status change:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al enviar notificación de cambio de estado');
+  }
+};
 
-  // Configurar preferencias de notificaciones
-  async updateNotificationPreferences(preferences: {
-    email_notifications?: boolean;
-    push_notifications?: boolean;
-    appointment_reminders?: boolean;
-    status_updates?: boolean;
-    system_notifications?: boolean;
-  }) {
-    try {
-      const response = await apiClient.put('/notifications/preferences', preferences);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al actualizar preferencias');
-    }
-  },
+// Obtener preferencias de notificaciones
+export const getNotificationPreferences = async (): Promise<NotificationPreferences> => {
+  try {
+    const response = await apiClient.get('/notifications/preferences');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching notification preferences:', error);
+    throw new Error('Error al obtener preferencias de notificaciones');
+  }
+};
 
-  // Obtener preferencias de notificaciones
-  async getNotificationPreferences() {
-    try {
-      const response = await apiClient.get('/notifications/preferences');
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al obtener preferencias');
+// Actualizar preferencias de notificaciones
+export const updateNotificationPreferences = async (preferences: Partial<NotificationPreferences>): Promise<NotificationPreferences> => {
+  try {
+    const response = await apiClient.put('/notifications/preferences', preferences);
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error updating notification preferences:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
+    throw new Error('Error al actualizar preferencias de notificaciones');
   }
 }; 

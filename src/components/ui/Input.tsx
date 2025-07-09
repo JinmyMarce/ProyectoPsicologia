@@ -1,5 +1,5 @@
 import React from 'react';
-import { clsx } from 'clsx';
+import { cn } from '../../lib/utils';
 import { DivideIcon as LucideIcon } from 'lucide-react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -29,7 +29,7 @@ export function Input({
           <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
         )}
         <input
-          className={clsx(
+          className={cn(
             'w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200',
             {
               'pl-10': Icon && iconPosition === 'left',

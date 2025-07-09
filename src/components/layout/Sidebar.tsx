@@ -121,6 +121,12 @@ const menuItems: MenuItem[] = [
     roles: ['super_admin', 'admin', 'psychologist']
   },
   {
+    label: 'Mi Perfil',
+    icon: UserCheck,
+    page: 'profile',
+    roles: ['super_admin', 'admin', 'psychologist', 'student']
+  },
+  {
     label: 'Configuración',
     icon: Settings,
     page: 'settings',

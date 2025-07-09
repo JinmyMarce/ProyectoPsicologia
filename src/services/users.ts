@@ -1,182 +1,178 @@
 import { apiClient } from './apiClient';
-import { User, Psychologist } from '../types';
-
-export interface CreateUserData {
-  name: string;
-  email: string;
-  password: string;
-  role: 'student' | 'psychologist' | 'admin' | 'super_admin';
-  specialization?: string;
-  verified?: boolean;
-}
+import type { User } from '../types';
 
 export interface UpdateUserData {
   name?: string;
   email?: string;
-  specialization?: string;
-  verified?: boolean;
-  active?: boolean;
+  phone?: string;
+  address?: string;
+  birth_date?: string;
+  student_id?: string;
+  career?: string;
+  semester?: string;
 }
 
-export interface UserFilters {
-  role?: string;
-  active?: boolean;
-  search?: string;
-  page?: number;
-  per_page?: number;
+export interface ChangePasswordData {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
 }
 
-export const userService = {
-  // Obtener todos los usuarios con filtros
-  async getUsers(filters: UserFilters = {}) {
-    try {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
-        }
-      });
+// Obtener perfil del usuario autenticado
+export const getProfile = async (): Promise<User> => {
+  try {
+    const response = await apiClient.get('/auth/profile');
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    throw new Error('Error al obtener el perfil');
+  }
+};
 
-      const response = await apiClient.get(`/users?${params.toString()}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al obtener usuarios');
+// Actualizar perfil del usuario
+export const updateProfile = async (userData: UpdateUserData): Promise<User> => {
+  try {
+    const response = await apiClient.put('/auth/profile', userData);
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error updating profile:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al actualizar el perfil');
+  }
+};
 
-  // Obtener un usuario específico
-  async getUser(id: string) {
-    try {
-      const response = await apiClient.get(`/users/${id}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al obtener usuario');
+// Cambiar contraseña
+export const changePassword = async (passwordData: ChangePasswordData): Promise<void> => {
+  try {
+    await apiClient.post('/auth/change-password', passwordData);
+  } catch (error: unknown) {
+    console.error('Error changing password:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al cambiar la contraseña');
+  }
+};
 
-  // Crear un nuevo usuario
-  async createUser(userData: CreateUserData) {
-    try {
-      const response = await apiClient.post('/users', userData);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al crear usuario');
-    }
-  },
+// Obtener todos los usuarios (solo admin/super_admin)
+export const getUsers = async (): Promise<User[]> => {
+  try {
+    const response = await apiClient.get('/users');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching users:', error);
+    throw new Error('Error al obtener los usuarios');
+  }
+};
 
-  // Actualizar un usuario
-  async updateUser(id: string, userData: UpdateUserData) {
-    try {
-      const response = await apiClient.put(`/users/${id}`, userData);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al actualizar usuario');
-    }
-  },
+// Obtener usuario por ID
+export const getUserById = async (id: number): Promise<User> => {
+  try {
+    const response = await apiClient.get(`/users/${id}`);
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching user:', error);
+    throw new Error('Error al obtener el usuario');
+  }
+};
 
-  // Desactivar un usuario
-  async deactivateUser(id: string, reason: string) {
-    try {
-      const response = await apiClient.post(`/users/${id}/deactivate`, { reason });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al desactivar usuario');
+// Crear nuevo usuario
+export const createUser = async (userData: Partial<User>): Promise<User> => {
+  try {
+    const response = await apiClient.post('/users', userData);
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error creating user:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al crear el usuario');
+  }
+};
 
-  // Reactivar un usuario
-  async reactivateUser(id: string) {
-    try {
-      const response = await apiClient.post(`/users/${id}/reactivate`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al reactivar usuario');
+// Actualizar usuario
+export const updateUser = async (id: number, userData: Partial<User>): Promise<User> => {
+  try {
+    const response = await apiClient.put(`/users/${id}`, userData);
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error updating user:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al actualizar el usuario');
+  }
+};
 
-  // Obtener historial de cambios de usuario
-  async getUserHistory(id: string) {
-    try {
-      const response = await apiClient.get(`/users/${id}/history`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al obtener historial');
+// Eliminar usuario
+export const deleteUser = async (id: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/users/${id}`);
+  } catch (error: unknown) {
+    console.error('Error deleting user:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al eliminar el usuario');
+  }
+};
 
-  // Eliminar un usuario
-  async deleteUser(id: string) {
-    try {
-      const response = await apiClient.delete(`/users/${id}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al eliminar usuario');
+// Desactivar usuario
+export const deactivateUser = async (id: number): Promise<void> => {
+  try {
+    await apiClient.post(`/users/${id}/deactivate`);
+  } catch (error: unknown) {
+    console.error('Error deactivating user:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al desactivar el usuario');
+  }
+};
 
-  // Obtener estadísticas de usuarios
-  async getUserStats() {
-    try {
-      const response = await apiClient.get('/users/stats');
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al obtener estadísticas');
+// Reactivar usuario
+export const reactivateUser = async (id: number): Promise<void> => {
+  try {
+    await apiClient.post(`/users/${id}/reactivate`);
+  } catch (error: unknown) {
+    console.error('Error reactivating user:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
     }
-  },
+    throw new Error('Error al reactivar el usuario');
+  }
+};
 
-  // Cambiar contraseña de usuario
-  async changePassword(id: string, currentPassword: string, newPassword: string) {
-    try {
-      const response = await apiClient.post(`/users/${id}/change-password`, {
-        current_password: currentPassword,
-        new_password: newPassword
-      });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al cambiar contraseña');
-    }
-  },
-
-  // Enviar email de verificación
-  async sendVerificationEmail(id: string) {
-    try {
-      const response = await apiClient.post(`/users/${id}/send-verification`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al enviar email de verificación');
-    }
-  },
-
-  // Verificar email
-  async verifyEmail(token: string) {
-    try {
-      const response = await apiClient.post('/users/verify-email', { token });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al verificar email');
-    }
-  },
-
-  // Restablecer contraseña
-  async resetPassword(email: string) {
-    try {
-      const response = await apiClient.post('/users/reset-password', { email });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al restablecer contraseña');
-    }
-  },
-
-  // Confirmar restablecimiento de contraseña
-  async confirmResetPassword(token: string, newPassword: string) {
-    try {
-      const response = await apiClient.post('/users/confirm-reset-password', {
-        token,
-        new_password: newPassword
-      });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Error al confirmar restablecimiento');
-    }
+// Obtener estadísticas de usuarios
+export const getUserStats = async (): Promise<Record<string, unknown>> => {
+  try {
+    const response = await apiClient.get('/users/stats');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching user stats:', error);
+    throw new Error('Error al obtener estadísticas de usuarios');
   }
 }; 
