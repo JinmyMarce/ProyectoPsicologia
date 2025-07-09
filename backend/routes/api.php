@@ -30,6 +30,9 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/google', [AuthController::class, 'loginWithGoogle']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 
+// Rutas públicas para horarios disponibles
+Route::get('/appointments/available-slots', [AppointmentController::class, 'getAvailableSlots']);
+
 // Rutas protegidas que requieren autenticación
 Route::middleware('auth:sanctum')->group(function () {
     // Rutas de autenticación
@@ -105,6 +108,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stats', [NotificationController::class, 'stats']);
         Route::post('/appointment-reminder/{appointmentId}', [NotificationController::class, 'sendAppointmentReminder']);
         Route::post('/appointment-status/{appointmentId}', [NotificationController::class, 'sendAppointmentStatusChange']);
+        Route::post('/appointment-approved/{appointmentId}', [NotificationController::class, 'sendAppointmentApproved']);
+        Route::post('/appointment-rejected/{appointmentId}', [NotificationController::class, 'sendAppointmentRejected']);
         Route::put('/preferences', [NotificationController::class, 'updatePreferences']);
         Route::get('/preferences', [NotificationController::class, 'getPreferences']);
     });
@@ -153,11 +158,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/appointments/{id}/confirm', [AppointmentController::class, 'confirm']);
     Route::patch('/appointments/{id}/cancel', [AppointmentController::class, 'cancel']);
     Route::patch('/appointments/{id}/complete', [AppointmentController::class, 'complete']);
+    Route::patch('/appointments/{id}/approve', [AppointmentController::class, 'approve']);
+    Route::patch('/appointments/{id}/reject', [AppointmentController::class, 'reject']);
+    Route::get('/appointments/pending', [AppointmentController::class, 'getPendingAppointments']);
 
 });
-
-// Ruta pública para obtener slots disponibles
-Route::get('/appointments/available-slots', [AppointmentController::class, 'getAvailableSlots']);
 
 // Ruta de prueba para verificar que la API funciona
 Route::get('/test', function () {

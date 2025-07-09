@@ -10,6 +10,12 @@ export const AUTH_CONFIG = {
   ALLOWED_DOMAINS: {
     INSTITUTIONAL: '@istta.edu.pe',
     PERSONAL: ['@gmail.com', '@hotmail.com', '@outlook.com', '@yahoo.com']
+  },
+  
+  // Emails especiales para roles específicos
+  SPECIAL_EMAILS: {
+    SUPER_ADMIN: ['marcelojinmy2024@gmail.com', 'superadmin@tupac-amaru.edu.pe'],
+    ADMIN: ['admin@tupac-amaru.edu.pe']
   }
 };
 
@@ -26,11 +32,22 @@ export const isPersonalEmail = (email: string): boolean => {
 };
 
 // Función para determinar el rol basado en el email
-export const determineRoleFromEmail = (email: string): 'student' | 'psychologist' | 'admin' => {
+export const determineRoleFromEmail = (email: string): 'student' | 'psychologist' | 'admin' | 'super_admin' => {
+  // Verificar emails especiales primero
+  if (AUTH_CONFIG.SPECIAL_EMAILS.SUPER_ADMIN.includes(email)) {
+    return 'super_admin';
+  }
+  
+  if (AUTH_CONFIG.SPECIAL_EMAILS.ADMIN.includes(email)) {
+    return 'admin';
+  }
+  
+  // Lógica normal para otros emails
   if (isInstitutionalEmail(email)) {
     return 'student';
   } else if (isPersonalEmail(email)) {
     return 'psychologist';
   }
+  
   throw new Error('Email no válido para el sistema');
 }; 

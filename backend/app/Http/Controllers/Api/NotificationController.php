@@ -12,7 +12,7 @@ class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Notification::where('user_id', auth()->id());
+        $query = Notification::where('user_id', auth()->user()->id);
 
         // Filtros
         if ($request->has('type') && $request->type) {
@@ -42,7 +42,7 @@ class NotificationController extends Controller
     public function show($id)
     {
         $notification = Notification::where('id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', auth()->user()->id)
             ->first();
 
         if (!$notification) {
@@ -61,7 +61,7 @@ class NotificationController extends Controller
     public function markAsRead($id)
     {
         $notification = Notification::where('id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', auth()->user()->id)
             ->first();
 
         if (!$notification) {
@@ -81,7 +81,7 @@ class NotificationController extends Controller
 
     public function markAllAsRead()
     {
-        Notification::where('user_id', auth()->id())
+        Notification::where('user_id', auth()->user()->id)
             ->where('read', false)
             ->update(['read' => true]);
 
@@ -94,7 +94,7 @@ class NotificationController extends Controller
     public function destroy($id)
     {
         $notification = Notification::where('id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', auth()->user()->id)
             ->first();
 
         if (!$notification) {
@@ -114,7 +114,7 @@ class NotificationController extends Controller
 
     public function destroyAll()
     {
-        Notification::where('user_id', auth()->id())->delete();
+        Notification::where('user_id', auth()->user()->id)->delete();
 
         return response()->json([
             'success' => true,
@@ -165,14 +165,14 @@ class NotificationController extends Controller
     public function stats()
     {
         $stats = [
-            'total' => Notification::where('user_id', auth()->id())->count(),
-            'unread' => Notification::where('user_id', auth()->id())->where('read', false)->count(),
-            'read' => Notification::where('user_id', auth()->id())->where('read', true)->count(),
+            'total' => Notification::where('user_id', auth()->user()->id)->count(),
+            'unread' => Notification::where('user_id', auth()->user()->id)->where('read', false)->count(),
+            'read' => Notification::where('user_id', auth()->user()->id)->where('read', true)->count(),
             'by_type' => [
-                'appointment' => Notification::where('user_id', auth()->id())->where('type', 'appointment')->count(),
-                'reminder' => Notification::where('user_id', auth()->id())->where('type', 'reminder')->count(),
-                'status' => Notification::where('user_id', auth()->id())->where('type', 'status')->count(),
-                'system' => Notification::where('user_id', auth()->id())->where('type', 'system')->count(),
+                'appointment' => Notification::where('user_id', auth()->user()->id)->where('type', 'appointment')->count(),
+                'reminder' => Notification::where('user_id', auth()->user()->id)->where('type', 'reminder')->count(),
+                'status' => Notification::where('user_id', auth()->user()->id)->where('type', 'status')->count(),
+                'system' => Notification::where('user_id', auth()->user()->id)->where('type', 'system')->count(),
             ]
         ];
 
@@ -263,15 +263,99 @@ class NotificationController extends Controller
         
         $preferences = [
             'email_notifications' => $user->email_notifications ?? true,
-            'push_notifications' => $user->push_notifications ?? true,
+            'sms_notifications' => $user->sms_notifications ?? false,
+            'app_notifications' => $user->app_notifications ?? true,
             'appointment_reminders' => $user->appointment_reminders ?? true,
             'status_updates' => $user->status_updates ?? true,
-            'system_notifications' => $user->system_notifications ?? true,
         ];
 
         return response()->json([
             'success' => true,
             'data' => $preferences
         ]);
+    }
+
+    // Enviar notificación de cita aprobada
+    public function sendAppointmentApproved($appointmentId)
+    {
+        try {
+            $appointment = \App\Models\Cita::with(['student', 'psychologist'])->find($appointmentId);
+            
+            if (!$appointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cita no encontrada'
+                ], 404);
+            }
+
+            // Crear notificación para el estudiante
+            $notification = Notification::create([
+                'user_id' => $appointment->student_id,
+                'type' => 'appointment',
+                'title' => 'Cita Aprobada',
+                'message' => "Tu cita del {$appointment->fecha} a las {$appointment->hora} ha sido aprobada por el psicólogo. Te esperamos en el consultorio.",
+                'read' => false,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notificación de aprobación enviada exitosamente',
+                'data' => $notification
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al enviar notificación: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Enviar notificación de cita rechazada
+    public function sendAppointmentRejected($appointmentId, Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'reason' => 'required|string|max:500'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error de validación',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $appointment = \App\Models\Cita::with(['student', 'psychologist'])->find($appointmentId);
+            
+            if (!$appointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cita no encontrada'
+                ], 404);
+            }
+
+            // Crear notificación para el estudiante
+            $notification = Notification::create([
+                'user_id' => $appointment->student_id,
+                'type' => 'appointment',
+                'title' => 'Cita Rechazada',
+                'message' => "Tu cita del {$appointment->fecha} a las {$appointment->hora} ha sido rechazada. Razón: {$request->reason}. Por favor, agenda una nueva cita.",
+                'read' => false,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notificación de rechazo enviada exitosamente',
+                'data' => $notification
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al enviar notificación: ' . $e->getMessage()
+            ], 500);
+        }
     }
 } 

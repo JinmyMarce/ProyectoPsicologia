@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User } from '../types';
 import { authService, LoginCredentials } from '../services/auth';
 import { googleAuthService, GoogleUser } from '../services/googleAuth';
+import { setAuthToken } from '../services/apiClient';
 
 interface AuthContextType {
   user: User | null;
@@ -14,6 +15,7 @@ interface AuthContextType {
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   updateUser: (updatedUser: User) => void;
+  simulateAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -148,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const googleUser = googleResponse.user;
       
       // Verificar tipo de email y determinar rol
-      let role: 'student' | 'psychologist' | 'admin';
+      let role: 'student' | 'psychologist' | 'admin' | 'super_admin';
       try {
         role = googleAuthService.determineRole(googleUser.email);
       } catch (error) {
@@ -195,6 +197,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  // Función para simular autenticación para pruebas
+  const simulateAuth = () => {
+    const mockUser = mockUsers[1]; // Carlos Rodriguez (student)
+    const mockToken = 'mock_token_for_testing';
+    
+    setUser(mockUser);
+    setToken(mockToken);
+    localStorage.setItem('auth_token', mockToken);
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    
+    // Establecer el token en el cliente API
+    setAuthToken(mockToken);
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -206,7 +222,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       error,
       setUser,
       setToken,
-      updateUser
+      updateUser,
+      simulateAuth
     }}>
       {children}
     </AuthContext.Provider>

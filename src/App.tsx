@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginForm } from './components/auth/LoginForm';
 import { Header } from './components/layout/Header';
@@ -21,11 +22,27 @@ import { PatientList } from './components/patients/PatientList';
 import { SessionRegistration } from './components/sessions/SessionRegistration';
 import { SessionList } from './components/sessions/SessionList';
 
+// Componente para manejar la navegación
+function NavigationHandler({ onPageChange }: { onPageChange: (page: string) => void }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Extraer la página actual de la URL
+    const path = location.pathname;
+    const page = path.substring(1) || 'dashboard';
+    onPageChange(page);
+  }, [location, onPageChange]);
+
+  return null;
+}
+
 function AppContent() {
   const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Para cerrar el menú lateral al cambiar de página en desktop
@@ -40,6 +57,7 @@ function AppContent() {
 
   const handlePageChange = (page: string) => {
     setCurrentPage(page);
+    navigate(`/${page}`);
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
@@ -69,52 +87,9 @@ function AppContent() {
     return <LoginForm />;
   }
 
-  const renderCurrentPage = () => {
-    switch (currentPage) {
-      case 'dashboard':
-        switch (user.role) {
-          case 'super_admin':
-            return <SuperAdminDashboard />;
-          case 'admin':
-            return <AdminDashboard />;
-          case 'psychologist':
-            return <PsychologistDashboard />;
-          case 'student':
-            return <StudentDashboard onPageChange={handlePageChange} />;
-          default:
-            return <div>Rol no reconocido</div>;
-        }
-      case 'appointments':
-        return <AppointmentBooking />;
-      case 'appointments/calendar':
-        return <AppointmentCalendar />;
-      case 'appointments/history':
-        return <AppointmentHistory />;
-      case 'profile':
-        return <UserProfile onPageChange={handlePageChange} />;
-      case 'users':
-        return <UserManagement />;
-      case 'notifications':
-        return <NotificationCenter />;
-      case 'reports':
-        return <ReportsAnalytics />;
-      case 'schedule':
-        return <ScheduleManager />;
-      case 'patients/register':
-        return <PatientRegistration />;
-      case 'patients':
-        return <PatientList />;
-      case 'sessions/register':
-        return <SessionRegistration />;
-      case 'sessions':
-        return <SessionList />;
-      default:
-        return <StudentDashboard onPageChange={handlePageChange} />;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      <NavigationHandler onPageChange={setCurrentPage} />
       <Sidebar 
         isOpen={sidebarOpen} 
         onClose={() => setSidebarOpen(false)}
@@ -129,15 +104,68 @@ function AppContent() {
         />
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
-            {renderCurrentPage()}
+            <Routes>
+              {/* Rutas para Super Admin */}
+              {user.role === 'super_admin' && (
+                <>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<SuperAdminDashboard />} />
+                  <Route path="/users" element={<UserManagement />} />
+                  <Route path="/reports" element={<ReportsAnalytics />} />
+                  <Route path="/notifications" element={<NotificationCenter />} />
+                  <Route path="/profile" element={<UserProfile />} />
+                </>
+              )}
+
+              {/* Rutas para Admin */}
+              {user.role === 'admin' && (
+                <>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<AdminDashboard />} />
+                  <Route path="/users" element={<UserManagement />} />
+                  <Route path="/reports" element={<ReportsAnalytics />} />
+                  <Route path="/notifications" element={<NotificationCenter />} />
+                  <Route path="/profile" element={<UserProfile />} />
+                </>
+              )}
+
+              {/* Rutas para Psicólogo */}
+              {user.role === 'psychologist' && (
+                <>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<PsychologistDashboard />} />
+                  <Route path="/schedule" element={<ScheduleManager />} />
+                  <Route path="/patients" element={<PatientList />} />
+                  <Route path="/patients/register" element={<PatientRegistration />} />
+                  <Route path="/sessions" element={<SessionList />} />
+                  <Route path="/sessions/register" element={<SessionRegistration />} />
+                  <Route path="/notifications" element={<NotificationCenter />} />
+                  <Route path="/profile" element={<UserProfile />} />
+                </>
+              )}
+
+              {/* Rutas para Estudiante */}
+              {user.role === 'student' && (
+                <>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<StudentDashboard onPageChange={handlePageChange} />} />
+                  <Route path="/appointments" element={<AppointmentBooking />} />
+                  <Route path="/appointments/calendar" element={<AppointmentCalendar />} />
+                  <Route path="/appointments/history" element={<AppointmentHistory />} />
+                  <Route path="/notifications" element={<NotificationCenter />} />
+                  <Route path="/profile" element={<UserProfile />} />
+                </>
+              )}
+
+              {/* Ruta por defecto */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
           </div>
         </main>
       </div>
     </div>
   );
 }
-
-import { BrowserRouter } from 'react-router-dom';
 
 function App() {
   return (

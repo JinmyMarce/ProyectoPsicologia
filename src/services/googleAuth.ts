@@ -112,7 +112,7 @@ class GoogleAuthService {
   }
 
   // Determinar el rol basado en el email
-  determineRole(email: string): 'student' | 'psychologist' | 'admin' {
+  determineRole(email: string): 'student' | 'psychologist' | 'admin' | 'super_admin' {
     return determineRoleFromEmail(email);
   }
 }

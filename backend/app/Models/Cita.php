@@ -15,13 +15,31 @@ class Cita extends Model
         'duracion',
         'motivo_consulta',
         'estado',
-        'notas'
+        'notas',
+        // Datos personales del paciente
+        'patient_dni',
+        'patient_full_name',
+        'patient_age',
+        'patient_gender',
+        'patient_address',
+        // Datos de contacto del paciente
+        'patient_phone',
+        'patient_email',
+        // Contacto de emergencia
+        'emergency_contact_name',
+        'emergency_contact_relationship',
+        'emergency_contact_phone',
+        // Información médica
+        'medical_history',
+        'current_medications',
+        'allergies'
     ];
 
     protected $casts = [
         'fecha' => 'date',
         'hora' => 'datetime:H:i',
         'duracion' => 'integer',
+        'patient_age' => 'integer',
     ];
 
     /**
@@ -87,6 +105,20 @@ class Cita extends Model
             'motivo_consulta' => $this->motivo_consulta,
             'estado' => $this->estado,
             'notas' => $this->notas,
+            // Datos del paciente
+            'patient_dni' => $this->patient_dni,
+            'patient_full_name' => $this->patient_full_name,
+            'patient_age' => $this->patient_age,
+            'patient_gender' => $this->patient_gender,
+            'patient_address' => $this->patient_address,
+            'patient_phone' => $this->patient_phone,
+            'patient_email' => $this->patient_email,
+            'emergency_contact_name' => $this->emergency_contact_name,
+            'emergency_contact_relationship' => $this->emergency_contact_relationship,
+            'emergency_contact_phone' => $this->emergency_contact_phone,
+            'medical_history' => $this->medical_history,
+            'current_medications' => $this->current_medications,
+            'allergies' => $this->allergies,
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
             'student' => $this->student ? $this->student->toApiArray() : null,

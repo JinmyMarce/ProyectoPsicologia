@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
@@ -83,10 +84,44 @@ class AppointmentController extends Controller
                 'psychologist_id' => 'required|exists:users,id',
                 'date' => 'required|date|after_or_equal:today',
                 'time' => 'required|string',
-                'reason' => 'required|string|max:500',
+                'reason' => 'nullable|string|max:500',
                 'notes' => 'nullable|string|max:1000',
                 'status' => 'required|in:pending,confirmed,completed,cancelled',
+                // Datos personales del paciente
+                'patient_dni' => 'required|string|size:8|regex:/^[0-9]{8}$/',
+                'patient_full_name' => 'required|string|max:255',
+                'patient_age' => 'required|integer|min:1|max:120',
+                'patient_gender' => 'required|in:masculino,femenino,otro',
+                'patient_address' => 'required|string|max:500',
+                'patient_study_program' => 'required|string|max:255',
+                'patient_semester' => 'required|string|max:10',
+                // Datos de contacto del paciente
+                'patient_phone' => 'required|string|max:20',
+                'patient_email' => 'required|email|max:255',
+                // Contacto de emergencia
+                'emergency_contact_name' => 'required|string|max:255',
+                'emergency_contact_relationship' => 'required|string|max:100',
+                'emergency_contact_phone' => 'required|string|max:20',
+                // Información médica (opcional)
+                'medical_history' => 'nullable|string|max:1000',
+                'current_medications' => 'nullable|string|max:1000',
+                'allergies' => 'nullable|string|max:1000',
             ]);
+
+            if ($validator->fails()) {
+                return response()->json(['message' => 'Datos inválidos', 'errors' => $validator->errors()], 422);
+            }
+
+            // Verificar que no sea fin de semana (sábado = 6, domingo = 0)
+            $appointmentDate = \Carbon\Carbon::parse($request->date);
+            $dayOfWeek = $appointmentDate->dayOfWeek;
+            
+            if ($dayOfWeek === 0 || $dayOfWeek === 6) {
+                return response()->json([
+                    'message' => 'No se pueden agendar citas en fines de semana (sábados y domingos). Solo se atiende de lunes a viernes.',
+                    'errors' => ['date' => ['No se pueden agendar citas en fines de semana']]
+                ], 422);
+            }
 
             if ($validator->fails()) {
                 return response()->json(['message' => 'Datos inválidos', 'errors' => $validator->errors()], 422);
@@ -147,10 +182,29 @@ class AppointmentController extends Controller
                 'psychologist_id' => $request->psychologist_id,
                 'fecha' => $request->date,
                 'hora' => $request->time,
-                'duracion' => 60, // Duración por defecto
+                'duracion' => 45, // Duración de 45 minutos
                 'motivo_consulta' => $request->reason,
                 'notas' => $request->notes,
-                'estado' => $estadoMap[$request->status] ?? 'pendiente',
+                'estado' => 'pendiente', // Siempre pendiente hasta que el psicólogo apruebe
+                // Datos personales del paciente
+                'patient_dni' => $request->patient_dni,
+                'patient_full_name' => $request->patient_full_name,
+                'patient_age' => $request->patient_age,
+                'patient_gender' => $request->patient_gender,
+                'patient_address' => $request->patient_address,
+                'patient_study_program' => $request->patient_study_program,
+                'patient_semester' => $request->patient_semester,
+                // Datos de contacto del paciente
+                'patient_phone' => $request->patient_phone,
+                'patient_email' => $request->patient_email,
+                // Contacto de emergencia
+                'emergency_contact_name' => $request->emergency_contact_name,
+                'emergency_contact_relationship' => $request->emergency_contact_relationship,
+                'emergency_contact_phone' => $request->emergency_contact_phone,
+                // Información médica
+                'medical_history' => $request->medical_history,
+                'current_medications' => $request->current_medications,
+                'allergies' => $request->allergies,
             ]);
 
             $appointment->load(['student', 'psychologist']);
@@ -168,6 +222,20 @@ class AppointmentController extends Controller
                     'reason' => $appointment->motivo_consulta,
                     'notes' => $appointment->notas ?? '',
                     'status' => $appointment->estado,
+                    // Datos del paciente
+                    'patient_dni' => $appointment->patient_dni,
+                    'patient_full_name' => $appointment->patient_full_name,
+                    'patient_age' => $appointment->patient_age,
+                    'patient_gender' => $appointment->patient_gender,
+                    'patient_address' => $appointment->patient_address,
+                    'patient_phone' => $appointment->patient_phone,
+                    'patient_email' => $appointment->patient_email,
+                    'emergency_contact_name' => $appointment->emergency_contact_name,
+                    'emergency_contact_relationship' => $appointment->emergency_contact_relationship,
+                    'emergency_contact_phone' => $appointment->emergency_contact_phone,
+                    'medical_history' => $appointment->medical_history,
+                    'current_medications' => $appointment->current_medications,
+                    'allergies' => $appointment->allergies,
                     'created_at' => $appointment->created_at,
                     'updated_at' => $appointment->updated_at,
                 ]
@@ -344,6 +412,146 @@ class AppointmentController extends Controller
         }
     }
 
+    // Aprobar cita (psicólogo)
+    public function approve($id)
+    {
+        try {
+            $appointment = Cita::with(['student', 'psychologist'])->find($id);
+            
+            if (!$appointment) {
+                return response()->json(['message' => 'Cita no encontrada'], 404);
+            }
+
+            if ($appointment->estado !== 'pendiente') {
+                return response()->json(['message' => 'Solo se pueden aprobar citas pendientes'], 422);
+            }
+
+            $appointment->update(['estado' => 'confirmada']);
+
+            // Enviar notificación al estudiante
+            try {
+                $notificationController = new \App\Http\Controllers\Api\NotificationController();
+                $notificationController->sendAppointmentApproved($id);
+            } catch (\Exception $e) {
+                // Log del error pero no fallar la operación
+                Log::error('Error enviando notificación de aprobación: ' . $e->getMessage());
+            }
+
+            return response()->json([
+                'message' => 'Cita aprobada exitosamente',
+                'appointment' => [
+                    'id' => $appointment->id,
+                    'student_name' => $appointment->student->name ?? 'N/A',
+                    'psychologist_name' => $appointment->psychologist->name ?? 'N/A',
+                    'date' => $appointment->fecha,
+                    'time' => $appointment->hora,
+                    'status' => $appointment->estado
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al aprobar la cita: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // Rechazar cita (psicólogo)
+    public function reject($id, Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'reason' => 'required|string|max:500'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['message' => 'Datos inválidos', 'errors' => $validator->errors()], 422);
+            }
+
+            $appointment = Cita::with(['student', 'psychologist'])->find($id);
+            
+            if (!$appointment) {
+                return response()->json(['message' => 'Cita no encontrada'], 404);
+            }
+
+            if ($appointment->estado !== 'pendiente') {
+                return response()->json(['message' => 'Solo se pueden rechazar citas pendientes'], 422);
+            }
+
+            $appointment->update([
+                'estado' => 'rechazada',
+                'notas' => 'Rechazada: ' . $request->reason
+            ]);
+
+            // Enviar notificación al estudiante
+            try {
+                $notificationController = new \App\Http\Controllers\Api\NotificationController();
+                $notificationController->sendAppointmentRejected($id, $request);
+            } catch (\Exception $e) {
+                // Log del error pero no fallar la operación
+                Log::error('Error enviando notificación de rechazo: ' . $e->getMessage());
+            }
+
+            return response()->json([
+                'message' => 'Cita rechazada exitosamente',
+                'appointment' => [
+                    'id' => $appointment->id,
+                    'student_name' => $appointment->student->name ?? 'N/A',
+                    'psychologist_name' => $appointment->psychologist->name ?? 'N/A',
+                    'date' => $appointment->fecha,
+                    'time' => $appointment->hora,
+                    'status' => $appointment->estado,
+                    'rejection_reason' => $request->reason
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al rechazar la cita: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // Obtener citas pendientes para psicólogo
+    public function getPendingAppointments()
+    {
+        try {
+            $appointments = Cita::with(['student', 'psychologist'])
+                ->where('estado', 'pendiente')
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($appointment) {
+                    return [
+                        'id' => $appointment->id,
+                        'student_name' => $appointment->student->name ?? 'N/A',
+                        'student_email' => $appointment->student->email ?? 'N/A',
+                        'psychologist_name' => $appointment->psychologist->name ?? 'N/A',
+                        'date' => $appointment->fecha,
+                        'time' => $appointment->hora,
+                        'reason' => $appointment->motivo_consulta,
+                        'status' => $appointment->estado,
+                        'created_at' => $appointment->created_at,
+                        // Datos del paciente
+                        'patient_dni' => $appointment->patient_dni,
+                        'patient_full_name' => $appointment->patient_full_name,
+                        'patient_age' => $appointment->patient_age,
+                        'patient_gender' => $appointment->patient_gender,
+                        'patient_address' => $appointment->patient_address,
+                        'patient_study_program' => $appointment->patient_study_program,
+                        'patient_semester' => $appointment->patient_semester,
+                        'patient_phone' => $appointment->patient_phone,
+                        'patient_email' => $appointment->patient_email,
+                        'emergency_contact_name' => $appointment->emergency_contact_name,
+                        'emergency_contact_relationship' => $appointment->emergency_contact_relationship,
+                        'emergency_contact_phone' => $appointment->emergency_contact_phone,
+                        'medical_history' => $appointment->medical_history,
+                        'current_medications' => $appointment->current_medications,
+                        'allergies' => $appointment->allergies,
+                    ];
+                });
+
+            return response()->json($appointments);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al obtener las citas pendientes: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function getAvailableSlots(Request $request)
     {
         try {
@@ -369,10 +577,26 @@ class AppointmentController extends Controller
                 return response()->json(['message' => 'Psicólogo no encontrado o inactivo'], 404);
             }
 
-            // Horarios disponibles (de 8:00 AM a 6:00 PM)
+            // Configurar zona horaria de Perú
+            date_default_timezone_set('America/Lima');
+            
+            // Verificar que no sea un día pasado usando zona horaria de Perú
+            $today = now()->format('Y-m-d');
+            if ($date < $today) {
+                // Para días pasados, devolver array vacío en lugar de error
+                return response()->json([]);
+            }
+
+            // Verificar que sea lunes a viernes (1 = lunes, 7 = domingo) usando zona horaria de Perú
+            $dayOfWeek = date('N', strtotime($date));
+            if ($dayOfWeek > 5) {
+                // Para fines de semana, devolver array vacío en lugar de error
+                return response()->json([]);
+            }
+
+            // Horarios disponibles de 8:00 AM a 2:00 PM (14:00) con intervalos de 45 minutos
             $availableTimes = [
-                '08:00', '09:00', '10:00', '11:00', '12:00',
-                '14:00', '15:00', '16:00', '17:00', '18:00'
+                '08:00', '08:45', '09:30', '10:15', '11:00', '11:45', '12:30', '13:15'
             ];
 
             // Obtener citas existentes para el psicólogo en esa fecha

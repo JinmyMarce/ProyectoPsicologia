@@ -10,6 +10,20 @@ export interface Appointment {
   reason: string;
   notes?: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  // Datos del paciente
+  patient_dni?: string;
+  patient_full_name?: string;
+  patient_age?: number;
+  patient_gender?: string;
+  patient_address?: string;
+  patient_phone?: string;
+  patient_email?: string;
+  emergency_contact_name?: string;
+  emergency_contact_relationship?: string;
+  emergency_contact_phone?: string;
+  medical_history?: string;
+  current_medications?: string;
+  allergies?: string;
   created_at: string;
   updated_at: string;
 }
@@ -19,9 +33,28 @@ export interface CreateAppointmentData {
   psychologist_id: number;
   date: string;
   time: string;
-  reason: string;
+  reason?: string;
   notes?: string;
   status?: string;
+  // Datos personales del paciente
+  patient_dni: string;
+  patient_full_name: string;
+  patient_age: number;
+  patient_gender: string;
+  patient_address: string;
+  patient_study_program: string;
+  patient_semester: string;
+  // Datos de contacto del paciente
+  patient_phone: string;
+  patient_email: string;
+  // Contacto de emergencia
+  emergency_contact_name: string;
+  emergency_contact_relationship: string;
+  emergency_contact_phone: string;
+  // Información médica (opcional)
+  medical_history?: string;
+  current_medications?: string;
+  allergies?: string;
 }
 
 export interface Psychologist {
@@ -131,6 +164,13 @@ export const getAvailableSlots = async (psychologistId: number, date: string): P
     });
     return response.data.data || response.data;
   } catch (error: unknown) {
+    // Para errores 422 (fines de semana, días pasados), devolver array vacío
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { status?: number } };
+      if (apiError.response?.status === 422) {
+        return [];
+      }
+    }
     console.error('Error fetching available slots:', error);
     throw new Error('Error al obtener los horarios disponibles');
   }
@@ -201,10 +241,55 @@ export const getPsychologistAppointments = async (): Promise<Appointment[]> => {
 // Obtener estadísticas del psicólogo
 export const getPsychologistStats = async (): Promise<any> => {
   try {
-    const response = await apiClient.get('/citas/stats');
+    const response = await apiClient.get('/citas/psychologist/stats');
     return response.data.data || response.data;
   } catch (error: unknown) {
     console.error('Error fetching psychologist stats:', error);
     throw new Error('Error al obtener las estadísticas del psicólogo');
+  }
+};
+
+// Aprobar cita (psicólogo)
+export const approveAppointment = async (id: number): Promise<Appointment> => {
+  try {
+    const response = await apiClient.patch(`/appointments/${id}/approve`);
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error approving appointment:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
+    }
+    throw new Error('Error al aprobar la cita');
+  }
+};
+
+// Rechazar cita (psicólogo)
+export const rejectAppointment = async (id: number, reason: string): Promise<Appointment> => {
+  try {
+    const response = await apiClient.patch(`/appointments/${id}/reject`, { reason });
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error rejecting appointment:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
+    }
+    throw new Error('Error al rechazar la cita');
+  }
+};
+
+// Obtener citas pendientes (psicólogo)
+export const getPendingAppointments = async (): Promise<Appointment[]> => {
+  try {
+    const response = await apiClient.get('/appointments/pending');
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching pending appointments:', error);
+    throw new Error('Error al obtener las citas pendientes');
   }
 }; 

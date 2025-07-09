@@ -30,6 +30,7 @@ export const PsychologistDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('appointments');
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showPendingAppointments, setShowPendingAppointments] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -69,8 +70,7 @@ export const PsychologistDashboard: React.FC = () => {
 
   const filteredAppointments = appointments.filter(appointment => {
     const matchesFilter = filter === 'all' || appointment.status === filter;
-    const matchesSearch = appointment.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = appointment.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          appointment.reason.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
@@ -205,6 +205,7 @@ export const PsychologistDashboard: React.FC = () => {
         <div className="flex space-x-2 border-b border-gray-200">
           {[
             { key: 'appointments', label: 'Mis Citas' },
+            { key: 'pending', label: 'Citas Pendientes' },
             { key: 'schedule', label: 'Horarios' },
             { key: 'patients', label: 'Pacientes' },
             { key: 'profile', label: 'Perfil' }
@@ -294,7 +295,7 @@ export const PsychologistDashboard: React.FC = () => {
                           <div className="flex items-center space-x-4">
                             <div>
                               <h3 className="font-semibold text-gray-900">
-                                {appointment.user_name}
+                                {appointment.user_email}
                               </h3>
                               <p className="text-sm text-gray-600">{appointment.user_email}</p>
                             </div>
@@ -348,6 +349,31 @@ export const PsychologistDashboard: React.FC = () => {
           </div>
         )}
 
+        {activeTab === 'pending' && (
+          <div className="bg-white rounded-lg shadow-md border border-gray-200">
+            <div className="p-6">
+              <h2 className="text-lg font-semibold mb-4">Citas Pendientes de Aprobación</h2>
+              <p className="text-gray-600 mb-4">Revisa y aprueba las citas solicitadas por los estudiantes.</p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <span className="text-yellow-800 font-medium">
+                    Tienes {stats.pendingAppointments} citas pendientes de aprobación
+                  </span>
+                </div>
+              </div>
+              <button 
+                className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors"
+                onClick={() => setShowPendingAppointments(true)}
+              >
+                Ver Citas Pendientes
+              </button>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'schedule' && (
           <div className="bg-white rounded-lg shadow-md border border-gray-200">
             <div className="p-6">
@@ -391,6 +417,29 @@ export const PsychologistDashboard: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
           <span className="text-red-800 font-semibold">{error}</span>
+        </div>
+      )}
+
+      {/* Modal de Citas Pendientes */}
+      {showPendingAppointments && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Citas Pendientes de Aprobación</h3>
+              <button
+                onClick={() => setShowPendingAppointments(false)}
+                className="text-gray-500 hover:text-gray-700 text-xl"
+              >
+                ✕
+              </button>
+            </div>
+            
+            {/* Aquí se importaría el componente PendingAppointments */}
+            <div className="text-center py-8">
+              <p className="text-gray-600">Componente de citas pendientes</p>
+              <p className="text-sm text-gray-500">Se integrará el componente PendingAppointments aquí</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

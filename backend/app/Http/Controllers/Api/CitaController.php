@@ -84,6 +84,18 @@ class CitaController extends Controller
             ], 422);
         }
 
+        // Verificar que no sea fin de semana (sábado = 6, domingo = 0)
+        $appointmentDate = \Carbon\Carbon::parse($request->fecha);
+        $dayOfWeek = $appointmentDate->dayOfWeek;
+        
+        if ($dayOfWeek === 0 || $dayOfWeek === 6) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pueden agendar citas en fines de semana (sábados y domingos). Solo se atiende de lunes a viernes.',
+                'errors' => ['fecha' => ['No se pueden agendar citas en fines de semana']]
+            ], 422);
+        }
+
         try {
             $user = Auth::user();
             
@@ -340,6 +352,18 @@ class CitaController extends Controller
                 'success' => false,
                 'message' => 'Datos de entrada inválidos',
                 'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Verificar que no sea fin de semana (sábado = 6, domingo = 0)
+        $appointmentDate = \Carbon\Carbon::parse($request->fecha);
+        $dayOfWeek = $appointmentDate->dayOfWeek;
+        
+        if ($dayOfWeek === 0 || $dayOfWeek === 6) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pueden agendar citas en fines de semana (sábados y domingos). Solo se atiende de lunes a viernes.',
+                'errors' => ['fecha' => ['No se pueden agendar citas en fines de semana']]
             ], 422);
         }
 
