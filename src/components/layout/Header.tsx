@@ -28,7 +28,7 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
+    <header className="bg-granate text-blanco shadow-sm border-b border-gris-medio">
       <div className="flex items-center justify-between px-4 h-16">
         <div className="flex items-center space-x-4">
           <Button
@@ -40,7 +40,7 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
             <Menu className="w-6 h-6" />
           </Button>
           
-          <h1 className="text-gray-800 font-bold text-lg hidden sm:block">
+          <h1 className="text-blanco font-bold text-lg hidden sm:block">
             Sistema de Gestión de Citas
           </h1>
         </div>

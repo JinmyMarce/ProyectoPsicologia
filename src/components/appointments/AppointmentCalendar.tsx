@@ -16,6 +16,22 @@ import {
   Loader2
 } from 'lucide-react';
 import { PageHeader } from '../ui/PageHeader';
+import { dateFnsLocalizer, Event } from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import esES from 'date-fns/locale/es';
+import { Tooltip } from '../ui/Tooltip';
+
+const locales = {
+  'es': esES,
+};
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+  getDay,
+  locales,
+});
 
 interface Appointment {
   id: number;
@@ -39,6 +55,13 @@ interface Psychologist {
   specialization: string;
   available: boolean;
 }
+
+// Colores para los estados
+const COLOR_DISPONIBLE = 'rgba(29, 185, 84, 0.18)'; // Verde claro transparente
+const COLOR_OCUPADO = 'rgba(142, 22, 26, 0.18)'; // Granate oscuro claro transparente
+const COLOR_BLOQUEADO = 'rgba(200,200,200,0.35)'; // Gris claro transparente
+const COLOR_TEXTO_BLOQUEADO = '#b0b0b0';
+const COLOR_TEXTO_NORMAL = '#222';
 
 export function AppointmentCalendar() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -176,6 +199,16 @@ export function AppointmentCalendar() {
 
   const days = getDaysInMonth(currentDate);
 
+  // Transformar citas a eventos para Big Calendar
+  const events: Event[] = appointments.map((appointment) => ({
+    id: appointment.id,
+    title: `${appointment.psychologist_name} (${appointment.status})`,
+    start: new Date(`${appointment.date}T${appointment.time}`),
+    end: new Date(`${appointment.date}T${appointment.time}`),
+    resource: appointment,
+    allDay: false,
+  }));
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -187,6 +220,36 @@ export function AppointmentCalendar() {
     );
   }
 
+  const customMessages = {
+    next: 'Siguiente',
+    previous: 'Anterior',
+    today: 'Hoy',
+    month: 'Mes',
+    week: 'Semana',
+    day: 'Día',
+    agenda: 'Agenda',
+    date: 'Fecha',
+    time: 'Hora',
+    event: 'Evento',
+    noEventsInRange: 'No hay eventos en este rango',
+  };
+
+  const customFormats = {
+    monthHeader: ({ date }: { date: Date }) => {
+      return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+    },
+    dayHeader: ({ date }: { date: Date }) => {
+      return dayNames[date.getDay()];
+    },
+  };
+
+  const handleSelectSlot = (slotInfo: any) => {
+    // Aquí puedes implementar la lógica para seleccionar un slot
+    // Por ejemplo, abrir un modal para seleccionar la hora
+    console.log('Slot seleccionado:', slotInfo);
+    // Puedes pasar la fecha y hora seleccionada al estado o a una función de confirmación
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -197,138 +260,48 @@ export function AppointmentCalendar() {
           Instituto Túpac Amaru - Psicología Clínica
         </p>
       </PageHeader>
-
-      {/* Alerts */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
           <AlertCircle className="w-5 h-5 mr-3" />
           <p className="text-sm font-medium">{error}</p>
         </div>
       )}
-
-      {/* Controles del calendario */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              onClick={goToPreviousMonth}
-              className="rounded-lg p-2"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            
-            <h2 className="text-xl font-bold text-gray-900">
-              {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-            </h2>
-            
-            <Button
-              variant="outline"
-              onClick={goToNextMonth}
-              className="rounded-lg p-2"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </Button>
-          </div>
-          
-          <Button
-            onClick={goToToday}
-            className="rounded-lg px-4 py-2 text-sm"
-          >
-            Hoy
-          </Button>
-        </div>
-
-        {/* Calendario */}
-        <div className="grid grid-cols-7 gap-1">
-          {/* Días de la semana */}
-          {dayNames.map(day => (
-            <div key={day} className="p-3 text-center font-semibold text-sm text-gray-700 bg-gray-100 rounded-lg">
-              {day}
-            </div>
-          ))}
-          
-          {/* Días del mes */}
-          {days.map((day, index) => {
-            const dayAppointments = getAppointmentsForDate(day.date);
-            const isCurrentMonth = day.isCurrentMonth;
-            const isTodayDate = isToday(day.date);
-            
-            return (
-              <div
-                key={index}
-                className={`min-h-24 p-2 border border-gray-200 rounded-lg transition-all duration-300 ${
-                  isTodayDate
-                    ? 'border-[#8e161a] bg-gradient-to-r from-[#8e161a]/10 to-[#d3b7a0]/10'
-                    : isCurrentMonth
-                    ? 'hover:border-[#8e161a]/50'
-                    : 'bg-gray-50'
-                }`}
-              >
-                <div className={`text-xs font-bold mb-1 ${
-                  isTodayDate
-                    ? 'text-[#8e161a]'
-                    : isCurrentMonth
-                    ? 'text-gray-900'
-                    : 'text-gray-400'
-                }`}>
-                  {day.date.getDate()}
-                </div>
-                
-                <div className="space-y-1">
-                  {dayAppointments.slice(0, 2).map(appointment => (
-                    <div
-                      key={appointment.id}
-                      className="p-1 bg-white rounded border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                      onClick={() => window.location.href = `/appointments/${appointment.id}`}
-                    >
-                      <div className="flex items-center space-x-1 mb-1">
-                        {getStatusIcon(appointment.status)}
-                        <span className="text-xs font-medium text-gray-600">
-                          {formatTime(appointment.time)}
-                        </span>
-                      </div>
-                      <div className="text-xs text-gray-800 font-medium truncate">
-                        {appointment.psychologist_name}
-                      </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {appointment.user_email}
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {dayAppointments.length > 2 && (
-                    <div className="text-xs text-gray-500 text-center py-1">
-                      +{dayAppointments.length - 2} más
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
-
-      {/* Leyenda */}
-      <Card className="p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Leyenda</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 text-yellow-500" />
-            <span className="text-xs font-medium">Pendiente</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-xs font-medium">Confirmada</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <CheckCircle className="w-4 h-4 text-blue-500" />
-            <span className="text-xs font-medium">Completada</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <XCircle className="w-4 h-4 text-red-500" />
-            <span className="text-xs font-medium">Cancelada</span>
-          </div>
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          selectable
+          style={{ height: 600, background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #e5e7eb', fontFamily: 'Inter, sans-serif' }}
+          messages={customMessages}
+          formats={customFormats}
+          views={['month']}
+          onSelectSlot={handleSelectSlot}
+          eventPropGetter={(event: any) => {
+            if (event.resource.ocupado) {
+              // Ocupado: granate oscuro claro transparente
+              return { style: { backgroundColor: COLOR_OCUPADO, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
+            }
+            // Disponible: verde claro transparente
+            return { style: { backgroundColor: COLOR_DISPONIBLE, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
+          }}
+          dayPropGetter={(date: any) => {
+            const day = date.getDay();
+            if (day === 0 || day === 6) {
+              return { style: { backgroundColor: COLOR_BLOQUEADO, color: COLOR_TEXTO_BLOQUEADO, pointerEvents: 'none', opacity: 1, cursor: 'not-allowed', fontWeight: 600 } };
+            }
+            return { style: { color: COLOR_TEXTO_NORMAL, fontWeight: 600 } };
+          }}
+          components={{
+            event: () => null // No mostrar badges ni íconos
+          }}
+        />
+        {/* Leyenda visual minimalista */}
+        <div className="flex gap-6 mt-4 text-sm items-center">
+          <div className="flex items-center gap-2"><span className="inline-block w-4 h-4 rounded bg-[rgba(29,185,84,0.18)] border border-[#1db954]"></span> Disponible</div>
+          <div className="flex items-center gap-2"><span className="inline-block w-4 h-4 rounded bg-[rgba(142,22,26,0.18)] border border-[#8e161a]"></span> Ocupado</div>
+          <div className="flex items-center gap-2"><span className="inline-block w-4 h-4 rounded bg-[rgba(200,200,200,0.35)] border border-gray-300"></span> No disponible</div>
         </div>
       </Card>
     </div>

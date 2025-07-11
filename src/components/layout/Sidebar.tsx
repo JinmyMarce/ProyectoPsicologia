@@ -168,13 +168,7 @@ export function Sidebar({
       )}
 
       {/* Sidebar */}
-      <aside className={`
-        fixed top-0 left-0 h-full bg-gradient-to-b from-[#8e161a] to-[#a52a2a] 
-        shadow-xl z-50 transform transition-all duration-300 ease-in-out border-r-2 border-[#d3b7a0]/20
-        ${isCollapsed ? 'w-20' : 'w-64'}
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0
-      `}>
+      <aside className={`bg-granate text-blanco w-64 h-full fixed z-50 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
         <div className="flex flex-col h-full">
           {/* Header del sidebar */}
           <div className={`p-4 text-center border-b border-white/10 bg-black/20 transition-all duration-300`}>
@@ -206,7 +200,7 @@ export function Sidebar({
               >
                 <item.icon className="w-5 h-5 flex-shrink-0" />
                 {!isCollapsed && (
-                  <span className="font-semibold text-sm ml-3">{item.label}</span>
+                  <span className="text-blanco font-semibold ml-2">{item.label}</span>
                 )}
               </Button>
             ))}

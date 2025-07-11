@@ -46,7 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/citas/psychologists/schedule', [CitaController::class, 'getPsychologistSchedule']);
     
     // Rutas para gestión de psicólogos (solo super admin)
-    Route::prefix('psychologists')->group(function () {
+    Route::prefix('psychologists')->middleware('role:super_admin')->group(function () {
         Route::get('/', [PsychologistController::class, 'index']);
         Route::post('/', [PsychologistController::class, 'store']);
         Route::get('/{id}', [PsychologistController::class, 'show']);
@@ -57,7 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Rutas para gestión de usuarios (solo super admin y admin)
-    Route::prefix('users')->group(function () {
+    Route::prefix('users')->middleware('role:admin,super_admin')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::get('/{id}', [UserController::class, 'show']);

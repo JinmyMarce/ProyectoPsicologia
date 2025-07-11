@@ -30,7 +30,45 @@ export default {
           700: '#0e7490',
           800: '#155e75',
           900: '#164e63',
-        }
+        },
+        granate: {
+          DEFAULT: '#8e161a', // Granate oscuro principal
+          dark: '#6b1013',
+        },
+        negro: '#181818',
+        blanco: '#fff',
+        crudo: '#f8f6f2',
+        gris: {
+          claro: '#f3f4f6',
+          medio: '#d1d5db',
+          oscuro: '#374151',
+        },
+        beige: '#f5e9da',
+        camel: '#c2b280',
+        marron: '#8d6748',
+        azul: {
+          marino: '#1e293b',
+          electrico: '#2563eb',
+          cobalto: '#1939b7',
+        },
+        verde: {
+          oscuro: '#14532d',
+          esmeralda: '#047857',
+          botella: '#174c3c',
+        },
+        rosa: {
+          palo: '#e9b7b7',
+          pastel: '#f8bbd0',
+          viejo: '#c48a8a',
+        },
+        naranja: {
+          quemado: '#cc5803',
+          terracota: '#e2725b',
+        },
+        mostaza: '#f4d35e',
+        amarillo: {
+          suave: '#fff9c4',
+        },
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

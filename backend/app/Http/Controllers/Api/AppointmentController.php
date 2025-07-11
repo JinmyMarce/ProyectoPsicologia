@@ -123,6 +123,17 @@ class AppointmentController extends Controller
                 ], 422);
             }
 
+            // Validar que la hora esté entre 8:00 y 14:00 y sea un bloque de 45 minutos
+            $allowedTimes = [
+                '08:00', '08:45', '09:30', '10:15', '11:00', '11:45', '12:30', '13:15'
+            ];
+            if (!in_array($request->time, $allowedTimes)) {
+                return response()->json([
+                    'message' => 'Solo se pueden agendar citas entre 8:00 y 14:00 en bloques de 45 minutos.',
+                    'errors' => ['time' => ['Horario no permitido']]
+                ], 422);
+            }
+
             if ($validator->fails()) {
                 return response()->json(['message' => 'Datos inválidos', 'errors' => $validator->errors()], 422);
             }

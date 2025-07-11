@@ -29,15 +29,7 @@ export function Input({
           <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
         )}
         <input
-          className={cn(
-            'w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200',
-            {
-              'pl-10': Icon && iconPosition === 'left',
-              'pr-10': Icon && iconPosition === 'right',
-              'border-red-300 focus:ring-red-500': error,
-            },
-            className
-          )}
+          className="w-full px-4 py-2 border-2 border-granate rounded-lg focus:ring-2 focus:ring-granate focus:border-granate bg-blanco text-gris-oscuro placeholder:text-gris-medio transition-colors duration-200"
           {...props}
         />
         {Icon && iconPosition === 'right' && (

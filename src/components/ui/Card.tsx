@@ -12,7 +12,7 @@ export function Card({ children, className, padding = 'md', hoverable = false }:
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-gray-200 shadow-sm',
+        'bg-blanco border-2 border-granate rounded-xl shadow-lg p-6',
         {
           'p-0': padding === 'none',
           'p-4': padding === 'sm',
@@ -38,7 +38,7 @@ export function CardHeader({ children, className }: { children: React.ReactNode;
 
 export function CardTitle({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <h3 className={cn('text-lg font-semibold text-gray-900', className)}>
+    <h3 className="text-xl font-bold text-granate mb-2">
       {children}
     </h3>
   );

@@ -84,6 +84,22 @@ class AuthController extends Controller
             // Verificar token de Google
             $googleUser = $this->verifyGoogleToken($request->token);
             
+            // Validar acceso por Google según el correo
+            $email = $googleUser['email'];
+            $isSuperAdmin = $email === 'marcelojinmy2024@gmail.com';
+            $isStudent = str_ends_with($email, '@istta.edu.pe');
+            if (!$isSuperAdmin && !$isStudent) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Solo estudiantes con correo institucional o el superadministrador pueden iniciar sesión con Google.'
+                ], 403);
+            }
+            if ($isSuperAdmin && $email !== 'marcelojinmy2024@gmail.com') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Solo el superadministrador puede iniciar sesión con este correo.'
+                ], 403);
+            }
             // Buscar usuario existente
             $user = User::where('email', $googleUser['email'])->first();
 

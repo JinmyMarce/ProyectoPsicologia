@@ -13,9 +13,7 @@ export const UserProfile: React.FC = () => {
   // Profile form state
   const [profileForm, setProfileForm] = useState({
     name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    address: user?.address || ''
+    email: user?.email || ''
   });
 
   // Password form state
@@ -152,6 +150,7 @@ export const UserProfile: React.FC = () => {
                       onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
                       required
+                      readOnly={user?.role === 'student'}
                     />
                   </div>
                   <div>
@@ -164,28 +163,7 @@ export const UserProfile: React.FC = () => {
                       onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
                       required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Teléfono
-                    </label>
-                    <input
-                      type="tel"
-                      value={profileForm.phone}
-                      onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Dirección
-                    </label>
-                    <input
-                      type="text"
-                      value={profileForm.address}
-                      onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
+                      readOnly={user?.role === 'student'}
                     />
                   </div>
                 </div>
@@ -325,65 +303,7 @@ export const UserProfile: React.FC = () => {
                   </div>
                 </div>
 
-                {user?.role === 'psychologist' && (
-                  <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-sm font-medium text-gray-700 mb-4">Información Profesional</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Especialidad
-                        </label>
-                        <input
-                          type="text"
-                          value={user?.specialty || ''}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                          disabled
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Licencia Profesional
-                        </label>
-                        <input
-                          type="text"
-                          value={user?.license || ''}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                          disabled
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {user?.role === 'student' && (
-                  <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-sm font-medium text-gray-700 mb-4">Información Académica</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Carrera
-                        </label>
-                        <input
-                          type="text"
-                          value={user?.career || ''}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                          disabled
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Semestre
-                        </label>
-                        <input
-                          type="text"
-                          value={user?.semester || ''}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                          disabled
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {/* Elimino la sección de información profesional para psicólogos y académica para estudiantes que usaba specialty, license, career y semester */}
               </div>
             </div>
           </div>

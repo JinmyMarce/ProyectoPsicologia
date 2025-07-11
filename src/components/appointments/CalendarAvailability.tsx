@@ -1,8 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, AlertCircle, CheckCircle, Clock, Loader2 } from 'lucide-react';
+import { Calendar, AlertCircle, CheckCircle, Clock, Loader2, Lock } from 'lucide-react';
 import { getAvailableSlots } from '../../services/appointments';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
+import { Calendar as BigCalendar, dateFnsLocalizer, Event } from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import esES from 'date-fns/locale/es';
+import { Tooltip } from '../ui/Tooltip';
+
+const locales = {
+  'es': esES,
+};
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+  getDay,
+  locales,
+});
 
 interface CalendarAvailabilityProps {
   psychologistId: string;
@@ -68,10 +84,9 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
         // Verificar si es fin de semana (sábado = 6, domingo = 0)
         const dayOfWeek = date.getDay();
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-        
         // Solo los días laborables (lunes a viernes) y futuros están disponibles
         let isAvailable = !isPast && !isWeekend;
-        let isBlocked = false;
+        let isBlocked = isWeekend;
         let availableSlots = 0;
         
         days.push({ 
@@ -222,203 +237,138 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
 
   const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
+  const dayNamesFull = [
+    'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'
+  ];
+
+  const customFormats = {
+    weekdayFormat: (date: Date) => dayNamesFull[date.getDay()]
+  };
+
+  // Simulación de días ocupados para ejemplo visual (puedes reemplazar por tu lógica real)
+  const diasOcupados = [
+    '2025-07-10', '2025-07-14', '2025-07-15', '2025-07-16', '2025-07-17',
+    '2025-07-21', '2025-07-22', '2025-07-23', '2025-07-24',
+    '2025-07-28', '2025-07-29', '2025-07-30'
+  ];
+
+  // Transformar días a eventos para Big Calendar
+  const events: Event[] = monthDays.map(day => {
+    if (diasOcupados.includes(day.date)) {
+      return {
+        id: day.date,
+        title: '',
+        start: new Date(day.date),
+        end: new Date(day.date),
+        allDay: true,
+        resource: { ...day, ocupado: true },
+      };
+    }
+    if (day.isAvailable) {
+      return {
+        id: day.date,
+        title: '',
+        start: new Date(day.date),
+        end: new Date(day.date),
+        allDay: true,
+        resource: { ...day, ocupado: false },
+      };
+    }
+    return null;
+  }).filter(Boolean) as Event[];
+
+  const handleSelectSlot = (slotInfo: any) => {
+    const dateStr = slotInfo.start.toISOString().split('T')[0];
+    const day = monthDays.find(d => d.date === dateStr);
+    if (day && day.isAvailable) {
+      onDateSelect(dateStr);
+    }
+  };
+
+  const customMessages = {
+    next: 'Siguiente',
+    previous: 'Anterior',
+    today: 'Hoy',
+    month: 'Mes',
+    week: 'Semana',
+    day: 'Día',
+    agenda: 'Agenda',
+    date: 'Fecha',
+    time: 'Hora',
+    event: 'Evento',
+    noEventsInRange: 'No hay disponibilidad en este rango',
+  };
+
+  // Colores y gradientes para los estados
+  const COLOR_DISPONIBLE = 'linear-gradient(135deg, #1db954 60%, #43e97b 100%)';
+  const COLOR_OCUPADO = 'linear-gradient(135deg, #8e161a 60%, #b31217 100%)';
+  const COLOR_BLOQUEADO = 'rgba(200,200,200,0.35)';
+  const COLOR_TEXTO_BLOQUEADO = '#b0b0b0';
+  const COLOR_TEXTO_NORMAL = '#222';
+  const COLOR_TEXTO_OCUPADO = '#fff';
+  const COLOR_BORDE_ACTUAL = '#2563eb'; // azul institucional
+  const COLOR_BORDE_SELECCIONADO = '#8e161a'; // granate
+
+  // Día actual y seleccionado
+  const today = new Date();
+  const isSameDay = (date1: Date, date2: Date) =>
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate();
+
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold flex items-center">
+      <h3 className="text-lg font-bold flex items-center mb-4">
           <Calendar className="w-5 h-5 mr-2 text-[#8e161a]" />
           Selecciona un día disponible
         </h3>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToPreviousMonth}
-            disabled={loading}
-          >
-            ←
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToToday}
-            disabled={loading}
-          >
-            Hoy
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToNextMonth}
-            disabled={loading}
-          >
-            →
-          </Button>
-        </div>
+      <BigCalendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        selectable
+        style={{ height: 500, background: '#fff', borderRadius: 20, boxShadow: '0 4px 32px rgba(0,0,0,0.10)', border: '1px solid #e5e7eb', fontFamily: 'Inter, sans-serif', padding: 8 }}
+        messages={customMessages}
+        formats={customFormats}
+        views={['month']}
+        onSelectSlot={handleSelectSlot}
+        eventPropGetter={(event: any) => {
+          if (event.resource.ocupado) {
+            // Ocupado: gradiente granate oscuro
+            return { style: { background: COLOR_OCUPADO, color: COLOR_TEXTO_OCUPADO, borderRadius: 12, border: 'none', fontWeight: 700, transition: 'background 0.3s, color 0.3s' } };
+          }
+          // Disponible: gradiente verde
+          return { style: { background: COLOR_DISPONIBLE, color: COLOR_TEXTO_NORMAL, borderRadius: 12, border: 'none', fontWeight: 700, transition: 'background 0.3s, color 0.3s' } };
+        }}
+        dayPropGetter={(date: any) => {
+          const day = date.getDay();
+          let style: any = { fontWeight: 700, fontSize: 18, transition: 'all 0.2s' };
+          if (day === 0 || day === 6) {
+            style.background = COLOR_BLOQUEADO;
+            style.color = COLOR_TEXTO_BLOQUEADO;
+            style.pointerEvents = 'none';
+            style.opacity = 1;
+            style.cursor = 'not-allowed';
+          }
+          if (isSameDay(date, today)) {
+            style.border = `2px solid ${COLOR_BORDE_ACTUAL}`;
+            style.borderRadius = 12;
+          }
+          // Puedes agregar lógica para día seleccionado si tienes un estado para ello
+          return { style };
+        }}
+        components={{
+          event: () => null // No mostrar badges ni íconos
+        }}
+      />
+      {/* Leyenda visual profesional */}
+      <div className="flex gap-6 mt-6 text-base items-center justify-center">
+        <div className="flex items-center gap-2"><span className="inline-block w-5 h-5 rounded-full" style={{background: 'linear-gradient(135deg, #1db954 60%, #43e97b 100%)', boxShadow: '0 2px 8px #1db95444'}}></span> Disponible</div>
+        <div className="flex items-center gap-2"><span className="inline-block w-5 h-5 rounded-full" style={{background: 'linear-gradient(135deg, #8e161a 60%, #b31217 100%)', boxShadow: '0 2px 8px #8e161a44'}}></span> Ocupado</div>
+        <div className="flex items-center gap-2"><span className="inline-block w-5 h-5 rounded-full bg-gray-300"></span> No disponible</div>
+        <div className="flex items-center gap-2"><span className="inline-block w-5 h-5 rounded-full border-2 border-blue-600"></span> Día actual</div>
       </div>
-
-      <div className="text-center mb-4">
-        <h4 className="text-xl font-bold text-gray-900">
-          {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-        </h4>
-        <p className="text-sm text-gray-600 mt-2">
-          <strong>Horarios de atención:</strong> Lunes a Viernes de 8:00 AM a 6:00 PM
-        </p>
-        <p className="text-xs text-red-600 mt-1">
-          No se atiende sábados ni domingos
-        </p>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center space-x-2 mb-4">
-          <AlertCircle className="w-5 h-5 text-red-600" />
-          <span className="text-red-800 font-semibold">{error}</span>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-[#8e161a] mr-2" />
-          <span className="text-gray-600">Cargando calendario...</span>
-        </div>
-      ) : (
-        <>
-          {/* Días de la semana */}
-          <div className="grid grid-cols-7 gap-2 mb-2">
-            {dayNames.map(day => (
-              <div key={day} className="text-center text-sm font-semibold text-gray-600 py-2">
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Días del mes */}
-          <div className="grid grid-cols-7 gap-2">
-            {monthDays.map(day => {
-              const isSelected = day.date === selectedDate;
-              const date = new Date(day.date);
-              const dayOfWeek = date.getDay();
-              const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-              const isCurrentMonth = date.getMonth() === currentMonth.getMonth() && date.getFullYear() === currentMonth.getFullYear();
-
-              // Días fuera del mes actual (relleno): gris muy claro, sin borde, sin interacción, sin tooltip
-              if (!isCurrentMonth) {
-                return (
-                  <div
-                    key={day.date}
-                    className="p-3 rounded-lg text-sm font-semibold min-h-[70px] flex flex-col items-center justify-center bg-gray-50 text-gray-300 select-none"
-                    style={{ border: 'none', cursor: 'default' }}
-                  >
-                    <span>{date.getDate()}</span>
-                  </div>
-                );
-              }
-
-              // Sábados y domingos SIEMPRE en gris claro, deshabilitados, sin iconos ni cantidad, con tooltip
-              if (isWeekend) {
-                return (
-                  <button
-                    key={day.date}
-                    className={
-                      'p-3 rounded-lg text-sm font-semibold border min-h-[70px] flex flex-col items-center justify-center relative ' +
-                      'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                    }
-                    disabled
-                    title="No se atiende fines de semana"
-                  >
-                    <span>{date.getDate()}</span>
-                  </button>
-                );
-              }
-
-              // Días laborables del mes actual: lógica normal
-              return (
-                <button
-                  key={day.date}
-                  className={`p-3 rounded-lg text-sm font-semibold border transition-all duration-200 min-h-[70px] flex flex-col items-center justify-center relative
-                    ${isSelected ? 'bg-[#8e161a] text-white border-[#8e161a] shadow-lg scale-105' : ''}
-                    ${day.isAvailable && !isSelected ? 'bg-green-50 border-green-400 hover:bg-green-100 hover:shadow-md hover:scale-105' : ''}
-                    ${day.isBlocked ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed' : ''}
-                    ${day.isPast ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : ''}
-                    ${!day.isAvailable && !day.isBlocked && !day.isPast ? 'bg-yellow-50 border-yellow-400 text-yellow-700 cursor-not-allowed' : ''}
-                  `}
-                  disabled={day.isPast || day.isBlocked || !day.isAvailable}
-                  onClick={() => handleDateClick(day.date, day.isAvailable)}
-                  title={
-                    day.isPast
-                      ? 'Fecha pasada'
-                      : day.isBlocked
-                      ? 'Día bloqueado por el psicólogo'
-                      : day.isAvailable
-                      ? day.availableSlots > 0 ? `${day.availableSlots} horarios disponibles` : 'Verificar disponibilidad'
-                      : 'Sin horarios disponibles'
-                  }
-                >
-                  <span className={`${day.isToday ? 'font-bold' : ''}`}>{date.getDate()}</span>
-                  {/* Indicadores visuales solo para días laborables */}
-                  {day.isToday && (
-                    <div className="absolute top-1 right-1 w-2 h-2 bg-[#8e161a] rounded-full"></div>
-                  )}
-                  {day.isAvailable && !isSelected && day.availableSlots > 0 && (
-                    <div className="flex items-center mt-1">
-                      <Clock className="w-3 h-3 text-green-600 mr-1" />
-                      <span className="text-xs text-green-600 font-bold">{day.availableSlots}</span>
-                    </div>
-                  )}
-                  {day.isAvailable && isSelected && (
-                    <CheckCircle className="w-4 h-4 mt-1" />
-                  )}
-                  {day.isAvailable && day.availableSlots === 0 && !day.isBlocked && !day.isPast && (
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse mt-1"></div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Leyenda */}
-          <div className="text-xs text-gray-500 mt-4 flex flex-wrap gap-4 justify-center">
-            <span className="flex items-center">
-              <span className="inline-block w-3 h-3 bg-green-200 rounded-full mr-2" />
-              Disponible (Lun-Vie)
-            </span>
-            <span className="flex items-center">
-              <span className="inline-block w-3 h-3 bg-yellow-200 rounded-full mr-2" />
-              Sin horarios
-            </span>
-            <span className="flex items-center">
-              <span className="inline-block w-3 h-3 bg-red-200 rounded-full mr-2" />
-              Fin de semana (Sáb-Dom)
-            </span>
-            <span className="flex items-center">
-              <span className="inline-block w-3 h-3 bg-gray-300 rounded-full mr-2" />
-              Bloqueado
-            </span>
-            <span className="flex items-center">
-              <span className="inline-block w-3 h-3 bg-gray-200 rounded-full mr-2" />
-              Fecha pasada
-            </span>
-            <span className="flex items-center">
-              <span className="inline-block w-3 h-3 bg-blue-400 rounded-full mr-2 animate-pulse" />
-              Verificando
-            </span>
-          </div>
-
-          {/* Información adicional */}
-          {selectedDate && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>Fecha seleccionada:</strong> {new Date(selectedDate).toLocaleDateString('es-ES', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </p>
-            </div>
-          )}
-        </>
-      )}
     </Card>
   );
 };

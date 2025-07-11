@@ -4,6 +4,22 @@ import { Badge } from '../ui/Badge';
 import { Calendar, Clock, User, CheckCircle, XCircle, Clock as ClockIcon } from 'lucide-react';
 import { getUserAppointments } from '../../services/appointments';
 import { useAuth } from '../../contexts/AuthContext';
+import { Calendar as BigCalendar, dateFnsLocalizer, Event } from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import esES from 'date-fns/locale/es';
+import { Tooltip } from '../ui/Tooltip';
+
+const locales = {
+  'es': esES,
+};
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+  getDay,
+  locales,
+});
 
 interface StudentAppointment {
   id: number;
@@ -22,6 +38,13 @@ export const StudentCalendar: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  // Colores para los estados
+  const COLOR_DISPONIBLE = 'rgba(29, 185, 84, 0.18)'; // Verde claro transparente
+  const COLOR_OCUPADO = 'rgba(142, 22, 26, 0.18)'; // Granate oscuro claro transparente
+  const COLOR_BLOQUEADO = 'rgba(200,200,200,0.35)'; // Gris claro transparente
+  const COLOR_TEXTO_BLOQUEADO = '#b0b0b0';
+  const COLOR_TEXTO_NORMAL = '#222';
 
   useEffect(() => {
     loadAppointments();
@@ -94,6 +117,50 @@ export const StudentCalendar: React.FC = () => {
       .slice(0, 5);
   };
 
+  // Transformar citas a eventos para Big Calendar
+  const events: Event[] = appointments.map((appointment) => ({
+    id: appointment.id,
+    title: `${appointment.psychologist_name} (${appointment.status})`,
+    start: new Date(`${appointment.date}T${appointment.time}`),
+    end: new Date(`${appointment.date}T${appointment.time}`),
+    resource: appointment,
+    allDay: false,
+  }));
+
+  const customMessages = {
+    next: 'Siguiente',
+    previous: 'Anterior',
+    today: 'Hoy',
+    month: 'Mes',
+    week: 'Semana',
+    day: 'Día',
+    agenda: 'Agenda',
+    date: 'Fecha',
+    time: 'Hora',
+    event: 'Evento',
+    noEventsInRange: 'No hay eventos en este rango',
+  };
+
+  const handleSelectSlot = (slotInfo: any) => {
+    // Aquí puedes implementar la lógica para agendar una nueva cita
+    // slotInfo contiene la fecha y hora seleccionada
+    console.log('Slot seleccionado:', slotInfo);
+    // Por ejemplo, si quieres abrir un modal de agendamiento
+    // setSelectedDate(slotInfo.start); // Para seleccionar la fecha
+  };
+
+  const customFormats = {
+    monthHeader: (date: Date) => {
+      return format(date, 'MMMM yyyy', { locale: esES });
+    },
+    dayHeader: (date: Date) => {
+      return format(date, 'EEEE dd', { locale: esES });
+    },
+    dayRangeHeader: (date: Date) => {
+      return `${format(date, 'dd', { locale: esES })} - ${format(date, 'dd MMM', { locale: esES })}`;
+    },
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -121,133 +188,43 @@ export const StudentCalendar: React.FC = () => {
           {appointments.length} citas totales
         </Badge>
       </div>
-
-      {/* Próximas citas */}
-      {upcomingAppointments.length > 0 && (
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Calendar className="w-5 h-5 mr-2 text-[#8e161a]" />
-            Próximas Citas
-          </h3>
-          <div className="space-y-3">
-            {upcomingAppointments.map((appointment) => (
-              <div key={appointment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2">
-                    {getStatusIcon(appointment.status)}
-                    <Badge className={getStatusColor(appointment.status)}>
-                      {getStatusText(appointment.status)}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {new Date(appointment.date).toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      <Clock className="w-3 h-3 inline mr-1" />
-                      {appointment.time} - Dr. {appointment.psychologist_name}
-                    </p>
-                  </div>
-                </div>
-                {appointment.reason && (
-                  <div className="text-sm text-gray-600 max-w-xs">
-                    <p className="font-medium">Motivo:</p>
-                    <p className="truncate">{appointment.reason}</p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Calendario mensual */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <Calendar className="w-5 h-5 mr-2 text-[#8e161a]" />
-          Calendario Mensual
-        </h3>
-        
-        <div className="grid grid-cols-7 gap-1 mb-4">
-          {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
-            <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
-              {day}
-            </div>
-          ))}
-          
-          {Array.from({ length: new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1).getDay() }, (_, i) => (
-            <div key={`empty-${i}`} className="h-10"></div>
-          ))}
-          
-          {Array.from({ length: new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate() }, (_, i) => {
-            const day = i + 1;
-            const date = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day);
-            const dayAppointments = getAppointmentsForDate(date);
-            const isToday = date.toDateString() === new Date().toDateString();
-            
-            return (
-              <div
-                key={day}
-                className={`h-10 border border-gray-200 flex items-center justify-center text-sm cursor-pointer hover:bg-gray-50 ${
-                  isToday ? 'bg-[#8e161a] text-white' : ''
-                }`}
-                onClick={() => setSelectedDate(date)}
-              >
-                <div className="relative">
-                  {day}
-                  {dayAppointments.length > 0 && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          selectable
+          style={{ height: 600, background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #e5e7eb', fontFamily: 'Inter, sans-serif' }}
+          messages={customMessages}
+          formats={customFormats}
+          views={['month']}
+          onSelectSlot={handleSelectSlot}
+          eventPropGetter={(event: any) => {
+            if (event.resource.ocupado) {
+              // Ocupado: granate oscuro claro transparente
+              return { style: { backgroundColor: COLOR_OCUPADO, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
+            }
+            // Disponible: verde claro transparente
+            return { style: { backgroundColor: COLOR_DISPONIBLE, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
+          }}
+          dayPropGetter={(date: any) => {
+            const day = date.getDay();
+            if (day === 0 || day === 6) {
+              return { style: { backgroundColor: COLOR_BLOQUEADO, color: COLOR_TEXTO_BLOQUEADO, pointerEvents: 'none', opacity: 1, cursor: 'not-allowed', fontWeight: 600 } };
+            }
+            return { style: { color: COLOR_TEXTO_NORMAL, fontWeight: 600 } };
+          }}
+          components={{
+            event: () => null // No mostrar badges ni íconos
+          }}
+        />
+        {/* Leyenda visual minimalista */}
+        <div className="flex gap-6 mt-4 text-sm items-center">
+          <div className="flex items-center gap-2"><span className="inline-block w-4 h-4 rounded bg-[rgba(29,185,84,0.18)] border border-[#1db954]"></span> Disponible</div>
+          <div className="flex items-center gap-2"><span className="inline-block w-4 h-4 rounded bg-[rgba(142,22,26,0.18)] border border-[#8e161a]"></span> Ocupado</div>
+          <div className="flex items-center gap-2"><span className="inline-block w-4 h-4 rounded bg-[rgba(200,200,200,0.35)] border border-gray-300"></span> No disponible</div>
         </div>
-
-        {/* Citas del día seleccionado */}
-        {selectedDateAppointments.length > 0 && (
-          <div className="mt-4">
-            <h4 className="font-medium text-gray-900 mb-2">
-              Citas del {selectedDate.toLocaleDateString('es-ES', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </h4>
-            <div className="space-y-2">
-              {selectedDateAppointments.map((appointment) => (
-                <div key={appointment.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Badge className={getStatusColor(appointment.status)}>
-                      {getStatusText(appointment.status)}
-                    </Badge>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        <Clock className="w-3 h-3 inline mr-1" />
-                        {appointment.time}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Dr. {appointment.psychologist_name}
-                      </p>
-                    </div>
-                  </div>
-                  {appointment.reason && (
-                    <div className="text-sm text-gray-600 max-w-xs">
-                      <p className="font-medium">Motivo:</p>
-                      <p className="truncate">{appointment.reason}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </Card>
     </div>
   );
