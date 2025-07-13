@@ -221,6 +221,18 @@ class PatientController extends Controller
                 ], 404);
             }
 
+            // Verificar si tiene al menos una cita confirmada
+            $hasConfirmedAppointment = \App\Models\Cita::where('student_id', $patient->id)
+                ->where('estado', 'confirmada')
+                ->exists();
+
+            if (!$hasConfirmedAppointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El paciente no tiene citas confirmadas. No se puede autocompletar.'
+                ], 403);
+            }
+
             return response()->json([
                 'success' => true,
                 'data' => $patient

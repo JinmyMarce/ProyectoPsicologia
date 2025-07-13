@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, X, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '../ui/Button';
+import axios from 'axios';
 
 interface PersonalData {
   dni: string;
@@ -12,6 +13,12 @@ interface PersonalData {
   semester: string;
   phone: string;
   email: string;
+  emergencyContactName: string;
+  emergencyContactRelationship: string;
+  emergencyContactPhone: string;
+  medicalHistory: string;
+  currentMedications: string;
+  allergies: string;
 }
 
 interface PersonalDataModalProps {
@@ -27,6 +34,7 @@ interface PersonalDataModalProps {
     career?: string;
     semester?: number;
   };
+  disableNameAndEmail?: boolean;
 }
 
 export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
@@ -36,7 +44,8 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
   onContinue,
   selectedDate,
   selectedTime,
-  userData
+  userData,
+  disableNameAndEmail
 }) => {
   const [formData, setFormData] = useState<PersonalData>({
     dni: '',
@@ -47,7 +56,13 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
     studyProgram: userData?.career || '',
     semester: userData?.semester?.toString() || '',
     phone: '',
-    email: userData?.email || ''
+    email: userData?.email || '',
+    emergencyContactName: '',
+    emergencyContactRelationship: '',
+    emergencyContactPhone: '',
+    medicalHistory: '',
+    currentMedications: '',
+    allergies: ''
   });
 
   const [errors, setErrors] = useState<Partial<PersonalData>>({});
@@ -150,6 +165,37 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
     });
   };
 
+  useEffect(() => {
+    // Si el DNI tiene 8 dígitos, buscar datos previos del estudiante
+    if (formData.dni.length === 8) {
+      axios.get(`/api/patients/search/dni/${formData.dni}`)
+        .then(res => {
+          if (res.data && res.data.success && res.data.data) {
+            const data = res.data.data;
+            setFormData(prev => ({
+              ...prev,
+              fullName: prev.fullName || userData?.fullName || data.name || '',
+              age: data.age ? String(data.age) : prev.age,
+              gender: data.gender || prev.gender,
+              address: data.address || prev.address,
+              studyProgram: data.career || prev.studyProgram,
+              semester: data.semester ? String(data.semester) : prev.semester,
+              phone: data.phone || prev.phone,
+              email: prev.email || userData?.email || data.email || '',
+              // Si hay datos de contacto de emergencia y clínicos, autocompletar
+              emergencyContactName: data.emergency_contact_name || '',
+              emergencyContactRelationship: data.emergency_contact_relationship || '',
+              emergencyContactPhone: data.emergency_contact_phone || '',
+              medicalHistory: data.medical_history || '',
+              currentMedications: data.current_medications || '',
+              allergies: data.allergies || ''
+            }));
+          }
+        })
+        .catch(() => {/* No autocompletar si no hay datos */});
+    }
+  }, [formData.dni, userData]);
+
   if (!isOpen) return null;
 
   return (
@@ -217,11 +263,9 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                   type="text"
                   value={formData.fullName}
                   onChange={(e) => handleInputChange('fullName', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.fullName ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Juan Pérez García"
-                  readOnly={!!userData?.fullName}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.fullName ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Nombre completo"
+                  disabled={disableNameAndEmail}
                 />
                 {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
               </div>
@@ -365,11 +409,9 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="juan.perez@email.com"
-                  readOnly={!!userData?.email}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Correo institucional"
+                  disabled={disableNameAndEmail}
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>

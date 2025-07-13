@@ -70,8 +70,10 @@ export const PsychologistDashboard: React.FC = () => {
 
   const filteredAppointments = appointments.filter(appointment => {
     const matchesFilter = filter === 'all' || appointment.status === filter;
-    const matchesSearch = appointment.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.reason.toLowerCase().includes(searchTerm.toLowerCase());
+    const userEmail = appointment.user_email ? appointment.user_email.toLowerCase() : '';
+    const reason = appointment.reason ? appointment.reason.toLowerCase() : '';
+    const matchesSearch = userEmail.includes(searchTerm.toLowerCase()) ||
+                         reason.includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -300,7 +302,11 @@ export const PsychologistDashboard: React.FC = () => {
                               <p className="text-sm text-gray-600">{appointment.user_email}</p>
                             </div>
                             <div className="text-sm text-gray-500">
-                              <p>{format(new Date(appointment.date), 'EEEE, d MMMM yyyy', { locale: es })}</p>
+                              <p>{
+                                appointment.date && !isNaN(new Date(appointment.date).getTime())
+                                  ? format(new Date(appointment.date), 'EEEE, d MMMM yyyy', { locale: es })
+                                  : 'Fecha no disponible'
+                              }</p>
                               <p>{appointment.time}</p>
                             </div>
                             <div className="flex-1">

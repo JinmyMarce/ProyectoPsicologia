@@ -320,9 +320,21 @@ class CitaController extends Controller
             $psychologists = User::where('role', 'psychologist')
                 ->where('active', true)
                 ->where('verified', true)
-                ->select('id', 'name', 'specialization', 'rating', 'total_appointments')
+                ->select('id', 'name', 'specialization', 'rating', 'total_appointments', 'email')
                 ->orderBy('name')
-                ->get();
+                ->get()
+                ->map(function ($psychologist) {
+                    return [
+                        'id' => $psychologist->id,
+                        'name' => $psychologist->name,
+                        'specialization' => $psychologist->specialization,
+                        'rating' => $psychologist->rating,
+                        'total_appointments' => $psychologist->total_appointments,
+                        'email' => $psychologist->email,
+                        'phone' => '', // No existe en la tabla, pero el frontend lo espera
+                        'available' => true
+                    ];
+                });
 
             return response()->json([
                 'success' => true,

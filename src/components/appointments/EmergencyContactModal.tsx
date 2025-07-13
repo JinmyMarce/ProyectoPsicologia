@@ -16,6 +16,7 @@ interface EmergencyContactModalProps {
   selectedDate: string;
   selectedTime: string;
   personalData: any;
+  initialData?: EmergencyContact;
 }
 
 export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
@@ -25,9 +26,10 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
   onContinue,
   selectedDate,
   selectedTime,
-  personalData
+  personalData,
+  initialData
 }) => {
-  const [formData, setFormData] = useState<EmergencyContact>({
+  const [formData, setFormData] = useState<EmergencyContact>(initialData || {
     name: '',
     relationship: '',
     phone: ''

@@ -22,6 +22,7 @@ import {
   deleteAllNotifications,
   getNotificationStats
 } from '../../services/notifications';
+import { approveAppointment, rejectAppointment } from '../../services/appointments';
 import { Notification } from '../../services/notifications';
 
 interface NotificationStats {
@@ -44,6 +45,8 @@ export function NotificationCenter() {
   const [stats, setStats] = useState<NotificationStats | null>(null);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [showNotificationDetails, setShowNotificationDetails] = useState(false);
+  const [showRejectForm, setShowRejectForm] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     loadNotifications();
@@ -67,7 +70,7 @@ export function NotificationCenter() {
   const loadStats = async () => {
     try {
       const data = await getNotificationStats();
-      setStats(data);
+      setStats((data as unknown) as NotificationStats);
     } catch (error) {
       console.error('Error loading notification stats:', error);
     }
@@ -430,7 +433,62 @@ export function NotificationCenter() {
                   Marcar como leída
                 </Button>
               )}
+              {/* Botones de aprobar/rechazar solo para notificaciones de cita */}
+              {selectedNotification.type === 'appointment' && selectedNotification.data && typeof (selectedNotification.data as any).appointment_id === 'number' && (
+                <React.Fragment>
+                  <Button
+                    variant="primary"
+                    onClick={async () => {
+                      try {
+                        await approveAppointment(Number((selectedNotification.data as any).appointment_id));
+                        setShowNotificationDetails(false);
+                        handleRefresh();
+                      } catch (e) {
+                        setError('Error al aprobar la cita');
+                      }
+                    }}
+                  >
+                    Aprobar cita
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => setShowRejectForm(true)}
+                  >
+                    Rechazar cita
+                  </Button>
+                </React.Fragment>
+              )}
             </div>
+            {/* Formulario para rechazar cita */}
+            {showRejectForm && selectedNotification.type === 'appointment' && selectedNotification.data && typeof (selectedNotification.data as any).appointment_id === 'number' && (
+              <div className="mt-4">
+                <textarea
+                  className="w-full border rounded p-2 mb-2"
+                  placeholder="Motivo del rechazo"
+                  value={rejectReason}
+                  onChange={e => setRejectReason(e.target.value)}
+                />
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setShowRejectForm(false)}>Cancelar</Button>
+                  <Button
+                    variant="danger"
+                    onClick={async () => {
+                      try {
+                        await rejectAppointment(Number((selectedNotification.data as any).appointment_id), rejectReason);
+                        setShowRejectForm(false);
+                        setShowNotificationDetails(false);
+                        handleRefresh();
+                      } catch (e) {
+                        setError('Error al rechazar la cita');
+                      }
+                    }}
+                    disabled={!rejectReason.trim()}
+                  >
+                    Confirmar rechazo
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

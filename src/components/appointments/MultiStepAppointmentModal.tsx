@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TimeSelectionModal } from './TimeSelectionModal';
 import { PersonalDataModal } from './PersonalDataModal';
 import { EmergencyContactModal } from './EmergencyContactModal';
 import { MedicalInfoModal } from './MedicalInfoModal';
-import { createAppointment, getStudentData } from '../../services/appointments';
+import { createAppointment } from '../../services/appointments';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface AppointmentData {
@@ -40,12 +40,6 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [studentData, setStudentData] = useState<{
-    fullName: string;
-    email: string;
-    career?: string;
-    semester?: number;
-  } | null>(null);
 
   const handleTimeSelected = (time: string) => {
     setAppointmentData(prev => ({ ...prev, time }));
@@ -119,27 +113,10 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
     }
   };
 
-  // Obtener datos del estudiante cuando se abre el modal
-  useEffect(() => {
-    if (isOpen && user?.email) {
-      const fetchStudentData = async () => {
-        try {
-          const data = await getStudentData();
-          setStudentData(data);
-        } catch (error) {
-          console.error('Error fetching student data:', error);
-          // Si no se pueden obtener los datos, continuar sin ellos
-        }
-      };
-      fetchStudentData();
-    }
-  }, [isOpen, user?.email]);
-
   const handleClose = () => {
     setCurrentStep(1);
     setAppointmentData({ psychologistId, date: selectedDate });
     setError('');
-    setStudentData(null);
     onClose();
   };
 
@@ -164,7 +141,11 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
             onContinue={handlePersonalDataComplete}
             selectedDate={selectedDate}
             selectedTime={appointmentData.time!}
-            userData={studentData || undefined}
+            userData={{
+              fullName: user?.name || '',
+              email: user?.email || ''
+            }}
+            disableNameAndEmail={true}
           />
         );
       case 3:
@@ -177,6 +158,11 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
             selectedDate={selectedDate}
             selectedTime={appointmentData.time!}
             personalData={appointmentData.personalData!}
+            initialData={appointmentData.personalData ? {
+              name: appointmentData.personalData.emergencyContactName || '',
+              relationship: appointmentData.personalData.emergencyContactRelationship || '',
+              phone: appointmentData.personalData.emergencyContactPhone || ''
+            } : undefined}
           />
         );
       case 4:
@@ -191,6 +177,12 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
             personalData={appointmentData.personalData!}
             emergencyContact={appointmentData.emergencyContact!}
             isFirstAppointment={isFirstAppointment}
+            initialData={appointmentData.personalData ? {
+              medicalHistory: appointmentData.personalData.medicalHistory || '',
+              currentMedications: appointmentData.personalData.currentMedications || '',
+              allergies: appointmentData.personalData.allergies || '',
+              reason: ''
+            } : undefined}
           />
         );
       default:

@@ -19,6 +19,7 @@ interface MedicalInfoModalProps {
   personalData: any;
   emergencyContact: any;
   isFirstAppointment: boolean;
+  initialData?: MedicalInfo;
 }
 
 export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
@@ -30,9 +31,10 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
   selectedTime,
   personalData,
   emergencyContact,
-  isFirstAppointment
+  isFirstAppointment,
+  initialData
 }) => {
-  const [formData, setFormData] = useState<MedicalInfo>({
+  const [formData, setFormData] = useState<MedicalInfo>(initialData || {
     medicalHistory: '',
     currentMedications: '',
     allergies: '',

@@ -15,7 +15,8 @@ import {
   UserCheck,
   Activity,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
@@ -55,6 +56,12 @@ const menuItems: MenuItem[] = [
     roles: ['student']
   },
   {
+    label: 'Reprogramar Citas',
+    icon: Edit,
+    page: 'appointments/reschedule',
+    roles: ['student']
+  },
+  {
     label: 'Calendario de Citas',
     icon: Calendar,
     page: 'appointments/calendar',
@@ -65,6 +72,12 @@ const menuItems: MenuItem[] = [
     icon: Clock,
     page: 'appointments/history',
     roles: ['super_admin', 'admin', 'psychologist']
+  },
+  {
+    label: 'Agendar Cita Directamente',
+    icon: Calendar,
+    page: 'appointments/direct',
+    roles: ['psychologist']
   },
   {
     label: 'Registro de Pacientes',

@@ -15,23 +15,21 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
-    public function __construct()
+    /**
+     * @var \App\Models\User|null
+     */
+    public function index(Request $request)
     {
-        $this->middleware(function ($request, $next) {
-            $user = auth()->user();
+        try {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
             if (!$user || $user->email !== 'marcelojinmy2024@gmail.com') {
                 return response()->json([
                     'success' => false,
                     'message' => 'Acceso denegado. Solo el superadministrador puede acceder.'
                 ], 403);
             }
-            return $next($request);
-        });
-    }
 
-    public function index(Request $request)
-    {
-        try {
             $query = User::query();
 
             // Filtros
@@ -66,8 +64,8 @@ class UserController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error en UserController@index: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error en UserController@index: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,
@@ -77,11 +75,15 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         try {
             // Verificar autenticación
-            if (!auth()->check()) {
+            if (!Auth::check()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No estás autenticado',
@@ -89,8 +91,8 @@ class UserController extends Controller
                 ], 401);
             }
 
-            // Verificar permisos
-            $user = auth()->user();
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
             if (!in_array($user->role, ['admin', 'super_admin'])) {
                 return response()->json([
                     'success' => false,
@@ -135,8 +137,8 @@ class UserController extends Controller
                 'data' => $user
             ], 201);
         } catch (\Exception $e) {
-            \Log::error('Error en UserController@store: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error en UserController@store: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,
@@ -146,8 +148,13 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show($id)
     {
+        /** @var \App\Models\User|null $user */
         $user = User::find($id);
 
         if (!$user) {
@@ -163,8 +170,14 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, $id)
     {
+        /** @var \App\Models\User|null $user */
         $user = User::find($id);
 
         if (!$user) {
@@ -174,6 +187,7 @@ class UserController extends Controller
             ], 404);
         }
 
+        /** @var \Illuminate\Support\Facades\Validator $validator */
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
             'email' => ['sometimes', 'email', Rule::unique('users')->ignore($id)],
@@ -199,8 +213,13 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy($id)
     {
+        /** @var \App\Models\User|null $user */
         $user = User::find($id);
 
         if (!$user) {
@@ -226,8 +245,14 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deactivate(Request $request, $id)
     {
+        /** @var \App\Models\User|null $user */
         $user = User::find($id);
 
         if (!$user) {
@@ -237,6 +262,7 @@ class UserController extends Controller
             ], 404);
         }
 
+        /** @var \Illuminate\Support\Facades\Validator $validator */
         $validator = Validator::make($request->all(), [
             'reason' => 'required|string|max:500',
         ]);
@@ -267,8 +293,13 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function reactivate($id)
     {
+        /** @var \App\Models\User|null $user */
         $user = User::find($id);
 
         if (!$user) {
@@ -296,8 +327,13 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function history($id)
     {
+        /** @var \App\Models\User|null $user */
         $user = User::find($id);
 
         if (!$user) {
@@ -325,8 +361,14 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function changePassword(Request $request, $id)
     {
+        /** @var \App\Models\User|null $user */
         $user = User::find($id);
 
         if (!$user) {
@@ -367,8 +409,13 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function sendVerificationEmail($id)
     {
+        /** @var \App\Models\User|null $user */
         $user = User::find($id);
 
         if (!$user) {
@@ -393,8 +440,14 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function sendPasswordResetEmail(Request $request, $id)
     {
+        /** @var \App\Models\User|null $user */
         $user = User::find($id);
 
         if (!$user) {
@@ -416,6 +469,9 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function stats()
     {
         $stats = [
@@ -439,11 +495,12 @@ class UserController extends Controller
     }
 
     /**
-     * Obtener el perfil del usuario autenticado
+     * @return \Illuminate\Http\JsonResponse
      */
     public function profile()
     {
         try {
+            /** @var \App\Models\User|null $user */
             $user = Auth::user();
             
             if (!$user) {
@@ -479,11 +536,13 @@ class UserController extends Controller
     }
 
     /**
-     * Actualizar el perfil del usuario autenticado
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function updateProfile(Request $request)
     {
         try {
+            /** @var \App\Models\User|null $user */
             $user = Auth::user();
             
             if (!$user) {

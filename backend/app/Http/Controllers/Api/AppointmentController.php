@@ -9,10 +9,47 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
     public function index()
+    {
+        try {
+            // Obtener citas del usuario autenticado
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json(['message' => 'Usuario no autenticado'], 401);
+            }
+
+            $appointments = Cita::with(['student', 'psychologist'])
+                ->where('student_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($appointment) {
+                    return [
+                        'id' => $appointment->id,
+                        'user_email' => $appointment->student->email ?? 'N/A',
+                        'user_name' => $appointment->student->name ?? 'N/A',
+                        'psychologist_id' => $appointment->psychologist_id,
+                        'psychologist_name' => $appointment->psychologist->name ?? 'N/A',
+                        'date' => $appointment->fecha,
+                        'time' => $appointment->hora,
+                        'reason' => $appointment->motivo_consulta,
+                        'notes' => $appointment->notas ?? '',
+                        'status' => $appointment->estado,
+                        'created_at' => $appointment->created_at,
+                        'updated_at' => $appointment->updated_at,
+                    ];
+                });
+
+            return response()->json($appointments);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al obtener las citas: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getAllAppointments()
     {
         try {
             $appointments = Cita::with(['student', 'psychologist'])
@@ -134,10 +171,6 @@ class AppointmentController extends Controller
                 ], 422);
             }
 
-            if ($validator->fails()) {
-                return response()->json(['message' => 'Datos inválidos', 'errors' => $validator->errors()], 422);
-            }
-
             // Verificar si el usuario existe y es un estudiante
             $user = User::where('email', $request->user_email)->first();
             if (!$user) {
@@ -219,6 +252,26 @@ class AppointmentController extends Controller
             ]);
 
             $appointment->load(['student', 'psychologist']);
+
+            // Notificar al psicólogo que tiene una cita pendiente de aprobar
+            try {
+                \App\Models\Notification::create([
+                    'user_id' => $psychologist->id,
+                    'type' => 'appointment',
+                    'title' => 'Nueva cita pendiente',
+                    'message' => "Tienes una nueva cita pendiente de aprobación para el estudiante {$user->name} ({$user->email}) el día {$appointment->fecha} a las {$appointment->hora}.",
+                    'read' => false,
+                    'data' => [
+                        'appointment_id' => $appointment->id,
+                        'student_name' => $user->name,
+                        'student_email' => $user->email,
+                        'date' => $appointment->fecha,
+                        'time' => $appointment->hora
+                    ]
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Error enviando notificación al psicólogo: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'message' => 'Cita creada exitosamente',

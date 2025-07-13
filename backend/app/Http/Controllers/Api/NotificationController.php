@@ -164,21 +164,47 @@ class NotificationController extends Controller
 
     public function stats()
     {
-        $stats = [
-            'total' => Notification::where('user_id', auth()->user()->id)->count(),
-            'unread' => Notification::where('user_id', auth()->user()->id)->where('read', false)->count(),
-            'read' => Notification::where('user_id', auth()->user()->id)->where('read', true)->count(),
-            'by_type' => [
-                'appointment' => Notification::where('user_id', auth()->user()->id)->where('type', 'appointment')->count(),
-                'reminder' => Notification::where('user_id', auth()->user()->id)->where('type', 'reminder')->count(),
-                'status' => Notification::where('user_id', auth()->user()->id)->where('type', 'status')->count(),
-                'system' => Notification::where('user_id', auth()->user()->id)->where('type', 'system')->count(),
-            ]
-        ];
+        try {
+            // Verificar si el usuario está autenticado
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no autenticado'
+                ], 401);
+            }
 
+            $stats = [
+                'total' => Notification::where('user_id', auth()->user()->id)->count(),
+                'unread' => Notification::where('user_id', auth()->user()->id)->where('read', false)->count(),
+                'read' => Notification::where('user_id', auth()->user()->id)->where('read', true)->count(),
+                'by_type' => [
+                    'appointment' => Notification::where('user_id', auth()->user()->id)->where('type', 'appointment')->count(),
+                    'reminder' => Notification::where('user_id', auth()->user()->id)->where('type', 'reminder')->count(),
+                    'status' => Notification::where('user_id', auth()->user()->id)->where('type', 'status')->count(),
+                    'system' => Notification::where('user_id', auth()->user()->id)->where('type', 'system')->count(),
+                ]
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $stats
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener estadísticas: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Método de prueba para verificar autenticación
+    public function test()
+    {
         return response()->json([
             'success' => true,
-            'data' => $stats
+            'message' => 'Endpoint de notificaciones funcionando',
+            'user' => auth()->user() ? auth()->user()->id : null,
+            'authenticated' => auth()->check()
         ]);
     }
 

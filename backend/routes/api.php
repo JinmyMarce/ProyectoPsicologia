@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\PsychologicalSessionController;
 use App\Http\Controllers\Api\AppointmentController;
+use Illuminate\Support\Facades\Auth;
 
 
 /*
@@ -109,13 +110,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rutas para notificaciones
     Route::prefix('notifications')->group(function () {
         Route::get('/', [NotificationController::class, 'index']);
+        Route::get('/stats', [NotificationController::class, 'stats']);
+        Route::get('/test', [NotificationController::class, 'test']);
         Route::get('/{id}', [NotificationController::class, 'show']);
         Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
         Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
         Route::delete('/{id}', [NotificationController::class, 'destroy']);
         Route::delete('/', [NotificationController::class, 'destroyAll']);
         Route::post('/', [NotificationController::class, 'store']);
-        Route::get('/stats', [NotificationController::class, 'stats']);
         Route::post('/appointment-reminder/{appointmentId}', [NotificationController::class, 'sendAppointmentReminder']);
         Route::post('/appointment-status/{appointmentId}', [NotificationController::class, 'sendAppointmentStatusChange']);
         Route::post('/appointment-approved/{appointmentId}', [NotificationController::class, 'sendAppointmentApproved']);
@@ -160,6 +162,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas para citas
     Route::get('/appointments', [AppointmentController::class, 'index']);
+    Route::get('/appointments/all', [AppointmentController::class, 'getAllAppointments']);
     Route::get('/appointments/user/{userEmail}', [AppointmentController::class, 'getUserAppointments']);
     Route::post('/appointments', [AppointmentController::class, 'store']);
     Route::get('/appointments/{id}', [AppointmentController::class, 'show']);
@@ -179,6 +182,34 @@ Route::get('/test', function () {
     return response()->json([
         'success' => true,
         'message' => 'API funcionando correctamente'
+    ]);
+});
+
+// Ruta de prueba para notificaciones sin autenticación
+Route::get('/notifications-test', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'Endpoint de notificaciones accesible sin autenticación',
+        'timestamp' => now()
+    ]);
+});
+
+// Ruta temporal para stats sin autenticación
+Route::get('/notifications-stats-test', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'Stats endpoint accesible sin autenticación',
+        'data' => [
+            'total' => 0,
+            'unread' => 0,
+            'read' => 0,
+            'by_type' => [
+                'appointment' => 0,
+                'reminder' => 0,
+                'status' => 0,
+                'system' => 0
+            ]
+        ]
     ]);
 });
 
@@ -204,11 +235,11 @@ Route::get('/debug/users', function () {
 
 Route::get('/debug/auth', function () {
     try {
-        $user = auth()->user();
+        $user = Auth::user();
         return response()->json([
             'success' => true,
-            'authenticated' => auth()->check(),
-            'user' => $user ? $user->toArray() : null
+            'authenticated' => Auth::check(),
+            'user' => $user
         ]);
     } catch (\Exception $e) {
         return response()->json([
@@ -349,8 +380,8 @@ Route::post('/debug/auth-test', function (Request $request) {
             $bearerToken = substr($token, 7);
         }
         
-        $isAuthenticated = auth()->check();
-        $user = auth()->user();
+        $isAuthenticated = Auth::check();
+        $user = Auth::user();
         
         return response()->json([
             'success' => true,

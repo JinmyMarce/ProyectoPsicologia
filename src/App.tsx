@@ -23,6 +23,10 @@ import { PatientRegistration } from './components/patients/PatientRegistration';
 import { PatientList } from './components/patients/PatientList';
 import { SessionRegistration } from './components/sessions/SessionRegistration';
 import { SessionList } from './components/sessions/SessionList';
+import { StudentAppointmentHistory } from './components/students/StudentAppointmentHistory';
+import { DirectAppointmentScheduler } from './components/psychologist/DirectAppointmentScheduler';
+import { SessionHistory } from './components/psychologist/SessionHistory';
+import { RescheduleAppointment } from './components/students/RescheduleAppointment';
 
 // Componente para manejar la navegación
 function NavigationHandler({ onPageChange }: { onPageChange: (page: string) => void }) {
@@ -144,8 +148,9 @@ function AppContent() {
                   <Route path="/schedule" element={<ScheduleManager />} />
                   <Route path="/patients" element={<PatientList />} />
                   <Route path="/patients/register" element={<PatientRegistration />} />
-                  <Route path="/sessions" element={<SessionList />} />
+                  <Route path="/sessions" element={<SessionHistory />} />
                   <Route path="/sessions/register" element={<SessionRegistration />} />
+                  <Route path="/appointments/direct" element={<DirectAppointmentScheduler />} />
                   <Route path="/notifications" element={<NotificationCenter />} />
                   <Route path="/profile" element={<UserProfile />} />
                 </>
@@ -162,7 +167,8 @@ function AppContent() {
                   <Route path="/dashboard" element={<StudentDashboard onPageChange={handlePageChange} />} />
                   <Route path="/appointments" element={<AppointmentBooking />} />
                   <Route path="/appointments/calendar" element={<AppointmentCalendar />} />
-                  <Route path="/appointments/history" element={<AppointmentHistory />} />
+                  <Route path="/appointments/history" element={<StudentAppointmentHistory />} />
+                  <Route path="/appointments/reschedule" element={<RescheduleAppointment />} />
                   <Route path="/notifications" element={<NotificationCenter />} />
                   <Route path="/profile" element={<UserProfile />} />
                 </>

@@ -137,27 +137,19 @@ export const getNotificationStats = async (): Promise<Record<string, unknown>> =
   } catch (error: unknown) {
     console.error('Error fetching notification stats:', error);
     
-    // Si es un error 404 o 401, retornar estadísticas por defecto
-    if (error && typeof error === 'object' && 'response' in error) {
-      const apiError = error as { response?: { status?: number } };
-      if (apiError.response?.status === 404 || apiError.response?.status === 401) {
-        // Retornar estadísticas por defecto en lugar de lanzar error
-        return {
-          total: 0,
-          unread: 0,
-          read: 0,
-          by_type: {
-            appointment: 0,
-            reminder: 0,
-            status: 0,
-            system: 0
-          }
-        };
+    // Para cualquier error (404, 401, 500, etc.), retornar estadísticas por defecto
+    // Esto evita que la interfaz se rompa si el endpoint no está disponible
+    return {
+      total: 0,
+      unread: 0,
+      read: 0,
+      by_type: {
+        appointment: 0,
+        reminder: 0,
+        status: 0,
+        system: 0
       }
-    }
-    
-    // Para otros errores, lanzar el error original
-    throw new Error('Error al obtener estadísticas de notificaciones');
+    };
   }
 };
 
