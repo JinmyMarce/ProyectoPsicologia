@@ -77,6 +77,7 @@ class DatabaseSeeder extends Seeder
             CitaSeeder::class,
             PsychologicalSessionSeeder::class,
             TestDataSeeder::class, // Agregado para datos de prueba
+            MessageSeeder::class, // Agregado para mensajes de prueba
         ]);
     }
 }

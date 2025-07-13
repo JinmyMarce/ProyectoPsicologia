@@ -22,6 +22,8 @@ class Cita extends Model
         'patient_age',
         'patient_gender',
         'patient_address',
+        'patient_study_program',
+        'patient_semester',
         // Datos de contacto del paciente
         'patient_phone',
         'patient_email',

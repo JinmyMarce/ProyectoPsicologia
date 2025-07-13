@@ -21,7 +21,7 @@ export interface ChangePasswordData {
 // Obtener perfil del usuario autenticado
 export const getProfile = async (): Promise<User> => {
   try {
-    const response = await apiClient.get('/auth/profile');
+    const response = await apiClient.get('/user/profile');
     return response.data.data || response.data;
   } catch (error) {
     console.error('Error fetching profile:', error);
@@ -32,7 +32,7 @@ export const getProfile = async (): Promise<User> => {
 // Actualizar perfil del usuario
 export const updateProfile = async (userData: UpdateUserData): Promise<User> => {
   try {
-    const response = await apiClient.put('/auth/profile', userData);
+    const response = await apiClient.put('/user/profile', userData);
     return response.data.data || response.data;
   } catch (error: unknown) {
     console.error('Error updating profile:', error);

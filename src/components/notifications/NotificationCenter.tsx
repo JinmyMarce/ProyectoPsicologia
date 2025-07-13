@@ -57,10 +57,12 @@ export function NotificationCenter() {
     try {
       setLoading(true);
       setError('');
+      console.log('🔍 Cargando notificaciones...');
       const data = await getNotifications();
+      console.log('📦 Notificaciones recibidas:', data);
       setNotifications(data);
     } catch (error: unknown) {
-      console.error('Error loading notifications:', error);
+      console.error('❌ Error loading notifications:', error);
       setError('Error al cargar las notificaciones');
     } finally {
       setLoading(false);

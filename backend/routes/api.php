@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\PsychologicalSessionController;
 use App\Http\Controllers\Api\AppointmentController;
+use App\Http\Controllers\Api\PsychologistDashboardController;
+use App\Http\Controllers\Api\MessageController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -158,6 +160,27 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stats', [ScheduleController::class, 'stats']);
         Route::post('/import', [ScheduleController::class, 'import']);
         Route::get('/export', [ScheduleController::class, 'export']);
+        
+        // Rutas específicas para psicólogos
+        Route::get('/my-schedule', [ScheduleController::class, 'getMySchedule']);
+        Route::post('/my-schedule', [ScheduleController::class, 'createMySchedule']);
+        Route::post('/my-schedule/{id}/block', [ScheduleController::class, 'blockMySchedule']);
+        Route::post('/my-schedule/{id}/unblock', [ScheduleController::class, 'unblockMySchedule']);
+        Route::delete('/my-schedule/{id}', [ScheduleController::class, 'deleteMySchedule']);
+        Route::get('/my-schedule/stats', [ScheduleController::class, 'getMyScheduleStats']);
+    });
+
+    // Rutas específicas para el panel del psicólogo
+    Route::prefix('psychologist-dashboard')->group(function () {
+        Route::get('/dashboard', [PsychologistDashboardController::class, 'dashboard']);
+        Route::post('/appointments/{id}/approve', [PsychologistDashboardController::class, 'approveAppointment']);
+        Route::post('/appointments/{id}/reject', [PsychologistDashboardController::class, 'rejectAppointment']);
+        Route::post('/appointments/schedule-for-student', [PsychologistDashboardController::class, 'scheduleAppointmentForStudent']);
+        Route::get('/students/search', [PsychologistDashboardController::class, 'searchStudent']);
+        Route::get('/patients', [PsychologistDashboardController::class, 'getPatients']);
+        Route::post('/sessions/register', [PsychologistDashboardController::class, 'registerSession']);
+        Route::get('/sessions/history', [PsychologistDashboardController::class, 'getSessionHistory']);
+        Route::get('/sessions/student-stats', [PsychologistDashboardController::class, 'getStudentSessionStats']);
     });
 
     // Rutas para citas
@@ -174,6 +197,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/appointments/{id}/approve', [AppointmentController::class, 'approve']);
     Route::patch('/appointments/{id}/reject', [AppointmentController::class, 'reject']);
     Route::get('/appointments/pending', [AppointmentController::class, 'getPendingAppointments']);
+
+    // Rutas para mensajes
+    Route::prefix('messages')->group(function () {
+        Route::get('/', [MessageController::class, 'index']);
+        Route::get('/sent', [MessageController::class, 'sent']);
+        Route::get('/{id}', [MessageController::class, 'show']);
+        Route::post('/', [MessageController::class, 'store']);
+        Route::post('/{id}/read', [MessageController::class, 'markAsRead']);
+        Route::post('/mark-all-read', [MessageController::class, 'markAllAsRead']);
+        Route::delete('/{id}', [MessageController::class, 'destroy']);
+        Route::get('/conversation/{userId}', [MessageController::class, 'conversation']);
+        Route::get('/stats', [MessageController::class, 'stats']);
+        Route::get('/recipients', [MessageController::class, 'getRecipients']);
+    });
 
 });
 
@@ -469,4 +506,31 @@ Route::get('/debug/server-status', function () {
             'error' => $e->getMessage()
         ], 500);
     }
+});
+
+// Endpoint temporal para estadísticas de mensajes
+Route::get('/messages/stats', function () {
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'unread' => 0,
+            'total' => 0
+        ]
+    ]);
+});
+
+// Endpoint temporal para obtener mensajes
+Route::get('/messages', function () {
+    return response()->json([
+        'success' => true,
+        'data' => []
+    ]);
+});
+
+// Endpoint temporal para mensajes enviados
+Route::get('/messages/sent', function () {
+    return response()->json([
+        'success' => true,
+        'data' => []
+    ]);
 }); 

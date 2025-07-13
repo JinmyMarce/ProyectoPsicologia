@@ -16,7 +16,13 @@ import {
   Clock as ClockIcon,
   Loader2,
   RefreshCw,
-  FileText
+  FileText,
+  Download,
+  MessageSquare,
+  CalendarDays,
+  SortAsc,
+  SortDesc,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { PageHeader } from '../ui/PageHeader';
@@ -51,6 +57,14 @@ interface Patient {
   total_sessions: number;
 }
 
+interface FilterOptions {
+  searchTerm: string;
+  patientFilter: string;
+  statusFilter: string;
+  therapyTypeFilter: string;
+  dateRange: string;
+}
+
 export function SessionHistory() {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -64,11 +78,26 @@ export function SessionHistory() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'realizada' | 'programada' | 'cancelada'>('all');
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [showSessionDetails, setShowSessionDetails] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState<string>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  const [filters, setFilters] = useState<FilterOptions>({
+    searchTerm: '',
+    patientFilter: '',
+    statusFilter: '',
+    therapyTypeFilter: '',
+    dateRange: ''
+  });
 
   useEffect(() => {
     loadSessions();
     loadPatients();
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [sessions, filters, sortBy, sortOrder]);
 
   const loadSessions = async () => {
     try {
@@ -267,6 +296,133 @@ export function SessionHistory() {
   const completedSessions = sessions.filter(s => s.estado === 'realizada').length;
   const scheduledSessions = sessions.filter(s => s.estado === 'programada').length;
 
+  const applyFilters = () => {
+    let filtered = [...sessions];
+
+    // Aplicar filtros
+    if (filters.searchTerm) {
+      const searchTerm = filters.searchTerm.toLowerCase();
+      filtered = filtered.filter(session =>
+        session.patient_name.toLowerCase().includes(searchTerm) ||
+        session.patient_dni.includes(searchTerm) ||
+        session.patient_email.toLowerCase().includes(searchTerm) ||
+        session.patient_career.toLowerCase().includes(searchTerm) ||
+        session.temas_tratados.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    if (filters.patientFilter) {
+      filtered = filtered.filter(session => session.patient_name === filters.patientFilter);
+    }
+
+    if (filters.statusFilter) {
+      filtered = filtered.filter(session => session.estado === filters.statusFilter);
+    }
+
+    if (filters.therapyTypeFilter) {
+      filtered = filtered.filter(session => session.tipo_sesion === filters.therapyTypeFilter);
+    }
+
+    if (filters.dateRange) {
+      const [startDate, endDate] = filters.dateRange.split(' to ');
+      filtered = filtered.filter(session => {
+        const sessionDate = new Date(session.fecha_sesion);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        return sessionDate >= start && sessionDate <= end;
+      });
+    }
+
+    // Aplicar ordenamiento
+    filtered.sort((a, b) => {
+      const aValue = a[sortBy as keyof Session];
+      const bValue = b[sortBy as keyof Session];
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortOrder === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+      
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      
+      return 0;
+    });
+
+    setSessions(filtered);
+  };
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      searchTerm: '',
+      patientFilter: '',
+      statusFilter: '',
+      therapyTypeFilter: '',
+      dateRange: ''
+    });
+  };
+
+  const viewSessionDetails = (session: Session) => {
+    setSelectedSession(session);
+    setShowSessionDetails(true);
+  };
+
+  const exportSessions = () => {
+    // Simular exportación
+    const csvContent = [
+      ['Fecha', 'Paciente', 'DNI', 'Hora', 'Duración', 'Estado', 'Tipo de Terapia', 'Temas'],
+      ...sessions.map(s => [
+        new Date(s.fecha_sesion).toLocaleDateString(),
+        s.patient_name,
+        s.patient_dni,
+        s.hora_sesion,
+        `${s.duracion_minutos} min`,
+        s.estado === 'realizada' ? 'Realizada' : s.estado === 'programada' ? 'Programada' : 'Cancelada',
+        s.tipo_sesion,
+        s.temas_tratados
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'historial_sesiones.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const colors = {
+      realizada: 'bg-green-100 text-green-800',
+      programada: 'bg-blue-100 text-blue-800',
+      cancelada: 'bg-yellow-100 text-yellow-800'
+    };
+
+    const labels = {
+      realizada: 'Realizada',
+      programada: 'Programada',
+      cancelada: 'Cancelada'
+    };
+
+    return (
+      <Badge className={`${colors[status as keyof typeof colors]}`}>
+        {labels[status as keyof typeof labels]}
+      </Badge>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -436,7 +592,7 @@ export function SessionHistory() {
             <p className="text-red-600 font-semibold">{error}</p>
           </div>
         </Card>
-      ) : filteredSessions.length === 0 ? (
+      ) : sessions.length === 0 ? (
         <Card className="p-6">
           <div className="text-center py-8">
             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -446,7 +602,7 @@ export function SessionHistory() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredSessions.map((session) => (
+          {sessions.map((session) => (
             <Card key={session.id} className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>

@@ -27,6 +27,7 @@ import { StudentAppointmentHistory } from './components/students/StudentAppointm
 import { DirectAppointmentScheduler } from './components/psychologist/DirectAppointmentScheduler';
 import { SessionHistory } from './components/psychologist/SessionHistory';
 import { RescheduleAppointment } from './components/students/RescheduleAppointment';
+import MessagePanel from './components/messages/MessagePanel';
 
 // Componente para manejar la navegación
 function NavigationHandler({ onPageChange }: { onPageChange: (page: string) => void }) {
@@ -48,6 +49,7 @@ function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [showMessagesPanel, setShowMessagesPanel] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,6 +64,10 @@ function AppContent() {
   }, []);
 
   const handlePageChange = (page: string) => {
+    if (page === 'messages') {
+      setShowMessagesPanel(true);
+      return;
+    }
     setCurrentPage(page);
     navigate(`/${page}`);
     if (window.innerWidth < 1024) {
@@ -180,6 +186,8 @@ function AppContent() {
           </div>
         </main>
       </div>
+      {/* Panel de mensajes global */}
+      <MessagePanel isOpen={showMessagesPanel} onClose={() => setShowMessagesPanel(false)} />
     </div>
   );
 }

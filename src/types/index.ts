@@ -8,6 +8,8 @@ export interface User {
   active: boolean;
   created_at: string;
   updated_at: string;
+  career?: string;
+  semester?: string;
 }
 
 export interface Appointment {

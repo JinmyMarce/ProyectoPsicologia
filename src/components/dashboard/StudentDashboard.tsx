@@ -53,12 +53,18 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
   const [cancellingAppointment, setCancellingAppointment] = useState<number | null>(null);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   useEffect(() => {
     if (user?.email) {
       loadAppointments();
     }
   }, [user]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowWelcome(false), 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const loadAppointments = async () => {
     try {
@@ -186,23 +192,36 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
   return (
     <div className="space-y-6">
       <PageHeader 
-        title={`Bienvenido, ${user?.name}`}
-        subtitle="Dashboard de Estudiante"
+        title={showWelcome ? `Bienvenido, ${user?.name}` : ''}
       >
-        <div className="flex items-center justify-between">
-          <p className="text-base text-gray-500 font-medium text-center">
-            Instituto Túpac Amaru - Psicología Clínica
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="ml-4"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Actualizar
-          </Button>
+        <div className="w-full flex flex-col items-center justify-center relative">
+          <div className="absolute right-0 top-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className=""
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              Actualizar
+            </Button>
+          </div>
+          <div className="w-full flex justify-center mt-4">
+            <span
+              className="text-2xl font-extrabold text-white text-center px-8 py-3 rounded-xl shadow-lg"
+              style={{
+                fontFamily: 'Gasters, sans-serif',
+                letterSpacing: '0.04em',
+                background: 'linear-gradient(90deg, #8e161a 60%, #d3b7a0 100%)',
+                boxShadow: '0 4px 24px 0 rgba(142,22,26,0.10)',
+                border: '2px solid #8e161a',
+                textShadow: '0 2px 8px rgba(0,0,0,0.08)'
+              }}
+            >
+              Mi Portal de Psicología
+            </span>
+          </div>
         </div>
       </PageHeader>
 

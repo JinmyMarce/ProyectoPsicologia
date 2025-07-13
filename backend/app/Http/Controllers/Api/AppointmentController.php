@@ -221,6 +221,14 @@ class AppointmentController extends Controller
                 'cancelled' => 'cancelada'
             ];
 
+            // Actualizar solo los campos específicos del usuario: nombre, email, semestre y programa de estudios
+            $user->update([
+                'name' => $request->patient_full_name,
+                'email' => $request->patient_email,
+                'career' => $request->patient_study_program,
+                'semester' => $request->patient_semester,
+            ]);
+
             $appointment = Cita::create([
                 'student_id' => $user->id,
                 'psychologist_id' => $request->psychologist_id,

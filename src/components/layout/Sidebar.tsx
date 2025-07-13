@@ -34,20 +34,35 @@ interface MenuItem {
   icon: React.ComponentType<{ className?: string }>;
   page: string;
   roles: string[];
+  subItems?: MenuItem[];
 }
 
 const menuItems: MenuItem[] = [
   {
-    label: 'Dashboard',
+    label: 'Mi Inicio',
     icon: Home,
     page: 'dashboard',
-    roles: ['super_admin', 'admin', 'psychologist', 'student']
+    roles: ['student', 'super_admin', 'admin', 'psychologist']
   },
   {
     label: 'Agendar Cita',
     icon: Calendar,
     page: 'appointments',
-    roles: ['student']
+    roles: ['student'],
+    subItems: [
+      {
+        label: 'Agendar Cita',
+        icon: Calendar,
+        page: 'appointments',
+        roles: ['student']
+      },
+      {
+        label: 'Reprogramar Citas',
+        icon: Edit,
+        page: 'appointments/reschedule',
+        roles: ['student']
+      }
+    ]
   },
   {
     label: 'Historial de Citas',
@@ -56,9 +71,21 @@ const menuItems: MenuItem[] = [
     roles: ['student']
   },
   {
-    label: 'Reprogramar Citas',
-    icon: Edit,
-    page: 'appointments/reschedule',
+    label: 'Notificaciones',
+    icon: Bell,
+    page: 'notifications',
+    roles: ['student', 'psychologist', 'admin', 'super_admin']
+  },
+  {
+    label: 'Mensajes',
+    icon: MessageSquare,
+    page: 'messages',
+    roles: ['student']
+  },
+  {
+    label: 'Mi cuenta',
+    icon: UserCheck,
+    page: 'profile',
     roles: ['student']
   },
   {
@@ -81,14 +108,8 @@ const menuItems: MenuItem[] = [
   },
   {
     label: 'Registro de Pacientes',
-    icon: UserPlus,
-    page: 'patients/register',
-    roles: ['psychologist']
-  },
-  {
-    label: 'Visualizar Pacientes',
     icon: Users,
-    page: 'patients',
+    page: 'patients/registry',
     roles: ['psychologist']
   },
   {
@@ -98,7 +119,7 @@ const menuItems: MenuItem[] = [
     roles: ['psychologist']
   },
   {
-    label: 'Visualizar Sesiones',
+    label: 'Historial de Sesiones',
     icon: ClipboardList,
     page: 'sessions',
     roles: ['psychologist']
@@ -128,29 +149,11 @@ const menuItems: MenuItem[] = [
     roles: ['super_admin', 'admin', 'psychologist']
   },
   {
-    label: 'Notificaciones',
-    icon: Bell,
-    page: 'notifications',
-    roles: ['super_admin', 'admin', 'psychologist', 'student']
-  },
-  {
     label: 'Reportes',
     icon: BarChart3,
     page: 'reports',
     roles: ['super_admin', 'admin', 'psychologist']
   },
-  {
-    label: 'Mi Perfil',
-    icon: UserCheck,
-    page: 'profile',
-    roles: ['super_admin', 'admin', 'psychologist', 'student']
-  },
-  {
-    label: 'Configuración',
-    icon: Settings,
-    page: 'settings',
-    roles: ['super_admin', 'admin', 'psychologist', 'student']
-  }
 ];
 
 export function Sidebar({ 

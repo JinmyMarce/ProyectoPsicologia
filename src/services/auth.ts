@@ -96,7 +96,7 @@ class AuthService {
 
   // Obtener perfil del usuario
   async getProfile(token: string): Promise<AuthResponse> {
-    return this.request<AuthResponse>('/auth/profile', {
+    return this.request<AuthResponse>('/user/profile', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

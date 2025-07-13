@@ -33,9 +33,12 @@ export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('appointments');
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showWelcome, setShowWelcome] = useState(true);
 
   useEffect(() => {
     loadDashboardData();
+    const timer = setTimeout(() => setShowWelcome(false), 5000);
+    return () => clearTimeout(timer);
   }, []);
 
   const loadDashboardData = async () => {
@@ -140,7 +143,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard del Administrador</h1>
-          <p className="text-gray-600 mt-1">Bienvenido, {user?.name}</p>
+          {showWelcome && <p className="text-gray-600 mt-1">Bienvenido, {user?.name}</p>}
         </div>
         <div className="flex items-center space-x-4">
           <button className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors">

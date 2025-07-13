@@ -4,6 +4,38 @@ import { getPsychologistAppointments } from '@/services/appointments';
 import { Appointment } from '@/services/appointments';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
+import { 
+  Calendar, 
+  Clock, 
+  User, 
+  FileText, 
+  Plus, 
+  ArrowRight, 
+  CheckCircle, 
+  AlertCircle, 
+  Clock as ClockIcon, 
+  RefreshCw,
+  Settings,
+  Edit,
+  X,
+  Info,
+  Phone,
+  Mail,
+  MapPin,
+  Download,
+  Eye,
+  Users,
+  MessageSquare,
+  ClipboardList,
+  Search,
+  Filter,
+  Bell
+} from 'lucide-react';
+import { PageHeader } from '../ui/PageHeader';
 
 interface PsychologistStats {
   totalAppointments: number;
@@ -12,10 +44,13 @@ interface PsychologistStats {
   cancelledAppointments: number;
   todayAppointments: number;
   thisWeekAppointments: number;
+  totalPatients: number;
+  totalSessions: number;
 }
 
 export const PsychologistDashboard: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [stats, setStats] = useState<PsychologistStats>({
     totalAppointments: 0,
@@ -23,7 +58,9 @@ export const PsychologistDashboard: React.FC = () => {
     completedAppointments: 0,
     cancelledAppointments: 0,
     todayAppointments: 0,
-    thisWeekAppointments: 0
+    thisWeekAppointments: 0,
+    totalPatients: 0,
+    totalSessions: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,9 +68,12 @@ export const PsychologistDashboard: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showPendingAppointments, setShowPendingAppointments] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   useEffect(() => {
     loadDashboardData();
+    const timer = setTimeout(() => setShowWelcome(false), 5000);
+    return () => clearTimeout(timer);
   }, []);
 
   const loadDashboardData = async () => {
@@ -56,7 +96,9 @@ export const PsychologistDashboard: React.FC = () => {
         completedAppointments: appointmentsData.filter(a => a.status === 'completed').length,
         cancelledAppointments: appointmentsData.filter(a => a.status === 'cancelled').length,
         todayAppointments: appointmentsData.filter(a => a.date === today).length,
-        thisWeekAppointments: appointmentsData.filter(a => new Date(a.date) >= thisWeek).length
+        thisWeekAppointments: appointmentsData.filter(a => new Date(a.date) >= thisWeek).length,
+        totalPatients: 0, // Assuming totalPatients is not provided in the original data
+        totalSessions: 0 // Assuming totalSessions is not provided in the original data
       };
 
       setStats(statsData);
@@ -110,6 +152,10 @@ export const PsychologistDashboard: React.FC = () => {
     }
   };
 
+  const handleNavigation = (page: string) => {
+    navigate(`/${page}`);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -122,331 +168,271 @@ export const PsychologistDashboard: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard del Psicólogo</h1>
-          <p className="text-gray-600 mt-1">Bienvenido, {user?.name}</p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-            Notificaciones
-          </button>
-          <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-            Configuración
-          </button>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Citas</p>
-              <p className="text-2xl font-bold">{stats.totalAppointments}</p>
-              <p className="text-xs text-gray-500">{stats.thisWeekAppointments} esta semana</p>
-            </div>
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pendientes</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.pendingAppointments}</p>
-              <p className="text-xs text-gray-500">Requieren confirmación</p>
-            </div>
-            <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Completadas</p>
-              <p className="text-2xl font-bold text-green-600">{stats.completedAppointments}</p>
-              <p className="text-xs text-gray-500">Sesiones realizadas</p>
-            </div>
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Hoy</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.todayAppointments}</p>
-              <p className="text-xs text-gray-500">Citas programadas</p>
-            </div>
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="space-y-6">
-        <div className="flex space-x-2 border-b border-gray-200">
-          {[
-            { key: 'appointments', label: 'Mis Citas' },
-            { key: 'pending', label: 'Citas Pendientes' },
-            { key: 'schedule', label: 'Horarios' },
-            { key: 'patients', label: 'Pacientes' },
-            { key: 'profile', label: 'Perfil' }
-          ].map(({ key, label }) => (
-            <button
-              key={key}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === key 
-                  ? 'border-[#8e161a] text-[#8e161a]' 
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-              onClick={() => setActiveTab(key)}
+    <div className="space-y-6">
+      <PageHeader 
+        title={showWelcome ? `Bienvenido, ${user?.name}` : ''}
+      >
+        <div className="w-full flex flex-col items-center justify-center relative">
+          <div className="absolute right-0 top-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadDashboardData}
+              className=""
             >
-              {label}
-            </button>
-          ))}
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Actualizar
+            </Button>
+          </div>
+          
+          {/* Título principal con fondo decorativo */}
+          <div className="text-center mb-6">
+            <div className="inline-block bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] text-white px-8 py-4 rounded-lg shadow-lg">
+              <h1 className="text-3xl font-bold" style={{ fontFamily: 'Gasters, sans-serif' }}>
+                Mi Portal de Psicología
+              </h1>
+            </div>
+            <p className="text-gray-600 mt-2">Instituto Túpac Amaru - Psicología Clínica</p>
+          </div>
         </div>
+      </PageHeader>
 
-        {activeTab === 'appointments' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Mis Citas</h2>
-                <div className="flex items-center space-x-2">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Buscar citas..."
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <button className="border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                    Filtros
-                  </button>
-                  <button className="border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                    Exportar
-                  </button>
-                </div>
-              </div>
+      {/* Estadísticas principales */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="p-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-white" />
             </div>
-            <div className="p-6">
-              {/* Filter Tabs */}
-              <div className="flex space-x-2 mb-6">
-                {[
-                  { key: 'all', label: 'Todas' },
-                  { key: 'pending', label: 'Pendientes' },
-                  { key: 'confirmed', label: 'Confirmadas' },
-                  { key: 'completed', label: 'Completadas' },
-                  { key: 'cancelled', label: 'Canceladas' }
-                ].map(({ key, label }) => (
-                  <button
-                    key={key}
-                    className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                      filter === key 
-                        ? 'bg-[#8e161a] text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                    onClick={() => setFilter(key as any)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Appointments List */}
-              <div className="space-y-4">
-                {filteredAppointments.length === 0 ? (
-                  <div className="text-center py-8">
-                    <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <p className="text-gray-600">No se encontraron citas</p>
-                  </div>
-                ) : (
-                  filteredAppointments.map((appointment) => (
-                    <div
-                      key={appointment.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-4">
-                            <div>
-                              <h3 className="font-semibold text-gray-900">
-                                {appointment.user_email}
-                              </h3>
-                              <p className="text-sm text-gray-600">{appointment.user_email}</p>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              <p>{
-                                appointment.date && !isNaN(new Date(appointment.date).getTime())
-                                  ? format(new Date(appointment.date), 'EEEE, d MMMM yyyy', { locale: es })
-                                  : 'Fecha no disponible'
-                              }</p>
-                              <p>{appointment.time}</p>
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm text-gray-700">{appointment.reason}</p>
-                              {appointment.notes && (
-                                <p className="text-xs text-gray-500 mt-1">{appointment.notes}</p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {getStatusBadge(appointment.status)}
-                          <div className="flex space-x-1">
-                            <button
-                              className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                              onClick={() => handleStatusChange(appointment.id, 'confirmed')}
-                              disabled={appointment.status === 'confirmed' || appointment.status === 'completed'}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </button>
-                            <button
-                              className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                              onClick={() => handleStatusChange(appointment.id, 'cancelled')}
-                              disabled={appointment.status === 'cancelled'}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
-                            <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+            <div>
+              <p className="text-lg font-bold text-gray-900">{stats.totalAppointments}</p>
+              <p className="text-sm font-medium text-gray-600">Total Citas</p>
             </div>
           </div>
-        )}
+        </Card>
 
-        {activeTab === 'pending' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Citas Pendientes de Aprobación</h2>
-              <p className="text-gray-600 mb-4">Revisa y aprueba las citas solicitadas por los estudiantes.</p>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                  <span className="text-yellow-800 font-medium">
-                    Tienes {stats.pendingAppointments} citas pendientes de aprobación
-                  </span>
-                </div>
-              </div>
-              <button 
-                className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors"
-                onClick={() => setShowPendingAppointments(true)}
-              >
-                Ver Citas Pendientes
-              </button>
+        <Card className="p-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
+              <ClockIcon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-gray-900">{stats.pendingAppointments}</p>
+              <p className="text-sm font-medium text-gray-600">Citas Pendientes</p>
             </div>
           </div>
-        )}
+        </Card>
 
-        {activeTab === 'schedule' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Gestión de Horarios</h2>
-              <p className="text-gray-600 mb-4">Aquí podrás gestionar tu disponibilidad y horarios de atención.</p>
-              <button className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors">
-                Configurar Horarios
-              </button>
+        <Card className="p-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-gray-900">{stats.totalPatients}</p>
+              <p className="text-sm font-medium text-gray-600">Pacientes</p>
             </div>
           </div>
-        )}
+        </Card>
 
-        {activeTab === 'patients' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Mis Pacientes</h2>
-              <p className="text-gray-600 mb-4">Lista de pacientes y su historial de sesiones.</p>
-              <button className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors">
-                Ver Pacientes
-              </button>
+        <Card className="p-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <ClipboardList className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-gray-900">{stats.totalSessions}</p>
+              <p className="text-sm font-medium text-gray-600">Sesiones</p>
             </div>
           </div>
-        )}
-
-        {activeTab === 'profile' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Mi Perfil</h2>
-              <p className="text-gray-600 mb-4">Gestiona tu información personal y profesional.</p>
-              <button className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors">
-                Editar Perfil
-              </button>
-            </div>
-          </div>
-        )}
+        </Card>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center space-x-2">
-          <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
-          <span className="text-red-800 font-semibold">{error}</span>
+      {/* Acciones rápidas */}
+      <Card className="p-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+          <Plus className="w-6 h-6 mr-3 text-[#8e161a]" />
+          Acciones Rápidas
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Button 
+            className="p-4 text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            onClick={() => handleNavigation('appointments/direct')}
+          >
+            <Calendar className="w-5 h-5 mr-2" />
+            Agendar Cita Directamente
+          </Button>
+
+          <Button 
+            variant="outline"
+            className="p-4 text-sm font-semibold rounded-lg border border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-all duration-300 transform hover:scale-105"
+            onClick={() => handleNavigation('patients')}
+          >
+            <Users className="w-5 h-5 mr-2" />
+            Ver Pacientes
+          </Button>
+
+          <Button 
+            variant="outline"
+            className="p-4 text-sm font-semibold rounded-lg border border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-all duration-300 transform hover:scale-105"
+            onClick={() => handleNavigation('sessions/register')}
+          >
+            <MessageSquare className="w-5 h-5 mr-2" />
+            Registrar Sesión
+          </Button>
+
+          <Button 
+            variant="outline"
+            className="p-4 text-sm font-semibold rounded-lg border border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-all duration-300 transform hover:scale-105"
+            onClick={() => handleNavigation('schedule')}
+          >
+            <Settings className="w-5 h-5 mr-2" />
+            Gestión de Horarios
+          </Button>
         </div>
+      </Card>
+
+      {/* Secciones principales */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Gestión de Citas */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900 flex items-center">
+              <Calendar className="w-5 h-5 mr-2 text-[#8e161a]" />
+              Gestión de Citas
+            </h3>
+            <Badge variant="warning" className="text-sm">
+              {stats.pendingAppointments} pendientes
+            </Badge>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <Bell className="w-5 h-5 text-blue-600" />
+                <div>
+                  <p className="font-medium text-gray-900">Solicitudes de Citas</p>
+                  <p className="text-sm text-gray-600">Recibe notificaciones de estudiantes</p>
+                </div>
+              </div>
+              <Button size="sm" onClick={() => handleNavigation('notifications')}>
+                Ver Notificaciones
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <Clock className="w-5 h-5 text-yellow-600" />
+                <div>
+                  <p className="font-medium text-gray-900">Citas Pendientes</p>
+                  <p className="text-sm text-gray-600">Aprobar o rechazar solicitudes</p>
+                </div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => handleNavigation('appointments/history')}>
+                Gestionar
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <Plus className="w-5 h-5 text-green-600" />
+                <div>
+                  <p className="font-medium text-gray-900">Agendar Cita Directamente</p>
+                  <p className="text-sm text-gray-600">Buscar por DNI o correo</p>
+                </div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => handleNavigation('appointments/direct')}>
+                Agendar
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Gestión de Pacientes y Sesiones */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900 flex items-center">
+              <Users className="w-5 h-5 mr-2 text-[#8e161a]" />
+              Pacientes y Sesiones
+            </h3>
+            <Badge variant="info" className="text-sm">
+              {stats.totalPatients} pacientes
+            </Badge>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <Users className="w-5 h-5 text-purple-600" />
+                <div>
+                  <p className="font-medium text-gray-900">Registro de Pacientes</p>
+                  <p className="text-sm text-gray-600">Lista completa con filtros</p>
+                </div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => handleNavigation('patients')}>
+                Ver Pacientes
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <MessageSquare className="w-5 h-5 text-indigo-600" />
+                <div>
+                  <p className="font-medium text-gray-900">Registro de Sesión</p>
+                  <p className="text-sm text-gray-600">Buscar por DNI, datos automáticos</p>
+                </div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => handleNavigation('sessions/register')}>
+                Registrar
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-teal-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <ClipboardList className="w-5 h-5 text-teal-600" />
+                <div>
+                  <p className="font-medium text-gray-900">Historial de Sesiones</p>
+                  <p className="text-sm text-gray-600">Filtrar por estudiante</p>
+                </div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => handleNavigation('sessions')}>
+                Ver Historial
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Recordatorios y Alertas */}
+      {stats.pendingAppointments > 0 && (
+        <Card className="p-6 border-l-4 border-yellow-400 bg-yellow-50">
+          <div className="flex items-center space-x-3">
+            <AlertCircle className="w-6 h-6 text-yellow-600" />
+            <div>
+              <h3 className="font-semibold text-yellow-800">Recordatorio Importante</h3>
+              <p className="text-yellow-700">
+                Tienes {stats.pendingAppointments} citas pendientes de aprobación. 
+                Revisa las solicitudes y toma una decisión.
+              </p>
+            </div>
+            <Button size="sm" onClick={() => handleNavigation('notifications')}>
+              Revisar Ahora
+            </Button>
+          </div>
+        </Card>
       )}
 
-      {/* Modal de Citas Pendientes */}
-      {showPendingAppointments && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">Citas Pendientes de Aprobación</h3>
-              <button
-                onClick={() => setShowPendingAppointments(false)}
-                className="text-gray-500 hover:text-gray-700 text-xl"
-              >
-                ✕
-              </button>
-            </div>
-            
-            {/* Aquí se importaría el componente PendingAppointments */}
-            <div className="text-center py-8">
-              <p className="text-gray-600">Componente de citas pendientes</p>
-              <p className="text-sm text-gray-500">Se integrará el componente PendingAppointments aquí</p>
+      {error && (
+        <Card className="p-6 border-l-4 border-red-400 bg-red-50">
+          <div className="flex items-center space-x-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-semibold text-red-800">Error</h3>
+              <p className="text-red-700">{error}</p>
             </div>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );
