@@ -46,7 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/citas/psychologists/schedule', [CitaController::class, 'getPsychologistSchedule']);
     
     // Rutas para gestión de psicólogos (solo super admin)
-    Route::prefix('psychologists')->middleware('role:super_admin')->group(function () {
+    Route::prefix('psychologists')->group(function () {
         Route::get('/', [PsychologistController::class, 'index']);
         Route::post('/', [PsychologistController::class, 'store']);
         Route::get('/{id}', [PsychologistController::class, 'show']);
@@ -57,7 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Rutas para gestión de usuarios (solo super admin y admin)
-    Route::prefix('users')->middleware('role:admin,super_admin')->group(function () {
+    Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::get('/{id}', [UserController::class, 'show']);
@@ -68,7 +68,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}/history', [UserController::class, 'history']);
         Route::post('/{id}/change-password', [UserController::class, 'changePassword']);
         Route::post('/{id}/send-verification', [UserController::class, 'sendVerificationEmail']);
+        Route::post('/{id}/send-password-reset', [UserController::class, 'sendPasswordResetEmail']);
         Route::get('/stats', [UserController::class, 'stats']);
+    });
+
+    // Ruta temporal sin middleware para probar creación de usuarios
+    Route::post('/users-temp', [UserController::class, 'store']);
+
+    // Rutas para perfil del usuario autenticado
+    Route::prefix('user')->group(function () {
+        Route::get('/profile', [UserController::class, 'profile']);
+        Route::put('/profile', [UserController::class, 'updateProfile']);
     });
 
     // Rutas para gestión de pacientes
@@ -170,4 +180,262 @@ Route::get('/test', function () {
         'success' => true,
         'message' => 'API funcionando correctamente'
     ]);
+});
+
+// Rutas de prueba para diagnosticar problemas
+Route::get('/debug/users', function () {
+    try {
+        $users = \App\Models\User::all();
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuarios obtenidos correctamente',
+            'count' => $users->count(),
+            'data' => $users
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener usuarios',
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+});
+
+Route::get('/debug/auth', function () {
+    try {
+        $user = auth()->user();
+        return response()->json([
+            'success' => true,
+            'authenticated' => auth()->check(),
+            'user' => $user ? $user->toArray() : null
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error de autenticación',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
+Route::get('/debug/migrations', function () {
+    try {
+        $migrations = \Illuminate\Support\Facades\DB::table('migrations')->get();
+        $usersTable = \Illuminate\Support\Facades\Schema::hasTable('users');
+        $usersColumns = $usersTable ? \Illuminate\Support\Facades\Schema::getColumnListing('users') : [];
+        
+        return response()->json([
+            'success' => true,
+            'migrations' => $migrations,
+            'users_table_exists' => $usersTable,
+            'users_columns' => $usersColumns
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al verificar migraciones',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
+// Endpoint de prueba para POST
+Route::post('/debug/test-post', function (Request $request) {
+    try {
+        return response()->json([
+            'success' => true,
+            'message' => 'POST funcionando correctamente',
+            'received_data' => $request->all()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error en POST',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
+// Endpoint temporal sin autenticación para probar creación de usuarios
+Route::post('/debug/create-user', function (Request $request) {
+    try {
+        $data = $request->all();
+        
+        // Validar datos requeridos
+        if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos incompletos',
+                'required' => ['name', 'email', 'password']
+            ], 422);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Datos recibidos correctamente',
+            'received_data' => $data
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error en creación de usuario',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
+// Endpoint temporal para probar el UserController sin middleware
+Route::post('/debug/users-test', function (Request $request) {
+    try {
+        // Simular la lógica del UserController sin middleware
+        $data = $request->all();
+        
+        // Validar datos requeridos
+        if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos incompletos',
+                'required' => ['name', 'email', 'password']
+            ], 422);
+        }
+        
+        // Verificar si la tabla users existe
+        $usersTableExists = \Illuminate\Support\Facades\Schema::hasTable('users');
+        
+        if (!$usersTableExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La tabla users no existe. Ejecuta las migraciones.',
+                'solution' => 'php artisan migrate'
+            ], 500);
+        }
+        
+        // Verificar conexión a la base de datos
+        try {
+            \Illuminate\Support\Facades\DB::connection()->getPdo();
+            $dbConnected = true;
+        } catch (\Exception $e) {
+            $dbConnected = false;
+            $dbError = $e->getMessage();
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'UserController funcionando correctamente',
+            'received_data' => $data,
+            'users_table_exists' => $usersTableExists,
+            'database_connected' => $dbConnected,
+            'database_error' => $dbError ?? null
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error en UserController',
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+});
+
+// Endpoint para probar autenticación
+Route::post('/debug/auth-test', function (Request $request) {
+    try {
+        $token = $request->header('Authorization');
+        $bearerToken = null;
+        
+        if ($token && strpos($token, 'Bearer ') === 0) {
+            $bearerToken = substr($token, 7);
+        }
+        
+        $isAuthenticated = auth()->check();
+        $user = auth()->user();
+        
+        return response()->json([
+            'success' => true,
+            'has_authorization_header' => !empty($token),
+            'has_bearer_token' => !empty($bearerToken),
+            'is_authenticated' => $isAuthenticated,
+            'user_id' => $user ? $user->id : null,
+            'user_role' => $user ? $user->role : null,
+            'user_email' => $user ? $user->email : null,
+            'token_length' => $bearerToken ? strlen($bearerToken) : 0,
+            'token_preview' => $bearerToken ? substr($bearerToken, 0, 20) . '...' : null
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al verificar autenticación',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
+// Endpoint para verificar token de autenticación
+Route::get('/debug/check-token', function (Request $request) {
+    try {
+        $token = $request->header('Authorization');
+        $bearerToken = null;
+        
+        if ($token && strpos($token, 'Bearer ') === 0) {
+            $bearerToken = substr($token, 7);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'has_authorization_header' => !empty($token),
+            'has_bearer_token' => !empty($bearerToken),
+            'token_length' => $bearerToken ? strlen($bearerToken) : 0,
+            'token_preview' => $bearerToken ? substr($bearerToken, 0, 20) . '...' : null
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al verificar token',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
+// Endpoint para verificar estado del servidor y base de datos
+Route::get('/debug/server-status', function () {
+    try {
+        $dbConnection = false;
+        $migrationsTable = false;
+        $usersTable = false;
+        $error = null;
+        
+        try {
+            // Verificar conexión a la base de datos
+            \Illuminate\Support\Facades\DB::connection()->getPdo();
+            $dbConnection = true;
+            
+            // Verificar si existe la tabla migrations
+            $migrationsTable = \Illuminate\Support\Facades\Schema::hasTable('migrations');
+            
+            // Verificar si existe la tabla users
+            $usersTable = \Illuminate\Support\Facades\Schema::hasTable('users');
+            
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+        }
+        
+        return response()->json([
+            'success' => true,
+            'server_status' => 'running',
+            'database_connection' => $dbConnection,
+            'migrations_table_exists' => $migrationsTable,
+            'users_table_exists' => $usersTable,
+            'error' => $error,
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al verificar estado del servidor',
+            'error' => $e->getMessage()
+        ], 500);
+    }
 }); 

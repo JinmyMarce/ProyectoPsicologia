@@ -84,24 +84,39 @@ class AuthController extends Controller
             // Verificar token de Google
             $googleUser = $this->verifyGoogleToken($request->token);
             
-            // Validar acceso por Google según el correo
+            // Validar acceso: solo el superadministrador o estudiantes con @istta.edu.pe pueden iniciar sesión con Google
             $email = $googleUser['email'];
             $isSuperAdmin = $email === 'marcelojinmy2024@gmail.com';
             $isStudent = str_ends_with($email, '@istta.edu.pe');
-            if (!$isSuperAdmin && !$isStudent) {
+            if (!($isSuperAdmin || $isStudent)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Solo estudiantes con correo institucional o el superadministrador pueden iniciar sesión con Google.'
-                ], 403);
-            }
-            if ($isSuperAdmin && $email !== 'marcelojinmy2024@gmail.com') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Solo el superadministrador puede iniciar sesión con este correo.'
+                    'message' => 'Solo estudiantes con correo institucional (@istta.edu.pe) o el superadministrador autorizado pueden iniciar sesión con Google.'
                 ], 403);
             }
             // Buscar usuario existente
             $user = User::where('email', $googleUser['email'])->first();
+
+            // Si es el superadministrador, asegurar que su rol sea super_admin
+            if ($isSuperAdmin) {
+                if ($user) {
+                    if ($user->role !== 'super_admin') {
+                        $user->role = 'super_admin';
+                        $user->save();
+                    }
+                } else {
+                    // Si no existe, crearlo como super_admin
+                    $user = User::create([
+                        'name' => $googleUser['name'],
+                        'email' => $googleUser['email'],
+                        'password' => Hash::make(Str::random(16)),
+                        'role' => 'super_admin',
+                        'google_id' => $googleUser['id'],
+                        'avatar' => $googleUser['picture'],
+                        'verified' => $googleUser['verified_email'],
+                    ]);
+                }
+            }
 
             if (!$user) {
                 // Crear nuevo usuario
