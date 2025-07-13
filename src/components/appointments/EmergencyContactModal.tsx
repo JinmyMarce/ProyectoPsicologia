@@ -36,7 +36,14 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
   const [errors, setErrors] = useState<Partial<EmergencyContact>>({});
 
   const handleInputChange = (field: keyof EmergencyContact, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // Validación especial para teléfono - solo números
+    if (field === 'phone') {
+      const numericValue = value.replace(/\D/g, '');
+      setFormData(prev => ({ ...prev, [field]: numericValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
+    
     // Limpiar error del campo
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
@@ -51,8 +58,8 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
     if (!formData.phone.trim()) newErrors.phone = 'El teléfono es obligatorio';
 
     // Validaciones específicas
-    if (formData.phone && !formData.phone.match(/^\+51\d{9}$/)) {
-      newErrors.phone = 'El teléfono debe tener formato +51 seguido de 9 dígitos';
+    if (formData.phone && !formData.phone.match(/^\d{9}$/)) {
+      newErrors.phone = 'El teléfono debe tener exactamente 9 dígitos';
     }
 
     setErrors(newErrors);
@@ -61,7 +68,12 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
 
   const handleContinue = () => {
     if (validateForm()) {
-      onContinue(formData);
+      // Agregar el prefijo +51 al teléfono antes de enviar
+      const dataToSend = {
+        ...formData,
+        phone: `+51${formData.phone}`
+      };
+      onContinue(dataToSend);
     }
   };
 
@@ -168,15 +180,21 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Teléfono de contacto <span className="text-red-500">*</span>
               </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.phone ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="+51987654321"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <span className="text-gray-500 text-sm">+51</span>
+                </div>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  className={`w-full pl-12 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.phone ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  placeholder="987654321"
+                  maxLength={9}
+                />
+              </div>
               {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
             </div>
 

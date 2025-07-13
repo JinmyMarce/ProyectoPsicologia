@@ -149,6 +149,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const googleResponse = await googleAuthService.signInWithGoogle();
       const googleUser = googleResponse.user;
       
+      // Solo permitir el login si el correo es exactamente marcelojinmy2024@gmail.com o termina en @istta.edu.pe
+      if (googleUser.email !== 'marcelojinmy2024@gmail.com' && !googleUser.email.endsWith('@istta.edu.pe')) {
+        setError('Solo estudiantes con correo institucional (@istta.edu.pe) o el superadministrador autorizado pueden iniciar sesión con Google.');
+        setLoading(false);
+        return false;
+      }
+
       // Verificar tipo de email y determinar rol
       let role: 'student' | 'psychologist' | 'admin' | 'super_admin';
       try {

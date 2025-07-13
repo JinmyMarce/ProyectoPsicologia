@@ -6,6 +6,7 @@ import { Appointment } from '@/services/appointments';
 import { User } from '@/types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { DebugPanel } from './DebugPanel';
 
 interface SuperAdminStats {
   totalUsers: number;
@@ -78,10 +79,10 @@ export const SuperAdminDashboard: React.FC = () => {
 
   const filteredAppointments = appointments.filter(appointment => {
     const matchesFilter = filter === 'all' || appointment.status === filter;
-    const matchesSearch = appointment.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.psychologist_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.reason.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (appointment.patient_full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (appointment.user_email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (appointment.psychologist_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (appointment.reason?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -253,7 +254,8 @@ export const SuperAdminDashboard: React.FC = () => {
             { key: 'users', label: 'Gestión de Usuarios' },
             { key: 'appointments', label: 'Todas las Citas' },
             { key: 'system', label: 'Sistema' },
-            { key: 'reports', label: 'Reportes' }
+            { key: 'reports', label: 'Reportes' },
+            { key: 'debug', label: 'Debug' }
           ].map(({ key, label }) => (
             <button
               key={key}
@@ -464,7 +466,7 @@ export const SuperAdminDashboard: React.FC = () => {
                           <div className="flex items-center space-x-4">
                             <div>
                               <h3 className="font-semibold text-gray-900">
-                                {appointment.user_name}
+                                {appointment.patient_full_name}
                               </h3>
                               <p className="text-sm text-gray-600">{appointment.user_email}</p>
                             </div>
@@ -575,6 +577,10 @@ export const SuperAdminDashboard: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {activeTab === 'debug' && (
+          <DebugPanel />
         )}
       </div>
 

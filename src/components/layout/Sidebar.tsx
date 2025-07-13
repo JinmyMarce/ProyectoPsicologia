@@ -103,6 +103,12 @@ const menuItems: MenuItem[] = [
     roles: ['super_admin', 'admin']
   },
   {
+    label: 'Monitoreo del Sistema',
+    icon: Activity,
+    page: 'monitoring',
+    roles: ['super_admin']
+  },
+  {
     label: 'Horarios',
     icon: Clock,
     page: 'schedule',

@@ -249,6 +249,28 @@ export const getPsychologistStats = async (): Promise<any> => {
   }
 };
 
+// Obtener datos del estudiante autenticado
+export const getStudentData = async (): Promise<{
+  fullName: string;
+  email: string;
+  career?: string;
+  semester?: number;
+}> => {
+  try {
+    const response = await apiClient.get('/user/profile');
+    const userData = response.data.data || response.data;
+    return {
+      fullName: userData.name,
+      email: userData.email,
+      career: userData.career,
+      semester: userData.semester
+    };
+  } catch (error: unknown) {
+    console.error('Error fetching student data:', error);
+    throw new Error('Error al obtener los datos del estudiante');
+  }
+};
+
 // Aprobar cita (psicólogo)
 export const approveAppointment = async (id: number): Promise<Appointment> => {
   try {

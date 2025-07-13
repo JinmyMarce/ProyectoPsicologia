@@ -69,6 +69,31 @@ export const getUsers = async (): Promise<User[]> => {
     return response.data.data || response.data;
   } catch (error: unknown) {
     console.error('Error fetching users:', error);
+    
+    // Obtener más información del error
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { 
+        response?: { 
+          status?: number;
+          data?: { 
+            message?: string;
+            error?: string;
+          } 
+        } 
+      };
+      
+      if (apiError.response?.status === 500) {
+        console.error('Server error details:', apiError.response.data);
+        throw new Error(`Error del servidor: ${apiError.response.data?.error || apiError.response.data?.message || 'Error interno del servidor'}`);
+      } else if (apiError.response?.status === 403) {
+        throw new Error('No tienes permisos para acceder a este recurso');
+      } else if (apiError.response?.status === 401) {
+        throw new Error('No estás autenticado');
+      } else {
+        throw new Error(apiError.response?.data?.message || 'Error al obtener los usuarios');
+      }
+    }
+    
     throw new Error('Error al obtener los usuarios');
   }
 };
@@ -91,12 +116,40 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
     return response.data.data || response.data;
   } catch (error: unknown) {
     console.error('Error creating user:', error);
+    
+    // Obtener más información del error
     if (error && typeof error === 'object' && 'response' in error) {
-      const apiError = error as { response?: { data?: { message?: string } } };
-      if (apiError.response?.data?.message) {
-        throw new Error(apiError.response.data.message);
+      const apiError = error as { 
+        response?: { 
+          status?: number;
+          data?: { 
+            message?: string;
+            error?: string;
+            errors?: Record<string, string[]>;
+          } 
+        } 
+      };
+      
+      if (apiError.response?.status === 500) {
+        console.error('Server error details:', apiError.response.data);
+        throw new Error(`Error del servidor: ${apiError.response.data?.error || apiError.response.data?.message || 'Error interno del servidor'}`);
+      } else if (apiError.response?.status === 422) {
+        // Error de validación
+        const validationErrors = apiError.response.data?.errors;
+        if (validationErrors) {
+          const errorMessages = Object.values(validationErrors).flat();
+          throw new Error(`Error de validación: ${errorMessages.join(', ')}`);
+        }
+        throw new Error(apiError.response.data?.message || 'Error de validación');
+      } else if (apiError.response?.status === 403) {
+        throw new Error('No tienes permisos para crear usuarios');
+      } else if (apiError.response?.status === 401) {
+        throw new Error('No estás autenticado');
+      } else {
+        throw new Error(apiError.response?.data?.message || 'Error al crear el usuario');
       }
     }
+    
     throw new Error('Error al crear el usuario');
   }
 };

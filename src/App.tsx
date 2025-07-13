@@ -14,6 +14,8 @@ import { AppointmentBooking } from './components/appointments/AppointmentBooking
 import { AppointmentCalendar } from './components/appointments/AppointmentCalendar';
 import { AppointmentHistory } from './components/appointments/AppointmentHistory';
 import { UserManagement } from './components/admin/UserManagement';
+import { UserManagement as SuperAdminUserManagement } from './components/super-admin/UserManagement';
+import { SystemMonitoring } from './components/super-admin/SystemMonitoring';
 import { NotificationCenter } from './components/notifications/NotificationCenter';
 import { ReportsAnalytics } from './components/reports/ReportsAnalytics';
 import { ScheduleManager } from './components/psychologist/ScheduleManager';
@@ -106,15 +108,20 @@ function AppContent() {
           <div className="max-w-7xl mx-auto">
             <Routes>
               {/* Rutas para Super Admin */}
-              {user.role === 'super_admin' && (
+              {user.role === 'super_admin' && user.email === 'marcelojinmy2024@gmail.com' && (
                 <>
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/dashboard" element={<SuperAdminDashboard />} />
-                  <Route path="/users" element={<UserManagement />} />
+                  <Route path="/users" element={<SuperAdminUserManagement />} />
+                  <Route path="/monitoring" element={<SystemMonitoring />} />
                   <Route path="/reports" element={<ReportsAnalytics />} />
                   <Route path="/notifications" element={<NotificationCenter />} />
                   <Route path="/profile" element={<UserProfile />} />
                 </>
+              )}
+              {/* Si es super_admin pero no tiene el email correcto, mostrar acceso denegado */}
+              {user.role === 'super_admin' && user.email !== 'marcelojinmy2024@gmail.com' && (
+                <Route path="*" element={<div className="flex items-center justify-center min-h-screen"><h2 className="text-2xl text-red-600 font-bold">Acceso denegado. Solo el superadministrador autorizado puede acceder.</h2></div>} />
               )}
 
               {/* Rutas para Admin */}
@@ -130,7 +137,7 @@ function AppContent() {
               )}
 
               {/* Rutas para Psicólogo */}
-              {user.role === 'psychologist' && (
+              {user.role === 'psychologist' && user.email !== 'marcelojinmy2024@gmail.com' && (
                 <>
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/dashboard" element={<PsychologistDashboard />} />
@@ -142,6 +149,10 @@ function AppContent() {
                   <Route path="/notifications" element={<NotificationCenter />} />
                   <Route path="/profile" element={<UserProfile />} />
                 </>
+              )}
+              {/* Si es super_admin, nunca mostrar la interfaz de psicólogo */}
+              {user.role === 'psychologist' && user.email === 'marcelojinmy2024@gmail.com' && (
+                <Route path="*" element={<div className="flex items-center justify-center min-h-screen"><h2 className="text-2xl text-red-600 font-bold">Acceso denegado. Solo el superadministrador autorizado puede acceder a su propia interfaz.</h2></div>} />
               )}
 
               {/* Rutas para Estudiante */}

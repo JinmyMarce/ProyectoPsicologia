@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TimeSelectionModal } from './TimeSelectionModal';
 import { PersonalDataModal } from './PersonalDataModal';
 import { EmergencyContactModal } from './EmergencyContactModal';
 import { MedicalInfoModal } from './MedicalInfoModal';
-import { createAppointment } from '../../services/appointments';
+import { createAppointment, getStudentData } from '../../services/appointments';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface AppointmentData {
@@ -40,6 +40,12 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [studentData, setStudentData] = useState<{
+    fullName: string;
+    email: string;
+    career?: string;
+    semester?: number;
+  } | null>(null);
 
   const handleTimeSelected = (time: string) => {
     setAppointmentData(prev => ({ ...prev, time }));
@@ -113,10 +119,27 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
     }
   };
 
+  // Obtener datos del estudiante cuando se abre el modal
+  useEffect(() => {
+    if (isOpen && user?.email) {
+      const fetchStudentData = async () => {
+        try {
+          const data = await getStudentData();
+          setStudentData(data);
+        } catch (error) {
+          console.error('Error fetching student data:', error);
+          // Si no se pueden obtener los datos, continuar sin ellos
+        }
+      };
+      fetchStudentData();
+    }
+  }, [isOpen, user?.email]);
+
   const handleClose = () => {
     setCurrentStep(1);
     setAppointmentData({ psychologistId, date: selectedDate });
     setError('');
+    setStudentData(null);
     onClose();
   };
 
@@ -141,6 +164,7 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
             onContinue={handlePersonalDataComplete}
             selectedDate={selectedDate}
             selectedTime={appointmentData.time!}
+            userData={studentData || undefined}
           />
         );
       case 3:

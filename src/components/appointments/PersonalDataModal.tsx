@@ -21,6 +21,12 @@ interface PersonalDataModalProps {
   onContinue: (data: PersonalData) => void;
   selectedDate: string;
   selectedTime: string;
+  userData?: {
+    fullName: string;
+    email: string;
+    career?: string;
+    semester?: number;
+  };
 }
 
 export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
@@ -29,18 +35,19 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
   onBack,
   onContinue,
   selectedDate,
-  selectedTime
+  selectedTime,
+  userData
 }) => {
   const [formData, setFormData] = useState<PersonalData>({
     dni: '',
-    fullName: '',
+    fullName: userData?.fullName || '',
     age: '',
     gender: '',
     address: '',
-    studyProgram: '',
-    semester: '',
+    studyProgram: userData?.career || '',
+    semester: userData?.semester?.toString() || '',
     phone: '',
-    email: ''
+    email: userData?.email || ''
   });
 
   const [errors, setErrors] = useState<Partial<PersonalData>>({});
@@ -70,7 +77,14 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
   };
 
   const handleInputChange = (field: keyof PersonalData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // Validación especial para DNI y teléfono - solo números
+    if (field === 'dni' || field === 'phone') {
+      const numericValue = value.replace(/\D/g, '');
+      setFormData(prev => ({ ...prev, [field]: numericValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
+    
     // Limpiar error del campo
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
@@ -91,16 +105,20 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
     if (!formData.email.trim()) newErrors.email = 'El email es obligatorio';
 
     // Validaciones específicas
-    if (formData.dni && formData.dni.length < 8) {
-      newErrors.dni = 'El DNI debe tener al menos 8 dígitos';
+    if (formData.dni && formData.dni.length !== 8) {
+      newErrors.dni = 'El DNI debe tener exactamente 8 dígitos';
     }
 
-    if (formData.age && (parseInt(formData.age) < 16 || parseInt(formData.age) > 100)) {
-      newErrors.age = 'La edad debe estar entre 16 y 100 años';
+    if (formData.dni && !/^\d+$/.test(formData.dni)) {
+      newErrors.dni = 'El DNI debe contener solo números';
     }
 
-    if (formData.phone && !formData.phone.match(/^\+51\d{9}$/)) {
-      newErrors.phone = 'El teléfono debe tener formato +51 seguido de 9 dígitos';
+    if (formData.age && (parseInt(formData.age) < 15 || parseInt(formData.age) > 80)) {
+      newErrors.age = 'La edad debe estar entre 15 y 80 años';
+    }
+
+    if (formData.phone && !formData.phone.match(/^\d{9}$/)) {
+      newErrors.phone = 'El teléfono debe tener exactamente 9 dígitos';
     }
 
     if (formData.email && !formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
@@ -113,7 +131,12 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
 
   const handleContinue = () => {
     if (validateForm()) {
-      onContinue(formData);
+      // Agregar el prefijo +51 al teléfono antes de enviar
+      const dataToSend = {
+        ...formData,
+        phone: `+51${formData.phone}`
+      };
+      onContinue(dataToSend);
     }
   };
 
@@ -180,6 +203,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                     errors.dni ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="12345678"
+                  maxLength={8}
                 />
                 {errors.dni && <p className="text-red-500 text-xs mt-1">{errors.dni}</p>}
               </div>
@@ -197,6 +221,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                     errors.fullName ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="Juan Pérez García"
+                  readOnly={!!userData?.fullName}
                 />
                 {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
               </div>
@@ -214,8 +239,8 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                     errors.age ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="20"
-                  min="16"
-                  max="100"
+                  min="15"
+                  max="80"
                 />
                 {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
               </div>
@@ -268,6 +293,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     errors.studyProgram ? 'border-red-500' : 'border-gray-300'
                   }`}
+                  disabled={!!userData?.career}
                 >
                   <option value="">Seleccionar programa</option>
                   <option value="Administración de Servicios de Hostelería y Restaurantes">Administración de Servicios de Hostelería y Restaurantes</option>
@@ -295,6 +321,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     errors.semester ? 'border-red-500' : 'border-gray-300'
                   }`}
+                  disabled={!!userData?.semester}
                 >
                   <option value="">Seleccionar semestre</option>
                   {getAvailableSemesters().map(semester => (
@@ -311,15 +338,21 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Teléfono <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="+51987654321"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <span className="text-gray-500 text-sm">+51</span>
+                  </div>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    className={`w-full pl-12 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.phone ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="987654321"
+                    maxLength={9}
+                  />
+                </div>
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
               </div>
 
@@ -336,6 +369,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                     errors.email ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="juan.perez@email.com"
+                  readOnly={!!userData?.email}
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
