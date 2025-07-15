@@ -142,11 +142,12 @@ export const StudentCalendar: React.FC = () => {
   };
 
   const handleSelectSlot = (slotInfo: any) => {
-    // Aquí puedes implementar la lógica para agendar una nueva cita
     // slotInfo contiene la fecha y hora seleccionada
-    console.log('Slot seleccionado:', slotInfo);
-    // Por ejemplo, si quieres abrir un modal de agendamiento
-    // setSelectedDate(slotInfo.start); // Para seleccionar la fecha
+    if (slotInfo && slotInfo.start) {
+      // Ajuste para evitar desfase de zona horaria
+      const selected = new Date(slotInfo.start.getFullYear(), slotInfo.start.getMonth(), slotInfo.start.getDate());
+      setSelectedDate(selected);
+    }
   };
 
   const customFormats = {
