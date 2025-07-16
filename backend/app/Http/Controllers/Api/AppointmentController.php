@@ -160,6 +160,28 @@ class AppointmentController extends Controller
                 ], 422);
             }
 
+            // Configurar zona horaria de Perú
+            date_default_timezone_set('America/Lima');
+            $now = \Carbon\Carbon::now();
+            $appointmentDateTime = \Carbon\Carbon::parse($request->date . ' ' . $request->time);
+
+            // Validación 1: No permitir citas en el pasado (mismo día o días anteriores)
+            if ($appointmentDateTime->isPast()) {
+                return response()->json([
+                    'message' => 'No se pueden agendar citas en horarios pasados. Por favor, selecciona una fecha y hora futura.',
+                    'errors' => ['time' => ['Horario pasado no permitido']]
+                ], 422);
+            }
+
+            // Validación 2: Límite de agendamiento para el día actual (horario de corte: 13:10)
+            $cutoffTime = \Carbon\Carbon::parse($request->date . ' 13:10');
+            if ($appointmentDate->isToday() && $now->isAfter($cutoffTime)) {
+                return response()->json([
+                    'message' => 'El horario de agendamiento para el día actual ha finalizado (13:10). Por favor, agenda para un día futuro.',
+                    'errors' => ['date' => ['Horario de corte excedido']]
+                ], 422);
+            }
+
             // Validar que la hora esté entre 8:00 y 14:00 y sea un bloque de 45 minutos
             $allowedTimes = [
                 '08:00', '08:45', '09:30', '10:15', '11:00', '11:45', '12:30', '13:15'
@@ -266,15 +288,17 @@ class AppointmentController extends Controller
                 \App\Models\Notification::create([
                     'user_id' => $psychologist->id,
                     'type' => 'appointment',
-                    'title' => 'Nueva cita pendiente',
-                    'message' => "Tienes una nueva cita pendiente de aprobación para el estudiante {$user->name} ({$user->email}) el día {$appointment->fecha} a las {$appointment->hora}.",
+                    'title' => 'Nueva cita pendiente de aprobación',
+                    'message' => "El estudiante {$user->name} ({$user->email}) ha solicitado una cita para el día {$appointment->fecha} a las {$appointment->hora}. Motivo: {$appointment->motivo_consulta}. Por favor, revisa la solicitud y acepta o rechaza la cita desde tu panel de administración.",
                     'read' => false,
                     'data' => [
                         'appointment_id' => $appointment->id,
                         'student_name' => $user->name,
                         'student_email' => $user->email,
                         'date' => $appointment->fecha,
-                        'time' => $appointment->hora
+                        'time' => $appointment->hora,
+                        'reason' => $appointment->motivo_consulta,
+                        'status' => 'pendiente'
                     ]
                 ]);
             } catch (\Exception $e) {
@@ -651,6 +675,8 @@ class AppointmentController extends Controller
 
             // Configurar zona horaria de Perú
             date_default_timezone_set('America/Lima');
+            $now = \Carbon\Carbon::now();
+            $appointmentDate = \Carbon\Carbon::parse($date);
             
             // Verificar que no sea un día pasado usando zona horaria de Perú
             $today = now()->format('Y-m-d');
@@ -670,6 +696,22 @@ class AppointmentController extends Controller
             $availableTimes = [
                 '08:00', '08:45', '09:30', '10:15', '11:00', '11:45', '12:30', '13:15'
             ];
+
+            // Si es el día actual, filtrar horarios pasados y aplicar límite de corte
+            if ($appointmentDate->isToday()) {
+                $currentTime = $now->format('H:i');
+                $cutoffTime = '13:10';
+                
+                // Si ya pasó el horario de corte, no mostrar horarios para hoy
+                if ($currentTime > $cutoffTime) {
+                    return response()->json([]);
+                }
+                
+                // Filtrar horarios que ya pasaron
+                $availableTimes = array_filter($availableTimes, function($time) use ($currentTime) {
+                    return $time > $currentTime;
+                });
+            }
 
             // Obtener citas existentes para el psicólogo en esa fecha
             $existingAppointments = Cita::where('psychologist_id', $psychologistId)

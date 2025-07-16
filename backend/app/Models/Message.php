@@ -262,20 +262,20 @@ class Message extends Model
      */
     public static function getStats($userId = null)
     {
-        $query = self::query();
+        $baseQuery = self::query();
         
         if ($userId) {
-            $query->where('recipient_id', $userId);
+            $baseQuery->where('recipient_id', $userId);
         }
 
         return [
-            'total' => $query->count(),
-            'unread' => $query->where('read', false)->count(),
-            'read' => $query->where('read', true)->count(),
-            'urgent' => $query->where('priority', 'urgent')->count(),
-            'high' => $query->where('priority', 'high')->count(),
-            'normal' => $query->where('priority', 'normal')->count(),
-            'low' => $query->where('priority', 'low')->count(),
+            'total' => (clone $baseQuery)->count(),
+            'unread' => (clone $baseQuery)->where('read', false)->count(),
+            'read' => (clone $baseQuery)->where('read', true)->count(),
+            'urgent' => (clone $baseQuery)->where('priority', 'urgent')->count(),
+            'high' => (clone $baseQuery)->where('priority', 'high')->count(),
+            'normal' => (clone $baseQuery)->where('priority', 'normal')->count(),
+            'low' => (clone $baseQuery)->where('priority', 'low')->count(),
         ];
     }
 

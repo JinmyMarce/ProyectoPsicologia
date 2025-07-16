@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class MessageController extends Controller
@@ -381,14 +382,26 @@ class MessageController extends Controller
     public function stats(): JsonResponse
     {
         try {
+            Log::info('MessageController::stats - Iniciando método');
+            
             $user = Auth::user();
+            Log::info('MessageController::stats - Usuario autenticado', [
+                'user_id' => $user ? $user->id : null,
+                'user_email' => $user ? $user->email : null,
+                'auth_check' => Auth::check()
+            ]);
+            
             if (!$user) {
+                Log::warning('MessageController::stats - Usuario no autenticado');
                 return response()->json([
                     'success' => false,
                     'message' => 'Usuario no autenticado'
                 ], 401);
             }
+            
+            Log::info('MessageController::stats - Llamando a Message::getStats', ['user_id' => $user->id]);
             $stats = Message::getStats($user->id);
+            Log::info('MessageController::stats - Stats obtenidos', ['stats' => $stats]);
 
             return response()->json([
                 'success' => true,
@@ -396,6 +409,10 @@ class MessageController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('MessageController::stats - Error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener estadísticas: ' . $e->getMessage()

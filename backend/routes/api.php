@@ -212,6 +212,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/recipients', [MessageController::class, 'getRecipients']);
     });
 
+    // Ruta específica para stats de mensajes (para debugging)
+    Route::get('/messages-stats-debug', [MessageController::class, 'stats']);
+
 });
 
 // Ruta de prueba para verificar que la API funciona
@@ -508,29 +511,72 @@ Route::get('/debug/server-status', function () {
     }
 });
 
-// Endpoint temporal para estadísticas de mensajes
-Route::get('/messages/stats', function () {
-    return response()->json([
-        'success' => true,
-        'data' => [
-            'unread' => 0,
-            'total' => 0
-        ]
-    ]);
+// Endpoint de prueba para diagnosticar stats de mensajes
+Route::get('/debug/messages-stats-test', function () {
+    try {
+        // Verificar si la tabla messages existe
+        $messagesTableExists = \Illuminate\Support\Facades\Schema::hasTable('messages');
+        
+        if (!$messagesTableExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La tabla messages no existe'
+            ], 500);
+        }
+        
+        // Obtener estadísticas básicas
+        $totalMessages = \App\Models\Message::count();
+        $unreadMessages = \App\Models\Message::where('read', false)->count();
+        $readMessages = \App\Models\Message::where('read', true)->count();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Stats de mensajes obtenidos correctamente',
+            'data' => [
+                'total' => $totalMessages,
+                'unread' => $unreadMessages,
+                'read' => $readMessages,
+                'table_exists' => $messagesTableExists
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener stats de mensajes',
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
 });
 
-// Endpoint temporal para obtener mensajes
-Route::get('/messages', function () {
-    return response()->json([
-        'success' => true,
-        'data' => []
-    ]);
-});
-
-// Endpoint temporal para mensajes enviados
-Route::get('/messages/sent', function () {
-    return response()->json([
-        'success' => true,
-        'data' => []
-    ]);
+// Endpoint para simular exactamente el controlador de mensajes
+Route::get('/debug/messages-controller-test', function (Request $request) {
+    try {
+        // Simular exactamente el método stats del MessageController
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado',
+                'auth_check' => Auth::check(),
+                'headers' => $request->headers->all()
+            ], 401);
+        }
+        
+        // Usar exactamente el mismo método del modelo
+        $stats = \App\Models\Message::getStats($user->id);
+        
+        return response()->json([
+            'success' => true,
+            'data' => $stats,
+            'user_id' => $user->id,
+            'user_email' => $user->email
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener estadísticas: ' . $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
 }); 

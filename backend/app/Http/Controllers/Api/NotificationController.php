@@ -314,13 +314,20 @@ class NotificationController extends Controller
                 ], 404);
             }
 
-            // Crear notificación para el estudiante
+            // Crear notificación profesional para el estudiante
             $notification = Notification::create([
                 'user_id' => $appointment->student_id,
                 'type' => 'appointment',
-                'title' => 'Cita Aprobada',
-                'message' => "Tu cita del {$appointment->fecha} a las {$appointment->hora} ha sido aprobada por el psicólogo. Te esperamos en el consultorio.",
+                'title' => 'Cita aprobada',
+                'message' => "¡Tu cita ha sido aprobada! La cita con el psicólogo {$appointment->psychologist->name} está programada para el día {$appointment->fecha} a las {$appointment->hora}. Por favor, preséntate puntualmente. Si tienes dudas, revisa tus mensajes o contacta a tu psicólogo.",
                 'read' => false,
+                'data' => [
+                    'appointment_id' => $appointment->id,
+                    'date' => $appointment->fecha,
+                    'time' => $appointment->hora,
+                    'psychologist_name' => $appointment->psychologist->name,
+                    'status' => 'aprobada'
+                ]
             ]);
 
             return response()->json([
@@ -362,13 +369,21 @@ class NotificationController extends Controller
                 ], 404);
             }
 
-            // Crear notificación para el estudiante
+            // Crear notificación profesional para el estudiante
             $notification = Notification::create([
                 'user_id' => $appointment->student_id,
                 'type' => 'appointment',
-                'title' => 'Cita Rechazada',
-                'message' => "Tu cita del {$appointment->fecha} a las {$appointment->hora} ha sido rechazada. Razón: {$request->reason}. Por favor, agenda una nueva cita.",
+                'title' => 'Cita rechazada',
+                'message' => "Lamentamos informarte que tu cita programada para el día {$appointment->fecha} a las {$appointment->hora} con el psicólogo {$appointment->psychologist->name} ha sido rechazada. Motivo: {$request->reason}. Por favor, agenda una nueva cita o consulta tus mensajes para más información.",
                 'read' => false,
+                'data' => [
+                    'appointment_id' => $appointment->id,
+                    'date' => $appointment->fecha,
+                    'time' => $appointment->hora,
+                    'psychologist_name' => $appointment->psychologist->name,
+                    'status' => 'rechazada',
+                    'reason' => $request->reason
+                ]
             ]);
 
             return response()->json([
