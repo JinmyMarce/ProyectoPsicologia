@@ -208,8 +208,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/mark-all-read', [MessageController::class, 'markAllAsRead']);
         Route::delete('/{id}', [MessageController::class, 'destroy']);
         Route::get('/conversation/{userId}', [MessageController::class, 'conversation']);
-        Route::get('/stats', [MessageController::class, 'stats']);
         Route::get('/recipients', [MessageController::class, 'getRecipients']);
+        Route::get('/stats', [MessageController::class, 'stats']);
     });
 
     // Ruta específica para stats de mensajes (para debugging)

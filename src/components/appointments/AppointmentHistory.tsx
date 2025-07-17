@@ -110,12 +110,12 @@ export function AppointmentHistory() {
     const csvContent = [
       headers.join(','),
       ...filteredAppointments.map(app => [
-        new Date(app.date).toLocaleDateString('es-ES'),
+        parseLocalDate(app.date).toLocaleDateString('es-ES'),
         app.time,
         app.psychologist_name,
         `"${app.reason}"`,
         getStatusText(app.status),
-        new Date(app.created_at).toLocaleDateString('es-ES')
+        parseLocalDate(app.created_at).toLocaleDateString('es-ES')
       ].join(','))
     ].join('\n');
 
@@ -175,14 +175,10 @@ export function AppointmentHistory() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  function parseLocalDate(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
 
   // Filtrar citas
   const filteredAppointments = appointments.filter(appointment => {
@@ -198,7 +194,7 @@ export function AppointmentHistory() {
 
   // Ordenar por fecha más reciente
   const sortedAppointments = filteredAppointments.sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
+    parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime()
   );
 
   const stats = {
@@ -353,7 +349,12 @@ export function AppointmentHistory() {
                       <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
                         <span className="flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
-                          {formatDate(appointment.date)}
+                          {parseLocalDate(appointment.date).toLocaleDateString('es-ES', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
                         </span>
                         <span className="flex items-center">
                           <Clock className="w-4 h-4 mr-1" />
@@ -423,7 +424,12 @@ export function AppointmentHistory() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Fecha</p>
-                <p className="text-base font-semibold text-gray-900">{formatDate(selectedAppointment.date)}</p>
+                <p className="text-base font-semibold text-gray-900">{parseLocalDate(selectedAppointment.date).toLocaleDateString('es-ES', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Hora</p>
@@ -450,7 +456,7 @@ export function AppointmentHistory() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Creada</p>
                 <p className="text-base text-gray-900">
-                  {new Date(selectedAppointment.created_at).toLocaleDateString('es-ES')}
+                  {parseLocalDate(selectedAppointment.created_at).toLocaleDateString('es-ES')}
                 </p>
               </div>
             </div>

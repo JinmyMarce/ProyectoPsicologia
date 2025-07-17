@@ -17,6 +17,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { PageHeader } from '../ui/PageHeader';
+import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { format, parse, startOfWeek, getDay, addDays, isAfter, isBefore, startOfDay } from 'date-fns';
+import esES from 'date-fns/locale/es';
 
 interface Student {
   id: number;
@@ -162,6 +166,15 @@ export function DirectAppointmentScheduler() {
     });
   };
 
+  const locales = { 'es': esES };
+  const localizer = dateFnsLocalizer({
+    format,
+    parse,
+    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+    getDay,
+    locales,
+  });
+
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -267,22 +280,39 @@ export function DirectAppointmentScheduler() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+            <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Fecha de la cita
               </label>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                min={getMinDate()}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
+              <BigCalendar
+                localizer={localizer}
+                events={[]}
+                startAccessor="start"
+                endAccessor="end"
+                selectable
+                style={{ height: 400, background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #e5e7eb', fontFamily: 'Inter, sans-serif' }}
+                views={['month']}
+                onSelectSlot={(slotInfo) => setSelectedDate(slotInfo.start.toISOString().split('T')[0])}
+                dayPropGetter={(date) => {
+                  // Lógica de colores y restricciones igual que el calendario mensual
+                  const today = new Date();
+                  const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
+                  const todayStart = startOfDay(peruTime);
+                  const futureLimit = addDays(todayStart, 14);
+                  const day = date.getDay();
+                  if (day === 0 || day === 6) {
+                    return { style: { backgroundColor: 'rgba(253, 186, 116, 0.3)', color: '#d97706', pointerEvents: 'none', cursor: 'not-allowed', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(253, 186, 116, 0.15)', border: 'none' } };
+                  }
+                  if (isBefore(date, todayStart)) {
+                    return { style: { backgroundColor: 'rgba(196, 181, 253, 0.3)', color: '#7c3aed', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(124, 58, 237, 0.15)', border: 'none', cursor: 'not-allowed' } };
+                  }
+                  if (isAfter(date, futureLimit)) {
+                    return { style: { backgroundColor: 'rgba(253, 224, 71, 0.3)', color: '#a16207', fontWeight: 600, opacity: 0.7, borderRadius: 12, boxShadow: '0 4px 12px rgba(253, 224, 71, 0.15)', border: 'none' } };
+                  }
+                  return { style: { backgroundColor: 'rgba(134, 239, 172, 0.3)', color: '#059669', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)', border: 'none', cursor: 'pointer' } };
+                }}
+                components={{ event: () => null }}
               />
-              {selectedDate && (
-                <p className="text-sm text-gray-600 mt-1">
-                  {formatDate(selectedDate)}
-                </p>
-              )}
             </div>
 
             <div>

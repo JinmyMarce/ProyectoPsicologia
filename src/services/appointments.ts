@@ -66,6 +66,17 @@ export interface Psychologist {
   available: boolean;
 }
 
+export interface Student {
+  id: number;
+  name: string;
+  email: string;
+  dni: string;
+  career: string;
+  semester: string;
+  phone?: string;
+  student_id?: string;
+}
+
 export interface TimeSlot {
   id: number;
   time: string;
@@ -313,5 +324,24 @@ export const getPendingAppointments = async (): Promise<Appointment[]> => {
   } catch (error: unknown) {
     console.error('Error fetching pending appointments:', error);
     throw new Error('Error al obtener las citas pendientes');
+  }
+};
+
+// Buscar estudiante por DNI o email (psicólogo)
+export const searchStudent = async (identifier: string): Promise<Student[]> => {
+  try {
+    const response = await apiClient.get('/psychologist-dashboard/students/search', {
+      params: { identifier }
+    });
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error searching student:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
+    }
+    throw new Error('Error al buscar el estudiante');
   }
 }; 

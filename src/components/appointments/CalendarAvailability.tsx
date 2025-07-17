@@ -44,7 +44,10 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
   const [monthDays, setMonthDays] = useState<DayAvailability[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1); // Comenzar desde este mes actual
+  });
 
   useEffect(() => {
     if (psychologistId) {
@@ -59,8 +62,6 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
   }, [psychologistId, monthDays.length]);
 
   const loadMonthAvailability = async () => {
-    if (!psychologistId) return;
-    
     setLoading(true);
     setError(null);
     
@@ -77,23 +78,36 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
       // Calcular límite de 2 semanas (14 días) desde hoy
       const futureLimit = addDays(todayStart, 14);
       
+      // Verificar horario de corte para el día actual (13:10)
+      const currentTime = peruTime.getHours() * 60 + peruTime.getMinutes(); // Convertir a minutos
+      const cutoffTime = 13 * 60 + 10; // 13:10 en minutos
+      const isAfterCutoff = currentTime > cutoffTime;
+      
       // Generar días del mes con validaciones mejoradas
       const days: DayAvailability[] = [];
       
       for (let d = 1; d <= lastDay.getDate(); d++) {
         const date = new Date(year, month, d);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(date);
         const isToday = date.toDateString() === peruTime.toDateString();
         const isPast = isBefore(date, todayStart) && !isToday;
         const isFutureLimit = isAfter(date, futureLimit);
         
-        // Verificar si es fin de semana (sábado = 6, domingo = 0)
+        // Verificar si es fin de semana (sábado = 6, domingo = 0) - BLOQUEADO PERMANENTEMENTE
         const dayOfWeek = date.getDay();
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
         
+        // Aplicar restricciones adicionales para el día actual
+        let isTodayBlocked = false;
+        if (isToday && isAfterCutoff) {
+          isTodayBlocked = true;
+        }
+        
         // Solo los días laborables (lunes a viernes), futuros y dentro del límite están disponibles
-        let isAvailable = !isPast && !isWeekend && !isFutureLimit;
-        let isBlocked = isWeekend || isPast || isFutureLimit;
+        // Los fines de semana están BLOQUEADOS PERMANENTEMENTE para todos los años
+        // El día actual se bloquea si ya pasó el horario de corte
+        let isAvailable = !isPast && !isWeekend && !isFutureLimit && !isTodayBlocked;
+        let isBlocked = isWeekend || isPast || isFutureLimit || isTodayBlocked;
         let availableSlots = 0;
         
         days.push({ 
@@ -121,13 +135,14 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
     if (!psychologistId) return;
     
     try {
-      // Verificar si es fin de semana antes de hacer la llamada
-      const dateObj = new Date(date);
+      // Verificar si es fin de semana antes de hacer la llamada - BLOQUEADO PERMANENTEMENTE
+      const dateObj = parseLocalDate(date);
       const dayOfWeek = dateObj.getDay();
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
       
       if (isWeekend) {
         // Para fines de semana, marcar como no disponible sin hacer llamada al servidor
+        // Los fines de semana están BLOQUEADOS PERMANENTEMENTE para todos los años
         setMonthDays(prev => prev.map(day => 
           day.date === date 
             ? { ...day, isAvailable: false, availableSlots: 0 }
@@ -140,7 +155,7 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
       const today = new Date();
       const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
       const todayStart = startOfDay(peruTime);
-      const dateToCheck = new Date(date);
+      const dateToCheck = parseLocalDate(date);
       
       if (isBefore(dateToCheck, todayStart)) {
         // Para días pasados, marcar como no disponible
@@ -205,13 +220,14 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
     // Precargar disponibilidad para los próximos 14 días (límite de 2 semanas)
     for (let i = 0; i < 14; i++) {
       const date = addDays(todayStart, i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = toLocalDateString(date);
       
-      // Verificar si es día laborable (lunes a viernes)
+      // Verificar si es día laborable (lunes a viernes) - BLOQUEADO PERMANENTEMENTE
       const dayOfWeek = date.getDay();
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
       
       // Solo verificar si el día está en el mes actual y es laborable
+      // Los fines de semana están BLOQUEADOS PERMANENTEMENTE para todos los años
       if (date.getMonth() === currentMonth.getMonth() && 
           date.getFullYear() === currentMonth.getFullYear() && 
           !isWeekend) {
@@ -220,14 +236,15 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
     }
   };
 
-  const handleDateClick = async (date: string, isAvailable: boolean) => {
-    // Verificar si es fin de semana
-    const dateObj = new Date(date);
+  const handleDateClick = async (slotInfo: any) => {
+    // Verificar si es fin de semana - BLOQUEADO PERMANENTEMENTE
+    const dateStr = toLocalDateString(slotInfo.start);
+    const dateObj = parseLocalDate(dateStr);
     const dayOfWeek = dateObj.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     
     if (isWeekend) {
-      setError('No se pueden agendar citas en fines de semana. Solo se atiende de lunes a viernes.');
+      setError('❌ FECHA NO VÁLIDA: No se pueden agendar citas en fines de semana. Solo se atiende de lunes a viernes.');
       return;
     }
     
@@ -237,28 +254,48 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
     const todayStart = startOfDay(peruTime);
     
     if (isBefore(dateObj, todayStart)) {
-      setError('No se pueden agendar citas en días pasados.');
+      setError('❌ FECHA NO VÁLIDA: No se pueden agendar citas en días pasados. Solo se permiten fechas futuras.');
       return;
     }
     
     // Verificar límite de 2 semanas
     const futureLimit = addDays(todayStart, 14);
     if (isAfter(dateObj, futureLimit)) {
-      setError('Solo se pueden agendar citas hasta 2 semanas en adelante.');
+      setError('❌ FECHA NO VÁLIDA: Solo se pueden agendar citas hasta 2 semanas en adelante. Esta fecha está fuera del límite permitido.');
       return;
     }
     
-    if (isAvailable) {
-      // Verificar disponibilidad real antes de seleccionar
-      const realAvailability = await checkDateAvailability(date);
-      if (realAvailability) {
-        onDateSelect(date);
+    // Verificar horario de corte para el día actual (13:10)
+    const isToday = dateObj.toDateString() === peruTime.toDateString();
+    if (isToday) {
+      const currentTime = peruTime.getHours() * 60 + peruTime.getMinutes(); // Convertir a minutos
+      const cutoffTime = 13 * 60 + 10; // 13:10 en minutos
+      
+      if (currentTime > cutoffTime) {
+        setError('❌ FECHA NO VÁLIDA: El horario de agendamiento para el día actual ha finalizado (13:10). Por favor, selecciona un día futuro.');
+        return;
       }
+    }
+    
+    const day = monthDays.find(d => d.date === dateStr);
+    if (day && day.isAvailable) {
+      onDateSelect(dateStr);
     }
   };
 
   const goToPreviousMonth = () => {
-    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    const today = new Date();
+    const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    setCurrentMonth(prev => {
+      const previousMonth = new Date(prev.getFullYear(), prev.getMonth() - 1, 1);
+      // No permitir navegar a meses anteriores al mes actual
+      if (previousMonth < currentMonthStart) {
+        setError('❌ FECHA NO VÁLIDA: No puedes navegar a meses anteriores. Solo se permiten fechas desde este mes en adelante.');
+        return prev;
+      }
+      return previousMonth;
+    });
   };
 
   const goToNextMonth = () => {
@@ -266,7 +303,8 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
   };
 
   const goToToday = () => {
-    setCurrentMonth(new Date());
+    const today = new Date();
+    setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
   };
 
   const monthNames = [
@@ -291,14 +329,14 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
     '2025-07-28', '2025-07-29', '2025-07-30'
   ];
 
-  // Transformar días a eventos para Big Calendar
-  const events: Event[] = monthDays.map(day => {
+  // Transformar días a eventos para FullCalendar
+  const events: any[] = monthDays.map(day => {
     if (diasOcupados.includes(day.date)) {
       return {
         id: day.date,
         title: '',
-        start: new Date(day.date),
-        end: new Date(day.date),
+        start: parseLocalDateTime(day.date, '00:00'),
+        end: parseLocalDateTime(day.date, '23:59'),
         allDay: true,
         resource: { ...day, ocupado: true },
       };
@@ -307,17 +345,17 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
       return {
         id: day.date,
         title: '',
-        start: new Date(day.date),
-        end: new Date(day.date),
+        start: parseLocalDateTime(day.date, '00:00'),
+        end: parseLocalDateTime(day.date, '23:59'),
         allDay: true,
         resource: { ...day, ocupado: false },
       };
     }
     return null;
-  }).filter(Boolean) as Event[];
+  }).filter(Boolean);
 
   const handleSelectSlot = (slotInfo: any) => {
-    const dateStr = slotInfo.start.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(slotInfo.start);
     const day = monthDays.find(d => d.date === dateStr);
     if (day && day.isAvailable) {
       onDateSelect(dateStr);
@@ -338,12 +376,12 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
     noEventsInRange: 'No hay disponibilidad en este rango',
   };
 
-  // Nuevos colores modernos y atractivos con transparencia
-  const COLOR_DISPONIBLE = 'rgba(16, 185, 129, 0.15)'; // Verde transparente
-  const COLOR_OCUPADO = 'rgba(220, 38, 38, 0.15)'; // Rojo transparente
-  const COLOR_BLOQUEADO = 'rgba(156, 163, 175, 0.15)'; // Gris transparente
-  const COLOR_PASADO = 'rgba(107, 114, 128, 0.15)'; // Gris oscuro transparente
-  const COLOR_FUTURO_LIMITE = 'rgba(245, 158, 11, 0.15)'; // Naranja transparente
+  // Colores claros y suaves con transparencia
+  const COLOR_DISPONIBLE = 'rgba(134, 239, 172, 0.3)'; // Verde claro transparente
+  const COLOR_OCUPADO = 'rgba(252, 165, 165, 0.3)'; // Rojo claro transparente
+  const COLOR_BLOQUEADO = 'rgba(253, 186, 116, 0.3)'; // Naranja claro para fin de semana
+  const COLOR_PASADO = 'rgba(196, 181, 253, 0.3)'; // Púrpura claro para día pasado
+  const COLOR_FUTURO_LIMITE = 'rgba(253, 224, 71, 0.3)'; // Amarillo claro transparente
   const COLOR_TEXTO_BLOQUEADO = '#6b7280';
   const COLOR_TEXTO_NORMAL = '#1f2937';
   const COLOR_TEXTO_OCUPADO = '#dc2626';
@@ -357,43 +395,85 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
     date1.getMonth() === date2.getMonth() &&
     date1.getDate() === date2.getDate();
 
+  function toLocalDateString(date: Date): string {
+    return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}`;
+  }
+
+  function parseLocalDate(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  function parseLocalDateTime(dateStr: string, timeStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const [hour, minute] = timeStr.split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute);
+  }
+
   return (
     <Card className="p-6 bg-gradient-to-br from-white to-gray-50">
       <div className="mb-6">
-        <h3 className="text-xl font-bold flex items-center mb-2 text-gray-800">
-          <Calendar className="w-6 h-6 mr-3 text-[#8e161a]" />
-          Selecciona un día disponible
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold flex items-center text-gray-800">
+            <Calendar className="w-6 h-6 mr-3 text-[#8e161a]" />
+            Selecciona un día disponible
+          </h3>
+          {/* Elimino aquí la barra de navegación personalizada */}
+        </div>
         <div className="flex items-center gap-2 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
           <Info className="w-4 h-4 text-blue-600" />
           <span>Solo puedes agendar citas hasta 2 semanas en adelante, de lunes a viernes</span>
         </div>
       </div>
-      
       <BigCalendar
         localizer={localizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
         selectable
-        style={{ 
-          height: 500, 
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', 
-          borderRadius: 24, 
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08)', 
-          border: '1px solid #e2e8f0', 
-          fontFamily: 'Inter, sans-serif', 
-          padding: 16,
-          overflow: 'hidden'
-        }}
+        style={{ height: 600, background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #e5e7eb', fontFamily: 'Inter, sans-serif' }}
         messages={customMessages}
-        formats={customFormats}
+        formats={{
+          ...customFormats,
+          monthHeader: (date: Date) => {
+            return date.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+          },
+          weekdayFormat: (date: Date) => {
+            return date.toLocaleString('es-ES', { weekday: 'long' });
+          }
+        }}
         views={['month']}
-        onSelectSlot={handleSelectSlot}
+        onSelectSlot={handleDateClick}
         eventPropGetter={() => ({ style: { display: 'none' } }) // Ocultar eventos visuales, solo fondo de celda
         }
         dayPropGetter={(date: any) => {
-          const dateStr = date.toISOString().split('T')[0];
+          const month = currentMonth.getMonth();
+          const year = currentMonth.getFullYear();
+          if (
+            date.getFullYear() < year ||
+            (date.getFullYear() === year && date.getMonth() < month)
+          ) {
+            return { style: { backgroundColor: 'transparent', color: COLOR_TEXTO_NORMAL } };
+          }
+          const today = new Date();
+          const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
+          const todayStart = startOfDay(peruTime);
+          const twoWeeksLimit = addDays(todayStart, 14);
+          // Solo colorea el primer día del límite
+          if (
+            date.getFullYear() === twoWeeksLimit.getFullYear() &&
+            date.getMonth() === twoWeeksLimit.getMonth() &&
+            date.getDate() === twoWeeksLimit.getDate()
+          ) {
+            return { style: { backgroundColor: COLOR_FUTURO_LIMITE, color: '#a16207', opacity: 1, cursor: 'not-allowed', fontWeight: 600 } };
+          }
+          // Días después del límite: sin color especial
+          if (isAfter(date, twoWeeksLimit)) {
+            return { style: { backgroundColor: 'transparent', color: COLOR_TEXTO_NORMAL, cursor: 'not-allowed', opacity: 0.7 } };
+          }
+          if (isBefore(date, todayStart) && date.getMonth() === month && date.getFullYear() === year) {
+            return { style: { backgroundColor: COLOR_PASADO, color: COLOR_TEXTO_NORMAL } };
+          }
+          const dateStr = toLocalDateString(date);
           const dayData = monthDays.find(d => d.date === dateStr);
           let style: any = {
             fontWeight: 700,
@@ -417,41 +497,46 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
             zIndex: 0
           };
 
-          // Fin de semana
-          if (date.getDay() === 0 || date.getDay() === 6) {
-            style.background = COLOR_BLOQUEADO;
-            style.color = COLOR_TEXTO_BLOQUEADO;
-            style.pointerEvents = 'none';
-            style.opacity = 0.7;
-            style.cursor = 'not-allowed';
-          } else if (dayData?.isPast) {
-            style.background = COLOR_PASADO;
-            style.color = COLOR_TEXTO_BLOQUEADO;
-            style.cursor = 'not-allowed';
-            style.opacity = 0.7;
-          } else if (dayData?.isFutureLimit) {
-            style.background = COLOR_FUTURO_LIMITE;
-            style.color = COLOR_TEXTO_NORMAL;
-            style.cursor = 'not-allowed';
-            style.opacity = 0.8;
-          } else if (dayData?.isAvailable) {
-            style.background = COLOR_DISPONIBLE;
-            style.color = COLOR_TEXTO_NORMAL;
-            style.cursor = 'pointer';
-            style.opacity = 1;
-            style.boxShadow = '0 4px 16px rgba(16,185,129,0.10)';
-          } else if (dayData && !dayData.isAvailable) {
-            style.background = COLOR_OCUPADO;
-            style.color = COLOR_TEXTO_OCUPADO;
-            style.cursor = 'not-allowed';
-            style.opacity = 1;
-            style.boxShadow = '0 4px 16px rgba(220,38,38,0.10)';
-          }
-
-          // Día actual
+          // Aplicar colores según el estado del día (excepto para el día actual)
           if (isSameDay(date, today)) {
+            // Para el día actual: solo borde azul, sin color de fondo
+            style.background = 'transparent';
+            style.color = COLOR_TEXTO_NORMAL;
             style.border = `2px solid ${COLOR_BORDE_ACTUAL}`;
-            style.boxShadow = `0 0 0 2px rgba(59, 130, 246, 0.10)`;
+            style.boxShadow = `0 4px 12px rgba(59, 130, 246, 0.3)`;
+            style.cursor = dayData?.isAvailable ? 'pointer' : 'not-allowed';
+            style.opacity = 1;
+          } else {
+            // Para otros días: aplicar colores normales
+            if (dayData?.isPast) {
+              style.background = COLOR_PASADO;
+              style.color = '#7c3aed'; // Púrpura para día pasado
+              style.cursor = 'not-allowed';
+              style.opacity = 1;
+            } else if (dayData?.isFutureLimit) {
+              style.background = COLOR_FUTURO_LIMITE;
+              style.color = '#a16207'; // Amarillo oscuro para fuera de límite
+              style.cursor = 'not-allowed';
+              style.opacity = 1;
+            } else if (dayData?.isBlocked) {
+              style.background = COLOR_BLOQUEADO;
+              style.color = '#d97706'; // Naranja claro para fin de semana
+              style.cursor = 'not-allowed';
+              style.opacity = 1;
+            } else if (dayData?.isAvailable) {
+              style.background = COLOR_DISPONIBLE;
+              style.color = '#059669'; // Verde oscuro para disponible
+              style.cursor = 'pointer';
+              style.opacity = 1;
+              style.boxShadow = '0 4px 16px rgba(16,185,129,0.10)';
+            } else {
+              // Para días que no están disponibles pero no están bloqueados (ocupados)
+              style.background = COLOR_OCUPADO;
+              style.color = '#b91c1c'; // Rojo oscuro para ocupado
+              style.cursor = 'not-allowed';
+              style.opacity = 1;
+              style.boxShadow = '0 4px 16px rgba(220,38,38,0.10)';
+            }
           }
 
           // Efecto hover solo para días disponibles
@@ -482,23 +567,21 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
             <h5 className="text-sm font-medium text-gray-700 mb-3">Estados principales</h5>
             <div className="space-y-2">
               <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_DISPONIBLE, color: '#065f46'}}>
-                  15
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Disponible</span>
-                  <p className="text-xs text-gray-500">Puedes agendar cita</p>
-                </div>
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_DISPONIBLE, color: '#059669'}}>
               </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_OCUPADO, color: '#991b1b'}}>
-                  20
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Ocupado</span>
-                  <p className="text-xs text-gray-500">No hay horarios disponibles</p>
-                </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Disponible</span>
+                <p className="text-xs text-gray-500">Puedes agendar cita</p>
               </div>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_OCUPADO, color: '#b91c1c'}}>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Ocupado</span>
+                <p className="text-xs text-gray-500">No hay horarios disponibles</p>
+              </div>
+            </div>
             </div>
           </div>
           
@@ -506,24 +589,22 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
           <div className="space-y-3">
             <h5 className="text-sm font-medium text-gray-700 mb-3">Restricciones</h5>
             <div className="space-y-2">
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_BLOQUEADO, color: '#374151'}}>
-                  22
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Fin de semana</span>
-                  <p className="text-xs text-gray-500">No se atiende</p>
-                </div>
+                          <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_BLOQUEADO, color: '#d97706'}}>
               </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_PASADO, color: '#374151'}}>
-                  10
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Día pasado</span>
-                  <p className="text-xs text-gray-500">No disponible</p>
-                </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Fin de semana</span>
+                <p className="text-xs text-gray-500">No se atiende</p>
               </div>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_PASADO, color: '#7c3aed'}}>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Día pasado</span>
+                <p className="text-xs text-gray-500">No disponible</p>
+              </div>
+            </div>
             </div>
           </div>
           
@@ -532,8 +613,7 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
             <h5 className="text-sm font-medium text-gray-700 mb-3">Límites de tiempo</h5>
             <div className="space-y-2">
               <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FUTURO_LIMITE, color: '#92400e'}}>
-                  30
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FUTURO_LIMITE, color: '#a16207'}}>
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-700">Fuera de límite</span>
@@ -542,7 +622,6 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
               </div>
               <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border-2 border-blue-500 text-blue-600">
-                  15
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-700">Día actual</span>
@@ -573,9 +652,12 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
       </div>
       
       {error && (
-        <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-          <AlertCircle className="w-5 h-5 mr-3" />
-          <p className="text-sm font-medium">{error}</p>
+        <div className="mt-4 bg-red-50 border-2 border-red-300 text-red-700 px-6 py-4 rounded-xl flex items-center shadow-lg animate-pulse">
+          <AlertCircle className="w-6 h-6 mr-4 flex-shrink-0" />
+          <div>
+            <p className="text-lg font-bold">{error}</p>
+            <p className="text-sm mt-1">Por favor, selecciona una fecha válida</p>
+          </div>
         </div>
       )}
     </Card>

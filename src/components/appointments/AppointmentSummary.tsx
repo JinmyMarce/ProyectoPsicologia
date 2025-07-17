@@ -44,6 +44,11 @@ interface AppointmentSummaryProps {
   isFirstAppointment: boolean;
 }
 
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export const AppointmentSummary: React.FC<AppointmentSummaryProps> = ({
   psychologist,
   date,
@@ -83,7 +88,7 @@ export const AppointmentSummary: React.FC<AppointmentSummaryProps> = ({
           </h4>
           <div className="space-y-1">
             <p className="text-sm font-medium text-gray-900">
-              {new Date(date).toLocaleDateString('es-ES', {
+              {parseLocalDate(date).toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',

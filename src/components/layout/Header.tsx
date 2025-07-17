@@ -7,6 +7,7 @@ import { getNotificationStats } from '../../services/notifications';
 import { NotificationPanel } from '../notifications/NotificationPanel';
 import { messageService } from '../../services/messages';
 import MessagePanel from '../messages/MessagePanel';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -15,6 +16,7 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(notifications);
   const [loading, setLoading] = useState(false);
@@ -24,6 +26,10 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
   const [showMessages, setShowMessages] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const messageRef = useRef<HTMLDivElement>(null);
+
+  // Estados para el menú de usuario
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Cargar estadísticas de notificaciones y mensajes
   useEffect(() => {
@@ -55,6 +61,9 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
       if (messageRef.current && !messageRef.current.contains(event.target as Node)) {
         setShowMessages(false);
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -79,45 +88,43 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
   };
 
   return (
-    <header className="bg-granate text-blanco shadow-sm border-b border-gris-medio">
-      <div className="flex items-center justify-between px-4 h-16">
-        <div className="flex items-center space-x-4">
+    <header className="bg-[#8e161a] text-white shadow-lg border-b border-[#6e1014] sticky top-0 z-50 h-20 md:h-24 flex items-center">
+      <div className="flex items-center justify-between px-0 h-full max-w-7xl mx-auto w-full">
+        <div className="flex items-center space-x-4 pl-0">
           <Button
             variant="ghost"
-            size="sm"
+            size="lg"
             onClick={onMenuClick}
-            className="text-gray-600 hover:bg-gray-100 lg:hidden"
+            className="text-white hover:bg-[#7a1417] focus:bg-[#7a1417] rounded-md p-3 transition lg:hidden"
+            aria-label="Abrir menú"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-9 h-9" />
           </Button>
-          
-          <h1 className="text-blanco font-bold text-lg hidden sm:block">
+          <h1 className="font-extrabold text-2xl md:text-3xl tracking-wide whitespace-nowrap ml-0 pl-0">
             Sistema de Gestión de Citas
           </h1>
         </div>
-
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 pr-0 ml-auto">
           {/* Mensajes (solo para psicólogos) */}
           {user?.role === 'psychologist' && (
             <div className="relative" ref={messageRef}>
               <Button
                 variant="ghost"
-                size="sm"
-                className="text-gray-600 hover:bg-gray-100 relative"
+                size="lg"
+                className="text-white hover:bg-[#7a1417] focus:bg-[#7a1417] relative rounded-md p-3"
                 onClick={() => setShowMessages(!showMessages)}
+                aria-label="Mensajes"
               >
-                <Mail className="w-5 h-5" />
+                <Mail className="w-7 h-7" />
                 {messageCount > 0 && (
                   <Badge 
                     variant="danger" 
-                    className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs"
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs shadow"
                   >
                     {messageCount > 9 ? '9+' : messageCount}
                   </Badge>
                 )}
               </Button>
-
-              {/* Panel de Mensajes */}
               {showMessages && (
                 <MessagePanel 
                   isOpen={showMessages}
@@ -126,29 +133,27 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
               )}
             </div>
           )}
-
           {/* Notificaciones */}
           <div className="relative" ref={notificationRef}>
             <Button
               variant="ghost"
-              size="sm"
-              className="text-gray-600 hover:bg-gray-100 relative"
+              size="lg"
+              className="text-white hover:bg-[#7a1417] focus:bg-[#7a1417] relative rounded-md p-3"
               onClick={() => setShowNotifications(!showNotifications)}
+              aria-label="Notificaciones"
             >
-              <Bell className="w-5 h-5" />
+              <Bell className="w-7 h-7" />
               {notificationCount > 0 && (
                 <Badge 
                   variant="danger" 
-                  className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs"
+                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs shadow"
                 >
                   {notificationCount > 9 ? '9+' : notificationCount}
                 </Badge>
               )}
             </Button>
-
-            {/* Panel de Notificaciones */}
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-hidden">
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-hidden animate-fade-in">
                 <div className="p-4 border-b border-gray-200 bg-gray-50">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-900">Notificaciones</h3>
@@ -157,12 +162,12 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
                       size="sm"
                       onClick={() => setShowNotifications(false)}
                       className="text-gray-500 hover:text-gray-700"
+                      aria-label="Cerrar notificaciones"
                     >
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
-                
                 <div className="max-h-80 overflow-y-auto">
                   {loading ? (
                     <div className="p-4 text-center">
@@ -173,7 +178,6 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
                     <NotificationPanel 
                       onClose={() => setShowNotifications(false)}
                       onNotificationUpdate={() => {
-                        // Recargar estadísticas cuando se actualice una notificación
                         const loadStats = async () => {
                           try {
                             const stats = await getNotificationStats();
@@ -190,47 +194,38 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
               </div>
             )}
           </div>
-
           {/* Usuario */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 relative">
             <div className="hidden sm:block text-right">
-              <p className="text-gray-800 font-semibold text-sm">
+              <p className="text-white font-semibold text-base">
                 {user?.name}
               </p>
-              <p className="text-gray-500 text-xs">
+              <p className="text-gray-200 text-xs">
                 {getRoleDisplayName(user?.role || '')}
               </p>
             </div>
-            
-            <div className="relative group">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-600 hover:bg-gray-100 rounded-full w-9 h-9"
-              >
-                <User className="w-5 h-5" />
-              </Button>
-              
-              {/* Dropdown menu */}
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="py-1">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-sm font-semibold text-gray-800">{user?.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                  </div>
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
-                    <Settings className="w-4 h-4" />
-                    <span>Configuración</span>
-                  </button>
-                  <button 
-                    onClick={logout}
-                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+            {/* Menú de usuario */}
+            <div ref={userMenuRef} className="flex items-center justify-center w-12 h-12 rounded-full bg-[#7a1417] cursor-pointer relative group" onClick={() => setShowUserMenu((v) => !v)}>
+              <User className="w-7 h-7 text-white" />
+              {/* Menú desplegable */}
+              {showUserMenu && (
+                <div className="absolute right-0 top-14 min-w-[180px] bg-white text-gray-900 rounded-xl shadow-2xl border border-gray-200 z-50 animate-fade-in overflow-hidden">
+                  <button
+                    className="w-full text-left px-5 py-3 hover:bg-gray-100 text-base font-medium border-b border-gray-200 flex items-center gap-2"
+                    onClick={() => { setShowUserMenu(false); navigate('/profile'); }}
                   >
-                    <LogOut className="w-4 h-4" />
-                    <span>Cerrar Sesión</span>
+                    <User className="w-5 h-5 text-[#8e161a]" />
+                    Mi perfil
+                  </button>
+                  <button
+                    className="w-full text-left px-5 py-3 hover:bg-gray-100 text-base font-medium flex items-center gap-2"
+                    onClick={logout}
+                  >
+                    <LogOut className="w-5 h-5 text-[#8e161a]" />
+                    Cerrar sesión
                   </button>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

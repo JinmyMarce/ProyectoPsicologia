@@ -18,7 +18,7 @@ import {
 import { PageHeader } from '../ui/PageHeader';
 import { dateFnsLocalizer, Event } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { format, parse, startOfWeek, getDay, startOfDay, addDays, isBefore, isAfter } from 'date-fns';
 import esES from 'date-fns/locale/es';
 import { Tooltip } from '../ui/Tooltip';
 
@@ -169,7 +169,7 @@ export function AppointmentCalendar() {
   };
 
   const getAppointmentsForDate = (date: Date) => {
-    const dateString = date.toISOString().split('T')[0];
+    const dateString = toLocalDateString(date);
     return appointments.filter(appointment => appointment.date === dateString);
   };
 
@@ -250,6 +250,20 @@ export function AppointmentCalendar() {
     // Puedes pasar la fecha y hora seleccionada al estado o a una función de confirmación
   };
 
+  function toLocalDateString(date: Date): string {
+    return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}`;
+  }
+
+  function parseLocalDate(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  function parseLocalDateTime(dateStr: string, timeStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const [hour, minute] = timeStr.split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute);
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -287,11 +301,21 @@ export function AppointmentCalendar() {
             return { style: { backgroundColor: COLOR_DISPONIBLE, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
           }}
           dayPropGetter={(date: any) => {
+            const today = new Date();
+            const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
+            const todayStart = startOfDay(peruTime);
+            const futureLimit = addDays(todayStart, 14);
             const day = date.getDay();
             if (day === 0 || day === 6) {
-              return { style: { backgroundColor: COLOR_BLOQUEADO, color: COLOR_TEXTO_BLOQUEADO, pointerEvents: 'none', opacity: 1, cursor: 'not-allowed', fontWeight: 600 } };
+              return { style: { backgroundColor: 'rgba(253, 186, 116, 0.3)', color: '#d97706', pointerEvents: 'none', cursor: 'not-allowed', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(253, 186, 116, 0.15)', border: 'none' } };
             }
-            return { style: { color: COLOR_TEXTO_NORMAL, fontWeight: 600 } };
+            if (isBefore(date, todayStart)) {
+              return { style: { backgroundColor: 'rgba(196, 181, 253, 0.3)', color: '#7c3aed', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(124, 58, 237, 0.15)', border: 'none', cursor: 'not-allowed' } };
+            }
+            if (isAfter(date, futureLimit)) {
+              return { style: { backgroundColor: 'rgba(253, 224, 71, 0.3)', color: '#a16207', fontWeight: 600, opacity: 0.7, borderRadius: 12, boxShadow: '0 4px 12px rgba(253, 224, 71, 0.15)', border: 'none' } };
+            }
+            return { style: { backgroundColor: 'rgba(134, 239, 172, 0.3)', color: '#059669', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)', border: 'none', cursor: 'pointer' } };
           }}
           components={{
             event: () => null // No mostrar badges ni íconos

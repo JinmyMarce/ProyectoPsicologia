@@ -64,7 +64,7 @@ export function AppointmentBooking() {
       
       // Obtener las 3 citas más recientes
       const recent = appointmentsData
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .sort((a, b) => parseLocalDateTime(b.created_at, b.time).getTime() - parseLocalDateTime(a.created_at, a.time).getTime())
         .slice(0, 3);
       setRecentAppointments(recent);
       
@@ -148,6 +148,16 @@ export function AppointmentBooking() {
         return status;
     }
   };
+
+  function parseLocalDate(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  function parseLocalDateTime(dateStr: string, timeStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const [hour, minute] = timeStr.split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute);
+  }
 
   if (loadingData) {
     return (
@@ -272,7 +282,7 @@ export function AppointmentBooking() {
                     <div key={appointment.id} className="border border-gray-200 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-gray-900">
-                          {new Date(appointment.date).toLocaleDateString('es-ES')}
+                          {parseLocalDate(appointment.date).toLocaleDateString('es-ES')}
                         </span>
                         <Badge className={getStatusColor(appointment.status)}>
                           {getStatusText(appointment.status)}

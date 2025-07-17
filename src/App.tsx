@@ -24,7 +24,7 @@ import { PatientList } from './components/patients/PatientList';
 import { SessionRegistration } from './components/sessions/SessionRegistration';
 import { SessionList } from './components/sessions/SessionList';
 import { StudentAppointmentHistory } from './components/students/StudentAppointmentHistory';
-import { DirectAppointmentScheduler } from './components/psychologist/DirectAppointmentScheduler';
+import { PsychologistCalendar } from './components/psychologist/PsychologistCalendar';
 import { SessionHistory } from './components/psychologist/SessionHistory';
 import { RescheduleAppointment } from './components/students/RescheduleAppointment';
 import MessagePanel from './components/messages/MessagePanel';
@@ -109,7 +109,10 @@ function AppContent() {
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300
+        ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'}
+        ${sidebarOpen ? 'z-0' : ''}
+      `}>
         <Header 
           onMenuClick={() => setSidebarOpen(true)} 
           notifications={3}
@@ -156,7 +159,7 @@ function AppContent() {
                   <Route path="/patients/register" element={<PatientRegistration />} />
                   <Route path="/sessions" element={<SessionHistory />} />
                   <Route path="/sessions/register" element={<SessionRegistration />} />
-                  <Route path="/appointments/direct" element={<DirectAppointmentScheduler />} />
+                  <Route path="/appointments/direct" element={<PsychologistCalendar />} />
                   <Route path="/notifications" element={<NotificationCenter />} />
                   <Route path="/profile" element={<UserProfile />} />
                 </>

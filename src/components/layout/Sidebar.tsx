@@ -190,54 +190,69 @@ export function Sidebar({
       )}
 
       {/* Sidebar */}
-      <aside className={`bg-granate text-blanco w-64 h-full fixed z-50 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
+      <aside className={`fixed top-0 left-0 h-full z-50 transition-all duration-300 bg-[#8e161a] text-white shadow-xl ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 ${isCollapsed ? 'w-20' : 'w-72'}`}>
         <div className="flex flex-col h-full">
           {/* Header del sidebar */}
-          <div className={`p-4 text-center border-b border-white/10 bg-black/20 transition-all duration-300`}>
+          <div className={`flex flex-col items-center justify-center relative ${isCollapsed ? 'py-4' : 'py-8'} border-b border-[#6e1014] bg-[#7a1417] transition-all duration-300`}>
             <img 
               src="/images/icons/psicologia.png"
               alt="Logo Institucional"
-              className={`object-contain mx-auto transition-all duration-300 ${isCollapsed ? 'w-10 h-10' : 'w-56 h-56'}`}
+              className={`object-contain mx-auto mb-4 rounded-full shadow-lg ${isCollapsed ? 'w-24 h-24' : 'w-56 h-56 md:w-64 md:h-64'}`}
             />
             {!isCollapsed && (
-              <div className="mt-2">
-                <h2 className="text-white font-bold text-base leading-tight">
-                  Psicología ISTTA
-                </h2>
-                <p className="text-white/70 text-xs font-medium">
-                  Sistema de Gestión
-                </p>
-              </div>
+              <>
+                <h2 className="font-extrabold text-2xl tracking-wide text-white text-center">Psicología ISTTA</h2>
+              </>
             )}
           </div>
-
-          {/* Menú */}
-          <nav className="flex-1 flex flex-col justify-center p-4 space-y-3">
-            {filteredMenuItems.map((item) => (
-              <Button
-                key={item.page}
-                variant="ghost"
-                className="w-full justify-start text-white/90 hover:bg-white/10 hover:text-white transition-all duration-200 group rounded-lg py-3 px-4"
-                onClick={() => handleItemClick(item.page)}
-              >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                {!isCollapsed && (
-                  <span className="text-blanco font-semibold ml-2">{item.label}</span>
-                )}
-              </Button>
-            ))}
-          </nav>
-
-          {/* Footer del sidebar con el botón para colapsar */}
-          <div className="p-2 border-t border-white/10">
+          {/* Botón de colapsar/expandir fuera de la barra lateral, mitad dentro y mitad fuera, alineado abajo, diseño elegante */}
+          <div
+            style={{
+              position: 'fixed',
+              bottom: 32,
+              right: isCollapsed ? '-10px' : '-19px', // La mitad del ancho del botón
+              zIndex: 60,
+            }}
+            className="hidden lg:block"
+          >
             <Button
               variant="ghost"
-              className="w-full justify-center text-white/90 hover:bg-white/10 hover:text-white p-3 rounded-lg hidden lg:flex"
+              size="sm"
               onClick={onToggleCollapse}
+              className="text-white rounded-full p-0 shadow-md border border-[#a32c34] hover:shadow-lg hover:scale-105 focus:scale-105 transition-all duration-200"
+              aria-label={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+              style={{
+                width: 48,
+                height: 32,
+                borderRadius: 9999,
+                background: 'linear-gradient(90deg, #8e161a 60%, #a32c34 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 1,
+                borderColor: '#a32c34',
+                boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)',
+                margin: 0,
+              }}
             >
-              {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+              {isCollapsed ? <ChevronRight className="w-6 h-6" /> : <ChevronLeft className="w-6 h-6" />}
             </Button>
           </div>
+          {/* Menú de opciones */}
+          <nav className={`flex-1 ${isCollapsed ? 'py-4 px-1 space-y-1' : 'py-8 px-4 space-y-2'} overflow-y-auto`}>
+            {filteredMenuItems.map((item, idx) => (
+              <button
+                key={item.label + idx}
+                onClick={() => handleItemClick(item.page)}
+                className={`flex items-center w-full ${isCollapsed ? 'justify-center px-0 py-3' : 'px-5 py-4'} rounded-xl transition-all duration-200 group hover:bg-[#a32c34] focus:bg-[#a32c34] focus:outline-none`}
+                tabIndex={0}
+                aria-label={item.label}
+              >
+                <item.icon className={`w-7 h-7 ${isCollapsed ? '' : 'mr-4'} group-hover:scale-110 group-hover:text-yellow-300 transition-all duration-200`} />
+                {!isCollapsed && <span className="font-medium text-sm truncate">{item.label}</span>}
+              </button>
+            ))}
+          </nav>
         </div>
       </aside>
     </>
