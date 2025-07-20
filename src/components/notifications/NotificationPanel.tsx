@@ -17,6 +17,7 @@ import {
   deleteNotification
 } from '../../services/notifications';
 import { Notification } from '../../services/notifications';
+import { useNavigate } from 'react-router-dom';
 
 interface NotificationPanelProps {
   onClose: () => void;
@@ -24,6 +25,7 @@ interface NotificationPanelProps {
 }
 
 export function NotificationPanel({ onClose, onNotificationUpdate }: NotificationPanelProps) {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -249,7 +251,7 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
         <Button
           variant="outline"
           size="sm"
-          onClick={onClose}
+          onClick={() => { onClose(); navigate('/notifications'); }}
           className="w-full text-xs"
         >
           Ver todas las notificaciones

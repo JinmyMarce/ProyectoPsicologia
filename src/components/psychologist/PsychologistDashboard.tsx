@@ -168,34 +168,13 @@ export const PsychologistDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader 
-        title={showWelcome ? `Bienvenido, ${user?.name}` : ''}
-      >
-        <div className="w-full flex flex-col items-center justify-center relative">
-          <div className="absolute right-0 top-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadDashboardData}
-              className=""
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Actualizar
-            </Button>
-          </div>
-          
-          {/* Título principal con fondo decorativo */}
-          <div className="text-center mb-6">
-            <div className="inline-block bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] text-white px-8 py-4 rounded-lg shadow-lg">
-              <h1 className="text-3xl font-bold" style={{ fontFamily: 'Gasters, sans-serif' }}>
-                Mi Portal de Psicología
-              </h1>
-            </div>
-            <p className="text-gray-600 mt-2">Instituto Túpac Amaru - Psicología Clínica</p>
-          </div>
+    <div className="space-y-6 font-serif" style={{fontFamily: 'Georgia, Times, serif'}}>
+      <PageHeader title={''} />
+      {showWelcome && (
+        <div className="mb-4 text-2xl font-semibold text-[#8e161a] text-center transition-opacity duration-1000" style={{fontFamily: 'Georgia, Times, serif', opacity: showWelcome ? 1 : 0}}>
+          ¡Bienvenido, {user?.name || 'Usuario'}!
         </div>
-      </PageHeader>
+      )}
 
       {/* Estadísticas principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

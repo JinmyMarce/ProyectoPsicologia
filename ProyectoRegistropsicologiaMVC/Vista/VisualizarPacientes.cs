@@ -38,6 +38,7 @@ namespace Vista
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
             var formAgregar = new RegistroPaciente();
+            MessageBox.Show("Abriendo formulario de registro de paciente", "Registrar Paciente");
             if (formAgregar.ShowDialog() == DialogResult.OK)
             {
                 CargarPacientes();

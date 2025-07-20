@@ -159,6 +159,7 @@ class User extends Authenticatable
             'specialization' => $this->specialization,
             'rating' => $this->rating,
             'total_appointments' => $this->total_appointments,
+            'dni' => $this->dni,
         ];
     }
 

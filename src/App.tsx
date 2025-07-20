@@ -100,7 +100,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex" style={{fontFamily: undefined}}>
       <NavigationHandler onPageChange={setCurrentPage} />
       <Sidebar 
         isOpen={sidebarOpen} 
@@ -115,7 +115,6 @@ function AppContent() {
       `}>
         <Header 
           onMenuClick={() => setSidebarOpen(true)} 
-          notifications={3}
         />
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto">

@@ -92,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [PatientController::class, 'update']);
         Route::delete('/{id}', [PatientController::class, 'destroy']);
         Route::get('/search/dni/{dni}', [PatientController::class, 'searchByDni']);
+        Route::get('/search/email/{email}', [PatientController::class, 'searchByEmail']);
         Route::get('/{id}/sessions', [PatientController::class, 'getSessions']);
     });
 

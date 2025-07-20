@@ -246,6 +246,35 @@ class PatientController extends Controller
     }
 
     /**
+     * Buscar paciente por Email
+     */
+    public function searchByEmail($email)
+    {
+        try {
+            $patient = User::where('role', 'student')
+                          ->where('email', $email)
+                          ->first();
+
+            if (!$patient) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Paciente no encontrado'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $patient
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al buscar paciente: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Obtener sesiones de un paciente
      */
     public function getSessions(User $patient)

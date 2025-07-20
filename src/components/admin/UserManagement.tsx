@@ -15,6 +15,18 @@ export function UserManagement() {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showAddUser, setShowAddUser] = useState(false);
+  const [addUserData, setAddUserData] = useState({
+    name: '',
+    email: '',
+    dni: '',
+    password: '',
+    confirmPassword: '',
+    role: 'psychologist',
+    specialization: ''
+  });
+  const [addUserPasswordError, setAddUserPasswordError] = useState<string | null>(null);
+  const [addUserDniError, setAddUserDniError] = useState<string | null>(null);
+  const [addUserSuccess, setAddUserSuccess] = useState<string | null>(null);
   const [showEditUser, setShowEditUser] = useState(false);
   const [showUserHistory, setShowUserHistory] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
@@ -120,6 +132,95 @@ export function UserManagement() {
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Error al eliminar usuario');
       }
+    }
+  };
+
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Validar DNI
+    if (!/^\d{8}$/.test(addUserData.dni)) {
+      setAddUserDniError('El DNI debe ser numérico y tener 8 dígitos');
+      return;
+    }
+    setAddUserDniError(null);
+    // Validar contraseñas
+    if (addUserData.password !== addUserData.confirmPassword) {
+      setAddUserPasswordError('Las contraseñas no coinciden');
+      return;
+    }
+    if (addUserData.password.length < 8) {
+      setAddUserPasswordError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    setAddUserPasswordError(null);
+    try {
+      const response = await fetch('http://localhost:8000/api/users', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: addUserData.name,
+          email: addUserData.email,
+          dni: addUserData.dni,
+          password: addUserData.password,
+          role: addUserData.role,
+          specialization: addUserData.role === 'psychologist' ? addUserData.specialization : undefined,
+          verified: true
+        })
+      });
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        let errorMessage = 'Error al crear usuario';
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorData.error || 'Error al crear usuario';
+          } catch (jsonError) {
+            errorMessage = `Error del servidor (${response.status})`;
+          }
+        } else {
+          errorMessage = `Error del servidor (${response.status}): Respuesta no válida`;
+        }
+        throw new Error(errorMessage);
+      }
+      setShowAddUser(false);
+      setAddUserData({
+        name: '',
+        email: '',
+        dni: '',
+        password: '',
+        confirmPassword: '',
+        role: 'psychologist',
+        specialization: ''
+      });
+      setAddUserSuccess('Usuario creado exitosamente');
+      setTimeout(() => setAddUserSuccess(null), 3000);
+      loadUsers();
+      loadStats();
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
+  const handleVerifyUser = async (userId: number) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/users/${userId}/verify`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Error al verificar usuario');
+      }
+      setAddUserSuccess('Usuario verificado exitosamente');
+      loadUsers();
+      loadStats();
+    } catch (error: any) {
+      setError(error.message);
     }
   };
 
@@ -317,23 +418,10 @@ export function UserManagement() {
                         </Button>
                       )}
                       
-                      {!user.verified && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            // Implementar la lógica para enviar verificación por email
-                          }}
-                          icon={Mail}
-                        >
-                          Verificar
-                        </Button>
-                      )}
-                      
                       {user.active ? (
                         <Button
                           size="sm"
-                          variant="warning"
+                          variant="danger"
                           onClick={() => {
                             const reason = prompt('Motivo de desactivación:');
                             if (reason) {
@@ -347,7 +435,7 @@ export function UserManagement() {
                       ) : (
                         <Button
                           size="sm"
-                          variant="success"
+                          variant="primary"
                           onClick={() => handleReactivateUser(user.id)}
                           icon={UserCheck}
                         >
@@ -374,6 +462,124 @@ export function UserManagement() {
 
       {/* Modals would go here - Add User, Edit User, User History */}
       {/* These would be implemented as separate modal components */}
+      {showAddUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Crear Nuevo Usuario</h2>
+              <form onSubmit={handleAddUser} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+                  <input
+                    type="text"
+                    value={addUserData.name}
+                    onChange={e => setAddUserData(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={addUserData.email}
+                    onChange={e => setAddUserData(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">DNI</label>
+                  <input
+                    type="text"
+                    value={addUserData.dni}
+                    maxLength={8}
+                    onChange={e => setAddUserData(prev => ({ ...prev, dni: e.target.value.replace(/[^0-9]/g, '') }))}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                    required
+                  />
+                  {addUserDniError && (
+                    <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-2 mt-1">{addUserDniError}</div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                  <input
+                    type="password"
+                    value={addUserData.password}
+                    onChange={e => setAddUserData(prev => ({ ...prev, password: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+                  <input
+                    type="password"
+                    value={addUserData.confirmPassword}
+                    onChange={e => setAddUserData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                    required
+                  />
+                  {addUserPasswordError && (
+                    <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-2 mt-1">{addUserPasswordError}</div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                  <select
+                    value={addUserData.role}
+                    onChange={e => setAddUserData(prev => ({ ...prev, role: e.target.value as 'psychologist' | 'admin' }))}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                  >
+                    <option value="psychologist">Psicólogo</option>
+                    <option value="admin">Administrador</option>
+                  </select>
+                </div>
+                {addUserData.role === 'psychologist' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Especialización</label>
+                    <input
+                      type="text"
+                      value={addUserData.specialization}
+                      onChange={e => setAddUserData(prev => ({ ...prev, specialization: e.target.value }))}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                      placeholder="Ej: Psicología Clínica"
+                    />
+                  </div>
+                )}
+                <div className="flex space-x-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowAddUser(false);
+                      setAddUserPasswordError(null);
+                      setAddUserDniError(null);
+                    }}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  >
+                    Crear Usuario
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {addUserSuccess && (
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-green-100 border border-green-400 text-green-800 px-6 py-3 rounded-lg shadow-lg">
+            {addUserSuccess}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

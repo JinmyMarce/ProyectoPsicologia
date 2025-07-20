@@ -23,6 +23,28 @@ export const UserProfile: React.FC = () => {
     confirmPassword: ''
   });
 
+  // Definir tipo para el historial de superadmins
+  type SuperAdminHistoryItem = {
+    name: string;
+    email: string;
+    activated: string;
+    deactivated: string | null;
+  };
+  // Simulación de obtención de historial real de superadmins
+  async function getSuperAdminHistory(): Promise<SuperAdminHistoryItem[]> {
+    // Aquí deberías llamar a tu API real
+    return [
+      { name: 'Marcelo Q', email: 'marcelojinmy2024@gmail.com', activated: '01/01/2023', deactivated: '01/06/2024' },
+      { name: user?.name || '', email: user?.email || '', activated: user?.created_at ? new Date(user.created_at).toLocaleDateString('es-PE') : '', deactivated: null }
+    ];
+  }
+  const [superAdminHistory, setSuperAdminHistory] = useState<SuperAdminHistoryItem[]>([]);
+  useEffect(() => {
+    if (user?.role === 'super_admin') {
+      getSuperAdminHistory().then(setSuperAdminHistory);
+    }
+  }, [user]);
+
   const getRoleLabel = (role: string) => {
     const labels = {
       student: 'Estudiante',
@@ -93,6 +115,20 @@ export const UserProfile: React.FC = () => {
     }
   };
 
+  // Simulación de agregar nuevo superadmin
+  const [showSuperAdminModal, setShowSuperAdminModal] = useState(false);
+
+  const handleAddSuperAdmin = () => {
+    setShowSuperAdminModal(true);
+  };
+  const handleCloseModal = () => {
+    setShowSuperAdminModal(false);
+  };
+  const handleContinueGoogle = () => {
+    setShowSuperAdminModal(false);
+    alert('Aquí se iniciaría el proceso de login con Google y desactivación del superadmin actual.');
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -109,91 +145,72 @@ export const UserProfile: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="space-y-6">
-        <div className="flex space-x-2 border-b border-gray-200">
-          {[
-            { key: 'profile', label: 'Información Personal' },
-            { key: 'password', label: 'Cambiar Contraseña' },
-            { key: 'system', label: 'Información del Sistema' }
-          ].map(({ key, label }) => (
-            <button
-              key={key}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === key 
-                  ? 'border-[#8e161a] text-[#8e161a]' 
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-              onClick={() => setActiveTab(key)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {activeTab === 'profile' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold">Información Personal</h2>
-              <p className="text-gray-600 mt-1">Actualiza tu información personal</p>
-            </div>
-            <div className="p-6">
-              <form onSubmit={handleProfileSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nombre Completo
-                    </label>
-                    <input
-                      type="text"
-                      value={profileForm.name}
-                      onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                      required
-                      readOnly={user?.role === 'student'}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Correo Electrónico
-                    </label>
-                    <input
-                      type="email"
-                      value={profileForm.email}
-                      onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                      required
-                      readOnly={user?.role === 'student'}
-                    />
-                  </div>
-                  {/* Solo para estudiantes: mostrar semestre y programa de estudios */}
-                  {user?.role === 'student' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Semestre
-                        </label>
-                        <input
-                          type="text"
-                          value={user.semester || ''}
-                          readOnly
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Programa de Estudios
-                        </label>
-                        <input
-                          type="text"
-                          value={user.career || ''}
-                          readOnly
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
-                        />
-                      </div>
-                    </>
-                  )}
+      {/* Información Personal */}
+      {activeTab === 'profile' && (
+        <div className="bg-white rounded-lg shadow-md border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-lg font-semibold">Información Personal</h2>
+            <p className="text-gray-600 mt-1">Actualiza tu información personal</p>
+          </div>
+          <div className="p-6">
+            <form onSubmit={handleProfileSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre Completo
+                  </label>
+                  <input
+                    type="text"
+                    value={profileForm.name}
+                    onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
+                    required
+                    readOnly={user?.role === 'student' || user?.role === 'super_admin'}
+                  />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Correo Electrónico
+                  </label>
+                  <input
+                    type="email"
+                    value={profileForm.email}
+                    onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
+                    required
+                    readOnly={user?.role === 'student' || user?.role === 'super_admin'}
+                  />
+                </div>
+                {/* Solo para estudiantes: mostrar semestre y programa de estudios */}
+                {user?.role === 'student' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Semestre
+                      </label>
+                      <input
+                        type="text"
+                        value={user.semester || ''}
+                        readOnly
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Programa de Estudios
+                      </label>
+                      <input
+                        type="text"
+                        value={user.career || ''}
+                        readOnly
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+              {/* Oculta el botón de guardar cambios para super_admin */}
+              {user?.role !== 'super_admin' && (
                 <div className="flex justify-end">
                   <button
                     type="submit"
@@ -203,10 +220,48 @@ export const UserProfile: React.FC = () => {
                     {loading ? 'Guardando...' : 'Guardar Cambios'}
                   </button>
                 </div>
-              </form>
-            </div>
+              )}
+            </form>
+            {/* Botón para agregar nuevo superadmin solo para super_admin */}
+            {user?.role === 'super_admin' && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={handleAddSuperAdmin}
+                  className="bg-[#8e161a] text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-[#7a1418] transition-colors text-lg"
+                >
+                  Agregar nuevo Super Administrador
+                </button>
+              </div>
+            )}
           </div>
-        )}
+          {/* Modal profesional para agregar superadmin */}
+          {showSuperAdminModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-2xl shadow-2xl border-4 border-[#8e161a] max-w-lg w-full p-8 relative animate-fade-in">
+                <h3 className="text-2xl font-extrabold text-[#8e161a] mb-4 text-center">Agregar nuevo Super Administrador</h3>
+                <p className="text-gray-700 text-center mb-6">
+                  Al continuar, el superadministrador actual será <span className="font-bold text-[#8e161a]">desactivado</span> y se iniciará sesión con Google para el nuevo superadministrador.<br/>
+                  ¿Estás seguro de que deseas continuar?
+                </p>
+                <div className="flex justify-center space-x-6 mt-6">
+                  <button
+                    onClick={handleCloseModal}
+                    className="px-6 py-2 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleContinueGoogle}
+                    className="px-6 py-2 rounded-lg bg-[#8e161a] text-white font-bold hover:bg-[#7a1418] transition-colors shadow"
+                  >
+                    Continuar con Google
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
         {activeTab === 'password' && (
           <div className="bg-white rounded-lg shadow-md border border-gray-200">
@@ -335,7 +390,6 @@ export const UserProfile: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
 
       {/* Messages */}
       {error && (

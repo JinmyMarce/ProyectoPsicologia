@@ -14,12 +14,14 @@ interface HeaderProps {
   notifications?: number;
 }
 
-export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
+export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(notifications);
   const [loading, setLoading] = useState(false);
+  const [notificationsList, setNotificationsList] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   
   // Estados para mensajes
@@ -36,14 +38,18 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
     const loadStats = async () => {
       try {
         setLoading(true);
+        setError(null);
         const [notificationStats, messageStats] = await Promise.all([
           getNotificationStats(),
           messageService.getStats()
         ]);
         setNotificationCount((notificationStats.unread as number) || 0);
         setMessageCount((messageStats.data.unread as number) || 0);
-      } catch (error) {
-        console.error('Error loading stats:', error);
+        // Aquí podrías cargar notificaciones reales si tienes endpoint
+        setNotificationsList([]); // Simulación: vacío
+      } catch (err) {
+        setError('No se pudieron cargar las notificaciones');
+        setNotificationsList([]);
       } finally {
         setLoading(false);
       }
@@ -88,7 +94,7 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
   };
 
   return (
-    <header className="bg-[#8e161a] text-white shadow-lg border-b border-[#6e1014] sticky top-0 z-50 h-20 md:h-24 flex items-center">
+    <header className="bg-[#8e161a] text-white shadow-lg border-b border-[#6e1014] sticky top-0 z-50 h-[72px] md:h-[88px] flex items-center">
       <div className="flex items-center justify-between px-0 h-full max-w-7xl mx-auto w-full">
         <div className="flex items-center space-x-4 pl-0">
           <Button
@@ -100,103 +106,45 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
           >
             <Menu className="w-9 h-9" />
           </Button>
-          <h1 className="font-extrabold text-2xl md:text-3xl tracking-wide whitespace-nowrap ml-0 pl-0">
-            Sistema de Gestión de Citas
+          <h1 className="font-extrabold text-xl md:text-2xl tracking-wide whitespace-nowrap ml-0 pl-0">
+            Portal Psicológico Tupac Amaru
           </h1>
         </div>
-        <div className="flex items-center space-x-4 pr-0 ml-auto">
-          {/* Mensajes (solo para psicólogos) */}
-          {user?.role === 'psychologist' && (
-            <div className="relative" ref={messageRef}>
-              <Button
-                variant="ghost"
-                size="lg"
-                className="text-white hover:bg-[#7a1417] focus:bg-[#7a1417] relative rounded-md p-3"
-                onClick={() => setShowMessages(!showMessages)}
-                aria-label="Mensajes"
-              >
-                <Mail className="w-7 h-7" />
-                {messageCount > 0 && (
-                  <Badge 
-                    variant="danger" 
-                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs shadow"
-                  >
-                    {messageCount > 9 ? '9+' : messageCount}
-                  </Badge>
-                )}
-              </Button>
-              {showMessages && (
-                <MessagePanel 
-                  isOpen={showMessages}
-                  onClose={() => setShowMessages(false)}
-                />
-              )}
-            </div>
-          )}
-          {/* Notificaciones */}
-          <div className="relative" ref={notificationRef}>
-            <Button
-              variant="ghost"
-              size="lg"
-              className="text-white hover:bg-[#7a1417] focus:bg-[#7a1417] relative rounded-md p-3"
-              onClick={() => setShowNotifications(!showNotifications)}
-              aria-label="Notificaciones"
-            >
-              <Bell className="w-7 h-7" />
-              {notificationCount > 0 && (
-                <Badge 
-                  variant="danger" 
-                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs shadow"
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center">
+            {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'psychologist' || user?.role === 'student') && (
+              <div className="relative" ref={notificationRef}>
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="text-white hover:bg-[#7a1417] focus:bg-[#7a1417] relative rounded-md p-3"
+                  onClick={() => setShowNotifications((v) => !v)}
+                  aria-label="Notificaciones"
                 >
-                  {notificationCount > 9 ? '9+' : notificationCount}
-                </Badge>
-              )}
-            </Button>
-            {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-hidden animate-fade-in">
-                <div className="p-4 border-b border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900">Notificaciones</h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowNotifications(false)}
-                      className="text-gray-500 hover:text-gray-700"
-                      aria-label="Cerrar notificaciones"
+                  <Bell className="w-5 h-5" />
+                  {notificationCount > 0 && (
+                    <Badge 
+                      variant="danger" 
+                      className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs shadow"
                     >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="max-h-80 overflow-y-auto">
-                  {loading ? (
-                    <div className="p-4 text-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#8e161a] mx-auto"></div>
-                      <p className="text-sm text-gray-500 mt-2">Cargando...</p>
-                    </div>
-                  ) : (
-                    <NotificationPanel 
-                      onClose={() => setShowNotifications(false)}
-                      onNotificationUpdate={() => {
-                        const loadStats = async () => {
-                          try {
-                            const stats = await getNotificationStats();
-                            setNotificationCount((stats.unread as number) || 0);
-                          } catch (error) {
-                            console.error('Error reloading stats:', error);
-                          }
-                        };
-                        loadStats();
-                      }}
-                    />
+                      {notificationCount > 9 ? '9+' : notificationCount}
+                    </Badge>
                   )}
-                </div>
+                </Button>
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-hidden animate-fade-in">
+                    <NotificationPanel 
+                      onClose={() => setShowNotifications(false)} 
+                      onNotificationUpdate={() => {}} 
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
-          {/* Usuario */}
-          <div className="flex items-center space-x-3 relative">
-            <div className="hidden sm:block text-right">
+          <div className="flex items-center space-x-5 pr-4">
+            {/* Nombre de usuario y avatar aquí */}
+            <div className="hidden sm:block text-right mr-3">
               <p className="text-white font-semibold text-base">
                 {user?.name}
               </p>
@@ -204,12 +152,12 @@ export function Header({ onMenuClick, notifications = 3 }: HeaderProps) {
                 {getRoleDisplayName(user?.role || '')}
               </p>
             </div>
-            {/* Menú de usuario */}
-            <div ref={userMenuRef} className="flex items-center justify-center w-12 h-12 rounded-full bg-[#7a1417] cursor-pointer relative group" onClick={() => setShowUserMenu((v) => !v)}>
-              <User className="w-7 h-7 text-white" />
+            {/* Icono de usuario más separado del borde */}
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#7a1417] cursor-pointer relative group ml-2" onClick={() => setShowUserMenu((v) => !v)}>
+              <User className="w-5 h-5 text-white" />
               {/* Menú desplegable */}
               {showUserMenu && (
-                <div className="absolute right-0 top-14 min-w-[180px] bg-white text-gray-900 rounded-xl shadow-2xl border border-gray-200 z-50 animate-fade-in overflow-hidden">
+                <div className="absolute right-0 top-14 min-w-[180px] bg-white text-gray-900 rounded-xl shadow-2xl border-2 border-[#8e161a] z-50 animate-fade-in overflow-hidden">
                   <button
                     className="w-full text-left px-5 py-3 hover:bg-gray-100 text-base font-medium border-b border-gray-200 flex items-center gap-2"
                     onClick={() => { setShowUserMenu(false); navigate('/profile'); }}

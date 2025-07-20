@@ -22,11 +22,10 @@ namespace Vista
 
         private void ShowNewForm(object sender, EventArgs e)
         {
-            this.Hide();
             RegistroPaciente rp = new RegistroPaciente();
-            rp.Show();
-
-           
+            rp.StartPosition = FormStartPosition.CenterScreen;
+            rp.TopMost = true;
+            rp.ShowDialog();
         }
 
         private void OpenFile(object sender, EventArgs e)

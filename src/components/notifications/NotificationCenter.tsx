@@ -211,12 +211,11 @@ export function NotificationCenter() {
     <div className="space-y-6">
       <PageHeader 
         title="Centro de Notificaciones"
-        subtitle="Gestiona tus notificaciones"
+        subtitle={undefined}
       >
         <div className="flex items-center justify-between">
-          <p className="text-base text-gray-500 font-medium text-center">
-            Instituto Túpac Amaru - Psicología Clínica
-          </p>
+          {/* Eliminado el título institucional */}
+          <span></span>
           <Button
             variant="outline"
             size="sm"

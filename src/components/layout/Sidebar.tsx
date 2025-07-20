@@ -89,18 +89,6 @@ const menuItems: MenuItem[] = [
     roles: ['student']
   },
   {
-    label: 'Calendario de Citas',
-    icon: Calendar,
-    page: 'appointments/calendar',
-    roles: ['super_admin', 'admin', 'psychologist']
-  },
-  {
-    label: 'Historial de Citas',
-    icon: Clock,
-    page: 'appointments/history',
-    roles: ['super_admin', 'admin', 'psychologist']
-  },
-  {
     label: 'Agendar Cita Directamente',
     icon: Calendar,
     page: 'appointments/direct',
@@ -125,12 +113,6 @@ const menuItems: MenuItem[] = [
     roles: ['psychologist']
   },
   {
-    label: 'Gestión de Psicólogos',
-    icon: UserCheck,
-    page: 'psychologists',
-    roles: ['super_admin']
-  },
-  {
     label: 'Gestión de Usuarios',
     icon: Users,
     page: 'users',
@@ -143,17 +125,18 @@ const menuItems: MenuItem[] = [
     roles: ['super_admin']
   },
   {
-    label: 'Horarios',
-    icon: Clock,
-    page: 'schedule',
-    roles: ['super_admin', 'admin', 'psychologist']
-  },
-  {
     label: 'Reportes',
     icon: BarChart3,
     page: 'reports',
     roles: ['super_admin', 'admin', 'psychologist']
   },
+  // 'Mi Perfil' al final
+  {
+    label: 'Mi Perfil',
+    icon: UserCheck,
+    page: 'profile',
+    roles: ['super_admin']
+  }
 ];
 
 export function Sidebar({ 
@@ -199,11 +182,7 @@ export function Sidebar({
               alt="Logo Institucional"
               className={`object-contain mx-auto mb-4 rounded-full shadow-lg ${isCollapsed ? 'w-24 h-24' : 'w-56 h-56 md:w-64 md:h-64'}`}
             />
-            {!isCollapsed && (
-              <>
-                <h2 className="font-extrabold text-2xl tracking-wide text-white text-center">Psicología ISTTA</h2>
-              </>
-            )}
+            {/* Eliminar el bloque/nombre 'Psicología ISTTA' (probablemente un <div> o <span> cerca del logo) */}
           </div>
           {/* Botón de colapsar/expandir fuera de la barra lateral, mitad dentro y mitad fuera, alineado abajo, diseño elegante */}
           <div

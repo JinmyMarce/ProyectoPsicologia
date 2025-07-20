@@ -7,6 +7,7 @@ import { User } from '@/types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DebugPanel } from './DebugPanel';
+import { PageHeader } from '../ui/PageHeader';
 
 interface SuperAdminStats {
   totalUsers: number;
@@ -39,6 +40,7 @@ export const SuperAdminDashboard: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showWelcome, setShowWelcome] = useState(true);
+  const [userStatsFilter, setUserStatsFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   useEffect(() => {
     loadDashboardData();
@@ -165,26 +167,30 @@ export const SuperAdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-0 pt-1 space-y-6 font-serif" style={{fontFamily: 'Georgia, Times, serif'}}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard del Super Administrador</h1>
-          {showWelcome && <p className="text-gray-600 mt-1">Bienvenido, {user?.name}</p>}
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">Estado del Sistema:</span>
-            {getSystemHealthBadge(stats.systemHealth)}
+      <PageHeader title={''}>
+        {showWelcome && (
+          <div className="mb-4 text-2xl font-semibold text-[#8e161a] text-center transition-opacity duration-1000" style={{fontFamily: 'Georgia, Times, serif', opacity: showWelcome ? 1 : 0}}>
+            ¡Bienvenido, {user?.name || 'Usuario'}!
           </div>
-          <button className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors">
-            Crear Usuario
-          </button>
-          <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-            Configuración
-          </button>
+        )}
+        <div className="w-full flex flex-col items-center justify-center mt-1 mb-2">
+          <span
+            className="text-2xl font-extrabold text-white text-center px-6 py-2 rounded-xl shadow-lg"
+            style={{
+              fontFamily: 'Gasters, sans-serif',
+              letterSpacing: '0.04em',
+              background: 'linear-gradient(90deg, #8e161a 60%, #d3b7a0 100%)',
+              boxShadow: '0 2px 12px 0 rgba(142,22,26,0.10)',
+              border: '2px solid #8e161a',
+              textShadow: '0 2px 8px rgba(0,0,0,0.08)'
+            }}
+          >
+            Panel del Super Administrador
+          </span>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -192,7 +198,7 @@ export const SuperAdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Usuarios</p>
-              <p className="text-2xl font-bold">{stats.totalUsers}</p>
+              <p className="text-2xl font-bold">{users.length}</p>
               <p className="text-xs text-gray-500">En el sistema</p>
             </div>
             <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -202,28 +208,17 @@ export const SuperAdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-
+        {/* Tarjeta de Psicólogos */}
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Citas</p>
-              <p className="text-2xl font-bold">{stats.totalAppointments}</p>
-              <p className="text-xs text-gray-500">{stats.pendingAppointments} pendientes</p>
-            </div>
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Psicólogos Activos</p>
-              <p className="text-2xl font-bold text-purple-600">{stats.activePsychologists}</p>
-              <p className="text-xs text-gray-500">Disponibles</p>
+              <p className="text-sm font-medium text-gray-600">Psicólogo</p>
+              <p className="text-2xl font-bold text-purple-600">{users.filter(u => u.role === 'psychologist' && u.active).length}</p>
+              <ul className="text-xs text-gray-700 mt-1">
+                {users.filter(u => u.role === 'psychologist' && u.active).map((u) => (
+                  <li key={u.id}>{u.name}</li>
+                ))}
+              </ul>
             </div>
             <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,13 +227,17 @@ export const SuperAdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-
+        {/* Tarjeta de Administradores */}
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Administradores</p>
-              <p className="text-2xl font-bold text-orange-600">{stats.activeAdmins}</p>
-              <p className="text-xs text-gray-500">Activos</p>
+              <p className="text-sm font-medium text-gray-600">Administrador</p>
+              <p className="text-2xl font-bold text-orange-600">{users.filter(u => u.role === 'admin' && u.active).length}</p>
+              <ul className="text-xs text-gray-700 mt-1">
+                {users.filter(u => u.role === 'admin' && u.active).map((u) => (
+                  <li key={u.id}>{u.name}</li>
+                ))}
+              </ul>
             </div>
             <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,346 +246,60 @@ export const SuperAdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="space-y-6">
-        <div className="flex space-x-2 border-b border-gray-200">
-          {[
-            { key: 'overview', label: 'Vista General' },
-            { key: 'users', label: 'Gestión de Usuarios' },
-            { key: 'appointments', label: 'Todas las Citas' },
-            { key: 'system', label: 'Sistema' },
-            { key: 'reports', label: 'Reportes' },
-            { key: 'debug', label: 'Debug' }
-          ].map(({ key, label }) => (
-            <button
-              key={key}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === key 
-                  ? 'border-[#8e161a] text-[#8e161a]' 
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-              onClick={() => setActiveTab(key)}
-            >
-              {label}
-            </button>
-          ))}
+        {/* Tarjeta de Super Administrador */}
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Super Administrador</p>
+              <p className="text-2xl font-bold text-red-700">{users.filter(u => u.role === 'super_admin' && u.active).length}</p>
+              <ul className="text-xs text-gray-700 mt-1">
+                {users.filter(u => u.role === 'super_admin' && u.active).map((u) => (
+                  <li key={u.id}>{u.name}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+          </div>
         </div>
-
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-md border border-gray-200">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold">Actividad Reciente</h2>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div>
-                      <p className="text-sm font-medium">Nuevo usuario registrado</p>
-                      <p className="text-xs text-gray-500">Hace 5 minutos</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div>
-                      <p className="text-sm font-medium">Cita confirmada</p>
-                      <p className="text-xs text-gray-500">Hace 15 minutos</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                    <div>
-                      <p className="text-sm font-medium">Nuevo psicólogo agregado</p>
-                      <p className="text-xs text-gray-500">Hace 1 hora</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-md border border-gray-200">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold">Estadísticas del Sistema</h2>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Uso de CPU</span>
-                    <span className="text-sm font-medium">45%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '45%' }}></div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Memoria</span>
-                    <span className="text-sm font-medium">67%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-600 h-2 rounded-full" style={{ width: '67%' }}></div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Almacenamiento</span>
-                    <span className="text-sm font-medium">23%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-yellow-600 h-2 rounded-full" style={{ width: '23%' }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'users' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Gestión de Usuarios</h2>
-                <button className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors">
-                  Crear Usuario
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {users.map((user) => (
-                  <div
-                    key={user.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{user.name}</h3>
-                          <p className="text-sm text-gray-600">{user.email}</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {getRoleBadge(user.role)}
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${user.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                            {user.active ? 'Activo' : 'Inactivo'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        </button>
-                        <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'appointments' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Todas las Citas</h2>
-                <div className="flex items-center space-x-2">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Buscar citas..."
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <button className="border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                    Filtros
-                  </button>
-                  <button className="border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                    Exportar
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              {/* Filter Tabs */}
-              <div className="flex space-x-2 mb-6">
-                {[
-                  { key: 'all', label: 'Todas' },
-                  { key: 'pending', label: 'Pendientes' },
-                  { key: 'confirmed', label: 'Confirmadas' },
-                  { key: 'completed', label: 'Completadas' },
-                  { key: 'cancelled', label: 'Canceladas' }
-                ].map(({ key, label }) => (
-                  <button
-                    key={key}
-                    className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                      filter === key 
-                        ? 'bg-[#8e161a] text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                    onClick={() => setFilter(key as any)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Appointments List */}
-              <div className="space-y-4">
-                {filteredAppointments.length === 0 ? (
-                  <div className="text-center py-8">
-                    <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <p className="text-gray-600">No se encontraron citas</p>
-                  </div>
-                ) : (
-                  filteredAppointments.map((appointment) => (
-                    <div
-                      key={appointment.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-4">
-                            <div>
-                              <h3 className="font-semibold text-gray-900">
-                                {appointment.patient_full_name}
-                              </h3>
-                              <p className="text-sm text-gray-600">{appointment.user_email}</p>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              <p>{format(new Date(appointment.date), 'EEEE, d MMMM yyyy', { locale: es })}</p>
-                              <p>{appointment.time}</p>
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm text-gray-700">{appointment.reason}</p>
-                              {appointment.notes && (
-                                <p className="text-xs text-gray-500 mt-1">{appointment.notes}</p>
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">Dr. {appointment.psychologist_name}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {getStatusBadge(appointment.status)}
-                          <div className="flex space-x-1">
-                            <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                            </button>
-                            <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'system' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Configuración del Sistema</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>Configuración General</span>
-                </button>
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  <span>Seguridad</span>
-                </button>
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-                  </svg>
-                  <span>Backup</span>
-                </button>
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Logs</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'reports' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Reportes y Análisis</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  <span>Reporte de Citas</span>
-                </button>
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                  <span>Reporte de Usuarios</span>
-                </button>
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span>Reporte de Psicólogos</span>
-                </button>
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Reporte General</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'debug' && (
-          <DebugPanel />
-        )}
       </div>
-
+      {/* Tabla profesional de usuarios psicólogo y administrador */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 mb-8 p-0 overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-[#8e161a]">Usuarios: Psicólogo y Administrador</h2>
+        </div>
+        <div className="p-0 md:p-6 overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
+            <thead className="bg-[#f7f3f1]">
+              <tr>
+                <th className="px-4 py-3 text-left font-bold text-[#8e161a] uppercase tracking-wider">Nombre</th>
+                <th className="px-4 py-3 text-left font-bold text-[#8e161a] uppercase tracking-wider">Correo</th>
+                <th className="px-4 py-3 text-left font-bold text-[#8e161a] uppercase tracking-wider">Rol</th>
+                <th className="px-4 py-3 text-left font-bold text-[#8e161a] uppercase tracking-wider">Estado</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-100">
+              {users.filter(u => (u.role === 'psychologist' || u.role === 'admin')).map((user) => (
+                <tr key={user.id} className="hover:bg-[#f8e8e8] transition-colors">
+                  <td className="px-4 py-2 font-semibold text-gray-900 whitespace-nowrap">{user.name}</td>
+                  <td className="px-4 py-2 text-gray-700 whitespace-nowrap">{user.email}</td>
+                  <td className="px-4 py-2 text-[#8e161a] font-bold whitespace-nowrap">{user.role === 'psychologist' ? 'Psicólogo' : 'Administrador'}</td>
+                  <td className="px-4 py-2">
+                    {user.active ? (
+                      <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 font-bold shadow">Activo</span>
+                    ) : (
+                      <span className="inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-600 font-bold shadow">Inactivo</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
       {error && (
         <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center space-x-2">
           <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -595,6 +308,103 @@ export const SuperAdminDashboard: React.FC = () => {
           <span className="text-red-800 font-semibold">{error}</span>
         </div>
       )}
+      {/* Bloque de estadísticas visuales de usuarios (admin, psicólogo, super admin) mejorado y alineado */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 mt-8 mb-8 p-6">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8">
+          {/* Estadísticas a la izquierda */}
+          <div className="flex-1 min-w-[220px] mb-6 md:mb-0 flex flex-col gap-4">
+            <h2 className="text-lg md:text-xl font-extrabold text-[#8e161a] tracking-wide mb-2 flex items-center">
+              <svg className="w-7 h-7 text-[#8e161a] mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-7V7a4 4 0 10-8 0v2m8 0a4 4 0 01-8 0" /></svg>
+              Estadísticas de Usuarios
+            </h2>
+            <div className="mb-2 flex space-x-2">
+              <button className={`px-3 py-1 rounded-lg font-bold text-xs transition-colors ${userStatsFilter === 'all' ? 'bg-[#8e161a] text-white' : 'bg-gray-100 text-[#8e161a]'}`} onClick={() => setUserStatsFilter('all')}>Todos</button>
+              <button className={`px-3 py-1 rounded-lg font-bold text-xs transition-colors ${userStatsFilter === 'active' ? 'bg-green-700 text-white' : 'bg-gray-100 text-green-700'}`} onClick={() => setUserStatsFilter('active')}>Activos</button>
+              <button className={`px-3 py-1 rounded-lg font-bold text-xs transition-colors ${userStatsFilter === 'inactive' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-700'}`} onClick={() => setUserStatsFilter('inactive')}>Inactivos</button>
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center bg-orange-50 rounded-lg px-4 py-2 shadow-sm">
+                <span className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center mr-3"><svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" /></svg></span>
+                <span className="font-bold text-orange-700">Admin:</span>
+                <span className="ml-2 text-gray-700">{users.filter(u => u.role === 'admin' && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length} <span className='font-bold'>({users.filter(u => u.role === 'admin' && u.active && (userStatsFilter !== 'inactive')).length} activos{userStatsFilter === 'all' ? `, ${users.filter(u => u.role === 'admin' && !u.active).length} inactivos` : ''})</span></span>
+              </div>
+              <div className="flex items-center bg-purple-50 rounded-lg px-4 py-2 shadow-sm">
+                <span className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center mr-3"><svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></span>
+                <span className="font-bold text-purple-700">Psicólogo:</span>
+                <span className="ml-2 text-gray-700">{users.filter(u => u.role === 'psychologist' && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length} <span className='font-bold'>({users.filter(u => u.role === 'psychologist' && u.active && (userStatsFilter !== 'inactive')).length} activos{userStatsFilter === 'all' ? `, ${users.filter(u => u.role === 'psychologist' && !u.active).length} inactivos` : ''})</span></span>
+              </div>
+              <div className="flex items-center bg-red-50 rounded-lg px-4 py-2 shadow-sm">
+                <span className="w-6 h-6 rounded-full bg-red-700 flex items-center justify-center mr-3"><svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg></span>
+                <span className="font-bold text-red-700">Super Admin:</span>
+                <span className="ml-2 text-gray-700">{users.filter(u => u.role === 'super_admin' && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length} <span className='font-bold'>({users.filter(u => u.role === 'super_admin' && u.active && (userStatsFilter !== 'inactive')).length} activos{userStatsFilter === 'all' ? `, ${users.filter(u => u.role === 'super_admin' && !u.active).length} inactivos` : ''})</span></span>
+              </div>
+            </div>
+          </div>
+          {/* Opciones y gráfica a la derecha */}
+          <div className="flex-1 flex flex-col items-center">
+            <div className="mb-4 flex space-x-2">
+              <button className={`px-4 py-2 rounded-t-lg font-bold text-sm transition-colors ${activeTab === 'bar' ? 'bg-[#8e161a] text-white' : 'bg-gray-100 text-[#8e161a]'}`} onClick={() => setActiveTab('bar')}>Barras</button>
+              <button className={`px-4 py-2 rounded-t-lg font-bold text-sm transition-colors ${activeTab === 'pie' ? 'bg-[#8e161a] text-white' : 'bg-gray-100 text-[#8e161a]'}`} onClick={() => setActiveTab('pie')}>Pastel</button>
+            </div>
+            {/* Gráfica de Barras */}
+            {activeTab === 'bar' && (
+              <div className="w-full flex flex-col md:flex-row md:items-end md:space-x-8 justify-center items-center py-8 px-2 md:px-8">
+                {['admin', 'psychologist', 'super_admin'].map((role, idx) => {
+                  const total = users.filter(u => u.role === role && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length;
+                  const activos = users.filter(u => u.role === role && u.active && (userStatsFilter !== 'inactive')).length;
+                  const color = role === 'admin' ? 'bg-orange-500' : role === 'psychologist' ? 'bg-purple-600' : 'bg-red-700';
+                  return (
+                    <div key={role} className="flex flex-col items-center mx-2">
+                      <div className={`w-14 md:w-20 h-44 flex items-end bg-gray-100 rounded-b-lg`}>
+                        <div className={`${color} rounded-t-lg w-full transition-all duration-500`} style={{height: `${total ? (activos/total)*100 : 0}%`, minHeight: '8px'}}></div>
+                      </div>
+                      <span className="mt-3 text-sm font-bold text-[#8e161a] capitalize">{role === 'admin' ? 'Admin' : role === 'psychologist' ? 'Psicólogo' : 'Super Admin'}</span>
+                      <span className="text-xs text-gray-600">{activos} / {total} activos</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {/* Gráfica de Pastel */}
+            {activeTab === 'pie' && (
+              <div className="flex flex-col items-center py-8 px-2 md:px-8">
+                {/* Pie chart SVG */}
+                <svg width="180" height="180" viewBox="0 0 36 36" className="mx-auto">
+                  {(() => {
+                    const roles = ['admin', 'psychologist', 'super_admin'];
+                    const colors = ['#fb923c', '#a21caf', '#b91c1c'];
+                    const totals = roles.map(r => users.filter(u => u.role === r && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length);
+                    const sum = totals.reduce((a, b) => a + b, 0);
+                    let acc = 0;
+                    return roles.map((role, i) => {
+                      const val = totals[i];
+                      const percent = sum ? val / sum : 0;
+                      const dash = percent * 100;
+                      const dasharray = `${dash} ${100-dash}`;
+                      const rotate = acc * 3.6;
+                      acc += percent * 100;
+                      return (
+                        <circle
+                          key={role}
+                          r="16"
+                          cx="18"
+                          cy="18"
+                          fill="transparent"
+                          stroke={colors[i]}
+                          strokeWidth="6"
+                          strokeDasharray={dasharray}
+                          strokeDashoffset={25}
+                          transform={`rotate(${rotate} 18 18)`}
+                        />
+                      );
+                    });
+                  })()}
+                </svg>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }; 

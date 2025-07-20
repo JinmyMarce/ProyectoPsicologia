@@ -23,8 +23,30 @@ namespace Vista
         }
     
 
+        private bool ValidarContactoEmergencia()
+        {
+            if (string.IsNullOrWhiteSpace(txtContactoNombre.Text))
+            {
+                MessageBox.Show("El nombre del contacto de emergencia es obligatorio.");
+                return false;
+            }
+            if (comboBoxContactoRelacion.SelectedIndex == -1)
+            {
+                MessageBox.Show("La relación del contacto de emergencia es obligatoria.");
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(txtContactoTelefono.Text))
+            {
+                MessageBox.Show("El teléfono del contacto de emergencia es obligatorio.");
+                return false;
+            }
+            return true;
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
+            if (!ValidarContactoEmergencia())
+                return;
             Cpaciente nuevoPaciente = new Cpaciente()
             {
                 dniPaciente = int.Parse(txtDNI.Text.Trim()), // Asumiendo que txtDNI es un TextBox para el DNI

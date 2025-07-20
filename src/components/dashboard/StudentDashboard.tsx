@@ -190,39 +190,13 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
   const pendingAppointments = appointments.filter(apt => apt.status === 'pending').length;
 
   return (
-    <div className="space-y-6">
-      <PageHeader 
-        title={showWelcome ? `Bienvenido, ${user?.name}` : ''}
-      >
-        <div className="w-full flex flex-col items-center justify-center relative">
-          <div className="absolute right-0 top-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className=""
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-              Actualizar
-            </Button>
+    <div className="space-y-6 font-serif" style={{fontFamily: 'Georgia, Times, serif'}}>
+      <PageHeader title={''}>
+        {showWelcome && (
+          <div className="mb-4 text-2xl font-semibold text-[#8e161a] text-center transition-opacity duration-1000" style={{fontFamily: 'Georgia, Times, serif', opacity: showWelcome ? 1 : 0}}>
+            ¡Bienvenido, {user?.name || 'Usuario'}!
           </div>
-          <div className="w-full flex justify-center mt-4">
-            <span
-              className="text-2xl font-extrabold text-white text-center px-8 py-3 rounded-xl shadow-lg"
-              style={{
-                fontFamily: 'Gasters, sans-serif',
-                letterSpacing: '0.04em',
-                background: 'linear-gradient(90deg, #8e161a 60%, #d3b7a0 100%)',
-                boxShadow: '0 4px 24px 0 rgba(142,22,26,0.10)',
-                border: '2px solid #8e161a',
-                textShadow: '0 2px 8px rgba(0,0,0,0.08)'
-              }}
-            >
-              Mi Portal de Psicología
-            </span>
-          </div>
-        </div>
+        )}
       </PageHeader>
 
       {/* Estadísticas */}

@@ -138,12 +138,16 @@ export const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6 font-serif" style={{fontFamily: 'Georgia, Times, serif'}}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard del Administrador</h1>
-          {showWelcome && <p className="text-gray-600 mt-1">Bienvenido, {user?.name}</p>}
+          {showWelcome && (
+            <div className="mb-4 text-2xl font-semibold text-[#8e161a] text-center transition-opacity duration-1000" style={{fontFamily: 'Georgia, Times, serif', opacity: showWelcome ? 1 : 0}}>
+              ¡Bienvenido, {user?.name || 'Usuario'}!
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-4">
           <button className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors">

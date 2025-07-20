@@ -36,9 +36,9 @@ export const RejectAppointmentModal: React.FC<RejectAppointmentModalProps> = ({
         </div>
       )}
       <div className="mb-4">
-        <label className="font-bold mb-2 block">Motivo del rechazo <span className="text-red-600">*</span></label>
+        <label className="font-bold mb-2 block text-gray-700">Motivo del rechazo <span className="text-red-600">*</span></label>
         <textarea
-          className="w-full border rounded-lg p-2"
+          className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all min-h-[80px] resize-none"
           value={reason}
           onChange={e => setReason(e.target.value)}
           placeholder="Explica la razón del rechazo..."
@@ -50,10 +50,8 @@ export const RejectAppointmentModal: React.FC<RejectAppointmentModalProps> = ({
         )}
       </div>
       <div className="flex justify-end gap-2 mt-6">
-        <Button variant="outline" type="button" onClick={onClose} disabled={loading}>Cancelar</Button>
-        <Button type="button" onClick={handleReject} loading={loading}>
-          Rechazar Cita
-        </Button>
+        <Button variant="outline" type="button" onClick={onClose} disabled={loading} className="border-[#8e161a] text-[#8e161a] hover:bg-[#f3e7e8] font-semibold">Cancelar</Button>
+        <Button type="button" onClick={handleReject} loading={loading} className="bg-[#8e161a] hover:bg-[#6b1115] text-white font-bold shadow-md">Rechazar Cita</Button>
       </div>
     </Modal>
   );
