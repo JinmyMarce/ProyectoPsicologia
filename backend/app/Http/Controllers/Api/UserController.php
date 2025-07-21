@@ -109,8 +109,37 @@ class UserController extends Controller
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required|string|min:8',
                 'role' => ['required', Rule::in($allowedRoles)],
+                'dni' => 'required|string|size:8|unique:users,dni',
+                'phone' => [
+                    'required',
+                    'string',
+                    'size:12',
+                    'regex:/^\\+519[0-9]{8}$/',
+                    'unique:users,phone'
+                ],
+                'birthdate' => 'required|date',
+                'gender' => 'required|in:masculino,femenino,otro',
                 'specialization' => 'nullable|string|max:255',
                 'verified' => 'boolean',
+            ], [
+                'name.required' => 'El nombre completo es obligatorio',
+                'email.required' => 'El correo es obligatorio',
+                'email.email' => 'El correo debe tener un formato válido',
+                'email.unique' => 'El correo ya está registrado',
+                'password.required' => 'La contraseña es obligatoria',
+                'password.min' => 'La contraseña debe tener al menos 8 caracteres',
+                'role.required' => 'El rol es obligatorio',
+                'dni.required' => 'El DNI es obligatorio',
+                'dni.size' => 'El DNI debe tener 8 dígitos',
+                'dni.unique' => 'El DNI ya está registrado',
+                'phone.required' => 'El número de celular es obligatorio',
+                'phone.size' => 'El número de celular debe tener 12 caracteres (+519xxxxxxxx)',
+                'phone.regex' => 'El número debe estar en formato +519xxxxxxxx',
+                'phone.unique' => 'El número de celular ya está registrado',
+                'birthdate.required' => 'La fecha de nacimiento es obligatoria',
+                'birthdate.date' => 'La fecha de nacimiento no es válida',
+                'gender.required' => 'El género es obligatorio',
+                'gender.in' => 'El género debe ser masculino, femenino u otro',
             ]);
 
             if ($validator->fails()) {
@@ -126,6 +155,10 @@ class UserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
+                'dni' => $request->dni,
+                'phone' => $request->phone,
+                'birthdate' => $request->birthdate,
+                'gender' => $request->gender,
                 'specialization' => $request->specialization,
                 'verified' => $request->verified ?? false,
                 'active' => true,
@@ -187,10 +220,23 @@ class UserController extends Controller
             ], 404);
         }
 
+        // Si viene un archivo avatar, guárdalo y actualiza el campo
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $filename = uniqid('avatar_') . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('public/avatars', $filename); // guarda en storage/app/public/avatars
+            $user->avatar = '/storage/avatars/' . $filename; // URL pública
+            $user->save();
+        }
+
         /** @var \Illuminate\Support\Facades\Validator $validator */
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
             'email' => ['sometimes', 'email', Rule::unique('users')->ignore($id)],
+            'dni' => 'sometimes|string|size:8|unique:users,dni,' . $id,
+            'phone' => 'sometimes|string|size:9|regex:/^9[0-9]{8}$/|unique:users,phone,' . $id,
+            'birthdate' => 'sometimes|date',
+            'gender' => 'sometimes|in:masculino,femenino,otro',
             'specialization' => 'nullable|string|max:255',
             'verified' => 'boolean',
             'active' => 'boolean',
@@ -204,7 +250,7 @@ class UserController extends Controller
             ], 422);
         }
 
-        $user->update($request->only(['name', 'email', 'specialization', 'verified', 'active']));
+        $user->update($request->only(['name', 'email', 'dni', 'phone', 'birthdate', 'gender', 'specialization', 'verified', 'active']));
 
         return response()->json([
             'success' => true,
@@ -278,10 +324,19 @@ class UserController extends Controller
         // Guardar en historial si es psicólogo
         if ($user->role === 'psychologist') {
             PsychologistHistory::create([
-                'psychologist_id' => $user->id,
-                'action' => 'deactivated',
-                'reason' => $request->reason,
-                'performed_by' => auth()->id(),
+                'original_user_id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'specialization' => $user->specialization,
+                'rating' => $user->rating,
+                'total_appointments' => $user->total_appointments,
+                'avatar' => $user->avatar,
+                'google_id' => $user->google_id,
+                'verified' => $user->verified,
+                'deactivated_at' => now(),
+                'deactivated_by' => Auth::user() ? Auth::user()->email : null,
+                'deactivation_reason' => $request->reason,
             ]);
         }
 

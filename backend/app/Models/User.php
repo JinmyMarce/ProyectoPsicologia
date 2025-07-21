@@ -33,7 +33,10 @@ class User extends Authenticatable
         'specialization',
         'rating',
         'total_appointments',
-        'dni'
+        'dni',
+        'phone', // <-- debe estar aquí
+        'birthdate',
+        'gender'
     ];
 
     /**
@@ -160,6 +163,8 @@ class User extends Authenticatable
             'rating' => $this->rating,
             'total_appointments' => $this->total_appointments,
             'dni' => $this->dni,
+            'birthdate' => $this->birthdate,
+            'gender' => $this->gender,
         ];
     }
 
