@@ -8,13 +8,24 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
     public function analytics(Request $request)
     {
-        $dateFrom = $request->get('date_from', Carbon::now()->startOfMonth());
-        $dateTo = $request->get('date_to', Carbon::now()->endOfMonth());
+        // Soporte para parámetro 'range' (por ejemplo, '7d')
+        $range = $request->get('range');
+        if ($range && preg_match('/^(\d+)d$/', $range, $matches)) {
+            $days = (int)$matches[1];
+            $dateTo = Carbon::now();
+            $dateFrom = Carbon::now()->subDays($days - 1)->startOfDay();
+        } else {
+            $dateFrom = $request->get('date_from', Carbon::now()->startOfMonth());
+            $dateTo = $request->get('date_to', Carbon::now()->endOfMonth());
+        }
 
         // Estadísticas generales
         $totalAppointments = Cita::whereBetween('fecha', [$dateFrom, $dateTo])->count();
@@ -378,5 +389,115 @@ class ReportController extends Controller
             'success' => true,
             'message' => 'Reporte programado cancelado exitosamente'
         ]);
+    }
+
+    // Nuevo endpoint para actividad reciente
+    public function activity(Request $request)
+    {
+        // Últimas 10 citas y 10 usuarios creados
+        $recentAppointments = \App\Models\Cita::orderBy('created_at', 'desc')->limit(10)->get();
+        $recentUsers = \App\Models\User::orderBy('created_at', 'desc')->limit(10)->get();
+
+        $activity = [];
+        foreach ($recentAppointments as $cita) {
+            $activity[] = [
+                'type' => 'appointment',
+                'id' => $cita->id,
+                'fecha' => $cita->fecha,
+                'hora' => $cita->hora,
+                'estado' => $cita->estado,
+                'created_at' => $cita->created_at,
+                'student_id' => $cita->student_id,
+                'psychologist_id' => $cita->psychologist_id,
+            ];
+        }
+        foreach ($recentUsers as $user) {
+            $activity[] = [
+                'type' => 'user',
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'created_at' => $user->created_at,
+            ];
+        }
+        // Ordenar por fecha de creación descendente
+        usort($activity, function($a, $b) {
+            return strtotime($b['created_at']) - strtotime($a['created_at']);
+        });
+        // Limitar a 15 actividades
+        $activity = array_slice($activity, 0, 15);
+
+        return response()->json([
+            'success' => true,
+            'data' => $activity
+        ]);
+    }
+
+    // Estado general del sistema
+    public function systemStatus(Request $request)
+    {
+        // Uso de disco
+        $diskTotal = disk_total_space(base_path());
+        $diskFree = disk_free_space(base_path());
+        $diskUsed = $diskTotal - $diskFree;
+        $diskPercent = round(($diskUsed / $diskTotal) * 100, 2);
+
+        // Memoria y CPU (solo para sistemas tipo Unix)
+        $memory = null;
+        $cpuLoad = null;
+        if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+            $memory = shell_exec('free -m');
+            $cpuLoad = sys_getloadavg();
+        }
+
+        // Uptime
+        $uptime = null;
+        if (file_exists('/proc/uptime')) {
+            $uptimeSeconds = (int)file_get_contents('/proc/uptime');
+            $uptime = gmdate('H:i:s', $uptimeSeconds);
+        }
+
+        // Versiones
+        $phpVersion = phpversion();
+        $laravelVersion = app()->version();
+
+        // Últimos errores del log
+        $logPath = storage_path('logs/laravel.log');
+        $lastErrors = [];
+        if (file_exists($logPath)) {
+            $lines = array_slice(file($logPath), -10);
+            $lastErrors = array_map('trim', $lines);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'disk' => [
+                    'total' => $diskTotal,
+                    'used' => $diskUsed,
+                    'free' => $diskFree,
+                    'percent' => $diskPercent
+                ],
+                'memory' => $memory,
+                'cpu' => $cpuLoad,
+                'uptime' => $uptime,
+                'php_version' => $phpVersion,
+                'laravel_version' => $laravelVersion,
+                'last_errors' => $lastErrors
+            ]
+        ]);
+    }
+
+    // Descargar reporte general del sistema en PDF profesional
+    public function downloadSystemReportPDF(Request $request)
+    {
+        $status = $this->systemStatus($request)->getData(true)['data'];
+        $logoPath = public_path('images/icons/logo.png'); // Cambia la ruta si tu logo está en otro lugar
+        $pdf = Pdf::loadView('reports.system', [
+            'status' => $status,
+            'logo' => $logoPath
+        ]);
+        return $pdf->download('reporte_general_sistema.pdf');
     }
 } 

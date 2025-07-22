@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { updateProfile, changePassword } from '@/services/users';
+import { updateProfile, changePassword, createUser, deactivateUser } from '@/services/users';
 import { User } from '@/types';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
 
 export const UserProfile: React.FC = () => {
   const { user, updateUser } = useAuth();
@@ -117,6 +119,51 @@ export const UserProfile: React.FC = () => {
 
   // Simulación de agregar nuevo superadmin
   const [showSuperAdminModal, setShowSuperAdminModal] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showAddAdmin, setShowAddAdmin] = useState(false);
+  const [adminForm, setAdminForm] = useState({
+    name: '',
+    email: '',
+    dni: '',
+    birthdate: '',
+    gender: '',
+    phone: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [adminFormError, setAdminFormError] = useState<string | null>(null);
+  const [adminFormLoading, setAdminFormLoading] = useState(false);
+
+  // 1. Eliminar 'required' de los inputs del formulario de admin
+  // 2. Agregar estados para errores por campo
+  const [adminFieldErrors, setAdminFieldErrors] = useState({
+    name: '',
+    email: '',
+    dni: '',
+    birthdate: '',
+    gender: '',
+    phone: '',
+    password: '',
+    confirmPassword: ''
+  });
+
+  // 3. Validación manual en el submit
+  const validateAdminForm = () => {
+    const errors: any = {};
+    if (!adminForm.name.trim()) errors.name = 'El nombre completo es obligatorio.';
+    if (!adminForm.email.trim()) errors.email = 'El email es obligatorio.';
+    if (!adminForm.dni.trim()) errors.dni = 'El DNI es obligatorio.';
+    if (adminForm.dni && adminForm.dni.length !== 8) errors.dni = 'El DNI debe tener 8 dígitos.';
+    if (!adminForm.birthdate.trim()) errors.birthdate = 'La fecha de nacimiento es obligatoria.';
+    if (!adminForm.gender.trim()) errors.gender = 'El género es obligatorio.';
+    if (!adminForm.phone.trim()) errors.phone = 'El celular es obligatorio.';
+    if (adminForm.phone && adminForm.phone.length !== 9) errors.phone = 'El celular debe tener 9 dígitos.';
+    if (!adminForm.password.trim()) errors.password = 'La contraseña es obligatoria.';
+    if (!adminForm.confirmPassword.trim()) errors.confirmPassword = 'Confirma la contraseña.';
+    if (adminForm.password !== adminForm.confirmPassword) errors.confirmPassword = 'Las contraseñas no coinciden.';
+    setAdminFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleAddSuperAdmin = () => {
     setShowSuperAdminModal(true);
@@ -129,200 +176,347 @@ export const UserProfile: React.FC = () => {
     alert('Aquí se iniciaría el proceso de login con Google y desactivación del superadmin actual.');
   };
 
+  // Función para crear nuevo admin
+  const handleCreateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminFormError(null);
+    setAdminFormLoading(true);
+    if (!validateAdminForm()) {
+      setAdminFormLoading(false);
+      return;
+    }
+    try {
+      // Crear el nuevo admin
+      await createUser({
+        ...adminForm,
+        role: 'admin',
+        phone: adminForm.phone ? '+51' + adminForm.phone.replace(/^\+?51/, '') : '',
+      });
+      // Desactivar el usuario actual
+      await deactivateUser(Number(user?.id) || 0);
+      setShowAddAdmin(false);
+      alert('¡Nuevo administrador registrado exitosamente! Tu cuenta ha sido desactivada. Por favor, inicia sesión con el nuevo usuario.');
+      // Cerrar sesión
+      localStorage.removeItem('auth_token');
+      window.location.href = '/login';
+    } catch (err) {
+      setAdminFormError('Error al crear el nuevo administrador');
+    } finally {
+      setAdminFormLoading(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b-2 border-[#8e161a] pb-4 mb-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Mi cuenta</h1>
-          <p className="text-gray-600 mt-1">Gestiona tu información personal y configuración</p>
+          <h1 className="text-3xl font-bold text-[#8e161a] tracking-tight">Mi cuenta</h1>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600">Rol:</span>
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user?.role || '')}`}>
-            {getRoleLabel(user?.role || '')}
-          </span>
+          <span className="text-base text-gray-700 font-semibold">Rol:</span>
+          <span className={`px-3 py-1 text-sm font-bold rounded-full border border-[#8e161a] bg-white text-[#8e161a]`}>{getRoleLabel(user?.role || '')}</span>
         </div>
       </div>
-
-      {/* Información Personal */}
-      {activeTab === 'profile' && (
-        <div className="bg-white rounded-lg shadow-md border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold">Información Personal</h2>
-            <p className="text-gray-600 mt-1">Actualiza tu información personal</p>
-          </div>
-          <div className="p-6">
-            <form onSubmit={handleProfileSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre Completo
-                  </label>
-                  <input
-                    type="text"
-                    value={profileForm.name}
-                    onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                    required
-                    readOnly={user?.role === 'student' || user?.role === 'super_admin'}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Correo Electrónico
-                  </label>
-                  <input
-                    type="email"
-                    value={profileForm.email}
-                    onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                    required
-                    readOnly={user?.role === 'student' || user?.role === 'super_admin'}
-                  />
-                </div>
-                {/* Solo para estudiantes: mostrar semestre y programa de estudios */}
-                {user?.role === 'student' && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Semestre
-                      </label>
-                      <input
-                        type="text"
-                        value={user.semester || ''}
-                        readOnly
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Programa de Estudios
-                      </label>
-                      <input
-                        type="text"
-                        value={user.career || ''}
-                        readOnly
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-              {/* Oculta el botón de guardar cambios para super_admin */}
-              {user?.role !== 'super_admin' && (
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="bg-[#8e161a] text-white px-6 py-2 rounded-lg hover:bg-[#7a1418] transition-colors disabled:opacity-50"
-                  >
-                    {loading ? 'Guardando...' : 'Guardar Cambios'}
-                  </button>
-                </div>
-              )}
-            </form>
-            {/* Botón para agregar nuevo superadmin solo para super_admin */}
-            {user?.role === 'super_admin' && (
-              <div className="mt-8 flex justify-center">
-                <button
-                  onClick={handleAddSuperAdmin}
-                  className="bg-[#8e161a] text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-[#7a1418] transition-colors text-lg"
-                >
-                  Agregar nuevo Super Administrador
-                </button>
-              </div>
-            )}
-          </div>
-          {/* Modal profesional para agregar superadmin */}
-          {showSuperAdminModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-              <div className="bg-white rounded-2xl shadow-2xl border-4 border-[#8e161a] max-w-lg w-full p-8 relative animate-fade-in">
-                <h3 className="text-2xl font-extrabold text-[#8e161a] mb-4 text-center">Agregar nuevo Super Administrador</h3>
-                <p className="text-gray-700 text-center mb-6">
-                  Al continuar, el superadministrador actual será <span className="font-bold text-[#8e161a]">desactivado</span> y se iniciará sesión con Google para el nuevo superadministrador.<br/>
-                  ¿Estás seguro de que deseas continuar?
-                </p>
-                <div className="flex justify-center space-x-6 mt-6">
-                  <button
-                    onClick={handleCloseModal}
-                    className="px-6 py-2 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleContinueGoogle}
-                    className="px-6 py-2 rounded-lg bg-[#8e161a] text-white font-bold hover:bg-[#7a1418] transition-colors shadow"
-                  >
-                    Continuar con Google
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+      {/* Botón para registrar nuevo admin */}
+      {user?.role === 'admin' && (
+        <div className="flex justify-end mb-4">
+          <Button className="bg-[#8e161a] text-white font-bold hover:bg-[#6b1115]" onClick={() => setShowAddAdmin(true)}>
+            Registrar nuevo administrador
+          </Button>
         </div>
       )}
-
-        {activeTab === 'password' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold">Cambiar Contraseña</h2>
-              <p className="text-gray-600 mt-1">Actualiza tu contraseña de acceso</p>
+      {/* Modal para crear nuevo admin */}
+      {showAddAdmin && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-all duration-500">
+          <div className="bg-white rounded-2xl shadow-lg max-w-2xl w-full mx-4 border border-gray-200 animate-fade-in-up">
+            <div className="rounded-t-2xl mb-0 shadow-md overflow-hidden border-b-4 border-[#8e161a]" style={{background: 'linear-gradient(90deg, #6b1115 0%, #8e161a 100%)'}}>
+              <h2 className="text-2xl font-extrabold text-white tracking-wide text-center py-6">Registrar Nuevo Administrador</h2>
             </div>
-            <div className="p-6">
-              <form onSubmit={handlePasswordSubmit} className="space-y-6">
+            <div className="px-8 py-8">
+              <form className="space-y-5" onSubmit={handleCreateAdmin}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Contraseña Actual
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordForm.currentPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div></div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nueva Contraseña
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                      required
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo <span className="text-red-600">*</span></label>
+                    <input type="text" value={adminForm.name} onChange={e => setAdminForm({...adminForm, name: e.target.value})} className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all" />
+                    {adminFieldErrors.name && (
+                      <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
+                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <span className="text-red-800 text-xs font-semibold">{adminFieldErrors.name}</span>
+                      </div>
+                    )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Confirmar Nueva Contraseña
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordForm.confirmPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                      required
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-600">*</span></label>
+                    <input type="email" value={adminForm.email} onChange={e => setAdminForm({...adminForm, email: e.target.value})} className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all" />
+                    {adminFieldErrors.email && (
+                      <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
+                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <span className="text-red-800 text-xs font-semibold">{adminFieldErrors.email}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="bg-[#8e161a] text-white px-6 py-2 rounded-lg hover:bg-[#7a1418] transition-colors disabled:opacity-50"
-                  >
-                    {loading ? 'Cambiando...' : 'Cambiar Contraseña'}
-                  </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">DNI <span className="text-red-600">*</span></label>
+                    <input type="text" value={adminForm.dni} onChange={e => setAdminForm({...adminForm, dni: e.target.value.replace(/[^0-9]/g, '')})} maxLength={8} className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all" />
+                    {adminFieldErrors.dni && (
+                      <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
+                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <span className="text-red-800 text-xs font-semibold">{adminFieldErrors.dni}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento <span className="text-red-600">*</span></label>
+                    <input type="date" value={adminForm.birthdate} onChange={e => setAdminForm({...adminForm, birthdate: e.target.value})} className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all" />
+                    {adminFieldErrors.birthdate && (
+                      <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
+                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <span className="text-red-800 text-xs font-semibold">{adminFieldErrors.birthdate}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Género <span className="text-red-600">*</span></label>
+                    <select value={adminForm.gender} onChange={e => setAdminForm({...adminForm, gender: e.target.value})} className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all" >
+                      <option value="">Seleccionar género</option>
+                      <option value="masculino">Masculino</option>
+                      <option value="femenino">Femenino</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                    {adminFieldErrors.gender && (
+                      <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
+                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <span className="text-red-800 text-xs font-semibold">{adminFieldErrors.gender}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Celular <span className="text-red-600">*</span></label>
+                    <div className="flex items-center">
+                      <span className="px-3 py-3 border border-gray-300 rounded-l-lg bg-gray-100 text-gray-700 select-none text-base h-[48px] flex items-center">+51</span>
+                      <input type="text" value={adminForm.phone} onChange={e => setAdminForm({...adminForm, phone: e.target.value.replace(/[^0-9]/g, '')})} maxLength={9} className="pl-3 w-full border-t border-b border-r border-gray-300 rounded-r-lg bg-white focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all text-base h-[48px]" placeholder="987654321" />
+                    </div>
+                    {adminFieldErrors.phone && (
+                      <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
+                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <span className="text-red-800 text-xs font-semibold">{adminFieldErrors.phone}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                    <input type="text" value="Administrador" readOnly className="w-full border rounded-lg p-3 bg-gray-100 text-gray-700 cursor-not-allowed" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña <span className="text-red-600">*</span></label>
+                    <input type="password" value={adminForm.password} onChange={e => setAdminForm({...adminForm, password: e.target.value})} className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all pr-10" />
+                    {adminFieldErrors.password && (
+                      <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
+                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <span className="text-red-800 text-xs font-semibold">{adminFieldErrors.password}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña <span className="text-red-600">*</span></label>
+                    <input type="password" value={adminForm.confirmPassword} onChange={e => setAdminForm({...adminForm, confirmPassword: e.target.value})} className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all pr-10" />
+                    {adminFieldErrors.confirmPassword && (
+                      <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
+                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <span className="text-red-800 text-xs font-semibold">{adminFieldErrors.confirmPassword}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {adminFormError && (
+                  <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center space-x-2 mt-2">
+                    <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span className="text-red-800 font-semibold">{adminFormError}</span>
+                  </div>
+                )}
+                <div className="flex space-x-3 pt-6">
+                  <Button type="button" variant="outline" onClick={() => setShowAddAdmin(false)} className="flex-1 border-[#8e161a] text-[#8e161a] hover:bg-[#f3e7e8] font-semibold transition-all duration-200 shadow-sm hover:shadow-md">
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="flex-1 bg-[#8e161a] hover:bg-[#6b1115] text-white font-bold shadow-md transition-all duration-200 shadow-sm hover:shadow-lg" disabled={adminFormLoading}>
+                    {adminFormLoading ? 'Creando...' : 'Registrar Administrador'}
+                  </Button>
                 </div>
               </form>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Botones de navegación */}
+      <div className="flex gap-4 mb-6">
+        <button
+          className={`px-6 py-2 rounded-lg font-semibold border transition-colors ${activeTab === 'profile' ? 'bg-[#8e161a] text-white border-[#8e161a]' : 'bg-white text-[#8e161a] border-[#8e161a] hover:bg-gray-100'}`}
+          onClick={() => setActiveTab('profile')}
+        >
+          Información Personal
+        </button>
+        {(user?.role === 'admin' || user?.role === 'psychologist') && (
+          <button
+            className={`px-6 py-2 rounded-lg font-semibold border transition-colors ${activeTab === 'password' ? 'bg-[#8e161a] text-white border-[#8e161a]' : 'bg-white text-[#8e161a] border-[#8e161a] hover:bg-gray-100'}`}
+            onClick={() => setActiveTab('password')}
+          >
+            Cambiar Contraseña
+          </button>
         )}
+      </div>
+
+      {/* Información Personal */}
+      {activeTab === 'profile' && (
+        <div className="bg-white rounded-xl shadow border border-gray-200 p-8 max-w-4xl w-full mx-auto">
+          <div className="mb-6 border-b border-gray-200 pb-4">
+            <h2 className="text-xl font-bold text-[#8e161a]">Información Personal</h2>
+          </div>
+          <form className="w-full">
+            {/* Fila 1: Nombre Completo y Correo Electrónico */}
+            <div className="flex flex-row gap-6 mb-6 w-full">
+              <div className="flex-1 min-w-[220px]">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre Completo</label>
+                <input
+                  type="text"
+                  value={profileForm.name}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-medium"
+                  required
+                  readOnly
+                />
+              </div>
+              <div className="flex-1 min-w-[220px]">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Correo Electrónico</label>
+                <input
+                  type="email"
+                  value={profileForm.email}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-medium"
+                  required
+                  readOnly
+                />
+              </div>
+            </div>
+            {/* Fila 2: Otros datos personales */}
+            <div className="flex flex-row flex-wrap gap-6 w-full">
+              {user?.dni && (
+                <div className="flex-1 min-w-[120px]">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">DNI</label>
+                  <input type="text" value={user.dni} readOnly className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 font-medium" />
+                </div>
+              )}
+              <div className="flex-1 min-w-[160px]">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Celular</label>
+                <div className="flex items-center">
+                  <span className="px-3 py-2 border border-gray-300 rounded-l-lg bg-gray-100 text-gray-700 select-none">+51</span>
+                  <input type="text" value={user?.phone ? user.phone.replace(/^\+?51/, '') : ''} readOnly className="w-full border-t border-b border-r border-gray-300 rounded-r-lg bg-gray-100 text-gray-700 font-medium px-3 py-2" />
+                </div>
+              </div>
+              {user?.specialization && (
+                <div className="flex-1 min-w-[160px]">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Especialización</label>
+                  <input type="text" value={user.specialization} readOnly className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 font-medium" />
+                </div>
+              )}
+              {user?.birthdate && (
+                <div className="flex-1 min-w-[150px]">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Fecha de Nacimiento</label>
+                  <input type="text" value={user.birthdate} readOnly className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 font-medium" />
+                </div>
+              )}
+              {user?.gender && (
+                <div className="flex-1 min-w-[100px]">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Género</label>
+                  <input type="text" value={user.gender} readOnly className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 font-medium" />
+                </div>
+              )}
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Cambiar Contraseña */}
+      {activeTab === 'password' && (user?.role === 'admin' || user?.role === 'psychologist') && (
+        <div className="bg-white rounded-xl shadow border border-gray-200 p-8 max-w-4xl w-full mx-auto flex flex-col items-center">
+          <div className="mb-6 border-b border-gray-200 pb-4 w-full">
+            <h2 className="text-xl font-bold text-[#8e161a]">Cambiar Contraseña</h2>
+          </div>
+          <form onSubmit={handlePasswordSubmit} className="space-y-6 w-full max-w-lg">
+            <div className="flex flex-row flex-wrap gap-6 w-full">
+              <div className="flex-1 min-w-[160px]">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Contraseña Actual</label>
+                <input
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-medium"
+                  required
+                />
+              </div>
+              <div className="flex-1 min-w-[160px]">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Nueva Contraseña</label>
+                <input
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-medium"
+                  required
+                />
+              </div>
+              <div className="flex-1 min-w-[160px]">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Confirmar Nueva Contraseña</label>
+                <input
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-medium"
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                type="button"
+                className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+                onClick={() => setActiveTab('profile')}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-[#8e161a] text-white px-6 py-2 rounded-lg hover:bg-[#7a1418] transition-colors disabled:opacity-50 font-bold"
+              >
+                {loading ? 'Cambiando...' : 'Cambiar Contraseña'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
         {activeTab === 'system' && (
           <div className="bg-white rounded-lg shadow-md border border-gray-200">
@@ -402,7 +596,7 @@ export const UserProfile: React.FC = () => {
       )}
 
       {success && (
-        <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 flex items-center space-x-2">
+        <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 flex items-center space-x-2 mt-2">
           <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>

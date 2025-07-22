@@ -157,7 +157,7 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
               <User className="w-5 h-5 text-white" />
               {/* Menú desplegable */}
               {showUserMenu && (
-                <div className="absolute right-0 top-14 min-w-[180px] bg-white text-gray-900 rounded-xl shadow-2xl border-2 border-[#8e161a] z-50 animate-fade-in overflow-hidden">
+                <div ref={userMenuRef} className="absolute right-0 top-14 min-w-[180px] bg-white text-gray-900 rounded-xl shadow-2xl border-2 border-[#8e161a] z-50 animate-fade-in overflow-hidden">
                   <button
                     className="w-full text-left px-5 py-3 hover:bg-gray-100 text-base font-medium border-b border-gray-200 flex items-center gap-2"
                     onClick={() => { setShowUserMenu(false); navigate('/profile'); }}

@@ -130,12 +130,24 @@ const menuItems: MenuItem[] = [
     page: 'reports',
     roles: ['super_admin', 'admin', 'psychologist']
   },
+  {
+    label: 'Estadísticas',
+    icon: BarChart3,
+    page: 'admin-stats',
+    roles: ['admin']
+  },
   // 'Mi Perfil' al final
   {
     label: 'Mi Perfil',
     icon: UserCheck,
     page: 'profile',
     roles: ['super_admin']
+  },
+  {
+    label: 'Mi Perfil',
+    icon: UserCheck,
+    page: 'profile',
+    roles: ['admin']
   }
 ];
 

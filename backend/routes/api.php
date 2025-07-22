@@ -143,6 +143,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/schedule', [ReportController::class, 'scheduleReport']);
         Route::get('/scheduled', [ReportController::class, 'getScheduledReports']);
         Route::delete('/scheduled/{id}', [ReportController::class, 'cancelScheduledReport']);
+        // Nueva ruta para actividad reciente
+        Route::get('/activity', [ReportController::class, 'activity']);
     });
 
     // Rutas para gestión de horarios

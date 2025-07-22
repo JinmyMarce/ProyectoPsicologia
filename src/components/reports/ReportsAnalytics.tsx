@@ -50,67 +50,30 @@ interface AnalyticsData {
 }
 
 export function ReportsAnalytics() {
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [system, setSystem] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
-  const [reportType, setReportType] = useState<'overview' | 'appointments' | 'psychologists' | 'students'>('overview');
 
   useEffect(() => {
-    loadAnalyticsData();
-  }, [dateRange]);
-
-  const loadAnalyticsData = async () => {
-    try {
+    async function fetchSystem() {
       setLoading(true);
       setError(null);
-      
-      // Simular carga de datos (en un caso real, harías una llamada a la API)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockData: AnalyticsData = {
-        totalAppointments: 1247,
-        completedAppointments: 1189,
-        cancelledAppointments: 45,
-        pendingAppointments: 13,
-        totalPsychologists: 8,
-        activePsychologists: 7,
-        totalStudents: 523,
-        averageRating: 4.7,
-        monthlyData: [
-          { month: 'Ene', appointments: 120, completed: 115, cancelled: 3 },
-          { month: 'Feb', appointments: 135, completed: 128, cancelled: 5 },
-          { month: 'Mar', appointments: 142, completed: 138, cancelled: 2 },
-          { month: 'Abr', appointments: 156, completed: 149, cancelled: 4 },
-          { month: 'May', appointments: 168, completed: 162, cancelled: 3 },
-          { month: 'Jun', appointments: 189, completed: 182, cancelled: 5 },
-          { month: 'Jul', appointments: 178, completed: 172, cancelled: 4 },
-          { month: 'Ago', appointments: 159, completed: 153, cancelled: 3 }
-        ],
-        psychologistPerformance: [
-          { name: 'Dr. Ana García', appointments: 156, rating: 4.9, completionRate: 98 },
-          { name: 'Dr. Luis Mendoza', appointments: 142, rating: 4.8, completionRate: 96 },
-          { name: 'Dr. Carmen Silva', appointments: 128, rating: 4.7, completionRate: 94 },
-          { name: 'Dr. Roberto Vargas', appointments: 115, rating: 4.6, completionRate: 92 },
-          { name: 'Dr. María López', appointments: 98, rating: 4.5, completionRate: 90 }
-        ],
-        appointmentTypes: [
-          { type: 'Primera consulta', count: 245, percentage: 20 },
-          { type: 'Seguimiento', count: 567, percentage: 45 },
-          { type: 'Evaluación', count: 189, percentage: 15 },
-          { type: 'Emergencia', count: 89, percentage: 7 },
-          { type: 'Otros', count: 157, percentage: 13 }
-        ]
-      };
-      
-      setAnalyticsData(mockData);
-    } catch (error: any) {
-      setError('Error al cargar los datos de análisis');
-      console.error('Error loading analytics data:', error);
-    } finally {
-      setLoading(false);
+      try {
+        const res = await fetch('http://localhost:8000/api/reports/system', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        });
+        const data = await res.json();
+        setSystem(data.data);
+      } catch (e) {
+        setError('No se pudieron cargar los datos del sistema.');
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    fetchSystem();
+  }, []);
 
   const generateReport = async (type: string) => {
     try {
@@ -134,7 +97,7 @@ export function ReportsAnalytics() {
     }
   };
 
-  if (loading && !analyticsData) {
+  if (loading && !system) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -145,7 +108,7 @@ export function ReportsAnalytics() {
     );
   }
 
-  if (!analyticsData) {
+  if (!system) {
     return (
       <div className="text-center py-12">
         <BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -156,236 +119,72 @@ export function ReportsAnalytics() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Reportes y Análisis</h1>
-        <p className="text-gray-600">Análisis detallado del sistema de citas psicológicas</p>
+      {/* Header alineado a la izquierda */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#8e161a] mb-1 text-left">Reportes y Análisis del Sistema</h1>
       </div>
 
-      {/* Alerts */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-          <AlertCircle className="w-5 h-5 mr-2" />
-          {error}
+      {/* Botón para descargar PDF profesional único */}
+      <div className="flex justify-end mb-6">
+        <Button
+          className="bg-[#8e161a] text-white font-bold hover:bg-[#6b1115]"
+          onClick={async () => {
+            try {
+              const res = await fetch('http://localhost:8000/api/reports/download-system-pdf', {
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                }
+              });
+              const blob = await res.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'reporte_superadmin.pdf';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            } catch (e) {
+              alert('No se pudo descargar el PDF profesional.');
+            }
+          }}
+        >
+          Descargar PDF Profesional Único
+        </Button>
+      </div>
+
+      {/* Resumen de datos generales del sistema en tiempo real */}
+      {loading ? (
+        <div className="text-center text-gray-500 py-12">Cargando datos del sistema...</div>
+      ) : error ? (
+        <div className="text-center text-red-600 py-12">{error}</div>
+      ) : system && (
+        <div className="space-y-8">
+          {/* Estado del Servidor */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-xl font-bold text-[#8e161a] mb-4">Estado del Servidor</h2>
+            <ul className="text-sm text-gray-700 space-y-1">
+              <li><b>Espacio en disco:</b> {((system.disk.used / 1024 / 1024 / 1024).toFixed(1))} GB usado / {((system.disk.total / 1024 / 1024 / 1024).toFixed(1))} GB total ({system.disk.percent}%)</li>
+              <li><b>CPU:</b> {Array.isArray(system.cpu) ? system.cpu[0] + ' (load avg)' : (system.cpu ?? 'N/A')}</li>
+              <li><b>Memoria RAM:</b> {system.memory ? <span className="font-mono">{system.memory}</span> : 'N/A'}</li>
+              <li><b>Uptime:</b> {system.uptime || 'N/A'}</li>
+              <li><b>Sistema:</b> PHP {system.php_version}, Laravel {system.laravel_version}</li>
+            </ul>
+          </div>
+          {/* Logs y Errores Recientes */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-xl font-bold text-[#8e161a] mb-4">Logs y Errores Recientes</h2>
+            <ul className="text-sm text-gray-700 space-y-1">
+              {system.last_errors && system.last_errors.length > 0 ? system.last_errors.map((err: string, idx: number) => (
+                <li key={idx}>{err}</li>
+              )) : <li>No hay errores recientes.</li>}
+            </ul>
+          </div>
         </div>
       )}
 
-      {/* Controles */}
-      <Card className="p-6">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div className="flex items-center gap-4">
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="week">Esta semana</option>
-              <option value="month">Este mes</option>
-              <option value="quarter">Este trimestre</option>
-              <option value="year">Este año</option>
-            </select>
-            
-            <select
-              value={reportType}
-              onChange={(e) => setReportType(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="overview">Vista general</option>
-              <option value="appointments">Citas</option>
-              <option value="psychologists">Psicólogos</option>
-              <option value="students">Estudiantes</option>
-            </select>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button
-              onClick={() => generateReport(reportType)}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <FileText className="w-4 h-4 mr-2" />
-              Generar Reporte
-            </Button>
-            
-            <Button
-              onClick={() => downloadReport(reportType)}
-              variant="outline"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Descargar
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Métricas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Calendar className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total de Citas</p>
-              <p className="text-2xl font-bold text-gray-900">{analyticsData.totalAppointments}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Completadas</p>
-              <p className="text-2xl font-bold text-gray-900">{analyticsData.completedAppointments}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <Users className="w-6 h-6 text-yellow-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Psicólogos Activos</p>
-              <p className="text-2xl font-bold text-gray-900">{analyticsData.activePsychologists}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <TrendingUp className="w-6 h-6 text-purple-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Calificación Promedio</p>
-              <p className="text-2xl font-bold text-gray-900">{analyticsData.averageRating}</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Gráfico de tendencias */}
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Tendencia de Citas</h2>
-        <div className="h-64 flex items-end justify-between gap-2">
-          {analyticsData.monthlyData.map((data, index) => (
-            <div key={data.month} className="flex-1 flex flex-col items-center">
-              <div className="w-full bg-gray-200 rounded-t mb-2 relative">
-                <div 
-                  className="bg-blue-500 rounded-t transition-all duration-500"
-                  style={{ 
-                    height: `${(data.appointments / Math.max(...analyticsData.monthlyData.map(d => d.appointments))) * 200}px` 
-                  }}
-                ></div>
-              </div>
-              <span className="text-xs text-gray-600">{data.month}</span>
-              <span className="text-xs font-medium text-gray-900">{data.appointments}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Rendimiento de psicólogos */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Rendimiento de Psicólogos</h2>
-          <div className="space-y-3">
-            {analyticsData.psychologistPerformance.map((psychologist, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                    <span className="text-gray-600 font-semibold text-sm">
-                      {psychologist.name.split(' ').map((n: string) => n[0]).join('')}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 text-sm">{psychologist.name}</h4>
-                    <p className="text-xs text-gray-600">{psychologist.appointments} citas</p>
-                  </div>
-                </div>
-                
-                <div className="text-right">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{psychologist.rating}</span>
-                    <span className="text-yellow-500">★</span>
-                  </div>
-                  <p className="text-xs text-gray-600">{psychologist.completionRate}% completadas</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Tipos de citas */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Tipos de Citas</h2>
-          <div className="space-y-3">
-            {analyticsData.appointmentTypes.map((type, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-4 h-4 rounded"
-                    style={{
-                      backgroundColor: [
-                        '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'
-                      ][index % 5]
-                    }}
-                  ></div>
-                  <span className="text-sm font-medium text-gray-900">{type.type}</span>
-                </div>
-                
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{type.count}</p>
-                  <p className="text-xs text-gray-600">{type.percentage}%</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      {/* Estadísticas adicionales */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-red-600 mb-2">
-              {analyticsData.cancelledAppointments}
-            </div>
-            <p className="text-sm text-gray-600">Citas Canceladas</p>
-            <p className="text-xs text-gray-500 mt-1">
-              {((analyticsData.cancelledAppointments / analyticsData.totalAppointments) * 100).toFixed(1)}% del total
-            </p>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-yellow-600 mb-2">
-              {analyticsData.pendingAppointments}
-            </div>
-            <p className="text-sm text-gray-600">Citas Pendientes</p>
-            <p className="text-xs text-gray-500 mt-1">
-              {((analyticsData.pendingAppointments / analyticsData.totalAppointments) * 100).toFixed(1)}% del total
-            </p>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">
-              {analyticsData.totalStudents}
-            </div>
-            <p className="text-sm text-gray-600">Estudiantes Únicos</p>
-            <p className="text-xs text-gray-500 mt-1">
-              Promedio: {(analyticsData.totalAppointments / analyticsData.totalStudents).toFixed(1)} citas/estudiante
-            </p>
-          </div>
-        </Card>
-      </div>
+      {/* Controles principales (si los quieres dejar, si no, elimínalos también) */}
+      {/* Elimino los controles principales y cualquier referencia a dateRange/setDateRange */}
 
       {/* Acciones rápidas */}
       <Card className="p-6">

@@ -197,12 +197,12 @@ export const SuperAdminDashboard: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Usuarios</p>
-              <p className="text-2xl font-bold">{users.length}</p>
-              <p className="text-xs text-gray-500">En el sistema</p>
+              <p className="text-sm font-medium text-gray-500">Total Usuarios</p>
+              <p className="text-2xl font-semibold text-gray-800">{users.length}</p>
+              <p className="text-xs text-gray-400">En el sistema</p>
             </div>
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
               </svg>
             </div>
@@ -212,16 +212,16 @@ export const SuperAdminDashboard: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Psicólogo</p>
-              <p className="text-2xl font-bold text-purple-600">{users.filter(u => u.role === 'psychologist' && u.active).length}</p>
-              <ul className="text-xs text-gray-700 mt-1">
+              <p className="text-sm font-medium text-gray-500">Psicólogo</p>
+              <p className="text-2xl font-semibold text-purple-700">{users.filter(u => u.role === 'psychologist' && u.active).length}</p>
+              <ul className="text-xs text-gray-500 mt-1">
                 {users.filter(u => u.role === 'psychologist' && u.active).map((u) => (
                   <li key={u.id}>{u.name}</li>
                 ))}
               </ul>
             </div>
-            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
@@ -231,16 +231,16 @@ export const SuperAdminDashboard: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Administrador</p>
-              <p className="text-2xl font-bold text-orange-600">{users.filter(u => u.role === 'admin' && u.active).length}</p>
-              <ul className="text-xs text-gray-700 mt-1">
+              <p className="text-sm font-medium text-gray-500">Administrador</p>
+              <p className="text-2xl font-semibold text-orange-600">{users.filter(u => u.role === 'admin' && u.active).length}</p>
+              <ul className="text-xs text-gray-500 mt-1">
                 {users.filter(u => u.role === 'admin' && u.active).map((u) => (
                   <li key={u.id}>{u.name}</li>
                 ))}
               </ul>
             </div>
-            <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
@@ -250,16 +250,16 @@ export const SuperAdminDashboard: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Super Administrador</p>
-              <p className="text-2xl font-bold text-red-700">{users.filter(u => u.role === 'super_admin' && u.active).length}</p>
-              <ul className="text-xs text-gray-700 mt-1">
+              <p className="text-sm font-medium text-gray-500">Super Administrador</p>
+              <p className="text-2xl font-semibold text-red-700">{users.filter(u => u.role === 'super_admin' && u.active).length}</p>
+              <ul className="text-xs text-gray-500 mt-1">
                 {users.filter(u => u.role === 'super_admin' && u.active).map((u) => (
                   <li key={u.id}>{u.name}</li>
                 ))}
               </ul>
             </div>
-            <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             </div>
@@ -275,23 +275,23 @@ export const SuperAdminDashboard: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-[#f7f3f1]">
               <tr>
-                <th className="px-4 py-3 text-left font-bold text-[#8e161a] uppercase tracking-wider">Nombre</th>
-                <th className="px-4 py-3 text-left font-bold text-[#8e161a] uppercase tracking-wider">Correo</th>
-                <th className="px-4 py-3 text-left font-bold text-[#8e161a] uppercase tracking-wider">Rol</th>
-                <th className="px-4 py-3 text-left font-bold text-[#8e161a] uppercase tracking-wider">Estado</th>
+                <th className="px-4 py-3 text-left font-semibold text-[#8e161a] uppercase tracking-wider">Nombre</th>
+                <th className="px-4 py-3 text-left font-semibold text-[#8e161a] uppercase tracking-wider">Correo</th>
+                <th className="px-4 py-3 text-left font-semibold text-[#8e161a] uppercase tracking-wider">Rol</th>
+                <th className="px-4 py-3 text-left font-semibold text-[#8e161a] uppercase tracking-wider">Estado</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               {users.filter(u => (u.role === 'psychologist' || u.role === 'admin')).map((user) => (
                 <tr key={user.id} className="hover:bg-[#f8e8e8] transition-colors">
-                  <td className="px-4 py-2 font-semibold text-gray-900 whitespace-nowrap">{user.name}</td>
-                  <td className="px-4 py-2 text-gray-700 whitespace-nowrap">{user.email}</td>
-                  <td className="px-4 py-2 text-[#8e161a] font-bold whitespace-nowrap">{user.role === 'psychologist' ? 'Psicólogo' : 'Administrador'}</td>
+                  <td className="px-4 py-2 font-normal text-gray-900 whitespace-nowrap">{user.name}</td>
+                  <td className="px-4 py-2 text-gray-600 whitespace-nowrap">{user.email}</td>
+                  <td className="px-4 py-2 text-[#8e161a] font-medium whitespace-nowrap">{user.role === 'psychologist' ? 'Psicólogo' : 'Administrador'}</td>
                   <td className="px-4 py-2">
                     {user.active ? (
-                      <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 font-bold shadow">Activo</span>
+                      <span className="inline-block px-3 py-1 rounded-full bg-green-50 text-green-700 font-medium shadow-sm">Activo</span>
                     ) : (
-                      <span className="inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-600 font-bold shadow">Inactivo</span>
+                      <span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-500 font-medium shadow-sm">Inactivo</span>
                     )}
                   </td>
                 </tr>
@@ -313,30 +313,30 @@ export const SuperAdminDashboard: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8">
           {/* Estadísticas a la izquierda */}
           <div className="flex-1 min-w-[220px] mb-6 md:mb-0 flex flex-col gap-4">
-            <h2 className="text-lg md:text-xl font-extrabold text-[#8e161a] tracking-wide mb-2 flex items-center">
+            <h2 className="text-lg md:text-xl font-semibold text-[#8e161a] tracking-wide mb-2 flex items-center">
               <svg className="w-7 h-7 text-[#8e161a] mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-7V7a4 4 0 10-8 0v2m8 0a4 4 0 01-8 0" /></svg>
               Estadísticas de Usuarios
             </h2>
             <div className="mb-2 flex space-x-2">
-              <button className={`px-3 py-1 rounded-lg font-bold text-xs transition-colors ${userStatsFilter === 'all' ? 'bg-[#8e161a] text-white' : 'bg-gray-100 text-[#8e161a]'}`} onClick={() => setUserStatsFilter('all')}>Todos</button>
-              <button className={`px-3 py-1 rounded-lg font-bold text-xs transition-colors ${userStatsFilter === 'active' ? 'bg-green-700 text-white' : 'bg-gray-100 text-green-700'}`} onClick={() => setUserStatsFilter('active')}>Activos</button>
-              <button className={`px-3 py-1 rounded-lg font-bold text-xs transition-colors ${userStatsFilter === 'inactive' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-700'}`} onClick={() => setUserStatsFilter('inactive')}>Inactivos</button>
+              <button className={`px-3 py-1 rounded-lg font-medium text-xs transition-colors ${userStatsFilter === 'all' ? 'bg-[#8e161a] text-white' : 'bg-gray-100 text-[#8e161a]'}`} onClick={() => setUserStatsFilter('all')}>Todos</button>
+              <button className={`px-3 py-1 rounded-lg font-medium text-xs transition-colors ${userStatsFilter === 'active' ? 'bg-green-700 text-white' : 'bg-gray-100 text-green-700'}`} onClick={() => setUserStatsFilter('active')}>Activos</button>
+              <button className={`px-3 py-1 rounded-lg font-medium text-xs transition-colors ${userStatsFilter === 'inactive' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-700'}`} onClick={() => setUserStatsFilter('inactive')}>Inactivos</button>
             </div>
             <div className="flex flex-col gap-3">
               <div className="flex items-center bg-orange-50 rounded-lg px-4 py-2 shadow-sm">
-                <span className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center mr-3"><svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" /></svg></span>
-                <span className="font-bold text-orange-700">Admin:</span>
-                <span className="ml-2 text-gray-700">{users.filter(u => u.role === 'admin' && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length} <span className='font-bold'>({users.filter(u => u.role === 'admin' && u.active && (userStatsFilter !== 'inactive')).length} activos{userStatsFilter === 'all' ? `, ${users.filter(u => u.role === 'admin' && !u.active).length} inactivos` : ''})</span></span>
+                <span className="w-6 h-6 rounded-full bg-orange-200 flex items-center justify-center mr-3"><svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" /></svg></span>
+                <span className="font-medium text-orange-700">Admin:</span>
+                <span className="ml-2 text-gray-700">{users.filter(u => u.role === 'admin' && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length} <span className='font-normal'>({users.filter(u => u.role === 'admin' && u.active && (userStatsFilter !== 'inactive')).length} activos{userStatsFilter === 'all' ? `, ${users.filter(u => u.role === 'admin' && !u.active).length} inactivos` : ''})</span></span>
               </div>
               <div className="flex items-center bg-purple-50 rounded-lg px-4 py-2 shadow-sm">
-                <span className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center mr-3"><svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></span>
-                <span className="font-bold text-purple-700">Psicólogo:</span>
-                <span className="ml-2 text-gray-700">{users.filter(u => u.role === 'psychologist' && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length} <span className='font-bold'>({users.filter(u => u.role === 'psychologist' && u.active && (userStatsFilter !== 'inactive')).length} activos{userStatsFilter === 'all' ? `, ${users.filter(u => u.role === 'psychologist' && !u.active).length} inactivos` : ''})</span></span>
+                <span className="w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center mr-3"><svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></span>
+                <span className="font-medium text-purple-700">Psicólogo:</span>
+                <span className="ml-2 text-gray-700">{users.filter(u => u.role === 'psychologist' && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length} <span className='font-normal'>({users.filter(u => u.role === 'psychologist' && u.active && (userStatsFilter !== 'inactive')).length} activos{userStatsFilter === 'all' ? `, ${users.filter(u => u.role === 'psychologist' && !u.active).length} inactivos` : ''})</span></span>
               </div>
               <div className="flex items-center bg-red-50 rounded-lg px-4 py-2 shadow-sm">
-                <span className="w-6 h-6 rounded-full bg-red-700 flex items-center justify-center mr-3"><svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg></span>
-                <span className="font-bold text-red-700">Super Admin:</span>
-                <span className="ml-2 text-gray-700">{users.filter(u => u.role === 'super_admin' && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length} <span className='font-bold'>({users.filter(u => u.role === 'super_admin' && u.active && (userStatsFilter !== 'inactive')).length} activos{userStatsFilter === 'all' ? `, ${users.filter(u => u.role === 'super_admin' && !u.active).length} inactivos` : ''})</span></span>
+                <span className="w-6 h-6 rounded-full bg-red-200 flex items-center justify-center mr-3"><svg className="w-4 h-4 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg></span>
+                <span className="font-medium text-red-700">Super Admin:</span>
+                <span className="ml-2 text-gray-700">{users.filter(u => u.role === 'super_admin' && (userStatsFilter === 'all' || (userStatsFilter === 'active' ? u.active : !u.active))).length} <span className='font-normal'>({users.filter(u => u.role === 'super_admin' && u.active && (userStatsFilter !== 'inactive')).length} activos{userStatsFilter === 'all' ? `, ${users.filter(u => u.role === 'super_admin' && !u.active).length} inactivos` : ''})</span></span>
               </div>
             </div>
           </div>

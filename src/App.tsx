@@ -28,6 +28,7 @@ import { PsychologistCalendar } from './components/psychologist/PsychologistCale
 import { SessionHistory } from './components/psychologist/SessionHistory';
 import { RescheduleAppointment } from './components/students/RescheduleAppointment';
 import MessagePanel from './components/messages/MessagePanel';
+import { AdminStats } from './components/dashboard/AdminStats';
 
 // Componente para manejar la navegación
 function NavigationHandler({ onPageChange }: { onPageChange: (page: string) => void }) {
@@ -139,6 +140,7 @@ function AppContent() {
               {/* Rutas para Admin */}
               {user.role === 'admin' && (
                 <>
+                  <Route path="/admin-stats" element={<AdminStats />} />
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/dashboard" element={<AdminDashboard />} />
                   <Route path="/users" element={<UserManagement />} />

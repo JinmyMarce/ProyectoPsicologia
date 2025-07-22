@@ -10,6 +10,10 @@ export interface User {
   updated_at: string;
   career?: string;
   semester?: string;
+  dni?: string;
+  phone?: string;
+  birthdate?: string;
+  gender?: string;
 }
 
 export interface Appointment {

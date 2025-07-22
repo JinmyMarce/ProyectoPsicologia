@@ -6,6 +6,8 @@ import { Appointment } from '@/services/appointments';
 import { User } from '@/types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { PageHeader } from '../ui/PageHeader';
+import { useNavigate } from 'react-router-dom';
 
 interface AdminStats {
   totalUsers: number;
@@ -18,6 +20,7 @@ interface AdminStats {
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<AdminStats>({
@@ -137,36 +140,51 @@ export const AdminDashboard: React.FC = () => {
     );
   }
 
+  // Manejo especial de error 403 (sin permisos)
+  if (error && error.includes('No tienes permisos')) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-3xl font-bold text-red-700 mb-4">Acceso restringido</div>
+          <div className="text-lg text-red-600 font-semibold">No tienes permisos para ver la información de usuarios. Solo puedes crear psicólogos.</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto p-6 space-y-6 font-serif" style={{fontFamily: 'Georgia, Times, serif'}}>
+    <div className="container mx-auto p-0 pt-1 space-y-6 font-serif" style={{fontFamily: 'Georgia, Times, serif'}}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard del Administrador</h1>
+      <PageHeader title={''}>
           {showWelcome && (
             <div className="mb-4 text-2xl font-semibold text-[#8e161a] text-center transition-opacity duration-1000" style={{fontFamily: 'Georgia, Times, serif', opacity: showWelcome ? 1 : 0}}>
               ¡Bienvenido, {user?.name || 'Usuario'}!
             </div>
           )}
+        <div className="w-full flex flex-col items-center justify-center mt-1 mb-2">
+          <span
+            className="text-2xl font-extrabold text-white text-center px-6 py-2 rounded-xl shadow-lg"
+            style={{
+              fontFamily: 'Gasters, sans-serif',
+              letterSpacing: '0.04em',
+              background: 'linear-gradient(90deg, #8e161a 60%, #d3b7a0 100%)',
+              boxShadow: '0 2px 12px 0 rgba(142,22,26,0.10)',
+              border: '2px solid #8e161a',
+              textShadow: '0 2px 8px rgba(0,0,0,0.08)'
+            }}
+          >
+            Panel Bienestar (Tupac Amaru)
+          </span>
         </div>
-        <div className="flex items-center space-x-4">
-          <button className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors">
-            Crear Usuario
-          </button>
-          <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-            Reportes
-          </button>
-        </div>
-      </div>
-
+      </PageHeader>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 1. Total de usuarios activos (cualquier rol) */}
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Usuarios</p>
-              <p className="text-2xl font-bold">{stats.totalUsers}</p>
-              <p className="text-xs text-gray-500">{stats.activeStudents} estudiantes activos</p>
+              <p className="text-sm font-medium text-gray-600">Total Usuarios Activos</p>
+              <p className="text-2xl font-bold">{users.filter(u => u.active).length}</p>
             </div>
             <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,27 +194,37 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* 2. Admins activos y nombre completo */}
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Citas</p>
-              <p className="text-2xl font-bold">{stats.totalAppointments}</p>
-              <p className="text-xs text-gray-500">{stats.pendingAppointments} pendientes</p>
+              <p className="text-sm font-medium text-gray-600">Admins Activos</p>
+              <p className="text-2xl font-bold text-orange-600">{users.filter(u => u.role === 'admin' && u.active).length}</p>
+              <ul className="text-xs text-gray-500 mt-1">
+                {users.filter(u => u.role === 'admin' && u.active).map((u) => (
+                  <li key={u.id}>{u.name}</li>
+                ))}
+              </ul>
             </div>
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
               </svg>
             </div>
           </div>
         </div>
 
+        {/* 3. Psicólogos activos: nombre y número */}
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Psicólogos Activos</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.activePsychologists}</p>
-              <p className="text-xs text-gray-500">Disponibles para citas</p>
+              <p className="text-2xl font-bold text-purple-700">{users.filter(u => u.role === 'psychologist' && u.active).length}</p>
+              <ul className="text-xs text-gray-500 mt-1">
+                {users.filter(u => u.role === 'psychologist' && u.active).map((u) => (
+                  <li key={u.id}>{u.name}</li>
+                ))}
+              </ul>
             </div>
             <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,288 +234,65 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* 4. Pacientes estudiantes activos */}
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Citas Completadas</p>
-              <p className="text-2xl font-bold text-green-600">{stats.completedAppointments}</p>
-              <p className="text-xs text-gray-500">Sesiones realizadas</p>
+              <p className="text-sm font-medium text-gray-500">Pacientes Estudiantes Activos</p>
+              <p className="text-2xl font-semibold text-red-700">{users.filter(u => u.role === 'student' && u.active).length}</p>
+              <p className="text-xs text-gray-400">En el sistema</p>
             </div>
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="space-y-6">
-        <div className="flex space-x-2 border-b border-gray-200">
-          {[
-            { key: 'appointments', label: 'Todas las Citas' },
-            { key: 'users', label: 'Usuarios' },
-            { key: 'reports', label: 'Reportes' },
-            { key: 'settings', label: 'Configuración' }
-          ].map(({ key, label }) => (
+      {/* Panel 2: Últimos Usuarios Registrados */}
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 mt-8 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-[#8e161a]">Últimos Usuarios Registrados</h2>
             <button
-              key={key}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === key 
-                  ? 'border-[#8e161a] text-[#8e161a]' 
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-              onClick={() => setActiveTab(key)}
-            >
-              {label}
+            className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors text-sm font-semibold"
+            onClick={() => navigate('/users')}
+          >
+            Ver Usuarios
             </button>
-          ))}
         </div>
-
-        {activeTab === 'appointments' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-md border border-gray-200">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">Todas las Citas</h2>
-                  <div className="flex items-center space-x-2">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Buscar citas..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                      <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                    <button className="border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                      Filtros
-                    </button>
-                    <button className="border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                      Exportar
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                {/* Filter Tabs */}
-                <div className="flex space-x-2 mb-6">
-                  {[
-                    { key: 'all', label: 'Todas' },
-                    { key: 'pending', label: 'Pendientes' },
-                    { key: 'confirmed', label: 'Confirmadas' },
-                    { key: 'completed', label: 'Completadas' },
-                    { key: 'cancelled', label: 'Canceladas' }
-                  ].map(({ key, label }) => (
-                    <button
-                      key={key}
-                      className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                        filter === key 
-                          ? 'bg-[#8e161a] text-white' 
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      onClick={() => setFilter(key as any)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Appointments List */}
-                <div className="space-y-4">
-                  {filteredAppointments.length === 0 ? (
-                    <div className="text-center py-8">
-                      <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <p className="text-gray-600">No se encontraron citas</p>
-                    </div>
-                  ) : (
-                    filteredAppointments.map((appointment) => (
-                      <div
-                        key={appointment.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-4">
-                              <div>
-                                <h3 className="font-semibold text-gray-900">
-                                  {appointment.user_name}
-                                </h3>
-                                <p className="text-sm text-gray-600">{appointment.user_email}</p>
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                <p>{format(new Date(appointment.date), 'EEEE, d MMMM yyyy', { locale: es })}</p>
-                                <p>{appointment.time}</p>
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-sm text-gray-700">{appointment.reason}</p>
-                                {appointment.notes && (
-                                  <p className="text-xs text-gray-500 mt-1">{appointment.notes}</p>
-                                )}
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium">Dr. {appointment.psychologist_name}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {getStatusBadge(appointment.status)}
-                            <div className="flex space-x-1">
-                              <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                              </button>
-                              <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'users' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Gestión de Usuarios</h2>
-                <button className="bg-[#8e161a] text-white px-4 py-2 rounded-lg hover:bg-[#7a1418] transition-colors">
-                  Crear Usuario
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {users.map((user) => (
-                  <div
-                    key={user.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{user.name}</h3>
-                          <p className="text-sm text-gray-600">{user.email}</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {getRoleBadge(user.role)}
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${user.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                            {user.active ? 'Activo' : 'Inactivo'}
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left font-semibold text-gray-700">Nombre</th>
+              <th className="px-4 py-2 text-left font-semibold text-gray-700">Rol</th>
+              <th className="px-4 py-2 text-left font-semibold text-gray-700">Fecha Registro</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users
+              .filter(u => u.role === 'student' || u.role === 'psychologist')
+              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+              .slice(0, 5)
+              .map((user) => (
+                <tr key={user.id} className="border-b last:border-b-0">
+                  <td className="px-4 py-2">{user.name}</td>
+                  <td className="px-4 py-2">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${user.role === 'psychologist' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
+                      {user.role === 'psychologist' ? 'Psicólogo' : 'Estudiante'}
                           </span>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        </button>
-                        <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button className="border border-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'reports' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Reportes y Análisis</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  <span>Reporte de Citas</span>
-                </button>
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                  <span>Reporte de Usuarios</span>
-                </button>
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span>Reporte de Psicólogos</span>
-                </button>
-                <button className="border border-gray-300 text-gray-700 p-8 rounded-lg hover:bg-gray-50 transition-colors flex flex-col items-center justify-center">
-                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Reporte General</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Configuración del Sistema</h2>
-              <p className="text-gray-600 mb-4">Configuración general del sistema y parámetros.</p>
-              <div className="space-y-2">
-                <button className="w-full text-left border border-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Configuración General
-                </button>
-                <button className="w-full text-left border border-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                  Gestión de Roles
-                </button>
-                <button className="w-full text-left border border-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  Configuración de Horarios
-                </button>
-                <button className="w-full text-left border border-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Configuración de Reportes
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+                  </td>
+                  <td className="px-4 py-2">{new Date(user.created_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </div>
+
+      {/* Elimino la sección de citas debajo de las cartas */}
+      {/* Main Content */}
+      {/* <div className="space-y-6"> ... citas ... </div> */}
 
       {error && (
         <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center space-x-2">

@@ -163,17 +163,18 @@ class User extends Authenticatable
             'rating' => $this->rating,
             'total_appointments' => $this->total_appointments,
             'dni' => $this->dni,
+            'phone' => $this->phone,
             'birthdate' => $this->birthdate,
             'gender' => $this->gender,
         ];
     }
 
     /**
-     * Get the citas for the user (as patient).
+     * Relación correcta: citas como estudiante
      */
     public function citas()
     {
-        return $this->hasMany(Cita::class, 'patient_id');
+        return $this->hasMany(Cita::class, 'student_id');
     }
 
     /**

@@ -23,14 +23,27 @@ class UserController extends Controller
         try {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
-            if (!$user || $user->email !== 'marcelojinmy2024@gmail.com') {
+            if (!$user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Acceso denegado. Solo el superadministrador puede acceder.'
+                    'message' => 'No autenticado.'
+                ], 401);
+            }
+
+            // Permitir solo a superadmin y admin
+            if (!in_array($user->role, ['super_admin', 'admin'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Acceso denegado. Solo el superadministrador o administrador puede acceder.'
                 ], 403);
             }
 
             $query = User::query();
+
+            // Si es admin, solo puede ver usuarios activos (de cualquier rol)
+            if ($user->role === 'admin') {
+                $query->where('active', true);
+            }
 
             // Filtros
             if ($request->has('role') && $request->role) {
