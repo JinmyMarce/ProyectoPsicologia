@@ -6,7 +6,7 @@ import axios from 'axios';
 interface PersonalData {
   dni: string;
   fullName: string;
-  age: string;
+  birthDate: string;
   gender: string;
   address: string;
   studyProgram: string;
@@ -35,6 +35,7 @@ interface PersonalDataModalProps {
     semester?: number;
   };
   disableNameAndEmail?: boolean;
+  initialData?: Partial<PersonalData>;
 }
 
 export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
@@ -45,25 +46,36 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
   selectedDate,
   selectedTime,
   userData,
-  disableNameAndEmail
+  disableNameAndEmail,
+  initialData
 }) => {
   const [formData, setFormData] = useState<PersonalData>({
-    dni: '',
-    fullName: userData?.fullName || '',
-    age: '',
-    gender: '',
-    address: '',
-    studyProgram: userData?.career || '',
-    semester: userData?.semester?.toString() || '',
-    phone: '',
-    email: userData?.email || '',
-    emergencyContactName: '',
-    emergencyContactRelationship: '',
-    emergencyContactPhone: '',
-    medicalHistory: '',
-    currentMedications: '',
-    allergies: ''
+    dni: initialData?.dni || '',
+    fullName: initialData?.fullName || userData?.fullName || '',
+    birthDate: initialData?.birthDate || '',
+    gender: initialData?.gender || '',
+    address: initialData?.address || '',
+    studyProgram: initialData?.studyProgram || userData?.career || '',
+    semester: initialData?.semester || userData?.semester?.toString() || '',
+    phone: initialData?.phone || '',
+    email: initialData?.email || userData?.email || '',
+    emergencyContactName: initialData?.emergencyContactName || '',
+    emergencyContactRelationship: initialData?.emergencyContactRelationship || '',
+    emergencyContactPhone: initialData?.emergencyContactPhone || '',
+    medicalHistory: initialData?.medicalHistory || '',
+    currentMedications: initialData?.currentMedications || '',
+    allergies: initialData?.allergies || ''
   });
+
+  // Actualizar si cambia initialData
+  React.useEffect(() => {
+    if (initialData) {
+      setFormData(prev => ({
+        ...prev,
+        ...initialData
+      }));
+    }
+  }, [initialData]);
 
   const [errors, setErrors] = useState<Partial<PersonalData>>({});
 
@@ -111,7 +123,13 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
 
     if (!formData.dni.trim()) newErrors.dni = 'El DNI es obligatorio';
     if (!formData.fullName.trim()) newErrors.fullName = 'El nombre completo es obligatorio';
-    if (!formData.age.trim()) newErrors.age = 'La edad es obligatoria';
+    if (!formData.birthDate.trim()) newErrors.birthDate = 'La fecha de nacimiento es obligatoria';
+    else {
+      const birth = new Date(formData.birthDate);
+      const today = new Date();
+      const age = today.getFullYear() - birth.getFullYear() - (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate()) ? 1 : 0);
+      if (age < 15) newErrors.birthDate = 'Debes tener al menos 15 años';
+    }
     if (!formData.gender.trim()) newErrors.gender = 'El género es obligatorio';
     if (!formData.address.trim()) newErrors.address = 'La dirección es obligatoria';
     if (!formData.studyProgram.trim()) newErrors.studyProgram = 'El programa de estudios es obligatorio';
@@ -128,10 +146,6 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
       newErrors.dni = 'El DNI debe contener solo números';
     }
 
-    if (formData.age && (parseInt(formData.age) < 15 || parseInt(formData.age) > 80)) {
-      newErrors.age = 'La edad debe estar entre 15 y 80 años';
-    }
-
     if (formData.phone && !formData.phone.match(/^\d{9}$/)) {
       newErrors.phone = 'El teléfono debe tener exactamente 9 dígitos';
     }
@@ -144,8 +158,25 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (validateForm()) {
+      // Validar DNI único en backend antes de continuar
+      try {
+        // Llama a un endpoint que verifique si el DNI ya existe en otro usuario
+        const res = await axios.post('/api/patients/validate-dni', {
+          dni: formData.dni
+        });
+        if (res.data.exists) {
+          setErrors(prev => ({ ...prev, dni: 'El DNI ya está registrado por otro usuario.' }));
+          return;
+        }
+      } catch (error: any) {
+        if (error.response && error.response.data && error.response.data.errors && error.response.data.errors.dni) {
+          setErrors(prev => ({ ...prev, dni: error.response.data.errors.dni[0] }));
+          return;
+        }
+        // Otro error inesperado
+      }
       // Agregar el prefijo +51 al teléfono antes de enviar
       const dataToSend = {
         ...formData,
@@ -175,7 +206,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
             setFormData(prev => ({
               ...prev,
               fullName: prev.fullName || userData?.fullName || data.name || '',
-              age: data.age ? String(data.age) : prev.age,
+              birthDate: data.birthDate || prev.birthDate,
               gender: data.gender || prev.gender,
               address: data.address || prev.address,
               studyProgram: data.career || prev.studyProgram,
@@ -221,40 +252,24 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
             </button>
           </div>
 
-          {/* Resumen de selección */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Fecha seleccionada:</span>
-              <span className="font-semibold">{formatDate(selectedDate)}</span>
+          {/* Resumen de selección solo para estudiantes (cuando hay fecha y hora) */}
+          {(selectedDate && selectedTime) && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Fecha seleccionada:</span>
+                <span className="font-semibold">{formatDate(selectedDate)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm mt-1">
+                <span className="text-gray-600">Horario seleccionado:</span>
+                <span className="font-semibold">{selectedTime}</span>
+              </div>
             </div>
-            <div className="flex items-center justify-between text-sm mt-1">
-              <span className="text-gray-600">Horario seleccionado:</span>
-              <span className="font-semibold">{selectedTime}</span>
-            </div>
-          </div>
+          )}
 
           {/* Formulario */}
           <div className="space-y-4">
+            {/* Fila 1: Nombre completo y Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* DNI */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  DNI <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.dni}
-                  onChange={(e) => handleInputChange('dni', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.dni ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="12345678"
-                  maxLength={8}
-                />
-                {errors.dni && <p className="text-red-500 text-xs mt-1">{errors.dni}</p>}
-              </div>
-
-              {/* Nombre completo */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nombre completo <span className="text-red-500">*</span>
@@ -269,27 +284,37 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 />
                 {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
               </div>
-
-              {/* Edad */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Edad <span className="text-red-500">*</span>
+                  Email <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
-                  value={formData.age}
-                  onChange={(e) => handleInputChange('age', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.age ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="20"
-                  min="15"
-                  max="80"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Correo institucional"
+                  disabled={disableNameAndEmail}
                 />
-                {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
-
-              {/* Género */}
+            </div>
+            {/* Fila 2: DNI, Género y Teléfono */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  DNI <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.dni}
+                  onChange={(e) => handleInputChange('dni', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.dni ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="12345678"
+                  maxLength={8}
+                />
+                {errors.dni && <p className="text-red-500 text-xs mt-1">{errors.dni}</p>}
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Género <span className="text-red-500">*</span>
@@ -297,9 +322,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 <select
                   value={formData.gender}
                   onChange={(e) => handleInputChange('gender', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.gender ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.gender ? 'border-red-500' : 'border-gray-300'}`}
                 >
                   <option value="">Seleccionar género</option>
                   <option value="masculino">Masculino</option>
@@ -308,9 +331,42 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 </select>
                 {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
               </div>
-
-              {/* Dirección */}
-              <div className="md:col-span-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Teléfono del paciente <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <span className="text-gray-500 text-sm">+51</span>
+                  </div>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    className={`w-full pl-12 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                    placeholder="987654321"
+                    maxLength={9}
+                  />
+                </div>
+                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+              </div>
+            </div>
+            {/* Fila 3: Fecha de nacimiento y Dirección */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fecha de nacimiento <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={formData.birthDate}
+                  onChange={(e) => handleInputChange('birthDate', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.birthDate ? 'border-red-500' : 'border-gray-300'}`}
+                  max={new Date().toISOString().split('T')[0]}
+                />
+                {errors.birthDate && <p className="text-red-500 text-xs mt-1">{errors.birthDate}</p>}
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Dirección <span className="text-red-500">*</span>
                 </label>
@@ -318,15 +374,14 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                   type="text"
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.address ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="Av. Principal 123, Lima"
                 />
                 {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
               </div>
-
-              {/* Programa de estudios */}
+            </div>
+            {/* Fila 4: Programa de estudios y Semestre */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Programa de estudios <span className="text-red-500">*</span>
@@ -334,9 +389,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 <select
                   value={formData.studyProgram}
                   onChange={(e) => handleInputChange('studyProgram', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.studyProgram ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.studyProgram ? 'border-red-500' : 'border-gray-300'}`}
                   disabled={!!userData?.career}
                 >
                   <option value="">Seleccionar programa</option>
@@ -353,8 +406,6 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 </select>
                 {errors.studyProgram && <p className="text-red-500 text-xs mt-1">{errors.studyProgram}</p>}
               </div>
-
-              {/* Semestre */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Semestre <span className="text-red-500">*</span>
@@ -362,9 +413,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 <select
                   value={formData.semester}
                   onChange={(e) => handleInputChange('semester', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.semester ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.semester ? 'border-red-500' : 'border-gray-300'}`}
                   disabled={!!userData?.semester}
                 >
                   <option value="">Seleccionar semestre</option>
@@ -375,45 +424,6 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                   ))}
                 </select>
                 {errors.semester && <p className="text-red-500 text-xs mt-1">{errors.semester}</p>}
-              </div>
-
-              {/* Teléfono */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Teléfono <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <span className="text-gray-500 text-sm">+51</span>
-                  </div>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className={`w-full pl-12 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.phone ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="987654321"
-                    maxLength={9}
-                  />
-                </div>
-                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
-                  placeholder="Correo institucional"
-                  disabled={disableNameAndEmail}
-                />
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
             </div>
           </div>

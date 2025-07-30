@@ -158,6 +158,7 @@ function AppContent() {
                   <Route path="/schedule" element={<ScheduleManager />} />
                   <Route path="/patients" element={<PatientList />} />
                   <Route path="/patients/register" element={<PatientRegistration />} />
+<Route path="/patients/registry" element={<PatientRegistration />} />
                   <Route path="/sessions" element={<SessionHistory />} />
                   <Route path="/sessions/register" element={<SessionRegistration />} />
                   <Route path="/appointments/direct" element={<PsychologistCalendar />} />

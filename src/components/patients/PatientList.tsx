@@ -6,13 +6,23 @@ import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { patientsService, Patient } from '../../services/patients';
 
-export function PatientList() {
+interface PatientListProps {
+  onRegisterClick?: () => void;
+}
+
+import { MultiStepPatientRegistrationModal } from './MultiStepPatientRegistrationModal';
+
+export function PatientList({ onRegisterClick }: PatientListProps) {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
+  // Estado para edición
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editPatientId, setEditPatientId] = useState<number|null>(null);
+  const [editPatientData, setEditPatientData] = useState<any>(null);
 
   const loadPatients = async (page = 1, search = '') => {
     setLoading(true);
@@ -22,7 +32,8 @@ export function PatientList() {
       const response = await patientsService.getPatients({
         search,
         page,
-        per_page: 10
+        per_page: 10,
+        role: 'student'
       });
 
       if (response.success) {
@@ -83,11 +94,11 @@ export function PatientList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f2f3c6] via-[#d3b7a0] to-[#8e161a] p-6">
+    <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto">
-        <Card className="shadow-2xl rounded-3xl border-0 bg-white/95 backdrop-blur-md overflow-hidden" padding="lg">
+        <Card className="shadow-2xl rounded-3xl border-0 bg-white overflow-hidden" padding="lg">
           {/* Header con icono grande */}
-          <div className="text-center mb-8 bg-gradient-to-r from-[#8e161a]/10 to-[#d3b7a0]/10 p-8 rounded-t-3xl">
+          <div className="text-center mb-8 bg-white p-8 rounded-t-3xl border-b-2 border-[#8e161a]">
             <div className="flex items-center justify-center mx-auto mb-6">
               <div className="relative">
                 <img 
@@ -98,10 +109,10 @@ export function PatientList() {
                 <div className="absolute inset-0 bg-white/20 rounded-full blur-lg"></div>
               </div>
             </div>
-            <h1 className="text-3xl font-extrabold text-[#8e161a] mb-3 tracking-tight drop-shadow-sm">
+            <h1 className="text-3xl font-extrabold text-[#8e161a] mb-3 tracking-tight">
               Visualizar Pacientes
             </h1>
-            <p className="text-gray-700 font-semibold text-lg">
+            <p className="text-[#8e161a] font-semibold text-lg">
               Sistema de Gestión de Citas - Psicología
             </p>
             <p className="text-[#8e161a] font-bold text-sm mt-2">
@@ -134,17 +145,17 @@ export function PatientList() {
                 <Button
                   onClick={() => loadPatients(currentPage, searchTerm)}
                   variant="outline"
-                  className="border-2 border-[#d3b7a0] hover:border-[#8e161a] text-[#8e161a] font-semibold bg-white hover:bg-[#f2f3c6] transition-all duration-300 px-6"
+                  className="border-2 border-[#8e161a] text-[#8e161a] font-semibold bg-white hover:bg-[#8e161a] hover:text-white transition-all duration-300 px-6"
                 >
                   <RefreshCw className="w-5 h-5 mr-2" />
                   Actualizar
                 </Button>
-
                 <Button
-                  className="bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] text-white font-bold shadow-lg hover:from-[#6d1115] hover:to-[#b89a8a] transition-all duration-300 px-6"
+                  className="bg-[#8e161a] text-white font-bold shadow-lg hover:bg-[#6d1115] transition-all duration-300 px-6"
+                  onClick={onRegisterClick}
                 >
                   <UserPlus className="w-5 h-5 mr-2" />
-                  Nuevo Paciente
+                  Registrar Paciente
                 </Button>
               </div>
             </div>
@@ -156,10 +167,10 @@ export function PatientList() {
             )}
 
             {/* Tabla de pacientes */}
-            <div className="overflow-x-auto bg-white rounded-2xl shadow-lg border border-gray-100">
+            <div className="overflow-x-auto bg-white rounded-2xl shadow-lg border border-[#8e161a]">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] text-white">
+                  <tr className="bg-[#8e161a] text-white">
                     <th className="px-6 py-4 text-left font-bold text-lg">DNI</th>
                     <th className="px-6 py-4 text-left font-bold text-lg">Nombre</th>
                     <th className="px-6 py-4 text-left font-bold text-lg">Email</th>
@@ -197,21 +208,35 @@ export function PatientList() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                              className="text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-colors duration-200"
                             >
                               <Eye className="w-5 h-5" />
                             </Button>
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="text-green-600 hover:bg-green-50 transition-colors duration-200"
+                              className="text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-colors duration-200"
+                              onClick={async () => {
+                                try {
+                                  const res = await patientsService.getPatient(patient.id);
+                                  if (res.success && res.data) {
+                                    setEditPatientId(patient.id);
+                                    setEditPatientData(res.data);
+                                    setEditModalOpen(true);
+                                  } else {
+                                    setError('No se pudo cargar los datos del paciente');
+                                  }
+                                } catch (e) {
+                                  setError('Error al cargar datos del paciente');
+                                }
+                              }}
                             >
-                              <Edit className="w-5 h-5" />
+                              Modificar
                             </Button>
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="text-red-600 hover:bg-red-50 transition-colors duration-200"
+                              className="text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-colors duration-200"
                               onClick={() => handleDeletePatient(patient.id)}
                             >
                               <Trash2 className="w-5 h-5" />
@@ -233,7 +258,7 @@ export function PatientList() {
                     variant="outline"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="border-[#d3b7a0] text-[#8e161a] hover:bg-[#f2f3c6] px-6 py-3"
+                    className="border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white px-6 py-3"
                   >
                     Anterior
                   </Button>
@@ -256,6 +281,23 @@ export function PatientList() {
           </div>
         </Card>
       </div>
+      {/* Modal de edición de paciente */}
+      <MultiStepPatientRegistrationModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditPatientId(null);
+          setEditPatientData(null);
+        }}
+        patientId={editPatientId || undefined}
+        patientData={editPatientData}
+        onSuccess={() => {
+          setEditModalOpen(false);
+          setEditPatientId(null);
+          setEditPatientData(null);
+          loadPatients(currentPage, searchTerm);
+        }}
+      />
     </div>
   );
 } 

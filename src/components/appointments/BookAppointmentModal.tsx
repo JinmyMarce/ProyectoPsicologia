@@ -31,7 +31,6 @@ interface ContactData {
   // Datos personales
   dni: string;
   fullName: string;
-  age: string;
   gender: string;
   address: string;
   studyProgram: string;
@@ -75,7 +74,7 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
   const [contactData, setContactData] = useState<ContactData>({
     dni: '',
     fullName: user?.name || '',
-    age: '',
+
     gender: '',
     address: '',
     phone: '',
@@ -105,7 +104,7 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
     setContactData({
       dni: '',
       fullName: user?.name || '',
-      age: '',
+ 
       gender: '',
       address: '',
       phone: '',
@@ -133,9 +132,9 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
     // Validaciones
     if (!selectedTime) return;
     if (isFirstAppointment && !reason.trim()) return;
-    if (!contactData.dni.trim()) return;
+
     if (!contactData.fullName.trim()) return;
-    if (!contactData.age.trim()) return;
+
     if (!contactData.gender.trim()) return;
     if (!contactData.address.trim()) return;
     if (!contactData.studyProgram.trim()) return;
@@ -195,9 +194,9 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
     return dniRegex.test(dni);
   };
 
-  const validateAge = (age: string) => {
-    const ageNum = parseInt(age);
-    return ageNum >= 1 && ageNum <= 120;
+  
+  
+  
   };
 
   // Función para determinar las opciones de semestre según la fecha actual
@@ -228,8 +227,8 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
            contactData.dni.trim() &&
            validateDNI(contactData.dni) &&
            contactData.fullName.trim() &&
-           contactData.age.trim() &&
-           validateAge(contactData.age) &&
+
+
            contactData.gender.trim() &&
            contactData.address.trim() &&
            contactData.studyProgram.trim() &&

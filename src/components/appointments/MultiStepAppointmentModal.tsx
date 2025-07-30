@@ -68,35 +68,60 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
         throw new Error('Usuario no autenticado');
       }
 
-      const appointmentDataToSend = {
-        psychologist_id: psychologistId,
-        date: selectedDate,
-        time: appointmentData.time!,
-        reason: medicalInfo.reason || '',
-        notes: '',
-        user_email: user.email,
-        status: 'pending',
-        // Datos personales del paciente
-        patient_dni: appointmentData.personalData!.dni,
-        patient_full_name: appointmentData.personalData!.fullName,
-        patient_age: parseInt(appointmentData.personalData!.age),
-        patient_gender: appointmentData.personalData!.gender,
-        patient_address: appointmentData.personalData!.address,
-        patient_study_program: appointmentData.personalData!.studyProgram,
-        patient_semester: appointmentData.personalData!.semester,
-        // Datos de contacto del paciente
-        patient_phone: appointmentData.personalData!.phone,
-        patient_email: appointmentData.personalData!.email,
-        // Contacto de emergencia
-        emergency_contact_name: appointmentData.emergencyContact!.name,
-        emergency_contact_relationship: appointmentData.emergencyContact!.relationship,
-        emergency_contact_phone: appointmentData.emergencyContact!.phone,
-        // Información médica (opcional)
-        medical_history: medicalInfo.medicalHistory || '',
-        current_medications: medicalInfo.currentMedications || '',
-        allergies: medicalInfo.allergies || ''
-      };
+      // Garantizar formato YYYY-MM-DD para patient_birthdate
+      let birthDate = appointmentData.personalData!.birthDate;
+      if (birthDate) {
+        // Si viene en otro formato, intentar convertir
+        const dateObj = new Date(birthDate);
+        if (!isNaN(dateObj.getTime())) {
+          birthDate = dateObj.toISOString().split('T')[0];
+        }
+      } else {
+        birthDate = '';
+      }
+      const calculateAge = (birthDateString: string): number => {
+  if (!birthDateString) return 0;
+  const today = new Date();
+  const birthDateObj = new Date(birthDateString);
+  let age = today.getFullYear() - birthDateObj.getFullYear();
+  const m = today.getMonth() - birthDateObj.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
+    age--;
+  }
+  return age;
+};
 
+const appointmentDataToSend = {
+  // Campos requeridos por backend
+  user_email: user.email,
+  date: selectedDate,
+  time: appointmentData.time!,
+  status: 'pending',
+  psychologist_id: psychologistId,
+  fecha: selectedDate,
+  hora: appointmentData.time!,
+  motivo_consulta: medicalInfo.reason || '',
+  duracion: 45,
+  // Datos personales del paciente
+  patient_dni: appointmentData.personalData?.dni || '',
+  patient_name: appointmentData.personalData?.fullName || '',
+  patient_birthdate: birthDate,
+  patient_gender: appointmentData.personalData?.gender || '',
+  patient_address: appointmentData.personalData?.address || '',
+  patient_study_program: appointmentData.personalData?.studyProgram || '',
+  patient_semester: appointmentData.personalData?.semester || '',
+  patient_phone: appointmentData.personalData?.phone || '',
+  patient_email: appointmentData.personalData?.email || '',
+  // Contacto de emergencia
+  emergency_contact_name: appointmentData.emergencyContact!.name,
+  emergency_contact_relationship: appointmentData.emergencyContact!.relationship,
+  emergency_contact_phone: appointmentData.emergencyContact!.phone,
+  // Información médica (opcional)
+  medical_history: medicalInfo.medicalHistory || '',
+  current_medications: medicalInfo.currentMedications || '',
+  allergies: medicalInfo.allergies || ''
+};
+      console.log('Payload enviado:', appointmentDataToSend);
       await createAppointment(appointmentDataToSend);
       onSuccess();
       handleClose();

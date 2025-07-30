@@ -117,33 +117,22 @@ class AppointmentController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'user_email' => 'required|email|exists:users,email',
-                'psychologist_id' => 'required|exists:users,id',
-                'date' => 'required|date|after_or_equal:today',
-                'time' => 'required|string',
-                'reason' => 'nullable|string|max:500',
-                'notes' => 'nullable|string|max:1000',
-                'status' => 'required|in:pending,confirmed,completed,cancelled',
-                // Datos personales del paciente
-                'patient_dni' => 'required|string|size:8|regex:/^[0-9]{8}$/',
-                'patient_full_name' => 'required|string|max:255',
-                'patient_age' => 'required|integer|min:1|max:120',
-                'patient_gender' => 'required|in:masculino,femenino,otro',
-                'patient_address' => 'required|string|max:500',
-                'patient_study_program' => 'required|string|max:255',
-                'patient_semester' => 'required|string|max:10',
-                // Datos de contacto del paciente
-                'patient_phone' => 'required|string|max:20',
-                'patient_email' => 'required|email|max:255',
-                // Contacto de emergencia
-                'emergency_contact_name' => 'required|string|max:255',
-                'emergency_contact_relationship' => 'required|string|max:100',
-                'emergency_contact_phone' => 'required|string|max:20',
-                // Información médica (opcional)
-                'medical_history' => 'nullable|string|max:1000',
-                'current_medications' => 'nullable|string|max:1000',
-                'allergies' => 'nullable|string|max:1000',
-            ]);
+    'user_email' => 'required|email|exists:users,email',
+    'psychologist_id' => 'required|exists:users,id',
+    'date' => 'required|date|after_or_equal:today',
+    'time' => 'required|string',
+    'reason' => 'nullable|string|max:500',
+    'notes' => 'nullable|string|max:1000',
+    'status' => 'required|in:pending,confirmed,completed,cancelled',
+    // Contacto de emergencia
+    'emergency_contact_name' => 'required|string|max:255',
+    'emergency_contact_relationship' => 'required|string|max:100',
+    'emergency_contact_phone' => 'required|string|max:20',
+    // Información médica (opcional)
+    'medical_history' => 'nullable|string|max:1000',
+    'current_medications' => 'nullable|string|max:1000',
+    'allergies' => 'nullable|string|max:1000',
+]);
 
             if ($validator->fails()) {
                 return response()->json(['message' => 'Datos inválidos', 'errors' => $validator->errors()], 422);
@@ -243,43 +232,63 @@ class AppointmentController extends Controller
                 'cancelled' => 'cancelada'
             ];
 
-            // Actualizar solo los campos específicos del usuario: nombre, email, semestre y programa de estudios
+            // Actualizar datos personales del usuario desde el request
+            // Validar que el dni no exista en otro usuario
+            $dniExists = \App\Models\User::where('dni', $request->patient_dni)
+                ->where('id', '!=', $user->id)
+                ->exists();
+            if ($dniExists) {
+                return response()->json([
+                    'message' => 'El DNI ya está registrado por otro usuario.',
+                    'errors' => ['dni' => ['El DNI ya está registrado por otro usuario.']]
+                ], 422);
+            }
             $user->update([
-                'name' => $request->patient_full_name,
-                'email' => $request->patient_email,
+                'dni' => $request->patient_dni,
+                'name' => $request->patient_name,
+                'birthdate' => $request->patient_birthdate,
+                'gender' => $request->patient_gender,
+                'address' => $request->patient_address,
                 'career' => $request->patient_study_program,
                 'semester' => $request->patient_semester,
+                'phone' => $request->patient_phone,
+                'email' => $request->patient_email
             ]);
 
+            // Guardar o actualizar contacto de emergencia
+            \App\Models\EmergencyContact::updateOrCreate(
+                [
+                    'user_id' => $user->id
+                ],
+                [
+                    'name' => $request->emergency_contact_name,
+                    'relationship' => $request->emergency_contact_relationship,
+                    'phone' => $request->emergency_contact_phone
+                ]
+            );
+
+            // Guardar o actualizar información médica
+            \App\Models\MedicalInfo::updateOrCreate(
+                [
+                    'user_id' => $user->id
+                ],
+                [
+                    'medical_history' => $request->medical_history,
+                    'current_medications' => $request->current_medications,
+                    'allergies' => $request->allergies
+                ]
+            );
+
             $appointment = Cita::create([
-                'student_id' => $user->id,
-                'psychologist_id' => $request->psychologist_id,
-                'fecha' => $request->date,
-                'hora' => $request->time,
-                'duracion' => 45, // Duración de 45 minutos
-                'motivo_consulta' => $request->reason,
-                'notas' => $request->notes,
-                'estado' => 'pendiente', // Siempre pendiente hasta que el psicólogo apruebe
-                // Datos personales del paciente
-                'patient_dni' => $request->patient_dni,
-                'patient_full_name' => $request->patient_full_name,
-                'patient_age' => $request->patient_age,
-                'patient_gender' => $request->patient_gender,
-                'patient_address' => $request->patient_address,
-                'patient_study_program' => $request->patient_study_program,
-                'patient_semester' => $request->patient_semester,
-                // Datos de contacto del paciente
-                'patient_phone' => $request->patient_phone,
-                'patient_email' => $request->patient_email,
-                // Contacto de emergencia
-                'emergency_contact_name' => $request->emergency_contact_name,
-                'emergency_contact_relationship' => $request->emergency_contact_relationship,
-                'emergency_contact_phone' => $request->emergency_contact_phone,
-                // Información médica
-                'medical_history' => $request->medical_history,
-                'current_medications' => $request->current_medications,
-                'allergies' => $request->allergies,
-            ]);
+            'student_id' => $user->id,
+            'psychologist_id' => $request->psychologist_id,
+            'fecha' => $request->date,
+            'hora' => $request->time,
+            'duracion' => 45, // Duración de 45 minutos
+            'motivo_consulta' => $request->reason,
+            'notas' => $request->notes,
+            'estado' => $estadoMap[$request->status] ?? 'pendiente',
+        ]);
 
             $appointment->load(['student', 'psychologist']);
 
@@ -318,20 +327,6 @@ class AppointmentController extends Controller
                     'reason' => $appointment->motivo_consulta,
                     'notes' => $appointment->notas ?? '',
                     'status' => $appointment->estado,
-                    // Datos del paciente
-                    'patient_dni' => $appointment->patient_dni,
-                    'patient_full_name' => $appointment->patient_full_name,
-                    'patient_age' => $appointment->patient_age,
-                    'patient_gender' => $appointment->patient_gender,
-                    'patient_address' => $appointment->patient_address,
-                    'patient_phone' => $appointment->patient_phone,
-                    'patient_email' => $appointment->patient_email,
-                    'emergency_contact_name' => $appointment->emergency_contact_name,
-                    'emergency_contact_relationship' => $appointment->emergency_contact_relationship,
-                    'emergency_contact_phone' => $appointment->emergency_contact_phone,
-                    'medical_history' => $appointment->medical_history,
-                    'current_medications' => $appointment->current_medications,
-                    'allergies' => $appointment->allergies,
                     'created_at' => $appointment->created_at,
                     'updated_at' => $appointment->updated_at,
                 ]

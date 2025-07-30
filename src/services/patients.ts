@@ -56,6 +56,7 @@ export const patientsService = {
     activo?: boolean;
     page?: number;
     per_page?: number;
+    role?: string;
   }) {
     const response = await apiClient.get('/patients', { params });
     return response.data;

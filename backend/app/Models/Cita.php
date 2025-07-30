@@ -15,26 +15,7 @@ class Cita extends Model
         'duracion',
         'motivo_consulta',
         'estado',
-        'notas',
-        // Datos personales del paciente
-        'patient_dni',
-        'patient_full_name',
-        'patient_age',
-        'patient_gender',
-        'patient_address',
-        'patient_study_program',
-        'patient_semester',
-        // Datos de contacto del paciente
-        'patient_phone',
-        'patient_email',
-        // Contacto de emergencia
-        'emergency_contact_name',
-        'emergency_contact_relationship',
-        'emergency_contact_phone',
-        // Información médica
-        'medical_history',
-        'current_medications',
-        'allergies'
+        'notas'
     ];
 
     protected $casts = [

@@ -34,9 +34,10 @@ class User extends Authenticatable
         'rating',
         'total_appointments',
         'dni',
-        'phone', // <-- debe estar aquí
+        'phone',
         'birthdate',
-        'gender'
+        'gender',
+        'address' // <-- agregado para permitir actualización
     ];
 
     /**

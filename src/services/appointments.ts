@@ -38,13 +38,12 @@ export interface CreateAppointmentData {
   status?: string;
   // Datos personales del paciente
   patient_dni: string;
-  patient_full_name: string;
-  patient_age: number;
+  patient_name: string;
+  patient_birthdate: string;
   patient_gender: string;
   patient_address: string;
   patient_study_program: string;
   patient_semester: string;
-  // Datos de contacto del paciente
   patient_phone: string;
   patient_email: string;
   // Contacto de emergencia
@@ -114,7 +113,14 @@ export const createAppointment = async (appointmentData: CreateAppointmentData):
   } catch (error: unknown) {
     console.error('Error creating appointment:', error);
     if (error && typeof error === 'object' && 'response' in error) {
-      const apiError = error as { response?: { data?: { message?: string } } };
+      const apiError = error as { response?: { data?: { message?: string, errors?: Record<string, string[]> } } };
+      if (apiError.response?.data?.errors) {
+        // Concatenar todos los mensajes de error de validación
+        const errorMessages = Object.entries(apiError.response.data.errors)
+          .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+          .join(' | ');
+        throw new Error(errorMessages);
+      }
       if (apiError.response?.data?.message) {
         throw new Error(apiError.response.data.message);
       }

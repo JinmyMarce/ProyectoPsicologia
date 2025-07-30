@@ -143,9 +143,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/schedule', [ReportController::class, 'scheduleReport']);
         Route::get('/scheduled', [ReportController::class, 'getScheduledReports']);
         Route::delete('/scheduled/{id}', [ReportController::class, 'cancelScheduledReport']);
-        // Nueva ruta para actividad reciente
         Route::get('/activity', [ReportController::class, 'activity']);
     });
+
+    // Rutas profesionales
+    Route::get('/disponibilidad/{id_psicologo}', [DisponibilidadController::class, 'disponibilidadPorPsicologo']);
+    Route::post('/citas/profesional', [CitaProfesionalController::class, 'agendar']);
 
     // Rutas para gestión de horarios
     Route::prefix('schedule')->group(function () {

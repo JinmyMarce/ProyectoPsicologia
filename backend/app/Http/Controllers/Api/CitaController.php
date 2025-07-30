@@ -97,8 +97,57 @@ class CitaController extends Controller
         }
 
         try {
-            $user = Auth::user();
-            
+            // Validar y obtener datos personales del request
+            // Mapeo explícito de campos personales para normalización profesional
+            $personalData = [
+                'dni' => $request->patient_dni ?? null,
+                'name' => $request->patient_name ?? null,
+                'email' => $request->patient_email ?? null,
+                'birthdate' => $request->patient_birthdate ?? null,
+                'gender' => $request->patient_gender ?? null,
+                'address' => $request->patient_address ?? null,
+                'career' => $request->patient_study_program ?? null,
+                'semester' => $request->patient_semester ?? null,
+                'phone' => $request->patient_phone ?? null,
+                'role' => 'student',
+                'active' => true
+            ];
+
+            // Buscar usuario por DNI o email
+            $student = null;
+            if (!empty($personalData['dni'])) {
+                $student = \App\Models\User::where('dni', $personalData['dni'])->first();
+            }
+            if (!$student && !empty($personalData['email'])) {
+                $student = \App\Models\User::where('email', $personalData['email'])->first();
+            }
+
+            if ($student) {
+                // Solo actualiza si alguno de los datos personales ha cambiado
+                $camposActualizar = [
+                    'name', 'email', 'dni', 'phone', 'birthdate', 'gender', 'address', 'career', 'semester'
+                ];
+                $datosActualizables = [];
+                foreach ($camposActualizar as $campo) {
+                    // Solo actualiza si el valor recibido es diferente de null y de string vacío
+                    if (
+                        isset($personalData[$campo]) &&
+                        $personalData[$campo] !== null &&
+                        $personalData[$campo] !== '' &&
+                        $student->$campo !== $personalData[$campo]
+                    ) {
+                        $datosActualizables[$campo] = $personalData[$campo];
+                    }
+                }
+                if (!empty($datosActualizables)) {
+                    $student->update($datosActualizables);
+                }
+            } else {
+                // Crear usuario nuevo (contraseña aleatoria)
+                $personalData['password'] = bcrypt(\Str::random(12));
+                $student = \App\Models\User::create($personalData);
+            }
+
             // Verificar que el psicólogo esté activo
             $psychologist = User::where('id', $request->psychologist_id)
                 ->where('role', 'psychologist')
@@ -126,8 +175,9 @@ class CitaController extends Controller
                 ], 422);
             }
 
+            // Crear la cita asociada al usuario correcto
             $cita = Cita::create([
-                'student_id' => $user->id,
+                'student_id' => $student->id,
                 'psychologist_id' => $request->psychologist_id,
                 'fecha' => $request->fecha,
                 'hora' => $request->hora,
@@ -145,7 +195,8 @@ class CitaController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear la cita'
+                'message' => 'Error al crear la cita: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ], 500);
         }
     }

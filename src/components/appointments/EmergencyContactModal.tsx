@@ -151,53 +151,56 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
 
-            {/* Relación */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Relación con el paciente <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.relationship}
-                onChange={(e) => handleInputChange('relationship', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.relationship ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Seleccionar relación</option>
-                <option value="padre">Padre</option>
-                <option value="madre">Madre</option>
-                <option value="hermano/a">Hermano/a</option>
-                <option value="esposo/a">Esposo/a</option>
-                <option value="hijo/a">Hijo/a</option>
-                <option value="tío/a">Tío/a</option>
-                <option value="abuelo/a">Abuelo/a</option>
-                <option value="amigo/a">Amigo/a</option>
-                <option value="otro">Otro</option>
-              </select>
-              {errors.relationship && <p className="text-red-500 text-xs mt-1">{errors.relationship}</p>}
-            </div>
-
-            {/* Teléfono */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Teléfono de contacto <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <span className="text-gray-500 text-sm">+51</span>
-                </div>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className={`w-full pl-12 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300'
+            {/* Relación y Teléfono en una sola fila */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Relación */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Relación con el paciente <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.relationship}
+                  onChange={(e) => handleInputChange('relationship', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.relationship ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="987654321"
-                  maxLength={9}
-                />
+                >
+                  <option value="">Seleccionar relación</option>
+                  <option value="padre">Padre</option>
+                  <option value="madre">Madre</option>
+                  <option value="hermano/a">Hermano/a</option>
+                  <option value="esposo/a">Esposo/a</option>
+                  <option value="hijo/a">Hijo/a</option>
+                  <option value="tío/a">Tío/a</option>
+                  <option value="abuelo/a">Abuelo/a</option>
+                  <option value="amigo/a">Amigo/a</option>
+                  <option value="otro">Otro</option>
+                </select>
+                {errors.relationship && <p className="text-red-500 text-xs mt-1">{errors.relationship}</p>}
               </div>
-              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+
+              {/* Teléfono */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Teléfono de contacto <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <span className="text-gray-500 text-sm">+51</span>
+                  </div>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    className={`w-full pl-12 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.phone ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="987654321"
+                    maxLength={9}
+                  />
+                </div>
+                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+              </div>
             </div>
 
             {/* Información adicional */}
