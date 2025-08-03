@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -8,7 +8,6 @@ import {
   Clock, 
   User, 
   Search, 
-  Filter, 
   Eye,
   AlertCircle,
   CheckCircle,
@@ -16,16 +15,10 @@ import {
   Clock as ClockIcon,
   Loader2,
   RefreshCw,
-  FileText,
-  Download,
-  MessageSquare,
-  CalendarDays,
-  SortAsc,
-  SortDesc,
-  X
+  FileText
 } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import { PageHeader } from '../ui/PageHeader';
+import { Modal } from '../ui/Modal';
 
 interface Session {
   id: number;
@@ -57,18 +50,35 @@ interface Patient {
   total_sessions: number;
 }
 
-interface FilterOptions {
-  searchTerm: string;
-  patientFilter: string;
-  statusFilter: string;
-  therapyTypeFilter: string;
-  dateRange: string;
+export function getStatusColor(status: string): 'success' | 'info' | 'danger' | 'default' {
+  switch (status) {
+    case 'realizada':
+      return 'success';
+    case 'programada':
+      return 'info';
+    case 'cancelada':
+      return 'danger';
+    default:
+      return 'default';
+  }
+}
+
+export function getStatusText(status: string): string {
+  switch (status) {
+    case 'realizada':
+      return 'Realizada';
+    case 'programada':
+      return 'Programada';
+    case 'cancelada':
+      return 'Cancelada';
+    default:
+      return 'Desconocido';
+  }
 }
 
 export function SessionHistory() {
-  const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
@@ -78,26 +88,6 @@ export function SessionHistory() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'realizada' | 'programada' | 'cancelada'>('all');
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [showSessionDetails, setShowSessionDetails] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState<string>('date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
-  const [filters, setFilters] = useState<FilterOptions>({
-    searchTerm: '',
-    patientFilter: '',
-    statusFilter: '',
-    therapyTypeFilter: '',
-    dateRange: ''
-  });
-
-  useEffect(() => {
-    loadSessions();
-    loadPatients();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [sessions, filters, sortBy, sortOrder]);
 
   const loadSessions = async () => {
     try {
@@ -175,52 +165,14 @@ export function SessionHistory() {
     }
   };
 
-  const loadPatients = async () => {
-    try {
-      // Simular carga de pacientes
-      const mockPatients: Patient[] = [
-        {
-          id: 1,
-          name: 'María González López',
-          email: 'maria.gonzalez@issta.edu.pe',
-          dni: '12345678',
-          career: 'Psicología',
-          semester: '5',
-          total_sessions: 2
-        },
-        {
-          id: 2,
-          name: 'Carlos Rodríguez Silva',
-          email: 'carlos.rodriguez@issta.edu.pe',
-          dni: '87654321',
-          career: 'Psicología',
-          semester: '3',
-          total_sessions: 1
-        }
-      ];
-      
-      setPatients(mockPatients);
-    } catch (error: any) {
-      console.error('Error loading patients:', error);
-    }
-  };
-
   const handleRefresh = async () => {
     setRefreshing(true);
     await loadSessions();
     setRefreshing(false);
   };
 
-  const handleSearch = () => {
-    if (!searchTerm.trim()) {
-      setError('Por favor ingresa un término de búsqueda');
-      return;
-    }
-
-    setError('');
-    
-    // Simular búsqueda de paciente
-    const foundPatient = patients.find(patient => {
+  const handleSearch = (): void => {
+    const foundPatient = patients.find((patient: Patient) => {
       switch (searchType) {
         case 'email':
           return patient.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -235,37 +187,14 @@ export function SessionHistory() {
 
     if (foundPatient) {
       setSelectedPatient(foundPatient);
-      setSuccess('Paciente encontrado');
     } else {
       setError('Paciente no encontrado');
       setSelectedPatient(null);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'realizada':
-        return 'success';
-      case 'programada':
-        return 'info';
-      case 'cancelada':
-        return 'danger';
-      default:
-        return 'default';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'realizada':
-        return 'Realizada';
-      case 'programada':
-        return 'Programada';
-      case 'cancelada':
-        return 'Cancelada';
-      default:
-        return status;
-    }
+  const setShowPatientDetails = (value: boolean): void => {
+    console.warn(`setShowPatientDetails llamado con valor: ${value}`);
   };
 
   const getStatusIcon = (status: string) => {
@@ -281,147 +210,14 @@ export function SessionHistory() {
     }
   };
 
-  const filteredSessions = sessions.filter(session => {
-    const matchesPatient = !selectedPatient || session.patient_id === selectedPatient.id;
-    const matchesStatus = filterStatus === 'all' || session.estado === filterStatus;
-    return matchesPatient && matchesStatus;
-  });
-
   const handleViewSessionDetails = (session: Session) => {
     setSelectedSession(session);
     setShowSessionDetails(true);
   };
 
   const totalSessions = sessions.length;
-  const completedSessions = sessions.filter(s => s.estado === 'realizada').length;
-  const scheduledSessions = sessions.filter(s => s.estado === 'programada').length;
-
-  const applyFilters = () => {
-    let filtered = [...sessions];
-
-    // Aplicar filtros
-    if (filters.searchTerm) {
-      const searchTerm = filters.searchTerm.toLowerCase();
-      filtered = filtered.filter(session =>
-        session.patient_name.toLowerCase().includes(searchTerm) ||
-        session.patient_dni.includes(searchTerm) ||
-        session.patient_email.toLowerCase().includes(searchTerm) ||
-        session.patient_career.toLowerCase().includes(searchTerm) ||
-        session.temas_tratados.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    if (filters.patientFilter) {
-      filtered = filtered.filter(session => session.patient_name === filters.patientFilter);
-    }
-
-    if (filters.statusFilter) {
-      filtered = filtered.filter(session => session.estado === filters.statusFilter);
-    }
-
-    if (filters.therapyTypeFilter) {
-      filtered = filtered.filter(session => session.tipo_sesion === filters.therapyTypeFilter);
-    }
-
-    if (filters.dateRange) {
-      const [startDate, endDate] = filters.dateRange.split(' to ');
-      filtered = filtered.filter(session => {
-        const sessionDate = new Date(session.fecha_sesion);
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        return sessionDate >= start && sessionDate <= end;
-      });
-    }
-
-    // Aplicar ordenamiento
-    filtered.sort((a, b) => {
-      const aValue = a[sortBy as keyof Session];
-      const bValue = b[sortBy as keyof Session];
-      
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortOrder === 'asc' 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-      
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-      }
-      
-      return 0;
-    });
-
-    setSessions(filtered);
-  };
-
-  const handleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(field);
-      setSortOrder('asc');
-    }
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      searchTerm: '',
-      patientFilter: '',
-      statusFilter: '',
-      therapyTypeFilter: '',
-      dateRange: ''
-    });
-  };
-
-  const viewSessionDetails = (session: Session) => {
-    setSelectedSession(session);
-    setShowSessionDetails(true);
-  };
-
-  const exportSessions = () => {
-    // Simular exportación
-    const csvContent = [
-      ['Fecha', 'Paciente', 'DNI', 'Hora', 'Duración', 'Estado', 'Tipo de Terapia', 'Temas'],
-      ...sessions.map(s => [
-        new Date(s.fecha_sesion).toLocaleDateString(),
-        s.patient_name,
-        s.patient_dni,
-        s.hora_sesion,
-        `${s.duracion_minutos} min`,
-        s.estado === 'realizada' ? 'Realizada' : s.estado === 'programada' ? 'Programada' : 'Cancelada',
-        s.tipo_sesion,
-        s.temas_tratados
-      ])
-    ].map(row => row.join(',')).join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'historial_sesiones.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  const getStatusBadge = (status: string) => {
-    const colors = {
-      realizada: 'bg-green-100 text-green-800',
-      programada: 'bg-blue-100 text-blue-800',
-      cancelada: 'bg-yellow-100 text-yellow-800'
-    };
-
-    const labels = {
-      realizada: 'Realizada',
-      programada: 'Programada',
-      cancelada: 'Cancelada'
-    };
-
-    return (
-      <Badge className={`${colors[status as keyof typeof colors]}`}>
-        {labels[status as keyof typeof labels]}
-      </Badge>
-    );
-  };
+  const completedSessions = sessions.filter((s: Session) => s.estado === 'realizada').length;
+  const scheduledSessions = sessions.filter((s: Session) => s.estado === 'programada').length;
 
   return (
     <div className="space-y-6">
@@ -569,7 +365,15 @@ export function SessionHistory() {
                   size="sm"
                   onClick={() => setSelectedPatient(null)}
                 >
-                  <X className="w-4 h-4" />
+                  ✖
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowPatientDetails(true)}
+                  title="Ver detalles del paciente"
+                >
+                  <Eye className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -673,121 +477,186 @@ export function SessionHistory() {
         </div>
       )}
 
-      {/* Modal de detalles de sesión */}
-      {showSessionDetails && selectedSession && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">Detalles de la Sesión</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowSessionDetails(false)}
-              >
-                ✕
-              </Button>
+      {/* Detalles de la Sesión - Modal */}
+      {selectedSession && (
+        <Modal 
+          open={showSessionDetails} 
+          onClose={() => setShowSessionDetails(false)} 
+          title={`Detalles de la Sesión con ${selectedSession?.patient_name || 'Paciente'}`}
+          className="rounded-xl shadow-2xl border border-gray-300 bg-white p-8 transition-transform transform scale-100"
+        >
+          <div className="space-y-8">
+            {/* Información General */}
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow-md border border-blue-200 p-6">
+              <h3 className="text-xl font-bold text-blue-900 mb-6">Información General</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-semibold text-blue-700">Paciente</label>
+                  <p className="text-blue-900 font-medium">{selectedSession?.patient_name || 'No especificado'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-blue-700">DNI</label>
+                  <p className="text-blue-900 font-medium">{selectedSession?.patient_dni || 'No especificado'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-blue-700">Correo Electrónico</label>
+                  <p className="text-blue-900 font-medium">{selectedSession?.patient_email || 'No especificado'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-blue-700">Programa de Estudios</label>
+                  <p className="text-blue-900 font-medium">{selectedSession?.patient_career || 'No especificado'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-blue-700">Semestre</label>
+                  <p className="text-blue-900 font-medium">{selectedSession?.patient_semester || 'No especificado'}°</p>
+                </div>
+              </div>
             </div>
-            
-            <div className="space-y-6">
-              {/* Información del paciente */}
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-3">Información del Paciente</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600">Nombre</p>
-                    <p className="font-medium">{selectedSession.patient_name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">DNI</p>
-                    <p className="font-medium">{selectedSession.patient_dni}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Programa</p>
-                    <p className="font-medium">{selectedSession.patient_career}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Semestre</p>
-                    <p className="font-medium">{selectedSession.patient_semester}°</p>
-                  </div>
+
+            {/* Detalles de la Sesión */}
+            <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg shadow-md border border-green-200 p-6">
+              <h3 className="text-xl font-bold text-green-900 mb-6">Detalles de la Sesión</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-semibold text-green-700">Fecha</label>
+                  <p className="text-green-900 font-medium">{selectedSession?.fecha_sesion || 'No especificado'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-green-700">Hora</label>
+                  <p className="text-green-900 font-medium">{selectedSession?.hora_sesion || 'No especificado'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-green-700">Duración</label>
+                  <p className="text-green-900 font-medium">{selectedSession?.duracion_minutos || 'No especificado'} minutos</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-green-700">Estado</label>
+                  <p className={`text-green-900 font-semibold ${getStatusColor(selectedSession?.estado || '')}`}>{getStatusText(selectedSession?.estado || '')}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-green-700">Tipo de Sesión</label>
+                  <p className="text-green-900 font-medium">{selectedSession?.tipo_sesion || 'No especificado'}</p>
                 </div>
               </div>
+            </div>
 
-              {/* Información de la sesión */}
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-3">Información de la Sesión</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600">Fecha</p>
-                    <p className="font-medium">
-                      {new Date(selectedSession.fecha_sesion).toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Hora</p>
-                    <p className="font-medium">{selectedSession.hora_sesion}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Duración</p>
-                    <p className="font-medium">{selectedSession.duracion_minutos} minutos</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Estado</p>
-                    <Badge variant={getStatusColor(selectedSession.estado)}>
-                      {getStatusText(selectedSession.estado)}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Tipo de Sesión</p>
-                    <p className="font-medium">{selectedSession.tipo_sesion}</p>
-                  </div>
+            {/* Temas Tratados */}
+            {selectedSession?.temas_tratados && (
+              <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg shadow-md border border-yellow-200 p-6">
+                <h3 className="text-xl font-bold text-yellow-900 mb-6">Temas Tratados</h3>
+                <p className="text-yellow-700 bg-yellow-50 p-4 rounded-lg">{selectedSession.temas_tratados}</p>
+              </div>
+            )}
+
+            {/* Notas y Conclusiones */}
+            <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg shadow-md border border-red-200 p-6">
+              <h3 className="text-xl font-bold text-red-900 mb-6">Notas y Conclusiones</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-semibold text-red-700">Notas</label>
+                  <p className="text-red-700 bg-red-50 p-4 rounded-lg">{selectedSession?.notas || 'No especificadas'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-red-700">Conclusiones</label>
+                  <p className="text-red-700 bg-red-50 p-4 rounded-lg">{selectedSession?.conclusiones || 'No especificadas'}</p>
                 </div>
               </div>
-
-              {/* Contenido de la sesión */}
-              {selectedSession.temas_tratados && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Temas Tratados</h4>
-                  <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
-                    {selectedSession.temas_tratados}
-                  </p>
-                </div>
-              )}
-
-              {selectedSession.notas && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Notas</h4>
-                  <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
-                    {selectedSession.notas}
-                  </p>
-                </div>
-              )}
-
-              {selectedSession.objetivos && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Objetivos</h4>
-                  <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
-                    {selectedSession.objetivos}
-                  </p>
-                </div>
-              )}
-
-              {selectedSession.conclusiones && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Conclusiones</h4>
-                  <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
-                    {selectedSession.conclusiones}
-                  </p>
-                </div>
-              )}
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );
-} 
+}
+
+export function SessionDetailsModal({ open, onClose, session }: { open: boolean; onClose: () => void; session: Session | null }) {
+  if (!open || !session) return null;
+
+  return (
+    <Modal open={open} onClose={onClose} title={`Detalles de la Sesión con ${session.patient_name}`}>
+      <div className="space-y-6">
+        {/* Información General */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Información General</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Paciente</label>
+              <p className="text-gray-900">{session.patient_name}</p>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">DNI</label>
+              <p className="text-gray-900">{session.patient_dni}</p>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Correo Electrónico</label>
+              <p className="text-gray-900">{session.patient_email}</p>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Programa de Estudios</label>
+              <p className="text-gray-900">{session.patient_career}</p>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Semestre</label>
+              <p className="text-gray-900">{session.patient_semester}°</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Detalles de la Sesión */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Detalles de la Sesión</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Fecha</label>
+              <p className="text-gray-900">{new Date(session.fecha_sesion).toLocaleDateString('es-ES', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}</p>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Hora</label>
+              <p className="text-gray-900">{session.hora_sesion}</p>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Duración</label>
+              <p className="text-gray-900">{session.duracion_minutos} minutos</p>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Estado</label>
+              <p className={`text-gray-900 font-semibold ${getStatusColor(session.estado)}`}>{getStatusText(session.estado)}</p>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Tipo de Sesión</label>
+              <p className="text-gray-900">{session.tipo_sesion}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Temas Tratados */}
+        {session.temas_tratados && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Temas Tratados</h3>
+            <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{session.temas_tratados}</p>
+          </div>
+        )}
+
+        {/* Notas y Conclusiones */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Notas y Conclusiones</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Notas</label>
+              <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{session.notas || 'No especificadas'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700">Conclusiones</label>
+              <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{session.conclusiones || 'No especificadas'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}

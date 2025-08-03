@@ -37,7 +37,7 @@ class User extends Authenticatable
         'phone',
         'birthdate',
         'gender',
-        'address' // <-- agregado para permitir actualización
+        'address'
     ];
 
     /**
@@ -224,5 +224,21 @@ class User extends Authenticatable
     public function psychologistHistory()
     {
         return $this->hasMany(PsychologistHistory::class, 'psychologist_id');
+    }
+
+    /**
+     * Get the emergency contact for the user.
+     */
+    public function emergencyContact()
+    {
+        return $this->hasOne(EmergencyContact::class, 'user_id');
+    }
+
+    /**
+     * Get the medical information for the user.
+     */
+    public function medicalInfo()
+    {
+        return $this->hasOne(MedicalInfo::class, 'user_id');
     }
 }

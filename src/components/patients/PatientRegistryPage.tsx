@@ -10,7 +10,7 @@ export function PatientRegistryPage() {
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-extrabold text-[#8e161a] mb-8 tracking-tight text-left">Registro y Gestión de Pacientes</h1>
+        <h1 className="text-3xl font-extrabold text-[#8e161a] mb-8 tracking-tight text-left">Gestión de Pacientes</h1>
         <PatientList onRegisterClick={() => setShowRegistration(true)} />
       </div>
       <MultiStepPatientRegistrationModal

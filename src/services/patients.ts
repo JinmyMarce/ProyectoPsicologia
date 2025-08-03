@@ -58,13 +58,13 @@ export const patientsService = {
     per_page?: number;
     role?: string;
   }) {
-    const response = await apiClient.get('/patients', { params });
+    const response = await apiClient.get('/psychologist-dashboard/patients', { params });
     return response.data;
   },
 
   // Obtener un paciente por ID
   async getPatient(id: number) {
-    const response = await apiClient.get(`/patients/${id}`);
+    const response = await apiClient.get(`/psychologist-dashboard/patients/${id}`);
     return response.data;
   },
 

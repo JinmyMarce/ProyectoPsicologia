@@ -446,6 +446,145 @@ class PsychologistDashboardController extends Controller
     }
 
     /**
+     * Obtener un paciente específico por ID
+     */
+    public function getPatient(Request $request, $id): JsonResponse
+    {
+        try {
+            $psychologist = Auth::user();
+            
+            if (!$psychologist->isPsychologist()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Acceso denegado. Solo psicólogos pueden acceder.'
+                ], 403);
+            }
+
+            $patient = User::where('role', 'student')
+                          ->where('id', $id)
+                          ->with(['emergencyContact', 'medicalInfo', 'citas' => function($query) {
+                              $query->orderBy('fecha', 'desc')->limit(10);
+                          }])
+                          ->withCount(['citas as total_appointments', 'psychologicalSessions as total_sessions'])
+                          ->first();
+
+            if (!$patient) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Paciente no encontrado'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $patient
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener paciente: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualizar información de un paciente
+     */
+    public function updatePatient(Request $request, $id): JsonResponse
+    {
+        try {
+            $psychologist = Auth::user();
+            
+            if (!$psychologist->isPsychologist()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Acceso denegado. Solo psicólogos pueden acceder.'
+                ], 403);
+            }
+
+            $patient = User::where('role', 'student')->where('id', $id)->first();
+
+            if (!$patient) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Paciente no encontrado'
+                ], 404);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'name' => 'sometimes|string|max:255',
+                'email' => 'sometimes|email|unique:users,email,' . $id,
+                'dni' => 'sometimes|string|max:20|unique:users,dni,' . $id,
+                'phone' => 'sometimes|string|max:20',
+                'address' => 'sometimes|string|max:500',
+                'birthdate' => 'sometimes|date',
+                'gender' => 'sometimes|in:male,female,other',
+                'career' => 'sometimes|string|max:255',
+                'semester' => 'sometimes|integer|min:1|max:12',
+                // Emergency contact fields
+                'emergency_contact.name' => 'sometimes|string|max:255',
+                'emergency_contact.phone' => 'sometimes|string|max:20',
+                'emergency_contact.relationship' => 'sometimes|string|max:100',
+                // Medical info fields
+                'medical_info.allergies' => 'sometimes|string|max:1000',
+                'medical_info.medications' => 'sometimes|string|max:1000',
+                'medical_info.medical_conditions' => 'sometimes|string|max:1000',
+                'medical_info.emergency_medical_info' => 'sometimes|string|max:1000'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos de validación incorrectos',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Update patient basic info
+            $patientData = $request->only(['name', 'email', 'dni', 'phone', 'address', 'birthdate', 'gender', 'career', 'semester']);
+            $patient->update($patientData);
+
+            // Update emergency contact if provided
+            if ($request->has('emergency_contact')) {
+                $emergencyData = $request->input('emergency_contact');
+                if ($patient->emergencyContact) {
+                    $patient->emergencyContact->update($emergencyData);
+                } else {
+                    $patient->emergencyContact()->create($emergencyData);
+                }
+            }
+
+            // Update medical info if provided
+            if ($request->has('medical_info')) {
+                $medicalData = $request->input('medical_info');
+                if ($patient->medicalInfo) {
+                    $patient->medicalInfo->update($medicalData);
+                } else {
+                    $patient->medicalInfo()->create($medicalData);
+                }
+            }
+
+            // Reload patient with relationships
+            $updatedPatient = User::where('id', $id)
+                                 ->with(['emergencyContact', 'medicalInfo'])
+                                 ->first();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Paciente actualizado exitosamente',
+                'data' => $updatedPatient
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar paciente: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Registrar nueva sesión psicológica
      */
     public function registerSession(Request $request): JsonResponse

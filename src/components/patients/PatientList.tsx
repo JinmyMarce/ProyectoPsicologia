@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Eye, Edit, Trash2, UserPlus, RefreshCw } from 'lucide-react';
+import { Eye, Edit, Search, Trash2, UserPlus, RefreshCw } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
+import { Card } from '../ui/Card';
 import { patientsService, Patient } from '../../services/patients';
+import { MultiStepPatientRegistrationModal } from './MultiStepPatientRegistrationModal';
+import { PatientDetailsModal } from './PatientDetailsModal';
 
 interface PatientListProps {
   onRegisterClick?: () => void;
 }
-
-import { MultiStepPatientRegistrationModal } from './MultiStepPatientRegistrationModal';
 
 export function PatientList({ onRegisterClick }: PatientListProps) {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -23,6 +23,9 @@ export function PatientList({ onRegisterClick }: PatientListProps) {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editPatientId, setEditPatientId] = useState<number|null>(null);
   const [editPatientData, setEditPatientData] = useState<any>(null);
+  // Estado para modal de detalles
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
 
   const loadPatients = async (page = 1, search = '') => {
     setLoading(true);
@@ -209,6 +212,19 @@ export function PatientList({ onRegisterClick }: PatientListProps) {
                               size="sm"
                               variant="ghost"
                               className="text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-colors duration-200"
+                              onClick={async () => {
+                                try {
+                                  const res = await patientsService.getPatient(patient.id);
+                                  if (res.success && res.data) {
+                                    setSelectedPatient(res.data);
+                                    setDetailsModalOpen(true);
+                                  } else {
+                                    setError('No se pudo cargar los datos del paciente');
+                                  }
+                                } catch (e) {
+                                  setError('Error al cargar datos del paciente');
+                                }
+                              }}
                             >
                               <Eye className="w-5 h-5" />
                             </Button>
@@ -298,6 +314,16 @@ export function PatientList({ onRegisterClick }: PatientListProps) {
           loadPatients(currentPage, searchTerm);
         }}
       />
+      
+      {/* Modal de detalles de paciente */}
+      <PatientDetailsModal
+        isOpen={detailsModalOpen}
+        onClose={() => {
+          setDetailsModalOpen(false);
+          setSelectedPatient(null);
+        }}
+        patientId={selectedPatient?.id}
+      />
     </div>
   );
-} 
+}

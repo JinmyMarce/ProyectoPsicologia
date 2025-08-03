@@ -184,6 +184,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/appointments/schedule-for-student', [PsychologistDashboardController::class, 'scheduleAppointmentForStudent']);
         Route::get('/students/search', [PsychologistDashboardController::class, 'searchStudent']);
         Route::get('/patients', [PsychologistDashboardController::class, 'getPatients']);
+        Route::get('/patients/{id}', [PsychologistDashboardController::class, 'getPatient']);
+        Route::put('/patients/{id}', [PsychologistDashboardController::class, 'updatePatient']);
         Route::post('/sessions/register', [PsychologistDashboardController::class, 'registerSession']);
         Route::get('/sessions/history', [PsychologistDashboardController::class, 'getSessionHistory']);
         Route::get('/sessions/student-stats', [PsychologistDashboardController::class, 'getStudentSessionStats']);

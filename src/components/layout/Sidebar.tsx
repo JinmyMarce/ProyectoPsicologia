@@ -95,7 +95,7 @@ const menuItems: MenuItem[] = [
     roles: ['psychologist']
   },
   {
-    label: 'Registro de Pacientes',
+    label: 'Gestión de Pacientes',
     icon: Users,
     page: 'patients/registry',
     roles: ['psychologist']
