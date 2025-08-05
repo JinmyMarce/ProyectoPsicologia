@@ -25,7 +25,7 @@ export function PatientList({ onRegisterClick }: PatientListProps) {
   const [editPatientData, setEditPatientData] = useState<any>(null);
   // Estado para modal de detalles
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<number|null>(null);
 
   const loadPatients = async (page = 1, search = '') => {
     setLoading(true);
@@ -212,18 +212,9 @@ export function PatientList({ onRegisterClick }: PatientListProps) {
                               size="sm"
                               variant="ghost"
                               className="text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-colors duration-200"
-                              onClick={async () => {
-                                try {
-                                  const res = await patientsService.getPatient(patient.id);
-                                  if (res.success && res.data) {
-                                    setSelectedPatient(res.data);
-                                    setDetailsModalOpen(true);
-                                  } else {
-                                    setError('No se pudo cargar los datos del paciente');
-                                  }
-                                } catch (e) {
-                                  setError('Error al cargar datos del paciente');
-                                }
+                              onClick={() => {
+                                setSelectedPatientId(patient.id);
+                                setDetailsModalOpen(true);
                               }}
                             >
                               <Eye className="w-5 h-5" />
@@ -320,9 +311,9 @@ export function PatientList({ onRegisterClick }: PatientListProps) {
         isOpen={detailsModalOpen}
         onClose={() => {
           setDetailsModalOpen(false);
-          setSelectedPatient(null);
+          setSelectedPatientId(null);
         }}
-        patientId={selectedPatient?.id}
+        patientId={selectedPatientId as number}
       />
     </div>
   );

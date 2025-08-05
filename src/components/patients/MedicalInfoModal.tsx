@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { X, AlertTriangle, Pill, Heart, FileText, Shield } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';

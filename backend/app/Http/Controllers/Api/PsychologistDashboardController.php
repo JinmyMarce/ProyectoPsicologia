@@ -466,6 +466,7 @@ class PsychologistDashboardController extends Controller
                               $query->orderBy('fecha', 'desc')->limit(10);
                           }])
                           ->withCount(['citas as total_appointments', 'psychologicalSessions as total_sessions'])
+                          ->select('id', 'name', 'email', 'dni', 'phone', 'birthdate', 'gender', 'address', 'career', 'semester', 'active') // Incluimos 'active'
                           ->first();
 
             if (!$patient) {
@@ -804,4 +805,4 @@ class PsychologistDashboardController extends Controller
             ], 500);
         }
     }
-} 
+}

@@ -235,10 +235,10 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the medical information for the user.
+     * Relación con la tabla de información médica.
      */
     public function medicalInfo()
     {
-        return $this->hasOne(MedicalInfo::class, 'user_id');
+        return $this->hasOne(MedicalInfo::class);
     }
 }

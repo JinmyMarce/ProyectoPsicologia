@@ -119,6 +119,8 @@ class PatientController extends Controller
                 ], 404);
             }
 
+            $patient->load('medicalInfo');
+
             return response()->json([
                 'success' => true,
                 'data' => $patient
