@@ -57,6 +57,7 @@ export const patientsService = {
     page?: number;
     per_page?: number;
     role?: string;
+    searchType?: string;
   }) {
     const response = await apiClient.get('/psychologist-dashboard/patients', { params });
     return response.data;
@@ -86,6 +87,12 @@ export const patientsService = {
     return response.data;
   },
 
+  // Desactivar un paciente (en lugar de eliminar)
+  async deactivatePatient(id: number) {
+    const response = await apiClient.put(`/patients/${id}/deactivate`);
+    return response.data;
+  },
+
   // Buscar paciente por DNI
   async searchByDni(dni: string) {
     const response = await apiClient.get(`/patients/search/dni/${dni}`);
@@ -101,6 +108,22 @@ export const patientsService = {
   // Obtener estadísticas de pacientes
   async getStats(): Promise<{ success: boolean; data: PatientStats }> {
     const response = await apiClient.get('/patients/stats');
+    return response.data;
+  },
+
+  // Sincronizar datos del paciente con cuenta de Google
+  async syncWithGoogleAccount(patientId: number, googleData: {
+    email: string;
+    name: string;
+    google_id: string;
+  }) {
+    const response = await apiClient.put(`/patients/${patientId}/sync-google`, googleData);
+    return response.data;
+  },
+
+  // Verificar si existe un paciente con email institucional
+  async checkPatientByInstitutionalEmail(email: string) {
+    const response = await apiClient.get(`/patients/check-institutional-email/${email}`);
     return response.data;
   }
 }; 

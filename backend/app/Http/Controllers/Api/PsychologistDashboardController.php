@@ -633,6 +633,9 @@ class PsychologistDashboardController extends Controller
                 ], 404);
             }
 
+            // Las sesiones psicológicas son independientes de las citas
+            // No requieren validación de citas confirmadas previas
+
             // Combinar fecha y hora
             $fechaSesion = Carbon::parse($request->fecha_sesion . ' ' . $request->hora_sesion);
 

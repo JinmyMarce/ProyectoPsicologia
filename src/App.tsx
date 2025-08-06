@@ -20,14 +20,15 @@ import { NotificationCenter } from './components/notifications/NotificationCente
 import { ReportsAnalytics } from './components/reports/ReportsAnalytics';
 import { ScheduleManager } from './components/psychologist/ScheduleManager';
 import { PatientRegistration } from './components/patients/PatientRegistration';
-import { PatientList } from './components/patients/PatientList';
-import { SessionRegistration } from './components/sessions/SessionRegistration';
+import PatientList from './components/patients/PatientList';
 import { SessionList } from './components/sessions/SessionList';
 import { StudentAppointmentHistory } from './components/students/StudentAppointmentHistory';
 import { PsychologistCalendar } from './components/psychologist/PsychologistCalendar';
 import { SessionHistory } from './components/psychologist/SessionHistory';
 import { RescheduleAppointment } from './components/students/RescheduleAppointment';
 import MessagePanel from './components/messages/MessagePanel';
+import { SyncNotification } from './components/ui/SyncNotification';
+import { WelcomeMessage } from './components/auth/WelcomeMessage';
 import { AdminStats } from './components/dashboard/AdminStats';
 
 // Componente para manejar la navegación
@@ -46,7 +47,7 @@ function NavigationHandler({ onPageChange }: { onPageChange: (page: string) => v
 }
 
 function AppContent() {
-  const { user, loading } = useAuth();
+  const { user, loading, syncMessage, setSyncMessage, welcomeMessage, setWelcomeMessage } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -117,6 +118,26 @@ function AppContent() {
         <Header 
           onMenuClick={() => setSidebarOpen(true)} 
         />
+        
+        {/* Notificación de sincronización */}
+        {syncMessage && (
+          <SyncNotification
+            isVisible={syncMessage.visible}
+            message={syncMessage.message}
+            type={syncMessage.type}
+            onClose={() => setSyncMessage(null)}
+          />
+        )}
+        
+        {/* Mensaje de bienvenida */}
+        {welcomeMessage && (
+          <WelcomeMessage
+            type={welcomeMessage.type}
+            userName={welcomeMessage.userName}
+            isVisible={welcomeMessage.visible}
+            onClose={() => setWelcomeMessage(null)}
+          />
+        )}
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             <Routes>
@@ -159,8 +180,8 @@ function AppContent() {
                   <Route path="/patients" element={<PatientList />} />
                   <Route path="/patients/register" element={<PatientRegistration />} />
 <Route path="/patients/registry" element={<PatientRegistration />} />
-                  <Route path="/sessions" element={<SessionHistory />} />
-                  <Route path="/sessions/register" element={<SessionRegistration />} />
+                                              <Route path="/sessions" element={<SessionList />} />
+                            <Route path="/sessions/history" element={<SessionHistory />} />
                   <Route path="/appointments/direct" element={<PsychologistCalendar />} />
                   <Route path="/notifications" element={<NotificationCenter />} />
                   <Route path="/profile" element={<UserProfile />} />

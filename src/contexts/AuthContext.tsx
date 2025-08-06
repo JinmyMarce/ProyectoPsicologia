@@ -16,6 +16,26 @@ interface AuthContextType {
   setToken: (token: string | null) => void;
   updateUser: (updatedUser: User) => void;
   simulateAuth: () => void;
+  syncMessage: {
+    message: string;
+    type: 'success' | 'info';
+    visible: boolean;
+  } | null;
+  setSyncMessage: (message: {
+    message: string;
+    type: 'success' | 'info';
+    visible: boolean;
+  } | null) => void;
+  welcomeMessage: {
+    type: 'new_user' | 'synced_user' | 'existing_user';
+    userName: string;
+    visible: boolean;
+  } | null;
+  setWelcomeMessage: (message: {
+    type: 'new_user' | 'synced_user' | 'existing_user';
+    userName: string;
+    visible: boolean;
+  } | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -69,6 +89,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [syncMessage, setSyncMessage] = useState<{
+    message: string;
+    type: 'success' | 'info';
+    visible: boolean;
+  } | null>(null);
+  const [welcomeMessage, setWelcomeMessage] = useState<{
+    type: 'new_user' | 'synced_user' | 'existing_user';
+    userName: string;
+    visible: boolean;
+  } | null>(null);
 
   useEffect(() => {
     // Verificar sesión existente al cargar
@@ -166,14 +196,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      // Enviar token de Google al backend
-      const response = await authService.loginWithGoogle(googleResponse.token);
+      // Enviar token de Google al backend con sincronización automática
+      const response = await authService.loginWithGoogleAndSync({
+        token: googleResponse.token,
+        email: googleUser.email,
+        name: googleUser.name,
+        id: googleUser.id
+      });
       
       if (response.success) {
         setUser(response.data.user);
         setToken(response.data.token);
         localStorage.setItem('auth_token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // Mostrar mensaje apropiado según el caso
+        if (response.synced) {
+          console.log('✅ Datos sincronizados exitosamente con la cuenta registrada por el psicólogo');
+          setWelcomeMessage({
+            type: 'synced_user',
+            userName: response.data.user.name,
+            visible: true
+          });
+        } else if (response.auto_registered) {
+          console.log('✅ Nueva cuenta creada automáticamente');
+          setWelcomeMessage({
+            type: 'new_user',
+            userName: response.data.user.name,
+            visible: true
+          });
+        } else {
+          console.log('✅ Usuario existente');
+          setWelcomeMessage({
+            type: 'existing_user',
+            userName: response.data.user.name,
+            visible: true
+          });
+        }
+        
         return true;
       } else {
         setError(response.message || 'Error al autenticar con Google');
@@ -230,7 +290,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser,
       setToken,
       updateUser,
-      simulateAuth
+      simulateAuth,
+      syncMessage,
+      setSyncMessage,
+      welcomeMessage,
+      setWelcomeMessage
     }}>
       {children}
     </AuthContext.Provider>

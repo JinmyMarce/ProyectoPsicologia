@@ -54,10 +54,38 @@ class AuthService {
   }
 
   // Login con Google OAuth
-  async loginWithGoogle(googleToken: string): Promise<AuthResponse> {
+  async loginWithGoogle(googleToken: string, googleUser?: {
+    email: string;
+    name: string;
+    id: string;
+  }): Promise<AuthResponse> {
     return this.request<AuthResponse>('/auth/google', {
       method: 'POST',
-      body: JSON.stringify({ token: googleToken }),
+      body: JSON.stringify({ 
+        token: googleToken,
+        user_data: googleUser 
+      }),
+    });
+  }
+
+  // Login con Google OAuth y sincronización automática
+  async loginWithGoogleAndSync(googleData: {
+    token: string;
+    email: string;
+    name: string;
+    id: string;
+  }): Promise<AuthResponse & { 
+    synced?: boolean; 
+    patient_data?: any;
+    auto_registered?: boolean;
+  }> {
+    return this.request<AuthResponse & { 
+      synced?: boolean; 
+      patient_data?: any;
+      auto_registered?: boolean;
+    }>('/auth/google-auto-register-or-sync', {
+      method: 'POST',
+      body: JSON.stringify(googleData),
     });
   }
 

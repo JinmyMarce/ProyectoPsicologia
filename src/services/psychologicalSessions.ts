@@ -72,6 +72,7 @@ export const psychologicalSessionsService = {
   async getSessions(params?: {
     patient_id?: number;
     psychologist_id?: number;
+    search?: string;
     estado?: string;
     date_from?: string;
     date_to?: string;

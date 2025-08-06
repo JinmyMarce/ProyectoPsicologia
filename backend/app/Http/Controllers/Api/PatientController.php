@@ -228,16 +228,12 @@ class PatientController extends Controller
                 ->where('estado', 'confirmada')
                 ->exists();
 
-            if (!$hasConfirmedAppointment) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'El paciente no tiene citas confirmadas. No se puede autocompletar.'
-                ], 403);
-            }
-
+            // Retornar el paciente pero con información sobre las citas
             return response()->json([
                 'success' => true,
-                'data' => $patient
+                'data' => $patient,
+                'has_confirmed_appointments' => $hasConfirmedAppointment,
+                'warning' => !$hasConfirmedAppointment ? 'El estudiante no tiene citas confirmadas. Debe tener al menos una cita confirmada antes de registrar una sesión.' : null
             ]);
         } catch (\Exception $e) {
             return response()->json([

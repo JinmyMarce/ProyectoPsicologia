@@ -101,14 +101,8 @@ const menuItems: MenuItem[] = [
     roles: ['psychologist']
   },
   {
-    label: 'Registrar Sesión',
+    label: 'Sesión Psicológica',
     icon: MessageSquare,
-    page: 'sessions/register',
-    roles: ['psychologist']
-  },
-  {
-    label: 'Historial de Sesiones',
-    icon: ClipboardList,
     page: 'sessions',
     roles: ['psychologist']
   },
