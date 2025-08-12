@@ -3,6 +3,8 @@ import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Calendar, Clock, User, CheckCircle, XCircle, Clock as ClockIcon } from 'lucide-react';
 import { getUserAppointments } from '../../services/appointments';
+import { getBlockedDatesForCalendar, getMockBlockedSchedules } from '../../services/schedule';
+import { useSchedule } from '../../contexts/ScheduleContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Calendar as BigCalendar, dateFnsLocalizer, Event } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -34,12 +36,14 @@ interface StudentAppointment {
 
 export const StudentCalendar: React.FC = () => {
   const { user } = useAuth();
+  const { getBlockedDates } = useSchedule();
   const [appointments, setAppointments] = useState<StudentAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   // Estado para la fecha seleccionada y error
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
   const [error, setError] = useState('');
+  const [blockedDates, setBlockedDates] = useState<string[]>([]);
 
   // Colores para los estados
   const COLOR_DISPONIBLE = 'rgba(29, 185, 84, 0.18)'; // Verde claro transparente
@@ -52,7 +56,8 @@ export const StudentCalendar: React.FC = () => {
 
   useEffect(() => {
     loadAppointments();
-  }, []);
+    loadBlockedDates();
+  }, [calendarMonth]);
 
   const loadAppointments = async () => {
     try {
@@ -64,6 +69,17 @@ export const StudentCalendar: React.FC = () => {
       setError(error.message || 'Error al cargar las citas');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadBlockedDates = async () => {
+    try {
+      // Usar el contexto global para obtener fechas bloqueadas
+      const blockedDatesList = getBlockedDates();
+      setBlockedDates(blockedDatesList);
+      
+    } catch (error) {
+      console.error('Error loading blocked dates:', error);
     }
   };
 
@@ -292,6 +308,8 @@ export const StudentCalendar: React.FC = () => {
           dayPropGetter={(date: any) => {
             const currentMonth = calendarMonth.getMonth();
             const currentYear = calendarMonth.getFullYear();
+            const dateStr = toLocalDateString(date);
+            
             // Si el día pertenece a un mes diferente al mostrado actualmente, no aplicar color ni estilos
             if (
               date.getFullYear() !== currentYear ||
@@ -299,6 +317,13 @@ export const StudentCalendar: React.FC = () => {
             ) {
               return { style: { backgroundColor: 'transparent', color: COLOR_TEXTO_NORMAL } };
             }
+            
+            // Verificar si el día está bloqueado por el psicólogo
+            const isBlockedByPsychologist = blockedDates.includes(dateStr);
+            if (isBlockedByPsychologist) {
+              return { style: { backgroundColor: COLOR_OCUPADO, color: '#b91c1c', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(220, 38, 38, 0.2)', border: 'none', cursor: 'not-allowed' } };
+            }
+            
             // Lógica para el límite de 2 semanas
             const today = new Date();
             const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
@@ -340,8 +365,8 @@ export const StudentCalendar: React.FC = () => {
                 <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_OCUPADO, color: '#b91c1c'}}></div>
                   <div>
-                    <span className="text-sm font-medium text-gray-700">Ocupado</span>
-                    <p className="text-xs text-gray-500">No hay horarios disponibles</p>
+                    <span className="text-sm font-medium text-gray-700">Ocupado/Bloqueado</span>
+                    <p className="text-xs text-gray-500">No disponible o bloqueado por psicólogo</p>
                   </div>
                 </div>
               </div>

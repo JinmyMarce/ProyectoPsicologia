@@ -79,14 +79,17 @@ class AuthService {
     patient_data?: any;
     auto_registered?: boolean;
   }> {
-    return this.request<AuthResponse & { 
-      synced?: boolean; 
-      patient_data?: any;
-      auto_registered?: boolean;
-    }>('/auth/google-auto-register-or-sync', {
+    const response = await this.request<AuthResponse>('/auth/google', {
       method: 'POST',
       body: JSON.stringify(googleData),
     });
+    
+    // Simular los campos adicionales que el frontend espera
+    return {
+      ...response,
+      synced: false,
+      auto_registered: false
+    };
   }
 
   // Verificar token actual

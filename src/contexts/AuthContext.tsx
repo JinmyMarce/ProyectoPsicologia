@@ -196,7 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      // Enviar token de Google al backend con sincronización automática
+      // Enviar token de Google al backend
       const response = await authService.loginWithGoogleAndSync({
         token: googleResponse.token,
         email: googleUser.email,

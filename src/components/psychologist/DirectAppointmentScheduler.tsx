@@ -13,10 +13,12 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  Save
+  Save,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { PageHeader } from '../ui/PageHeader';
+import { useNavigate } from 'react-router-dom';
 import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, parse, startOfWeek, getDay, addDays, isAfter, isBefore, startOfDay } from 'date-fns';
@@ -40,6 +42,7 @@ interface AppointmentSlot {
 
 export function DirectAppointmentScheduler() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState<'dni' | 'email'>('dni');
   const [searching, setSearching] = useState(false);
@@ -181,9 +184,18 @@ export function DirectAppointmentScheduler() {
         title="Agendar Cita Directamente"
         subtitle="Busca un estudiante y agenda una cita para él"
       >
-        <p className="text-base text-gray-500 font-medium text-center">
-          Instituto Túpac Amaru - Psicología Clínica
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-base text-gray-500 font-medium text-center">
+            Instituto Túpac Amaru - Psicología Clínica
+          </p>
+          <Button
+            onClick={() => navigate('/schedule')}
+            className="bg-gradient-to-r from-[#8e161a] to-[#b91c1c] hover:from-[#a01e24] hover:to-[#d92027] text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+          >
+            <Settings className="w-5 h-5 mr-2" />
+            Gestión de Horarios
+          </Button>
+        </div>
       </PageHeader>
 
       {/* Mensajes de estado */}
@@ -284,86 +296,214 @@ export function DirectAppointmentScheduler() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Fecha de la cita
               </label>
-              <BigCalendar
-                localizer={localizer}
-                events={[]}
-                startAccessor="start"
-                endAccessor="end"
-                selectable
-                style={{ height: 400, background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #e5e7eb', fontFamily: 'Inter, sans-serif' }}
-                views={['month']}
-                onSelectSlot={(slotInfo) => setSelectedDate(slotInfo.start.toISOString().split('T')[0])}
-                dayPropGetter={(date) => {
-                  // Lógica de colores y restricciones igual que el calendario mensual
-                  const today = new Date();
-                  const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
-                  const todayStart = startOfDay(peruTime);
-                  const futureLimit = addDays(todayStart, 14);
-                  const day = date.getDay();
-                  if (day === 0 || day === 6) {
-                    return { style: { backgroundColor: 'rgba(253, 186, 116, 0.3)', color: '#d97706', pointerEvents: 'none', cursor: 'not-allowed', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(253, 186, 116, 0.15)', border: 'none' } };
-                  }
-                  if (isBefore(date, todayStart)) {
-                    return { style: { backgroundColor: 'rgba(196, 181, 253, 0.3)', color: '#7c3aed', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(124, 58, 237, 0.15)', border: 'none', cursor: 'not-allowed' } };
-                  }
-                  if (isAfter(date, futureLimit)) {
-                    return { style: { backgroundColor: 'rgba(253, 224, 71, 0.3)', color: '#a16207', fontWeight: 600, opacity: 0.7, borderRadius: 12, boxShadow: '0 4px 12px rgba(253, 224, 71, 0.15)', border: 'none' } };
-                  }
-                  return { style: { backgroundColor: 'rgba(134, 239, 172, 0.3)', color: '#059669', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)', border: 'none', cursor: 'pointer' } };
-                }}
-                components={{ event: () => null }}
-              />
+              <div className="bg-white rounded-3xl shadow-2xl p-6 border-2 border-gray-100">
+                <div className="mb-4 text-center">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">📅 Calendario Profesional</h3>
+                  <p className="text-gray-600">Selecciona la fecha para la cita</p>
+                </div>
+                <BigCalendar
+                  localizer={localizer}
+                  events={[]}
+                  startAccessor="start"
+                  endAccessor="end"
+                  selectable
+                  style={{ 
+                    height: 450, 
+                    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', 
+                    borderRadius: 24, 
+                    boxShadow: 'inset 0 2px 20px rgba(0,0,0,0.05)', 
+                    border: '2px solid #e2e8f0', 
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                    fontSize: '14px',
+                    fontWeight: '600'
+                  }}
+                  views={['month']}
+                  onSelectSlot={(slotInfo) => setSelectedDate(slotInfo.start.toISOString().split('T')[0])}
+                  dayPropGetter={(date) => {
+                    const today = new Date();
+                    const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
+                    const todayStart = startOfDay(peruTime);
+                    const futureLimit = addDays(todayStart, 14);
+                    const day = date.getDay();
+                    
+                    if (day === 0 || day === 6) {
+                      return { 
+                        style: { 
+                          backgroundColor: 'linear-gradient(135deg, #fed7aa 0%, #fb923c 100%)', 
+                          color: '#ea580c', 
+                          pointerEvents: 'none', 
+                          cursor: 'not-allowed', 
+                          fontWeight: 700, 
+                          borderRadius: 16, 
+                          boxShadow: '0 6px 20px rgba(253, 186, 116, 0.25)', 
+                          border: '2px solid #fed7aa',
+                          transform: 'scale(0.95)',
+                          opacity: 0.7
+                        } 
+                      };
+                    }
+                    if (isBefore(date, todayStart)) {
+                      return { 
+                        style: { 
+                          background: 'linear-gradient(135deg, #e4e7eb 0%, #d1d5db 100%)', 
+                          color: '#6b7280', 
+                          fontWeight: 700, 
+                          borderRadius: 16, 
+                          boxShadow: '0 6px 20px rgba(156, 163, 175, 0.2)', 
+                          border: '2px solid #e5e7eb', 
+                          cursor: 'not-allowed',
+                          opacity: 0.6,
+                          transform: 'scale(0.95)'
+                        } 
+                      };
+                    }
+                    if (isAfter(date, futureLimit)) {
+                      return { 
+                        style: { 
+                          background: 'linear-gradient(135deg, #fef3c7 0%, #fde047 100%)', 
+                          color: '#b45309', 
+                          fontWeight: 700, 
+                          opacity: 0.8, 
+                          borderRadius: 16, 
+                          boxShadow: '0 6px 20px rgba(253, 224, 71, 0.25)', 
+                          border: '2px solid #fef3c7',
+                          transform: 'scale(0.98)'
+                        } 
+                      };
+                    }
+                    return { 
+                      style: { 
+                        background: selectedDate === date.toISOString().split('T')[0] 
+                          ? 'linear-gradient(135deg, #8e161a 0%, #b91c1c 100%)' 
+                          : 'linear-gradient(135deg, #d1fae5 0%, #86efac 100%)', 
+                        color: selectedDate === date.toISOString().split('T')[0] ? '#ffffff' : '#047857', 
+                        fontWeight: 700, 
+                        borderRadius: 16, 
+                        boxShadow: selectedDate === date.toISOString().split('T')[0] 
+                          ? '0 8px 25px rgba(142, 22, 26, 0.4)' 
+                          : '0 6px 20px rgba(16, 185, 129, 0.25)', 
+                        border: selectedDate === date.toISOString().split('T')[0] 
+                          ? '2px solid #8e161a' 
+                          : '2px solid #86efac', 
+                        cursor: 'pointer',
+                        transform: selectedDate === date.toISOString().split('T')[0] ? 'scale(1.05)' : 'scale(1)',
+                        transition: 'all 0.3s ease'
+                      } 
+                    };
+                  }}
+                  components={{ 
+                    event: () => null,
+                    toolbar: (props) => (
+                      <div className="flex items-center justify-between mb-6 p-4 bg-gradient-to-r from-[#8e161a] to-[#b91c1c] rounded-2xl text-white">
+                        <button 
+                          onClick={() => props.onNavigate('PREV')}
+                          className="bg-white/20 hover:bg-white/30 p-3 rounded-xl transition-all duration-300 font-bold"
+                        >
+                          ← Anterior
+                        </button>
+                        <div className="text-center">
+                          <h3 className="text-2xl font-bold">{props.label}</h3>
+                        </div>
+                        <button 
+                          onClick={() => props.onNavigate('NEXT')}
+                          className="bg-white/20 hover:bg-white/30 p-3 rounded-xl transition-all duration-300 font-bold"
+                        >
+                          Siguiente →
+                        </button>
+                      </div>
+                    )
+                  }}
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hora de la cita
-              </label>
+            <div className="bg-white rounded-3xl shadow-2xl p-6 border-2 border-gray-100">
+              <div className="mb-4 text-center">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">🕐 Horarios Disponibles</h3>
+                <p className="text-gray-600">Selecciona la hora de atención</p>
+              </div>
+              
               <select
                 value={selectedTime}
                 onChange={(e) => setSelectedTime(e.target.value)}
                 disabled={!selectedDate || loadingSlots}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#8e161a]/20 focus:border-[#8e161a] disabled:bg-gray-50 transition-all duration-300 text-lg font-semibold bg-gradient-to-br from-white to-gray-50"
               >
-                <option value="">Seleccionar hora</option>
+                <option value="">🔘 Seleccionar hora profesional</option>
                 {availableSlots
                   .filter(slot => slot.available)
                   .map(slot => (
                     <option key={slot.time} value={slot.time}>
-                      {slot.time}
+                      ⏰ {slot.time}
                     </option>
                   ))}
               </select>
+              
               {loadingSlots && (
-                <p className="text-sm text-gray-600 mt-1">
-                  <Loader2 className="w-3 h-3 inline mr-1 animate-spin" />
-                  Cargando horarios disponibles...
-                </p>
+                <div className="mt-4 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                  <p className="text-blue-800 font-semibold flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    🔄 Cargando horarios disponibles del profesional...
+                  </p>
+                </div>
+              )}
+              
+              {selectedDate && !loadingSlots && availableSlots.length > 0 && (
+                <div className="mt-4 p-4 bg-green-50 rounded-2xl border border-green-200">
+                  <p className="text-green-800 font-semibold text-center">
+                    ✅ {availableSlots.filter(slot => slot.available).length} horarios disponibles encontrados
+                  </p>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Horarios disponibles */}
+          {/* Horarios disponibles con diseño profesional */}
           {selectedDate && availableSlots.length > 0 && (
-            <div className="mt-6">
-              <h3 className="font-semibold text-gray-900 mb-3">Horarios Disponibles</h3>
-              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                {availableSlots.map(slot => (
-                  <button
-                    key={slot.time}
-                    onClick={() => setSelectedTime(slot.time)}
-                    disabled={!slot.available}
-                    className={`p-2 text-sm rounded-lg border transition-colors ${
-                      selectedTime === slot.time
-                        ? 'bg-[#8e161a] text-white border-[#8e161a]'
-                        : slot.available
-                        ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                        : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                    }`}
-                  >
-                    {slot.time}
-                  </button>
-                ))}
+            <div className="mt-8">
+              <div className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-gray-100">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">⏰ Horarios Profesionales Disponibles</h3>
+                  <p className="text-gray-600">Haz clic en el horario que prefieras para la cita</p>
+                  <div className="mt-3 inline-block px-6 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full">
+                    <span className="text-blue-800 font-bold">📅 {formatDate(selectedDate)}</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                  {availableSlots.map(slot => (
+                    <button
+                      key={slot.time}
+                      onClick={() => setSelectedTime(slot.time)}
+                      disabled={!slot.available}
+                      className={`p-4 text-sm font-bold rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 ${
+                        selectedTime === slot.time
+                          ? 'bg-gradient-to-r from-[#8e161a] to-[#b91c1c] text-white border-[#8e161a] shadow-xl scale-110'
+                          : slot.available
+                          ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border-green-200 hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 shadow-lg'
+                          : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-400 border-gray-300 cursor-not-allowed opacity-50'
+                      }`}
+                    >
+                      <div className="flex flex-col items-center">
+                        <Clock className="w-4 h-4 mb-1" />
+                        <span>{slot.time}</span>
+                        {selectedTime === slot.time && (
+                          <div className="text-xs mt-1">✅ Seleccionado</div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                
+                {selectedTime && (
+                  <div className="mt-6 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200">
+                    <div className="text-center">
+                      <h4 className="text-lg font-bold text-green-900 mb-2">🎯 Horario Seleccionado</h4>
+                      <p className="text-green-800">
+                        <strong>{formatDate(selectedDate)}</strong> a las <strong>{selectedTime}</strong>
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

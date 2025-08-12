@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, AlertCircle, CheckCircle, Clock, Loader2, Lock, Info, Search, User, Plus } from 'lucide-react';
 import { getAvailableSlots, createAppointment, searchStudent, Student } from '../../services/appointments';
+import { getBlockedDatesForCalendar, getMockBlockedSchedules } from '../../services/schedule';
+import { useSchedule } from '../../contexts/ScheduleContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -43,6 +45,7 @@ interface AppointmentSlot {
 }
 
 export const PsychologistCalendar: React.FC = () => {
+  const { getBlockedDates } = useSchedule();
   const [monthDays, setMonthDays] = useState<DayAvailability[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +65,7 @@ export const PsychologistCalendar: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [showTimeSelection, setShowTimeSelection] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [blockedDates, setBlockedDates] = useState<string[]>([]);
 
   // Función para validar DNI (solo 8 números)
   const validateDNI = (value: string) => {
@@ -91,6 +95,7 @@ export const PsychologistCalendar: React.FC = () => {
 
   useEffect(() => {
     loadMonthAvailability();
+    loadBlockedDates();
   }, [currentMonth]);
 
   const loadMonthAvailability = async () => {
@@ -159,6 +164,17 @@ export const PsychologistCalendar: React.FC = () => {
       setError('Error al cargar la disponibilidad del calendario');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadBlockedDates = async () => {
+    try {
+      // Usar el contexto global para obtener fechas bloqueadas
+      const blockedDatesList = getBlockedDates();
+      setBlockedDates(blockedDatesList);
+      
+    } catch (error) {
+      console.error('Error loading blocked dates:', error);
     }
   };
 
@@ -371,12 +387,8 @@ export const PsychologistCalendar: React.FC = () => {
     weekdayFormat: (date: Date) => dayNamesFull[date.getDay()]
   };
 
-  // Simulación de días ocupados para ejemplo visual (puedes reemplazar por tu lógica real)
-  const diasOcupados = [
-    '2025-07-10', '2025-07-14', '2025-07-15', '2025-07-16', '2025-07-17',
-    '2025-07-21', '2025-07-22', '2025-07-23', '2025-07-24',
-    '2025-07-28', '2025-07-29', '2025-07-30'
-  ];
+  // Usar fechas bloqueadas del servicio
+  const diasOcupados = blockedDates;
 
   // Transformar días a eventos para BigCalendar
   const events: any[] = monthDays.map(day => {
@@ -629,28 +641,64 @@ export const PsychologistCalendar: React.FC = () => {
         </div>
       </Card>
 
-      {/* Calendario */}
-      <BigCalendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        selectable
-        style={{ height: 600, background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #e5e7eb', fontFamily: 'Inter, sans-serif' }}
-        messages={customMessages}
-        formats={{
-          ...customFormats,
-          monthHeader: (date: Date) => {
-            return date.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
-          },
-          weekdayFormat: (date: Date) => {
-            return date.toLocaleString('es-ES', { weekday: 'long' });
-          }
-        }}
-        views={['month']}
-        onSelectSlot={handleDateClick}
-        eventPropGetter={() => ({ style: { display: 'none' } })}
-        dayPropGetter={(date: any) => {
+      {/* Calendario Profesional Mejorado */}
+      <div className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-gray-100">
+        <div className="mb-6 text-center">
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">📅 Calendario de Disponibilidad Profesional</h3>
+          <p className="text-gray-600">Haz clic en un día para configurar horarios o agendar citas</p>
+        </div>
+        <BigCalendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          selectable
+          style={{ 
+            height: 650, 
+            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', 
+            borderRadius: 24, 
+            boxShadow: 'inset 0 2px 20px rgba(0,0,0,0.05)', 
+            border: '2px solid #e2e8f0', 
+            fontFamily: 'Inter, system-ui, sans-serif',
+            fontSize: '14px',
+            fontWeight: '600'
+          }}
+          messages={customMessages}
+          formats={{
+            ...customFormats,
+            monthHeader: (date: Date) => {
+              return date.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+            },
+            weekdayFormat: (date: Date) => {
+              return date.toLocaleString('es-ES', { weekday: 'long' });
+            }
+          }}
+          views={['month']}
+          onSelectSlot={handleDateClick}
+          eventPropGetter={() => ({ style: { display: 'none' } })}
+          components={{
+            toolbar: (props) => (
+              <div className="flex items-center justify-between mb-8 p-6 bg-gradient-to-r from-[#8e161a] to-[#b91c1c] rounded-2xl text-white">
+                <button 
+                  onClick={() => props.onNavigate('PREV')}
+                  className="bg-white/20 hover:bg-white/30 p-3 rounded-xl transition-all duration-300 font-bold"
+                >
+                  ← Anterior
+                </button>
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold">{props.label}</h3>
+                  <p className="text-sm opacity-90">Gestión Profesional de Horarios</p>
+                </div>
+                <button 
+                  onClick={() => props.onNavigate('NEXT')}
+                  className="bg-white/20 hover:bg-white/30 p-3 rounded-xl transition-all duration-300 font-bold"
+                >
+                  Siguiente →
+                </button>
+              </div>
+            )
+          }}
+          dayPropGetter={(date: any) => {
           const month = currentMonth.getMonth();
           const year = currentMonth.getFullYear();
           if (
@@ -779,6 +827,7 @@ export const PsychologistCalendar: React.FC = () => {
           event: () => null
         }}
       />
+      </div>
 
       {/* Leyenda */}
       <Legend />

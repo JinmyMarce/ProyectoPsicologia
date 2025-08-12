@@ -3,732 +3,449 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Schedule;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
-    public function getPsychologistSchedule($psychologistId, Request $request)
-    {
-        $query = Schedule::where('psychologist_id', $psychologistId);
-
-        // Filtros
-        if ($request->has('date_from') && $request->date_from) {
-            $query->where('date', '>=', $request->date_from);
-        }
-
-        if ($request->has('date_to') && $request->date_to) {
-            $query->where('date', '<=', $request->date_to);
-        }
-
-        if ($request->has('is_available') && $request->is_available !== null) {
-            $query->where('is_available', $request->is_available);
-        }
-
-        if ($request->has('is_blocked') && $request->is_blocked !== null) {
-            $query->where('is_blocked', $request->is_blocked);
-        }
-
-        $schedules = $query->orderBy('date')->orderBy('start_time')->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $schedules
-        ]);
-    }
-
-    public function getAvailableSlots($psychologistId, Request $request)
-    {
-        $date = $request->get('date', Carbon::today()->format('Y-m-d'));
-
-        $availableSlots = Schedule::where('psychologist_id', $psychologistId)
-            ->where('date', $date)
-            ->where('is_available', true)
-            ->where('is_blocked', false)
-            ->orderBy('start_time')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $availableSlots
-        ]);
-    }
-
-    public function store(Request $request)
+    /**
+     * Obtener horarios bloqueados del psicólogo
+     */
+    public function getBlockedSchedules(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'psychologist_id' => 'required|exists:users,id',
+            'psychologist_id' => 'required|integer',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos de entrada inválidos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $psychologistId = $request->psychologist_id;
+            $startDate = $request->start_date;
+            $endDate = $request->end_date;
+
+            // Obtener horarios bloqueados de la base de datos
+            $blockedSchedules = DB::table('blocked_schedules')
+                ->where('psychologist_id', $psychologistId)
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $blockedSchedules
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener horarios bloqueados: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Crear un bloqueo de horario
+     */
+    public function createScheduleBlock(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'psychologist_id' => 'required|integer',
             'date' => 'required|date|after_or_equal:today',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-            'is_available' => 'boolean',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'is_full_day_blocked' => 'required|boolean',
+            'reason' => 'required|string|max:500', // Aumentado para motivos más largos
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error de validación',
+                'message' => 'Datos de entrada inválidos',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        // Verificar conflictos
-        $conflicts = Schedule::where('psychologist_id', $request->psychologist_id)
-            ->where('date', $request->date)
-            ->where(function($query) use ($request) {
-                $query->whereBetween('start_time', [$request->start_time, $request->end_time])
-                      ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
-                      ->orWhere(function($q) use ($request) {
-                          $q->where('start_time', '<=', $request->start_time)
-                            ->where('end_time', '>=', $request->end_time);
-                      });
-            })
-            ->exists();
+        try {
+            $psychologistId = $request->psychologist_id;
+            $date = $request->date;
+            $startTime = $request->start_time;
+            $endTime = $request->end_time;
+            $isFullDayBlocked = $request->is_full_day_blocked;
+            $reason = $request->reason;
 
-        if ($conflicts) {
+            // Verificar que la fecha no sea fin de semana
+            $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+            if ($dayOfWeek === 0 || $dayOfWeek === 6) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pueden bloquear horarios en fines de semana'
+                ], 422);
+            }
+
+            // Verificar que las horas estén dentro del horario de atención (8:00 - 14:00)
+            if (!$isFullDayBlocked && ($startTime || $endTime)) {
+                $startHour = $startTime ? (int)substr($startTime, 0, 2) : 8;
+                $endHour = $endTime ? (int)substr($endTime, 0, 2) : 14;
+                $endMinute = $endTime ? (int)substr($endTime, 3, 2) : 0;
+                
+                if ($startHour < 8 || $endHour > 14 || ($endHour === 14 && $endMinute > 0)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'El horario debe estar entre 8:00 AM y 2:00 PM'
+                    ], 422);
+                }
+            }
+
+            // Contar citas afectadas
+            $affectedAppointments = 0;
+            if ($isFullDayBlocked) {
+                $affectedAppointments = DB::table('citas')
+                    ->where('psychologist_id', $psychologistId)
+                    ->where('fecha', $date)
+                    ->where('status', '!=', 'cancelada')
+                    ->count();
+            } else if ($startTime && $endTime) {
+                $affectedAppointments = DB::table('citas')
+                    ->where('psychologist_id', $psychologistId)
+                    ->where('fecha', $date)
+                    ->where('hora', '>=', $startTime)
+                    ->where('hora', '<', $endTime)
+                    ->where('status', '!=', 'cancelada')
+                    ->count();
+            }
+
+            // Crear el bloqueo
+            $blockId = DB::table('blocked_schedules')->insertGetId([
+                'psychologist_id' => $psychologistId,
+                'date' => $date,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'is_full_day_blocked' => $isFullDayBlocked,
+                'reason' => $reason,
+                'affected_appointments' => $affectedAppointments,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Si hay citas afectadas, cancelarlas automáticamente
+            if ($affectedAppointments > 0) {
+                if ($isFullDayBlocked) {
+                    DB::table('citas')
+                        ->where('psychologist_id', $psychologistId)
+                        ->where('fecha', $date)
+                        ->where('status', '!=', 'cancelada')
+                        ->update([
+                            'status' => 'cancelada',
+                            'motivo_cancelacion' => 'Horario bloqueado por psicólogo: ' . $reason,
+                            'updated_at' => now()
+                        ]);
+                } else if ($startTime && $endTime) {
+                    DB::table('citas')
+                        ->where('psychologist_id', $psychologistId)
+                        ->where('fecha', $date)
+                        ->where('hora', '>=', $startTime)
+                        ->where('hora', '<', $endTime)
+                        ->where('status', '!=', 'cancelada')
+                        ->update([
+                            'status' => 'cancelada',
+                            'motivo_cancelacion' => 'Horario bloqueado por psicólogo: ' . $reason,
+                            'updated_at' => now()
+                        ]);
+                }
+            }
+
+            $blockedSchedule = DB::table('blocked_schedules')->find($blockId);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Horario bloqueado exitosamente',
+                'data' => $blockedSchedule
+            ]);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Existe un conflicto de horarios para esta fecha y hora'
-            ], 400);
+                'message' => 'Error al crear bloqueo de horario: ' . $e->getMessage()
+            ], 500);
         }
-
-        $schedule = Schedule::create([
-            'psychologist_id' => $request->psychologist_id,
-            'date' => $request->date,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'is_available' => $request->is_available ?? true,
-            'is_blocked' => false,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Horario creado exitosamente',
-            'data' => $schedule
-        ], 201);
     }
 
-    public function storeBulk(Request $request)
+    /**
+     * Eliminar un bloqueo de horario
+     */
+    public function removeScheduleBlock($blockId): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'schedules' => 'required|array|min:1',
-            'schedules.*.psychologist_id' => 'required|exists:users,id',
-            'schedules.*.date' => 'required|date|after_or_equal:today',
-            'schedules.*.start_time' => 'required|date_format:H:i',
-            'schedules.*.end_time' => 'required|date_format:H:i|after:schedules.*.start_time',
-            'schedules.*.is_available' => 'boolean',
+        try {
+            $blockedSchedule = DB::table('blocked_schedules')->find($blockId);
+            
+            if (!$blockedSchedule) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bloqueo de horario no encontrado'
+                ], 404);
+            }
+
+            DB::table('blocked_schedules')->where('id', $blockId)->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Bloqueo de horario eliminado exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar bloqueo de horario: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener disponibilidad para una fecha específica
+     */
+    public function getAvailabilityForDate(Request $request, $date): JsonResponse
+    {
+        $validator = Validator::make(['date' => $date], [
+            'date' => 'required|date',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error de validación',
+                'message' => 'Fecha inválida',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        $createdSchedules = [];
-        $errors = [];
+        try {
+            $psychologistId = $request->query('psychologist_id', 1);
 
-        foreach ($request->schedules as $index => $scheduleData) {
-            try {
-                // Verificar conflictos
-                $conflicts = Schedule::where('psychologist_id', $scheduleData['psychologist_id'])
-                    ->where('date', $scheduleData['date'])
-                    ->where(function($query) use ($scheduleData) {
-                        $query->whereBetween('start_time', [$scheduleData['start_time'], $scheduleData['end_time']])
-                              ->orWhereBetween('end_time', [$scheduleData['start_time'], $scheduleData['end_time']])
-                              ->orWhere(function($q) use ($scheduleData) {
-                                  $q->where('start_time', '<=', $scheduleData['start_time'])
-                                    ->where('end_time', '>=', $scheduleData['end_time']);
+            // Verificar si es fin de semana
+            $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+            $isWeekend = $dayOfWeek === 0 || $dayOfWeek === 6;
+
+            if ($isWeekend) {
+                            return response()->json([
+                'success' => true,
+                'data' => [
+                    'date' => $date,
+                    'day_name' => Carbon::parse($date)->format('l'),
+                    'is_full_day_blocked' => true,
+                    'full_day_reason' => 'Fin de semana',
+                    'blocks' => []
+                ]
+            ]);
+            }
+
+            // Generar bloques exactos de 45 minutos de 8:00 a 14:00
+            $blocks = [];
+            $timeSlots = [
+                ['start' => '08:00', 'end' => '08:45'],
+                ['start' => '08:45', 'end' => '09:30'],
+                ['start' => '09:30', 'end' => '10:15'],
+                ['start' => '10:15', 'end' => '11:00'],
+                ['start' => '11:00', 'end' => '11:45'],
+                ['start' => '11:45', 'end' => '12:30'],
+                ['start' => '12:30', 'end' => '13:15'],
+                ['start' => '13:15', 'end' => '14:00']
+            ];
+
+            foreach ($timeSlots as $slot) {
+                $startTime = $slot['start'];
+                $endTime = $slot['end'];
+
+                // Verificar si hay cita en este bloque
+                $hasAppointment = DB::table('citas')
+                    ->where('psychologist_id', $psychologistId)
+                    ->where('fecha', $date)
+                    ->where('hora', $startTime)
+                    ->where('status', '!=', 'cancelada')
+                    ->exists();
+
+                // Verificar si el bloque está bloqueado
+                $isBlocked = DB::table('blocked_schedules')
+                    ->where('psychologist_id', $psychologistId)
+                    ->where('date', $date)
+                    ->where(function ($query) use ($startTime, $endTime) {
+                        $query->where('is_full_day_blocked', true)
+                              ->orWhere(function ($q) use ($startTime, $endTime) {
+                                  $q->where('start_time', '<=', $startTime)
+                                    ->where('end_time', '>', $startTime);
                               });
                     })
                     ->exists();
 
-                if ($conflicts) {
-                    $errors[] = "Conflicto en el horario " . ($index + 1);
-                    continue;
-                }
-
-                $schedule = Schedule::create([
-                    'psychologist_id' => $scheduleData['psychologist_id'],
-                    'date' => $scheduleData['date'],
-                    'start_time' => $scheduleData['start_time'],
-                    'end_time' => $scheduleData['end_time'],
-                    'is_available' => $scheduleData['is_available'] ?? true,
-                    'is_blocked' => false,
-                ]);
-
-                $createdSchedules[] = $schedule;
-            } catch (\Exception $e) {
-                $errors[] = "Error en el horario " . ($index + 1) . ": " . $e->getMessage();
+                $blocks[] = [
+                    'id' => $startTime . '-' . $endTime,
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
+                    'is_available' => !$isBlocked,
+                    'has_appointment' => $hasAppointment,
+                    'is_blocked' => $isBlocked,
+                    'reason' => $isBlocked ? 'Horario bloqueado' : null
+                ];
             }
-        }
 
-        return response()->json([
-            'success' => true,
-            'message' => count($createdSchedules) . ' horarios creados exitosamente',
-            'data' => $createdSchedules,
-            'errors' => $errors
-        ], 201);
-    }
+            // Verificar si todo el día está bloqueado
+            $fullDayBlocked = DB::table('blocked_schedules')
+                ->where('psychologist_id', $psychologistId)
+                ->where('date', $date)
+                ->where('is_full_day_blocked', true)
+                ->first();
 
-    public function update(Request $request, $id)
-    {
-        $schedule = Schedule::find($id);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'date' => $date,
+                    'day_name' => Carbon::parse($date)->format('l'),
+                    'is_full_day_blocked' => $fullDayBlocked ? true : false,
+                    'full_day_reason' => $fullDayBlocked ? $fullDayBlocked->reason : null,
+                    'blocks' => $blocks
+                ]
+            ]);
 
-        if (!$schedule) {
+        } catch (\Exception $e) {
+            Log::error('Error en getAvailabilityForDate: ' . $e->getMessage(), [
+                'date' => $date,
+                'psychologist_id' => $request->query('psychologist_id'),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Horario no encontrado'
-            ], 404);
+                'message' => 'Error al obtener disponibilidad: ' . $e->getMessage()
+            ], 500);
         }
+    }
 
+    /**
+     * Verificar si una fecha/hora está disponible para agendar
+     */
+    public function checkSlotAvailability(Request $request): JsonResponse
+    {
         $validator = Validator::make($request->all(), [
-            'start_time' => 'sometimes|date_format:H:i',
-            'end_time' => 'sometimes|date_format:H:i|after:start_time',
-            'is_available' => 'boolean',
-            'is_blocked' => 'boolean',
+            'psychologist_id' => 'required|integer',
+            'date' => 'required|date',
+            'time' => 'required|date_format:H:i',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error de validación',
+                'message' => 'Datos de entrada inválidos',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        // Verificar conflictos si se cambia la hora
-        if ($request->has('start_time') || $request->has('end_time')) {
-            $startTime = $request->get('start_time', $schedule->start_time);
-            $endTime = $request->get('end_time', $schedule->end_time);
+        try {
+            $psychologistId = $request->psychologist_id;
+            $date = $request->date;
+            $time = $request->time;
 
-            $conflicts = Schedule::where('psychologist_id', $schedule->psychologist_id)
-                ->where('date', $schedule->date)
-                ->where('id', '!=', $id)
-                ->where(function($query) use ($startTime, $endTime) {
-                    $query->whereBetween('start_time', [$startTime, $endTime])
-                          ->orWhereBetween('end_time', [$startTime, $endTime])
-                          ->orWhere(function($q) use ($startTime, $endTime) {
-                              $q->where('start_time', '<=', $startTime)
-                                ->where('end_time', '>=', $endTime);
+            // Verificar que la fecha no sea fin de semana
+            $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+            if ($dayOfWeek === 0 || $dayOfWeek === 6) {
+                return response()->json([
+                    'success' => false,
+                    'data' => [
+                        'available' => false,
+                        'reason' => 'No se atiende en fines de semana'
+                    ]
+                ]);
+            }
+
+            // Verificar que la hora esté dentro del horario de atención
+            $hour = (int)substr($time, 0, 2);
+            $minute = (int)substr($time, 3, 2);
+            
+            if ($hour < 8 || $hour > 14 || ($hour === 14 && $minute > 0)) {
+                return response()->json([
+                    'success' => false,
+                    'data' => [
+                        'available' => false,
+                        'reason' => 'Horario fuera del rango de atención (8:00 AM - 2:00 PM)'
+                    ]
+                ]);
+            }
+
+            // Verificar si hay cita en este horario
+            $hasAppointment = DB::table('citas')
+                ->where('psychologist_id', $psychologistId)
+                ->where('fecha', $date)
+                ->where('hora', $time)
+                ->where('status', '!=', 'cancelada')
+                ->exists();
+
+            if ($hasAppointment) {
+                return response()->json([
+                    'success' => false,
+                    'data' => [
+                        'available' => false,
+                        'reason' => 'Ya existe una cita en este horario'
+                    ]
+                ]);
+            }
+
+            // Verificar si el horario está bloqueado
+            $isBlocked = DB::table('blocked_schedules')
+                ->where('psychologist_id', $psychologistId)
+                ->where('date', $date)
+                ->where(function ($query) use ($time) {
+                    $query->where('is_full_day_blocked', true)
+                          ->orWhere(function ($q) use ($time) {
+                              $q->where('start_time', '<=', $time)
+                                ->where('end_time', '>', $time);
                           });
                 })
                 ->exists();
 
-            if ($conflicts) {
+            if ($isBlocked) {
+                $blockedSchedule = DB::table('blocked_schedules')
+                    ->where('psychologist_id', $psychologistId)
+                    ->where('date', $date)
+                    ->where(function ($query) use ($time) {
+                        $query->where('is_full_day_blocked', true)
+                              ->orWhere(function ($q) use ($time) {
+                                  $q->where('start_time', '<=', $time)
+                                    ->where('end_time', '>', $time);
+                              });
+                    })
+                    ->first();
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Existe un conflicto de horarios para esta fecha y hora'
-                ], 400);
+                    'data' => [
+                        'available' => false,
+                        'reason' => 'Horario bloqueado: ' . $blockedSchedule->reason
+                    ]
+                ]);
             }
-        }
 
-        $schedule->update($request->only(['start_time', 'end_time', 'is_available', 'is_blocked']));
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'available' => true
+                ]
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Horario actualizado exitosamente',
-            'data' => $schedule
-        ]);
-    }
-
-    public function destroy($id)
-    {
-        $schedule = Schedule::find($id);
-
-        if (!$schedule) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Horario no encontrado'
-            ], 404);
+                'message' => 'Error al verificar disponibilidad: ' . $e->getMessage()
+            ], 500);
         }
-
-        $schedule->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Horario eliminado exitosamente'
-        ]);
-    }
-
-    public function block(Request $request, $id)
-    {
-        $schedule = Schedule::find($id);
-
-        if (!$schedule) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Horario no encontrado'
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'reason' => 'required|string|max:500',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $schedule->update([
-            'is_blocked' => true,
-            'block_reason' => $request->reason
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Horario bloqueado exitosamente'
-        ]);
-    }
-
-    public function unblock($id)
-    {
-        $schedule = Schedule::find($id);
-
-        if (!$schedule) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Horario no encontrado'
-            ], 404);
-        }
-
-        $schedule->update([
-            'is_blocked' => false,
-            'block_reason' => null
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Horario desbloqueado exitosamente'
-        ]);
-    }
-
-    public function getByDate(Request $request)
-    {
-        $date = $request->get('date', Carbon::today()->format('Y-m-d'));
-        $psychologistId = $request->get('psychologist_id');
-
-        $query = Schedule::where('date', $date);
-
-        if ($psychologistId) {
-            $query->where('psychologist_id', $psychologistId);
-        }
-
-        $schedules = $query->with('psychologist')
-            ->orderBy('start_time')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $schedules
-        ]);
-    }
-
-    public function getByDateRange(Request $request)
-    {
-        $dateFrom = $request->get('date_from', Carbon::today()->format('Y-m-d'));
-        $dateTo = $request->get('date_to', Carbon::today()->addDays(7)->format('Y-m-d'));
-        $psychologistId = $request->get('psychologist_id');
-
-        $query = Schedule::whereBetween('date', [$dateFrom, $dateTo]);
-
-        if ($psychologistId) {
-            $query->where('psychologist_id', $psychologistId);
-        }
-
-        $schedules = $query->with('psychologist')
-            ->orderBy('date')
-            ->orderBy('start_time')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $schedules
-        ]);
-    }
-
-    public function getConflicts(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'psychologist_id' => 'required|exists:users,id',
-            'date' => 'required|date',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $conflicts = Schedule::where('psychologist_id', $request->psychologist_id)
-            ->where('date', $request->date)
-            ->where(function($query) use ($request) {
-                $query->whereBetween('start_time', [$request->start_time, $request->end_time])
-                      ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
-                      ->orWhere(function($q) use ($request) {
-                          $q->where('start_time', '<=', $request->start_time)
-                            ->where('end_time', '>=', $request->end_time);
-                      });
-            })
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $conflicts
-        ]);
-    }
-
-    public function stats(Request $request)
-    {
-        $psychologistId = $request->get('psychologist_id');
-        $dateFrom = $request->get('date_from', Carbon::now()->startOfMonth());
-        $dateTo = $request->get('date_to', Carbon::now()->endOfMonth());
-
-        $query = Schedule::whereBetween('date', [$dateFrom, $dateTo]);
-
-        if ($psychologistId) {
-            $query->where('psychologist_id', $psychologistId);
-        }
-
-        $stats = [
-            'total_slots' => $query->count(),
-            'available_slots' => $query->where('is_available', true)->count(),
-            'blocked_slots' => $query->where('is_blocked', true)->count(),
-            'booked_slots' => $query->where('is_available', false)->where('is_blocked', false)->count(),
-        ];
-
-        return response()->json([
-            'success' => true,
-            'data' => $stats
-        ]);
-    }
-
-    public function import(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'file' => 'required|file|mimes:csv,xlsx,xls',
-            'psychologist_id' => 'required|exists:users,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // Aquí se implementaría la lógica de importación
-        // Por ahora solo simulamos la respuesta
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Horarios importados exitosamente'
-        ]);
-    }
-
-    public function export(Request $request)
-    {
-        $format = $request->get('format', 'csv');
-        $psychologistId = $request->get('psychologist_id');
-        $dateFrom = $request->get('date_from');
-        $dateTo = $request->get('date_to');
-
-        $query = Schedule::with('psychologist');
-
-        if ($psychologistId) {
-            $query->where('psychologist_id', $psychologistId);
-        }
-
-        if ($dateFrom) {
-            $query->where('date', '>=', $dateFrom);
-        }
-
-        if ($dateTo) {
-            $query->where('date', '<=', $dateTo);
-        }
-
-        $schedules = $query->get();
-
-        // Aquí se implementaría la lógica de exportación
-        // Por ahora solo simulamos la respuesta
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Horarios exportados exitosamente',
-            'download_url' => '/schedule/download/mock-export.' . $format
-        ]);
-    }
-
-    /**
-     * Obtener horarios del psicólogo autenticado
-     */
-    public function getMySchedule(Request $request)
-    {
-        $psychologist = Auth::user();
-        
-        if (!$psychologist->isPsychologist()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Acceso denegado. Solo psicólogos pueden acceder.'
-            ], 403);
-        }
-
-        $query = Schedule::where('psychologist_id', $psychologist->id);
-
-        // Filtros
-        if ($request->has('date_from') && $request->date_from) {
-            $query->where('date', '>=', $request->date_from);
-        }
-
-        if ($request->has('date_to') && $request->date_to) {
-            $query->where('date', '<=', $request->date_to);
-        }
-
-        if ($request->has('is_available') && $request->is_available !== null) {
-            $query->where('is_available', $request->is_available);
-        }
-
-        if ($request->has('is_blocked') && $request->is_blocked !== null) {
-            $query->where('is_blocked', $request->is_blocked);
-        }
-
-        $schedules = $query->orderBy('date')->orderBy('start_time')->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $schedules
-        ]);
-    }
-
-    /**
-     * Crear horario para el psicólogo autenticado
-     */
-    public function createMySchedule(Request $request)
-    {
-        $psychologist = Auth::user();
-        
-        if (!$psychologist->isPsychologist()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Acceso denegado. Solo psicólogos pueden crear horarios.'
-            ], 403);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'date' => 'required|date|after_or_equal:today',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-            'is_available' => 'boolean',
-            'block_reason' => 'nullable|string|max:500',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // Verificar conflictos
-        $conflicts = Schedule::where('psychologist_id', $psychologist->id)
-            ->where('date', $request->date)
-            ->where(function($query) use ($request) {
-                $query->whereBetween('start_time', [$request->start_time, $request->end_time])
-                      ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
-                      ->orWhere(function($q) use ($request) {
-                          $q->where('start_time', '<=', $request->start_time)
-                            ->where('end_time', '>=', $request->end_time);
-                      });
-            })
-            ->exists();
-
-        if ($conflicts) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Existe un conflicto de horarios para esta fecha y hora'
-            ], 400);
-        }
-
-        $schedule = Schedule::create([
-            'psychologist_id' => $psychologist->id,
-            'date' => $request->date,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'is_available' => $request->is_available ?? true,
-            'is_blocked' => $request->has('block_reason'),
-            'block_reason' => $request->block_reason,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Horario creado exitosamente',
-            'data' => $schedule
-        ], 201);
-    }
-
-    /**
-     * Bloquear horario del psicólogo autenticado
-     */
-    public function blockMySchedule(Request $request, $id)
-    {
-        $psychologist = Auth::user();
-        
-        if (!$psychologist->isPsychologist()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Acceso denegado. Solo psicólogos pueden bloquear horarios.'
-            ], 403);
-        }
-
-        $schedule = Schedule::where('id', $id)
-            ->where('psychologist_id', $psychologist->id)
-            ->first();
-
-        if (!$schedule) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Horario no encontrado'
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'reason' => 'required|string|max:500',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $schedule->update([
-            'is_blocked' => true,
-            'block_reason' => $request->reason
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Horario bloqueado exitosamente'
-        ]);
-    }
-
-    /**
-     * Desbloquear horario del psicólogo autenticado
-     */
-    public function unblockMySchedule($id)
-    {
-        $psychologist = Auth::user();
-        
-        if (!$psychologist->isPsychologist()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Acceso denegado. Solo psicólogos pueden desbloquear horarios.'
-            ], 403);
-        }
-
-        $schedule = Schedule::where('id', $id)
-            ->where('psychologist_id', $psychologist->id)
-            ->first();
-
-        if (!$schedule) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Horario no encontrado'
-            ], 404);
-        }
-
-        $schedule->update([
-            'is_blocked' => false,
-            'block_reason' => null
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Horario desbloqueado exitosamente'
-        ]);
-    }
-
-    /**
-     * Eliminar horario del psicólogo autenticado
-     */
-    public function deleteMySchedule($id)
-    {
-        $psychologist = Auth::user();
-        
-        if (!$psychologist->isPsychologist()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Acceso denegado. Solo psicólogos pueden eliminar horarios.'
-            ], 403);
-        }
-
-        $schedule = Schedule::where('id', $id)
-            ->where('psychologist_id', $psychologist->id)
-            ->first();
-
-        if (!$schedule) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Horario no encontrado'
-            ], 404);
-        }
-
-        $schedule->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Horario eliminado exitosamente'
-        ]);
-    }
-
-    /**
-     * Obtener estadísticas de horarios del psicólogo autenticado
-     */
-    public function getMyScheduleStats(Request $request)
-    {
-        $psychologist = Auth::user();
-        
-        if (!$psychologist->isPsychologist()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Acceso denegado. Solo psicólogos pueden acceder.'
-            ], 403);
-        }
-
-        $dateFrom = $request->get('date_from', Carbon::now()->startOfMonth());
-        $dateTo = $request->get('date_to', Carbon::now()->endOfMonth());
-
-        $query = Schedule::where('psychologist_id', $psychologist->id)
-            ->whereBetween('date', [$dateFrom, $dateTo]);
-
-        $stats = [
-            'total_slots' => $query->count(),
-            'available_slots' => $query->where('is_available', true)->count(),
-            'blocked_slots' => $query->where('is_blocked', true)->count(),
-            'booked_slots' => $query->where('is_available', false)->where('is_blocked', false)->count(),
-        ];
-
-        return response()->json([
-            'success' => true,
-            'data' => $stats
-        ]);
     }
 } 

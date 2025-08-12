@@ -36,6 +36,15 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 // Rutas públicas para horarios disponibles
 Route::get('/appointments/available-slots', [AppointmentController::class, 'getAvailableSlots']);
 
+// Rutas públicas para gestión de horarios bloqueados (sin autenticación)
+Route::prefix('psychologist-dashboard/schedules')->group(function () {
+    Route::get('/blocked', [ScheduleController::class, 'getBlockedSchedules']);
+    Route::post('/block', [ScheduleController::class, 'createScheduleBlock']);
+    Route::delete('/block/{id}', [ScheduleController::class, 'removeScheduleBlock']);
+    Route::get('/availability/{date}', [ScheduleController::class, 'getAvailabilityForDate']);
+    Route::get('/check-availability', [ScheduleController::class, 'checkSlotAvailability']);
+});
+
 // Rutas protegidas que requieren autenticación
 Route::middleware('auth:sanctum')->group(function () {
     // Rutas de autenticación
@@ -146,9 +155,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/activity', [ReportController::class, 'activity']);
     });
 
-    // Rutas profesionales
-    Route::get('/disponibilidad/{id_psicologo}', [DisponibilidadController::class, 'disponibilidadPorPsicologo']);
-    Route::post('/citas/profesional', [CitaProfesionalController::class, 'agendar']);
+
 
     // Rutas para gestión de horarios
     Route::prefix('schedule')->group(function () {
