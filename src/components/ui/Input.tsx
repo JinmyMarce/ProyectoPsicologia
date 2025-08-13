@@ -30,27 +30,26 @@ export function Input({
           {label}
         </label>
       )}
-      <div className="relative pl-4">
+      <div className="relative pl-4 flex justify-center">
         {/* Icono izquierdo */}
         {Icon && iconPosition === 'left' && (
-          <div className="absolute -left-1 top-1/2 transform -translate-y-1/2 w-7 h-7 flex items-center justify-center z-10 bg-white rounded-l-xl shadow-md border-r border-[#8e161a]/30">
-            <Icon className="w-5 h-5 text-[#8e161a]" />
+          <div className="absolute left-[8.5%] top-1/2 transform -translate-y-1/2 w-7 h-7 flex items-center justify-center z-10 bg-white rounded-l-xl shadow-md border-r border-[#8e161a]/30">
+            <Icon className="w-5 h-5 text-[#8e161a]/70" />
           </div>
         )}
         
         {/* Campo de entrada */}
         <input
           className={cn(
-            "w-full py-4 border-2 border-[#8e161a]/30 rounded-xl focus:ring-2 focus:ring-[#8e161a]/30 focus:border-[#8e161a] bg-white text-black placeholder:text-gray-500 transition-all duration-300 text-base font-medium shadow-sm hover:shadow-lg hover:border-[#8e161a]/50 focus:outline-none border-[#8e161a]/30",
+            "w-5/6 py-3 border-2 border-[#8e161a]/30 rounded-xl focus:ring-2 focus:ring-[#8e161a]/40 focus:border-[#8e161a]/50 bg-white text-black placeholder:text-gray-500 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-lg hover:border-[#8e161a]/50 focus:outline-none",
             Icon && iconPosition === 'left' ? "pl-4 pr-4" : "px-4",
             Icon && iconPosition === 'right' ? "pr-16 pl-4" : "px-4",
             hasRightButton ? "pr-12" : "",
             placeholderPosition === 'right' ? "text-right" : "text-left",
-            error ? "border-red-300 focus:ring-red-500 focus:border-red-500" : "border-[#8e161a]/30 focus:ring-[#8e161a]/30 focus:border-[#8e161a]",
+            error ? "border-[#8e161a] focus:ring-[#6d1115] focus:border-[#6d1115]" : "border-[#8e161a]/30 focus:ring-[#8e161a]/40 focus:border-[#8e161a]/50",
             className
           )}
           placeholder={placeholder}
-          style={{ borderColor: 'rgba(142, 22, 26, 0.3)' }}
           {...props}
         />
         
@@ -63,13 +62,13 @@ export function Input({
         
         {/* Botón derecho (ojo) */}
         {rightButton && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 z-20">
+          <div className="absolute right-[8.5%] top-1/2 transform -translate-y-1/2 z-20">
             {rightButton}
           </div>
         )}
       </div>
       {error && (
-        <p className="mt-2 text-sm text-red-600 font-medium flex items-center gap-1">
+        <p className="mt-1 ml-8 text-xs text-red-600 font-medium flex items-center gap-1">
           <span className="w-1 h-1 bg-red-500 rounded-full"></span>
           {error}
         </p>
