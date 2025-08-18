@@ -37,7 +37,14 @@ class User extends Authenticatable
         'phone',
         'birthdate',
         'gender',
-        'address'
+        'address',
+        // Campos específicos para tutores
+        'classroom',
+        'study_program',
+        'semester',
+        'course',
+        'total_students',
+        'active_derivations'
     ];
 
     /**
@@ -99,6 +106,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is tutor
+     */
+    public function isTutor(): bool
+    {
+        return $this->role === 'tutor';
+    }
+
+    /**
      * Check if user is active
      */
     public function isActive(): bool
@@ -145,6 +160,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Scope to get only tutors
+     */
+    public function scopeTutors($query)
+    {
+        return $query->where('role', 'tutor');
+    }
+
+    /**
      * Get user data for API response
      */
     public function toApiArray(): array
@@ -167,6 +190,13 @@ class User extends Authenticatable
             'phone' => $this->phone,
             'birthdate' => $this->birthdate,
             'gender' => $this->gender,
+            // Campos específicos para tutores
+            'classroom' => $this->classroom,
+            'study_program' => $this->study_program,
+            'semester' => $this->semester,
+            'course' => $this->course,
+            'total_students' => $this->total_students,
+            'active_derivations' => $this->active_derivations,
         ];
     }
 
@@ -240,5 +270,37 @@ class User extends Authenticatable
     public function medicalInfo()
     {
         return $this->hasOne(MedicalInfo::class);
+    }
+
+    /**
+     * Derivaciones realizadas por el tutor
+     */
+    public function tutorDerivations()
+    {
+        return $this->hasMany(Derivation::class, 'tutor_id');
+    }
+
+    /**
+     * Derivaciones asignadas al psicólogo
+     */
+    public function psychologistDerivations()
+    {
+        return $this->hasMany(Derivation::class, 'psychologist_id');
+    }
+
+    /**
+     * Derivaciones del estudiante
+     */
+    public function studentDerivations()
+    {
+        return $this->hasMany(Derivation::class, 'student_id');
+    }
+
+    /**
+     * Sesiones grupales organizadas por el tutor
+     */
+    public function groupSessions()
+    {
+        return $this->hasMany(GroupSession::class, 'tutor_id');
     }
 }

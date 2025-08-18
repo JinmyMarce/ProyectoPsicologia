@@ -11,13 +11,13 @@ export function Badge({ children, variant = 'default', className }: BadgeProps) 
   const baseClasses = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold';
   
   const variants = {
-    primary: 'bg-granate text-blanco',
-    success: 'bg-verde-esmeralda text-blanco',
-    info: 'bg-azul-marino text-blanco',
-    warning: 'bg-mostaza text-negro',
-    danger: 'bg-naranja-quemado text-blanco',
-    neutral: 'bg-gris-claro text-gris-oscuro',
-    pink: 'bg-rosa-palo text-granate',
+    default: 'bg-granate-800 text-blanco shadow-sm',
+    primary: 'bg-granate-800 text-blanco shadow-sm',
+    secondary: 'bg-azul-marino-800 text-blanco shadow-sm',
+    success: 'bg-verde-esmeralda text-blanco shadow-sm',
+    info: 'bg-azul-marino text-blanco shadow-sm',
+    warning: 'bg-mostaza text-negro shadow-sm',
+    danger: 'bg-red-600 text-blanco shadow-sm',
   };
 
   return (

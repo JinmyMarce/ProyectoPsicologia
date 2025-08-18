@@ -2,7 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'student' | 'psychologist' | 'admin' | 'super_admin';
+  role: 'student' | 'psychologist' | 'admin' | 'super_admin' | 'tutor';
   specialization?: string;
   verified: boolean;
   active: boolean;
@@ -38,6 +38,16 @@ export interface Psychologist extends User {
   completed_appointments?: number;
 }
 
+export interface Tutor extends User {
+  role: 'tutor';
+  classroom?: string;
+  study_program?: string;
+  semester?: string;
+  course?: string;
+  total_students?: number;
+  active_derivations?: number;
+}
+
 export interface PsychologistHistory {
   id: string;
   psychologist_id: string;
@@ -59,6 +69,43 @@ export interface TimeSlot {
 
 export interface Student extends User {
   role: 'student';
+}
+
+// Interfaces para sistema de derivaciones
+export interface Derivation {
+  id: string;
+  student_id: string;
+  tutor_id: string;
+  psychologist_id?: string;
+  reason: string;
+  urgency: 'low' | 'medium' | 'high' | 'critical';
+  status: 'pending' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  student?: Student;
+  tutor?: Tutor;
+  psychologist?: Psychologist;
+}
+
+// Interfaces para sesiones grupales
+export interface GroupSession {
+  id: string;
+  tutor_id: string;
+  classroom: string;
+  date: string;
+  start_time: string; // "01:00"
+  end_time: string;   // "02:00"
+  day_of_week: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday';
+  topic: string;
+  max_students?: number;
+  registered_students: string[]; // IDs de estudiantes
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  tutor?: Tutor;
+  students?: Student[];
 }
 
 export interface Notification {
@@ -146,8 +193,16 @@ export interface CreateUserData {
   name: string;
   email: string;
   password: string;
-  role: 'student' | 'psychologist' | 'admin' | 'super_admin';
+  confirmPassword?: string;
+  dni?: string;
+  phone?: string;
+  role: 'student' | 'psychologist' | 'admin' | 'super_admin' | 'tutor';
   specialization?: string;
+  // Campos específicos para tutores
+  classroom?: string;
+  study_program?: string;
+  semester?: string;
+  course?: string;
   verified?: boolean;
 }
 

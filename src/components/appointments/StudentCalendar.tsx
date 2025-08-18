@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
-import { Calendar, Clock, User, CheckCircle, XCircle, Clock as ClockIcon } from 'lucide-react';
+import { CheckCircle, XCircle, Clock as ClockIcon } from 'lucide-react';
 import { getUserAppointments } from '../../services/appointments';
-import { getBlockedDatesForCalendar, getMockBlockedSchedules } from '../../services/schedule';
+import { getBlockedDatesForCalendar } from '../../services/schedule';
+import { Holiday } from '../../services/holidays';
+import { holidayPublicService } from '../../services/holidaysPublic';
+import { holidayLocalService } from '../../services/holidaysLocal';
 import { useSchedule } from '../../contexts/ScheduleContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Calendar as BigCalendar, dateFnsLocalizer, Event } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, parse, startOfWeek, getDay, addDays, isAfter, isBefore, startOfDay } from 'date-fns';
 import esES from 'date-fns/locale/es';
-import { Tooltip } from '../ui/Tooltip';
+
 
 const locales = {
   'es': esES,
@@ -38,6 +41,7 @@ export const StudentCalendar: React.FC = () => {
   const { user } = useAuth();
   const { getBlockedDates } = useSchedule();
   const [appointments, setAppointments] = useState<StudentAppointment[]>([]);
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [loading, setLoading] = useState(true);
   // Estado para la fecha seleccionada y error
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -45,19 +49,33 @@ export const StudentCalendar: React.FC = () => {
   const [error, setError] = useState('');
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
 
-  // Colores para los estados
-  const COLOR_DISPONIBLE = 'rgba(29, 185, 84, 0.18)'; // Verde claro transparente
-  const COLOR_OCUPADO = 'rgba(142, 22, 26, 0.18)'; // Granate oscuro claro transparente
-  const COLOR_BLOQUEADO = 'rgba(200,200,200,0.35)'; // Gris claro transparente
-  const COLOR_TEXTO_BLOQUEADO = '#b0b0b0';
-  const COLOR_TEXTO_NORMAL = '#222';
-  const COLOR_PASADO = 'rgba(124, 58, 237, 0.1)'; // Morado claro transparente
-  const COLOR_FUTURO_LIMITE = 'rgba(161, 98, 7, 0.1)'; // Amarillo claro transparente
+  // Colores institucionales del sistema
+  const COLOR_DISPONIBLE = 'rgba(142, 22, 26, 0.18)'; // Granate institucional transparente
+  const COLOR_OCUPADO = 'rgba(52, 73, 94, 0.18)'; // Gris azul medio transparente
+  const COLOR_BLOQUEADO = 'rgba(44, 62, 80, 0.35)'; // Gris azul oscuro transparente
+  const COLOR_FERIADO = 'rgba(211, 183, 160, 0.25)'; // Beige metálico para feriados
+  const COLOR_FERIADO_NACIONAL = 'rgba(142, 22, 26, 0.25)'; // Granate para feriados nacionales
+  const COLOR_TEXTO_BLOQUEADO = '#34495e';
+  const COLOR_TEXTO_NORMAL = '#2c3e50';
+  const COLOR_TEXTO_FERIADO = '#8e161a';
+  const COLOR_PASADO = 'rgba(44, 62, 80, 0.1)'; // Gris azul oscuro transparente
+  const COLOR_FUTURO_LIMITE = 'rgba(52, 73, 94, 0.1)'; // Gris azul medio transparente
 
   useEffect(() => {
+    console.log('📅 Calendario cambió a:', calendarMonth);
+    console.log('🎉 Estado actual de holidays:', holidays.length, 'feriados');
     loadAppointments();
     loadBlockedDates();
+    loadHolidays();
   }, [calendarMonth]);
+
+  // Debug: Mostrar estado actual
+  useEffect(() => {
+    console.log('🔍 Estado actualizado:');
+    console.log('- Holidays cargados:', holidays.length);
+    console.log('- Appointments:', appointments.length);
+    console.log('- Eventos de feriados que se van a mostrar:', holidays.map(h => h.name));
+  }, [holidays, appointments]);
 
   const loadAppointments = async () => {
     try {
@@ -80,6 +98,38 @@ export const StudentCalendar: React.FC = () => {
       
     } catch (error) {
       console.error('Error loading blocked dates:', error);
+    }
+  };
+
+  const loadHolidays = async () => {
+    try {
+      const year = calendarMonth.getFullYear();
+      const month = calendarMonth.getMonth() + 1;
+      console.log(`🎉 Cargando feriados para ${month}/${year}...`);
+      
+      // Usar servicio local para garantizar que siempre funcione
+      const holidaysData = holidayLocalService.getHolidaysForMonth(year, month, 'Lima');
+      console.log('🎉 Feriados cargados (servicio local):', holidaysData.length, 'encontrados');
+      console.log('🎉 Detalle de feriados:', holidaysData);
+      setHolidays(holidaysData);
+      
+      // También intentar cargar desde API si está disponible
+      try {
+        const connectionOk = await holidayPublicService.testConnection();
+        if (connectionOk) {
+          const apiHolidays = await holidayPublicService.getHolidaysForMonth(year, month, 'Lima');
+          if (apiHolidays.length > 0) {
+            console.log('✅ También cargados desde API:', apiHolidays.length);
+            setHolidays(apiHolidays); // Usar los de la API si están disponibles
+          }
+        }
+      } catch (apiError) {
+        console.warn('⚠️ API no disponible, usando feriados locales:', apiError);
+      }
+    } catch (error) {
+      console.error('❌ Error loading holidays:', error);
+      // Como fallback, usar todos los feriados locales
+      setHolidays(holidayLocalService.getAllHolidays());
     }
   };
 
@@ -152,14 +202,30 @@ export const StudentCalendar: React.FC = () => {
   }
 
   // Transformar citas a eventos para Big Calendar
-  const events: Event[] = appointments.map((appointment) => ({
+  const appointmentEvents: Event[] = appointments.map((appointment) => ({
     id: appointment.id,
     title: `${appointment.psychologist_name} (${appointment.status})`,
     start: parseLocalDateTime(appointment.date, appointment.time),
     end: parseLocalDateTime(appointment.date, appointment.time),
-    resource: appointment,
+    resource: { type: 'appointment', data: appointment },
     allDay: false,
   }));
+
+  // Transformar feriados a eventos para Big Calendar
+  const holidayEvents: Event[] = holidays.map((holiday) => {
+    const holidayDate = new Date(holiday.date);
+    return {
+      id: `holiday-${holiday.id}`,
+      title: `🎉 ${holiday.name}`,
+      start: holidayDate,
+      end: holidayDate,
+      resource: { type: 'holiday', data: holiday },
+      allDay: true,
+    };
+  });
+
+  // Combinar todos los eventos
+  const events: Event[] = [...appointmentEvents, ...holidayEvents];
 
   const customMessages = {
     next: 'Siguiente',
@@ -186,6 +252,15 @@ export const StudentCalendar: React.FC = () => {
       const dayOfWeek = selected.getDay();
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
       const isToday = selected.toDateString() === peruTime.toDateString();
+      
+      // Verificar si es feriado
+      const holiday = holidayLocalService.isHolidayDate(selected, holidays);
+      if (holiday) {
+        const scope = holiday.is_national ? 'Nacional' : `Regional (${holiday.region})`;
+        setError(`🎉 FERIADO ${scope.toUpperCase()}: ${holiday.name} - No se atiende en días feriados. ${holiday.description}`);
+        return;
+      }
+      
       // Validaciones
       if (isWeekend) {
         setError('❌ FECHA NO VÁLIDA: No se pueden agendar citas en fines de semana. Solo se atiende de lunes a viernes.');
@@ -300,9 +375,34 @@ export const StudentCalendar: React.FC = () => {
           views={['month']}
           onSelectSlot={handleDateClick}
           eventPropGetter={(event: any) => {
-            if (event.resource.ocupado) {
-              return { style: { backgroundColor: COLOR_OCUPADO, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
+            // Estilos para feriados
+            if (event.resource?.type === 'holiday') {
+              const holiday = event.resource.data;
+              const backgroundColor = holiday.is_national ? COLOR_FERIADO_NACIONAL : COLOR_FERIADO;
+              return { 
+                style: { 
+                  backgroundColor, 
+                  color: COLOR_TEXTO_FERIADO, 
+                  borderRadius: 8, 
+                  border: 'none', 
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                } 
+              };
             }
+            
+            // Estilos para citas
+            if (event.resource?.type === 'appointment') {
+              const appointment = event.resource.data;
+              if (appointment.status === 'confirmada') {
+                return { style: { backgroundColor: COLOR_DISPONIBLE, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
+              } else if (appointment.status === 'cancelada' || appointment.status === 'rechazada') {
+                return { style: { backgroundColor: COLOR_OCUPADO, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
+              }
+            }
+            
+            // Estilo por defecto
             return { style: { backgroundColor: COLOR_DISPONIBLE, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
           }}
           dayPropGetter={(date: any) => {
@@ -318,6 +418,25 @@ export const StudentCalendar: React.FC = () => {
               return { style: { backgroundColor: 'transparent', color: COLOR_TEXTO_NORMAL } };
             }
             
+            // Verificar si el día es feriado
+            const holiday = holidayLocalService.isHolidayDate(date, holidays);
+            if (holiday) {
+              console.log('🎉 DÍA FERIADO DETECTADO:', date, holiday.name);
+              const backgroundColor = holiday.is_national ? COLOR_FERIADO_NACIONAL : COLOR_FERIADO;
+              return { 
+                style: { 
+                  backgroundColor, 
+                  color: COLOR_TEXTO_FERIADO, 
+                  fontWeight: 700, 
+                  borderRadius: 12, 
+                  boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)', 
+                  border: '2px solid #dc3545', 
+                  cursor: 'pointer',
+                  position: 'relative'
+                } 
+              };
+            }
+
             // Verificar si el día está bloqueado por el psicólogo
             const isBlockedByPsychologist = blockedDates.includes(dateStr);
             if (isBlockedByPsychologist) {
@@ -351,7 +470,7 @@ export const StudentCalendar: React.FC = () => {
             <span className="w-5 h-5 mr-2 text-blue-600">ℹ️</span>
             Leyenda de disponibilidad
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="space-y-3">
               <h5 className="text-sm font-medium text-gray-700 mb-3">Estados principales</h5>
               <div className="space-y-2">
@@ -409,6 +528,25 @@ export const StudentCalendar: React.FC = () => {
                 </div>
               </div>
             </div>
+            <div className="space-y-3">
+              <h5 className="text-sm font-medium text-gray-700 mb-3">Feriados</h5>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FERIADO_NACIONAL, color: COLOR_TEXTO_FERIADO}}>🏛️</div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Feriado Nacional</span>
+                    <p className="text-xs text-gray-500">No se atiende en todo el país</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FERIADO, color: COLOR_TEXTO_FERIADO}}>🏢</div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Feriado Regional</span>
+                    <p className="text-xs text-gray-500">Feriado específico de Lima</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-start gap-3">
@@ -421,7 +559,8 @@ export const StudentCalendar: React.FC = () => {
                   <li>• Solo puedes navegar y agendar desde este mes en adelante</li>
                   <li>• Solo se pueden agendar citas hasta 2 semanas en adelante</li>
                   <li>• El horario de atención es de lunes a viernes</li>
-                  <li>• Los fines de semana no se atiende</li>
+                  <li>• Los fines de semana y feriados no se atiende</li>
+                  <li>• Los feriados nacionales y regionales están marcados automáticamente</li>
                   <li>• No se pueden agendar citas en días pasados</li>
                 </ul>
               </div>
@@ -429,6 +568,41 @@ export const StudentCalendar: React.FC = () => {
           </div>
         </div>
       </Card>
+      
+      {/* Estilos CSS específicos para feriados */}
+      <style>{`
+        .rbc-calendar .rbc-date-cell:has(.holiday-marker) {
+          position: relative;
+        }
+        
+        .holiday-marker {
+          position: absolute;
+          top: 2px;
+          right: 2px;
+          width: 8px;
+          height: 8px;
+          background-color: #dc3545;
+          border-radius: 50%;
+          z-index: 10;
+        }
+        
+        .holiday-marker.regional {
+          background-color: #ffc107;
+        }
+        
+        .rbc-event.holiday-event {
+          background-color: ${COLOR_FERIADO_NACIONAL} !important;
+          color: ${COLOR_TEXTO_FERIADO} !important;
+          border: 2px solid #dc3545 !important;
+          font-weight: 700 !important;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+        }
+        
+        .rbc-event.holiday-event.regional {
+          background-color: ${COLOR_FERIADO} !important;
+          border: 2px solid #ffc107 !important;
+        }
+      `}</style>
     </div>
   );
 }; 

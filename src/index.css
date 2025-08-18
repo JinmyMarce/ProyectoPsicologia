@@ -4,3 +4,87 @@
 body, html {
   font-family: 'Georgia, Times, serif', serif !important;
 }
+
+/* Animaciones profesionales para la interfaz */
+@keyframes professionalGradient {
+  0%, 100% { 
+    background-position: 0% 50%; 
+  }
+  25% { 
+    background-position: 100% 50%; 
+  }
+  50% { 
+    background-position: 100% 100%; 
+  }
+  75% { 
+    background-position: 0% 100%; 
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) scale(1);
+    opacity: 0.3;
+  }
+  25% { 
+    transform: translateY(-2px) translateX(2px) scale(1.1);
+    opacity: 0.6;
+  }
+  50% { 
+    transform: translateY(-4px) translateX(-1px) scale(0.9);
+    opacity: 0.3;
+  }
+  75% { 
+    transform: translateY(-1px) translateX(-2px) scale(1.05);
+    opacity: 0.5;
+  }
+}
+
+@keyframes moonGlow {
+  0%, 100% { 
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1), 0 0 40px rgba(255, 255, 255, 0.2);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.15), 0 0 60px rgba(255, 255, 255, 0.3);
+  }
+}
+
+@keyframes moonFloat {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% { 
+    transform: translateY(-2px) rotate(0.5deg);
+  }
+  66% { 
+    transform: translateY(1px) rotate(-0.3deg);
+  }
+}
+
+@keyframes logoFloat {
+  0%, 100% { 
+    transform: translateY(0px) scale(1) rotate(0deg);
+    filter: brightness(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+  }
+  25% { 
+    transform: translateY(-2px) scale(1.02) rotate(0.5deg);
+    filter: brightness(1.05) drop-shadow(0 0 12px rgba(255, 255, 255, 0.3));
+  }
+  50% { 
+    transform: translateY(-1px) scale(1) rotate(0deg);
+    filter: brightness(1.1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.25));
+  }
+  75% { 
+    transform: translateY(-2px) scale(1.01) rotate(-0.5deg);
+    filter: brightness(1.05) drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+  }
+}
+
+@keyframes logoGlow {
+  0%, 100% { 
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.3), 0 0 8px rgba(211, 183, 160, 0.2);
+  }
+  50% { 
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.4), 0 0 12px rgba(211, 183, 160, 0.3);
+  }
+}

@@ -8,12 +8,12 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, children }: PageHeaderProps) {
   return (
-    <div className="bg-blanco border-b-4 border-granate py-6 px-8 mb-6">
-      <h1 className="text-3xl font-bold text-granate mb-2">
+    <div className="bg-blanco border-b-4 border-granate-800 py-6 px-8 mb-6 shadow-sm">
+      <h1 className="text-3xl font-bold text-granate-800 mb-2">
         {title}
       </h1>
       {subtitle && (
-        <p className="text-lg text-gris-oscuro">
+        <p className="text-lg text-azul-marino-700">
           {subtitle}
         </p>
       )}

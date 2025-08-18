@@ -26,19 +26,15 @@ export function Button({
 
   const variants = {
     primary:
-      'bg-granate text-white hover:bg-granate-dark focus:ring-granate border border-granate',
+      'bg-granate-800 text-blanco hover:bg-granate-700 focus:ring-granate-500 border border-granate-800 shadow-lg hover:shadow-xl transition-all duration-200',
     secondary:
-      'bg-azul-marino text-white hover:bg-azul-electrico focus:ring-azul-marino border border-azul-marino',
+      'bg-azul-marino-800 text-blanco hover:bg-azul-marino-700 focus:ring-azul-marino-500 border border-azul-marino-800 shadow-lg hover:shadow-xl transition-all duration-200',
     outline:
-      'bg-white text-granate border border-granate hover:bg-granate hover:text-white',
-    neutral:
-      'bg-gris-claro text-negro border border-gris-medio hover:bg-gris-medio',
-    success:
-      'bg-verde-esmeralda text-white',
-    warning:
-      'bg-mostaza text-negro',
+      'bg-transparent text-granate-800 border-2 border-granate-800 hover:bg-granate-800 hover:text-blanco shadow-md hover:shadow-lg transition-all duration-200',
+    ghost:
+      'bg-transparent text-granate-800 hover:bg-granate-100 border border-transparent hover:border-granate-300 transition-all duration-200',
     danger:
-      'bg-naranja-quemado text-white',
+      'bg-red-600 text-blanco hover:bg-red-700 focus:ring-red-500 border border-red-600 shadow-lg hover:shadow-xl transition-all duration-200',
   };
 
   return (

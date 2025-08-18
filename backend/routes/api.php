@@ -14,6 +14,11 @@ use App\Http\Controllers\Api\PsychologicalSessionController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\PsychologistDashboardController;
 use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\HolidayController;
+use App\Http\Controllers\Api\ChatBotController;
+use App\Http\Controllers\Api\TutorController;
+use App\Http\Controllers\Api\DerivationController;
+use App\Http\Controllers\Api\GroupSessionController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -35,6 +40,33 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 
 // Rutas públicas para horarios disponibles
 Route::get('/appointments/available-slots', [AppointmentController::class, 'getAvailableSlots']);
+
+// === RUTAS PÚBLICAS PARA FERIADOS ===
+Route::prefix('holidays')->group(function () {
+    Route::get('/', [HolidayController::class, 'index']);
+    Route::get('/upcoming', [HolidayController::class, 'upcoming']);
+    Route::post('/check-date', [HolidayController::class, 'checkDate']);
+    Route::post('/get-in-range', [HolidayController::class, 'getInRange']);
+    Route::get('/year/{year}', [HolidayController::class, 'getByYear']);
+    Route::get('/stats', [HolidayController::class, 'stats']);
+    
+    // Nuevos endpoints para días laborables
+    Route::post('/is-working-day', [HolidayController::class, 'isWorkingDay']);
+    Route::post('/next-working-day', [HolidayController::class, 'getNextWorkingDay']);
+    Route::post('/working-days-range', [HolidayController::class, 'getWorkingDaysInRange']);
+    Route::get('/available-years', [HolidayController::class, 'getAvailableYears']);
+    
+    // Endpoint para generar feriados (admin)
+    Route::post('/generate', [HolidayController::class, 'generateHolidays']);
+});
+
+// === RUTAS PÚBLICAS PARA CHATBOT ===
+Route::prefix('chatbot')->group(function () {
+    Route::post('/chat', [ChatBotController::class, 'chat']);
+    Route::get('/knowledge-base', [ChatBotController::class, 'getKnowledgeBase']);
+    Route::post('/feedback', [ChatBotController::class, 'submitFeedback']);
+    Route::get('/stats', [ChatBotController::class, 'getStats']);
+});
 
 // Rutas públicas para gestión de horarios bloqueados (sin autenticación)
 Route::prefix('psychologist-dashboard/schedules')->group(function () {
@@ -66,6 +98,41 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/deactivate', [PsychologistController::class, 'deactivate']);
         Route::get('/history/list', [PsychologistController::class, 'history']);
         Route::post('/history/{id}/reactivate', [PsychologistController::class, 'reactivate']);
+    });
+
+    // Rutas para gestión de tutores
+    Route::prefix('tutors')->group(function () {
+        Route::get('/', [TutorController::class, 'index']);
+        Route::post('/', [TutorController::class, 'store']);
+        Route::get('/{id}', [TutorController::class, 'show']);
+        Route::put('/{id}', [TutorController::class, 'update']);
+        Route::delete('/{id}', [TutorController::class, 'destroy']);
+        Route::get('/{id}/students', [TutorController::class, 'getStudents']);
+        Route::get('/{id}/stats', [TutorController::class, 'getStats']);
+    });
+
+    // Rutas para gestión de derivaciones
+    Route::prefix('derivations')->group(function () {
+        Route::get('/', [DerivationController::class, 'index']);
+        Route::post('/', [DerivationController::class, 'store']);
+        Route::get('/pending', [DerivationController::class, 'pending']);
+        Route::get('/stats', [DerivationController::class, 'stats']);
+        Route::get('/{id}', [DerivationController::class, 'show']);
+        Route::post('/{id}/assign-psychologist', [DerivationController::class, 'assignPsychologist']);
+        Route::patch('/{id}/status', [DerivationController::class, 'updateStatus']);
+    });
+
+    // Rutas para gestión de sesiones grupales
+    Route::prefix('group-sessions')->group(function () {
+        Route::get('/', [GroupSessionController::class, 'index']);
+        Route::post('/', [GroupSessionController::class, 'store']);
+        Route::get('/available', [GroupSessionController::class, 'available']);
+        Route::get('/stats', [GroupSessionController::class, 'stats']);
+        Route::get('/{id}', [GroupSessionController::class, 'show']);
+        Route::put('/{id}', [GroupSessionController::class, 'update']);
+        Route::patch('/{id}/status', [GroupSessionController::class, 'updateStatus']);
+        Route::post('/{id}/register-student', [GroupSessionController::class, 'registerStudent']);
+        Route::delete('/{id}/unregister-student', [GroupSessionController::class, 'unregisterStudent']);
     });
 
     // Rutas para gestión de usuarios (solo super admin y admin)

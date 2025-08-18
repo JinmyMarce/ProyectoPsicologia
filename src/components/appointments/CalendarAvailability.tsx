@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, AlertCircle, CheckCircle, Clock, Loader2, Lock, Info } from 'lucide-react';
 import { getAvailableSlots } from '../../services/appointments';
+import { holidayLocalService, Holiday } from '../../services/holidaysLocal';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Calendar as BigCalendar, dateFnsLocalizer, Event } from 'react-big-calendar';
@@ -42,6 +43,7 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
   onDateSelect 
 }) => {
   const [monthDays, setMonthDays] = useState<DayAvailability[]>([]);
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -68,6 +70,11 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
     try {
       const year = currentMonth.getFullYear();
       const month = currentMonth.getMonth();
+      
+      // Cargar feriados para el mes actual
+      const holidaysData = holidayLocalService.getHolidaysForMonth(year, month + 1, 'Lima');
+      console.log('🎉 [CALENDARIO DISPONIBILIDAD] Feriados cargados:', holidaysData.length, 'encontrados');
+      setHolidays(holidaysData);
       const lastDay = new Date(year, month + 1, 0);
       
       // Usar zona horaria de Perú
@@ -97,6 +104,9 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
         const dayOfWeek = date.getDay();
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
         
+        // Verificar si es feriado
+        const isHoliday = holidayLocalService.isHolidayDate(date, holidaysData) !== null;
+        
         // Aplicar restricciones adicionales para el día actual
         let isTodayBlocked = false;
         if (isToday && isAfterCutoff) {
@@ -104,10 +114,10 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
         }
         
         // Solo los días laborables (lunes a viernes), futuros y dentro del límite están disponibles
-        // Los fines de semana están BLOQUEADOS PERMANENTEMENTE para todos los años
+        // Los fines de semana y feriados están BLOQUEADOS PERMANENTEMENTE para todos los años
         // El día actual se bloquea si ya pasó el horario de corte
-        let isAvailable = !isPast && !isWeekend && !isFutureLimit && !isTodayBlocked;
-        let isBlocked = isWeekend || isPast || isFutureLimit || isTodayBlocked;
+        let isAvailable = !isPast && !isWeekend && !isHoliday && !isFutureLimit && !isTodayBlocked;
+        let isBlocked = isWeekend || isHoliday || isPast || isFutureLimit || isTodayBlocked;
         let availableSlots = 0;
         
         days.push({ 
@@ -376,17 +386,19 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
     noEventsInRange: 'No hay disponibilidad en este rango',
   };
 
-  // Colores claros y suaves con transparencia
-  const COLOR_DISPONIBLE = 'rgba(134, 239, 172, 0.3)'; // Verde claro transparente
-  const COLOR_OCUPADO = 'rgba(252, 165, 165, 0.3)'; // Rojo claro transparente
-  const COLOR_BLOQUEADO = 'rgba(253, 186, 116, 0.3)'; // Naranja claro para fin de semana
-  const COLOR_PASADO = 'rgba(196, 181, 253, 0.3)'; // Púrpura claro para día pasado
-  const COLOR_FUTURO_LIMITE = 'rgba(253, 224, 71, 0.3)'; // Amarillo claro transparente
-  const COLOR_TEXTO_BLOQUEADO = '#6b7280';
-  const COLOR_TEXTO_NORMAL = '#1f2937';
-  const COLOR_TEXTO_OCUPADO = '#dc2626';
-  const COLOR_BORDE_ACTUAL = '#3b82f6';
-  const COLOR_BORDE_SELECCIONADO = '#8e161a';
+  // Colores claros y suaves con transparencia - Nueva paleta profesional
+  const COLOR_DISPONIBLE = 'rgba(142, 22, 26, 0.3)'; // Granate institucional transparente
+  const COLOR_OCUPADO = 'rgba(52, 73, 94, 0.3)'; // Gris azul medio transparente
+  const COLOR_BLOQUEADO = 'rgba(44, 62, 80, 0.3)'; // Gris azul oscuro para fin de semana
+  const COLOR_PASADO = 'rgba(30, 41, 59, 0.3)'; // Azul marino oscuro para días pasados // Púrpura claro para día pasado
+  const COLOR_FUTURO_LIMITE = 'rgba(244, 211, 94, 0.3)'; // Mostaza transparente
+  const COLOR_FERIADO = 'rgba(142, 22, 26, 0.4)'; // Granate para feriados nacionales
+  const COLOR_FERIADO_REGIONAL = 'rgba(30, 41, 59, 0.4)'; // Azul marino para feriados regionales
+  const COLOR_TEXTO_BLOQUEADO = '#64748b'; // Azul gris medio
+  const COLOR_TEXTO_NORMAL = '#1e293b'; // Azul marino oscuro
+  const COLOR_TEXTO_OCUPADO = '#b91c1c'; // Granate light para texto ocupado
+  const COLOR_BORDE_ACTUAL = '#0369a1'; // Azul profesional para día actual
+  const COLOR_BORDE_SELECCIONADO = '#8e161a'; // Granate oscuro para seleccionado
 
   // Día actual y seleccionado
   const today = new Date();
@@ -510,32 +522,40 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
             // Para otros días: aplicar colores normales
             if (dayData?.isPast) {
               style.background = COLOR_PASADO;
-              style.color = '#7c3aed'; // Púrpura para día pasado
+              style.color = '#34495e'; // Gris azul medio para día pasado
               style.cursor = 'not-allowed';
               style.opacity = 1;
             } else if (dayData?.isFutureLimit) {
               style.background = COLOR_FUTURO_LIMITE;
-              style.color = '#a16207'; // Amarillo oscuro para fuera de límite
+              style.color = '#2c3e50'; // Gris azul oscuro para fuera de límite
               style.cursor = 'not-allowed';
               style.opacity = 1;
             } else if (dayData?.isBlocked) {
-              style.background = COLOR_BLOQUEADO;
-              style.color = '#d97706'; // Naranja claro para fin de semana
+              // Verificar si es feriado para darle color específico
+              const holiday = holidayLocalService.isHolidayDate(date, holidays);
+              if (holiday) {
+                style.background = holiday.is_national ? COLOR_FERIADO : COLOR_FERIADO_REGIONAL;
+                style.color = holiday.is_national ? '#8e161a' : '#d3b7a0';
+                style.boxShadow = '0 4px 16px rgba(248,113,113,0.20)';
+              } else {
+                style.background = COLOR_BLOQUEADO;
+                style.color = '#34495e'; // Gris azul medio para fin de semana
+              }
               style.cursor = 'not-allowed';
               style.opacity = 1;
             } else if (dayData?.isAvailable) {
               style.background = COLOR_DISPONIBLE;
-              style.color = '#059669'; // Verde oscuro para disponible
+              style.color = '#8e161a'; // Granate institucional para disponible
               style.cursor = 'pointer';
               style.opacity = 1;
-              style.boxShadow = '0 4px 16px rgba(16,185,129,0.10)';
+              style.boxShadow = '0 4px 16px rgba(142, 22, 26, 0.10)';
             } else {
               // Para días que no están disponibles pero no están bloqueados (ocupados)
               style.background = COLOR_OCUPADO;
-              style.color = '#b91c1c'; // Rojo oscuro para ocupado
+              style.color = '#2c3e50'; // Gris azul oscuro para ocupado
               style.cursor = 'not-allowed';
               style.opacity = 1;
-              style.boxShadow = '0 4px 16px rgba(220,38,38,0.10)';
+              style.boxShadow = '0 4px 16px rgba(52, 73, 94, 0.10)';
             }
           }
 
@@ -567,7 +587,7 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
             <h5 className="text-sm font-medium text-gray-700 mb-3">Estados principales</h5>
             <div className="space-y-2">
               <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_DISPONIBLE, color: '#059669'}}>
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_DISPONIBLE, color: '#8e161a'}}>
               </div>
               <div>
                 <span className="text-sm font-medium text-gray-700">Disponible</span>
@@ -575,7 +595,7 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_OCUPADO, color: '#b91c1c'}}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_OCUPADO, color: '#2c3e50'}}>
               </div>
               <div>
                 <span className="text-sm font-medium text-gray-700">Ocupado</span>
@@ -590,7 +610,7 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
             <h5 className="text-sm font-medium text-gray-700 mb-3">Restricciones</h5>
             <div className="space-y-2">
                           <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_BLOQUEADO, color: '#d97706'}}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_BLOQUEADO, color: '#34495e'}}>
               </div>
               <div>
                 <span className="text-sm font-medium text-gray-700">Fin de semana</span>
@@ -603,6 +623,24 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
               <div>
                 <span className="text-sm font-medium text-gray-700">Día pasado</span>
                 <p className="text-xs text-gray-500">No disponible</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FERIADO, color: '#dc2626'}}>
+                🎉
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Feriado Nacional</span>
+                <p className="text-xs text-gray-500">No hay atención</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FERIADO_REGIONAL, color: '#d97706'}}>
+                🏛️
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Feriado Regional</span>
+                <p className="text-xs text-gray-500">No hay atención</p>
               </div>
             </div>
             </div>

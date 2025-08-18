@@ -35,15 +35,15 @@ export function LoadingScreen({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#8e161a] via-[#2c3e50] to-[#34495e] flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-granate-800 via-azul-marino-800 to-azul-oscuro-800 flex items-center justify-center relative overflow-hidden">
       {/* Efectos de fondo mejorados */}
-      <div className="absolute inset-0 bg-[#8e161a]/20"></div>
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#d3b7a0]/10 via-transparent to-[#8e161a]/10"></div>
+      <div className="absolute inset-0 bg-granate-800/20"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-azul-marino-500/10 via-transparent to-granate-800/10"></div>
       
       {/* Círculos decorativos con animación */}
-      <div className="absolute top-20 left-20 w-32 h-32 bg-[#d3b7a0]/20 rounded-full blur-xl loading-pulse-soft"></div>
-      <div className="absolute bottom-20 right-20 w-40 h-40 bg-[#8e161a]/20 rounded-full blur-xl loading-pulse-soft" style={{animationDelay: '1s'}}></div>
-      <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-[#2c3e50]/30 rounded-full blur-lg loading-pulse-soft" style={{animationDelay: '2s'}}></div>
+      <div className="absolute top-20 left-20 w-32 h-32 bg-azul-marino-500/20 rounded-full blur-xl loading-pulse-soft"></div>
+      <div className="absolute bottom-20 right-20 w-40 h-40 bg-granate-800/20 rounded-full blur-xl loading-pulse-soft" style={{animationDelay: '1s'}}></div>
+      <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-azul-marino-800/30 rounded-full blur-lg loading-pulse-soft" style={{animationDelay: '2s'}}></div>
       
       {/* Partículas flotantes */}
       {showParticles && (
@@ -63,7 +63,7 @@ export function LoadingScreen({
       <div className="text-center relative z-10">
         {/* Logo principal con efectos mejorados */}
         <div className="relative mb-8">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-full blur-3xl opacity-30 scale-150 loading-glow"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-granate-800 to-azul-marino-500 rounded-full blur-3xl opacity-30 scale-150 loading-glow"></div>
           <img 
             src="/images/icons/psicologia.png"
             alt="Logo Institucional"
@@ -79,17 +79,17 @@ export function LoadingScreen({
         <h1 className={`${titleSize[size]} font-black text-white mb-3 tracking-tight drop-shadow-lg professional-text`}>
           {title}
         </h1>
-        <p className={`${subtitleSize[size]} font-bold text-[#d3b7a0] mb-8 tracking-wide loading-shimmer`}>
+        <p className={`${subtitleSize[size]} font-bold text-azul-marino-200 mb-8 tracking-wide loading-shimmer`}>
           {subtitle}
         </p>
         
         {/* Animación de carga mejorada con colores profesionales */}
         <div className="flex items-center justify-center space-x-4 mb-8">
-          <div className="w-6 h-6 rounded-full bg-[#d3b7a0] loading-bounce-delayed shadow-lg"></div>
-          <div className="w-6 h-6 rounded-full bg-[#8e161a] loading-bounce-delayed shadow-lg" style={{animationDelay: '0.2s'}}></div>
-          <div className="w-6 h-6 rounded-full bg-[#2c3e50] loading-bounce-delayed shadow-lg" style={{animationDelay: '0.4s'}}></div>
-          <div className="w-6 h-6 rounded-full bg-[#34495e] loading-bounce-delayed shadow-lg" style={{animationDelay: '0.6s'}}></div>
-          <div className="w-6 h-6 rounded-full bg-[#27ae60] loading-bounce-delayed shadow-lg" style={{animationDelay: '0.8s'}}></div>
+          <div className="w-6 h-6 rounded-full bg-azul-marino-400 loading-bounce-delayed shadow-lg"></div>
+          <div className="w-6 h-6 rounded-full bg-granate-800 loading-bounce-delayed shadow-lg" style={{animationDelay: '0.2s'}}></div>
+          <div className="w-6 h-6 rounded-full bg-azul-marino-800 loading-bounce-delayed shadow-lg" style={{animationDelay: '0.4s'}}></div>
+          <div className="w-6 h-6 rounded-full bg-azul-oscuro-800 loading-bounce-delayed shadow-lg" style={{animationDelay: '0.6s'}}></div>
+          <div className="w-6 h-6 rounded-full bg-verde-esmeralda loading-bounce-delayed shadow-lg" style={{animationDelay: '0.8s'}}></div>
         </div>
         
         {/* Barra de progreso mejorada */}
@@ -97,13 +97,13 @@ export function LoadingScreen({
           <p className="text-white font-bold text-xl tracking-wide mb-4">
             Cargando sistema...
           </p>
-          <div className="w-64 h-2 bg-[#d3b7a0]/30 rounded-full mx-auto overflow-hidden shadow-inner">
-            <div className="h-full bg-gradient-to-r from-[#d3b7a0] via-[#8e161a] to-[#2c3e50] rounded-full loading-shimmer"></div>
+          <div className="w-64 h-2 bg-azul-marino-400/30 rounded-full mx-auto overflow-hidden shadow-inner">
+            <div className="h-full bg-gradient-to-r from-azul-marino-400 via-granate-800 to-azul-marino-800 rounded-full loading-shimmer"></div>
           </div>
         </div>
         
         {/* Información adicional con animación */}
-        <div className="mt-8 text-[#d3b7a0]/90 text-sm font-medium space-y-2">
+        <div className="mt-8 text-azul-marino-200/90 text-sm font-medium space-y-2">
           <p className="loading-pulse-soft">Conectando con el servidor...</p>
           <p className="loading-pulse-soft" style={{animationDelay: '0.5s'}}>Verificando credenciales...</p>
           <p className="loading-pulse-soft" style={{animationDelay: '1s'}}>Inicializando módulos...</p>
@@ -111,8 +111,8 @@ export function LoadingScreen({
         
         {/* Indicador de estado */}
         <div className="mt-6 flex items-center justify-center space-x-2">
-          <div className="w-3 h-3 bg-[#27ae60] rounded-full animate-pulse"></div>
-          <span className="text-[#d3b7a0] text-xs font-medium">Sistema operativo</span>
+          <div className="w-3 h-3 bg-verde-esmeralda rounded-full animate-pulse"></div>
+          <span className="text-azul-marino-200 text-xs font-medium">Sistema operativo</span>
         </div>
       </div>
     </div>

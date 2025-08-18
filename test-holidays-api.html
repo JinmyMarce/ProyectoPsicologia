@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Feriados</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .holiday { 
+            background: #ffeb3b; 
+            padding: 10px; 
+            margin: 5px 0; 
+            border-radius: 5px; 
+            border: 2px solid #f57c00;
+        }
+        .holiday.national { 
+            background: #ffcdd2; 
+            border-color: #d32f2f; 
+        }
+        .error { color: red; }
+        .success { color: green; }
+        button { padding: 10px 20px; margin: 10px 5px; }
+    </style>
+</head>
+<body>
+    <h1>🎉 Test API de Feriados</h1>
+    
+    <div>
+        <button onclick="testUpcomingHolidays()">Probar Próximos Feriados</button>
+        <button onclick="testCurrentMonth()">Probar Mes Actual</button>
+        <button onclick="testSpecificDate()">Probar Fecha Específica</button>
+        <button onclick="testStats()">Probar Estadísticas</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000/api';
+        
+        function displayResult(title, data, isError = false) {
+            const resultDiv = document.getElementById('result');
+            const className = isError ? 'error' : 'success';
+            
+            let html = `<h3 class="${className}">${title}</h3>`;
+            
+            if (isError) {
+                html += `<pre class="error">${data}</pre>`;
+            } else {
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                // Si hay feriados, mostrarlos de forma visual
+                if (data.data && Array.isArray(data.data)) {
+                    html += '<h4>🎉 Feriados encontrados:</h4>';
+                    data.data.forEach(holiday => {
+                        const className = holiday.is_national ? 'holiday national' : 'holiday';
+                        html += `<div class="${className}">
+                            <strong>${holiday.name}</strong> - ${holiday.formatted_date}<br>
+                            <small>${holiday.description} (${holiday.is_national ? 'Nacional' : 'Regional'})</small>
+                        </div>`;
+                    });
+                }
+            }
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        async function testUpcomingHolidays() {
+            try {
+                console.log('🔍 Probando próximos feriados...');
+                const response = await fetch(`${API_BASE}/holidays/upcoming?days=60`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ Próximos feriados:', data);
+                displayResult('✅ Próximos Feriados (60 días)', data);
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                displayResult('❌ Error al cargar próximos feriados', error.message, true);
+            }
+        }
+        
+        async function testCurrentMonth() {
+            try {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth() + 1;
+                
+                console.log(`🔍 Probando feriados del mes ${month}/${year}...`);
+                
+                const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+                const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+                
+                const response = await fetch(`${API_BASE}/holidays/get-in-range`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        start_date: startDate,
+                        end_date: endDate,
+                        region: 'Lima'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log(`✅ Feriados de ${month}/${year}:`, data);
+                displayResult(`✅ Feriados del Mes ${month}/${year}`, data);
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                displayResult('❌ Error al cargar feriados del mes', error.message, true);
+            }
+        }
+        
+        async function testSpecificDate() {
+            try {
+                console.log('🔍 Probando fecha específica (25/12/2025)...');
+                const response = await fetch(`${API_BASE}/holidays/check-date`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        date: '2025-12-25',
+                        region: 'Lima'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ Verificación de fecha:', data);
+                displayResult('✅ Verificación: 25/12/2025 (Navidad)', data);
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                displayResult('❌ Error al verificar fecha', error.message, true);
+            }
+        }
+        
+        async function testStats() {
+            try {
+                console.log('🔍 Probando estadísticas...');
+                const response = await fetch(`${API_BASE}/holidays/stats?region=Lima`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ Estadísticas:', data);
+                displayResult('✅ Estadísticas de Feriados', data);
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                displayResult('❌ Error al cargar estadísticas', error.message, true);
+            }
+        }
+        
+        // Ejecutar prueba automática al cargar
+        window.onload = function() {
+            console.log('🚀 Iniciando pruebas automáticas de API...');
+            testUpcomingHolidays();
+        };
+    </script>
+</body>
+</html>
+
+
+

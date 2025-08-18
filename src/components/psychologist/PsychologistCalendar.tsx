@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, AlertCircle, CheckCircle, Clock, Loader2, Lock, Info, Search, User, Plus } from 'lucide-react';
+import { Calendar, AlertCircle, CheckCircle, Loader2, Info, Search, User } from 'lucide-react';
 import { getAvailableSlots, createAppointment, searchStudent, Student } from '../../services/appointments';
-import { getBlockedDatesForCalendar, getMockBlockedSchedules } from '../../services/schedule';
+import { getBlockedDatesForCalendar } from '../../services/schedule';
+import { holidayService, Holiday } from '../../services/holidays';
+import { holidayLocalService } from '../../services/holidaysLocal';
 import { useSchedule } from '../../contexts/ScheduleContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -66,6 +68,7 @@ export const PsychologistCalendar: React.FC = () => {
   const [showTimeSelection, setShowTimeSelection] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
 
   // Función para validar DNI (solo 8 números)
   const validateDNI = (value: string) => {
@@ -96,6 +99,7 @@ export const PsychologistCalendar: React.FC = () => {
   useEffect(() => {
     loadMonthAvailability();
     loadBlockedDates();
+    loadHolidays();
   }, [currentMonth]);
 
   const loadMonthAvailability = async () => {
@@ -175,6 +179,23 @@ export const PsychologistCalendar: React.FC = () => {
       
     } catch (error) {
       console.error('Error loading blocked dates:', error);
+    }
+  };
+
+  const loadHolidays = async () => {
+    try {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth() + 1;
+      console.log(`🎉 [PSICÓLOGO] Cargando feriados para ${month}/${year}...`);
+      
+      // Usar servicio local para garantizar que siempre funcione
+      const holidaysData = holidayLocalService.getHolidaysForMonth(year, month, 'Lima');
+      console.log('🎉 [PSICÓLOGO] Feriados cargados:', holidaysData.length, 'encontrados');
+      setHolidays(holidaysData);
+    } catch (error) {
+      console.error('❌ [PSICÓLOGO] Error loading holidays:', error);
+      // Como fallback, usar todos los feriados locales
+      setHolidays(holidayLocalService.getAllHolidays());
     }
   };
 
@@ -390,8 +411,21 @@ export const PsychologistCalendar: React.FC = () => {
   // Usar fechas bloqueadas del servicio
   const diasOcupados = blockedDates;
 
+  // Transformar feriados a eventos para BigCalendar
+  const holidayEvents: any[] = holidays.map((holiday) => {
+    const holidayDate = new Date(holiday.date);
+    return {
+      id: `holiday-${holiday.id}`,
+      title: `🎉 ${holiday.name}`,
+      start: holidayDate,
+      end: holidayDate,
+      resource: { type: 'holiday', data: holiday },
+      allDay: true,
+    };
+  });
+
   // Transformar días a eventos para BigCalendar
-  const events: any[] = monthDays.map(day => {
+  const dayEvents: any[] = monthDays.map(day => {
     if (diasOcupados.includes(day.date)) {
       return {
         id: day.date,
@@ -415,6 +449,9 @@ export const PsychologistCalendar: React.FC = () => {
     return null;
   }).filter(Boolean);
 
+  // Combinar todos los eventos
+  const events: any[] = [...dayEvents, ...holidayEvents];
+
   const customMessages = {
     next: 'Siguiente',
     previous: 'Anterior',
@@ -435,9 +472,12 @@ export const PsychologistCalendar: React.FC = () => {
   const COLOR_BLOQUEADO = 'rgba(253, 186, 116, 0.3)'; // Naranja claro para fin de semana
   const COLOR_PASADO = 'rgba(196, 181, 253, 0.3)'; // Púrpura claro para día pasado
   const COLOR_FUTURO_LIMITE = 'rgba(253, 224, 71, 0.3)'; // Amarillo claro transparente
+  const COLOR_FERIADO = 'rgba(255, 193, 7, 0.5)'; // Amarillo para feriados regionales
+  const COLOR_FERIADO_NACIONAL = 'rgba(220, 53, 69, 0.5)'; // Rojo para feriados nacionales
   const COLOR_TEXTO_BLOQUEADO = '#6b7280';
   const COLOR_TEXTO_NORMAL = '#1f2937';
   const COLOR_TEXTO_OCUPADO = '#dc2626';
+  const COLOR_TEXTO_FERIADO = '#d63031';
   const COLOR_BORDE_ACTUAL = '#3b82f6';
   const COLOR_BORDE_SELECCIONADO = '#8e161a';
 
@@ -675,9 +715,29 @@ export const PsychologistCalendar: React.FC = () => {
           }}
           views={['month']}
           onSelectSlot={handleDateClick}
-          eventPropGetter={() => ({ style: { display: 'none' } })}
+          eventPropGetter={(event: any) => {
+            // Mostrar solo los eventos de feriados
+            if (event.resource?.type === 'holiday') {
+              const holiday = event.resource.data;
+              const backgroundColor = holiday.is_national ? '#ffcdd2' : '#fff9c4';
+              const textColor = holiday.is_national ? '#d32f2f' : '#f57c00';
+              return { 
+                style: { 
+                  backgroundColor, 
+                  color: textColor, 
+                  borderRadius: 8, 
+                  border: 'none', 
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                } 
+              };
+            }
+            // Ocultar otros eventos (días disponibles/ocupados)
+            return { style: { display: 'none' } };
+          }}
           components={{
-            toolbar: (props) => (
+            toolbar: (props: any) => (
               <div className="flex items-center justify-between mb-8 p-6 bg-gradient-to-r from-[#8e161a] to-[#b91c1c] rounded-2xl text-white">
                 <button 
                   onClick={() => props.onNavigate('PREV')}
@@ -706,6 +766,30 @@ export const PsychologistCalendar: React.FC = () => {
             (date.getFullYear() === year && date.getMonth() < month)
           ) {
             return { style: { backgroundColor: 'transparent', color: COLOR_TEXTO_NORMAL } };
+          }
+          
+          // Verificar si es feriado PRIMERO
+          const holiday = holidayService.isHolidayDate(date, holidays);
+          if (holiday) {
+            const backgroundColor = holiday.is_national ? COLOR_FERIADO_NACIONAL : COLOR_FERIADO;
+            const borderColor = holiday.is_national ? '#dc3545' : '#ffc107';
+            return { 
+              style: { 
+                backgroundColor,
+                color: COLOR_TEXTO_FERIADO,
+                fontWeight: 700,
+                borderRadius: 12,
+                boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)',
+                border: `2px solid ${borderColor}`,
+                cursor: 'pointer',
+                position: 'relative',
+                minHeight: '60px',
+                height: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              } 
+            };
           }
           const today = new Date();
           const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));

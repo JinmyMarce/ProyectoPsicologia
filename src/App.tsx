@@ -80,7 +80,9 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, rgba(142, 22, 26, 0.05) 0%, rgba(211, 183, 160, 0.05) 100%)'
+      }}>
         <div className="text-center">
           <img 
             src="/images/icons/psicologia.png"
@@ -88,11 +90,11 @@ function AppContent() {
             className="w-24 h-24 object-contain mx-auto mb-4"
           />
           <div className="flex items-center justify-center space-x-2">
-            <div className="w-4 h-4 rounded-full bg-red-700 animate-bounce"></div>
-            <div className="w-4 h-4 rounded-full bg-red-700 animate-bounce [animation-delay:-.3s]"></div>
-            <div className="w-4 h-4 rounded-full bg-red-700 animate-bounce [animation-delay:-.5s]"></div>
+            <div className="w-4 h-4 rounded-full animate-bounce" style={{backgroundColor: '#8e161a'}}></div>
+            <div className="w-4 h-4 rounded-full animate-bounce [animation-delay:-.3s]" style={{backgroundColor: '#d3b7a0'}}></div>
+            <div className="w-4 h-4 rounded-full animate-bounce [animation-delay:-.5s]" style={{backgroundColor: '#34495e'}}></div>
           </div>
-          <p className="text-gray-600 font-semibold mt-4">Cargando...</p>
+          <p className="font-semibold mt-4" style={{color: '#2c3e50'}}>Cargando...</p>
         </div>
       </div>
     );

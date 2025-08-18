@@ -74,6 +74,7 @@ class DatabaseSeeder extends Seeder
             SuperAdminSeeder::class,
             PsychologistSeeder::class,
             StudentSeeder::class,
+            HolidaySeeder::class, // Agregado para feriados de Perú
             CitaSeeder::class,
             PsychologicalSessionSeeder::class,
             TestDataSeeder::class, // Agregado para datos de prueba

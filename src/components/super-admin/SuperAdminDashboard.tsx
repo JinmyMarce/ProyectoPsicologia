@@ -93,10 +93,10 @@ export const SuperAdminDashboard: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const colors = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      confirmed: 'bg-blue-100 text-blue-800',
-      completed: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800'
+      pending: 'bg-mostaza/20 text-granate-800',
+      confirmed: 'bg-azul-marino-100 text-azul-marino-800',
+      completed: 'bg-verde-esmeralda/20 text-verde-oscuro',
+      cancelled: 'bg-granate-100 text-granate-800'
     };
 
     const labels = {
@@ -107,7 +107,7 @@ export const SuperAdminDashboard: React.FC = () => {
     };
 
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'}`}>
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${colors[status as keyof typeof colors] || 'bg-gris-claro text-gris-oscuro'}`}>
         {labels[status as keyof typeof labels] || status}
       </span>
     );
@@ -115,10 +115,10 @@ export const SuperAdminDashboard: React.FC = () => {
 
   const getRoleBadge = (role: string) => {
     const colors = {
-      student: 'bg-blue-100 text-blue-800',
-      psychologist: 'bg-purple-100 text-purple-800',
-      admin: 'bg-orange-100 text-orange-800',
-      super_admin: 'bg-red-100 text-red-800'
+      student: 'bg-azul-marino-100 text-azul-marino-800',
+      psychologist: 'bg-azul-oscuro-100 text-azul-oscuro-800',
+      admin: 'bg-granate-100 text-granate-800',
+      super_admin: 'bg-granate-200 text-granate-900'
     };
 
     const labels = {
@@ -129,7 +129,7 @@ export const SuperAdminDashboard: React.FC = () => {
     };
 
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800'}`}>
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${colors[role as keyof typeof colors] || 'bg-gris-claro text-gris-oscuro'}`}>
         {labels[role as keyof typeof labels] || role}
       </span>
     );
@@ -137,9 +137,9 @@ export const SuperAdminDashboard: React.FC = () => {
 
   const getSystemHealthBadge = (health: string) => {
     const colors = {
-      healthy: 'bg-green-100 text-green-800',
-      warning: 'bg-yellow-100 text-yellow-800',
-      critical: 'bg-red-100 text-red-800'
+      healthy: 'bg-verde-esmeralda/20 text-verde-oscuro',
+      warning: 'bg-mostaza/20 text-granate-800',
+      critical: 'bg-granate-100 text-granate-800'
     };
 
     const labels = {
@@ -149,7 +149,7 @@ export const SuperAdminDashboard: React.FC = () => {
     };
 
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${colors[health as keyof typeof colors] || 'bg-gray-100 text-gray-800'}`}>
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${colors[health as keyof typeof colors] || 'bg-gris-claro text-gris-oscuro'}`}>
         {labels[health as keyof typeof labels] || health}
       </span>
     );

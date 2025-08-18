@@ -24,7 +24,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  role: 'student' | 'psychologist' | 'admin' | 'super_admin';
+  role: 'student' | 'psychologist' | 'admin' | 'super_admin' | 'tutor';
   verified: boolean;
   active: boolean;
   created_at: string;
@@ -37,6 +37,11 @@ interface User {
   birthdate?: string; // Añadido para evitar error de linter
   gender?: string; // Añadido para evitar error de linter
   avatar?: string; // <-- Soporte para avatar
+  // Campos específicos para tutores
+  classroom?: string;
+  study_program?: string;
+  semester?: string;
+  course?: string;
 }
 
 interface CreateUserData {
@@ -46,11 +51,16 @@ interface CreateUserData {
   confirmPassword: string;
   dni: string;
   phone: string;
-  role: 'psychologist' | 'admin';
+  role: 'psychologist' | 'admin' | 'tutor';
   specialization?: string;
   birthdate?: string; // Added birthdate
   gender?: string; // Added gender
   avatar?: string; // <-- Soporte para avatar
+  // Campos específicos para tutores
+  classroom?: string;
+  study_program?: string;
+  semester?: string;
+  course?: string;
 }
 
 export function UserManagement() {
@@ -424,15 +434,17 @@ export function UserManagement() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'super_admin':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-granate-200 text-granate-900';
       case 'admin':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-granate-100 text-granate-800';
       case 'psychologist':
-        return 'bg-green-100 text-green-800';
+        return 'bg-azul-oscuro-100 text-azul-oscuro-800';
+      case 'tutor':
+        return 'bg-azul-marino-100 text-azul-marino-800';
       case 'student':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-verde-esmeralda/20 text-verde-oscuro';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gris-claro text-gris-oscuro';
     }
   };
 
@@ -444,6 +456,8 @@ export function UserManagement() {
         return 'Administrador';
       case 'psychologist':
         return 'Psicólogo';
+      case 'tutor':
+        return 'Tutor';
       case 'student':
         return 'Estudiante';
       default:
@@ -452,7 +466,7 @@ export function UserManagement() {
   };
 
   const filteredUsers = users.filter(user => {
-    const isAllowedRole = user.role === 'psychologist' || user.role === 'admin' || user.role === 'super_admin';
+    const isAllowedRole = user.role === 'psychologist' || user.role === 'admin' || user.role === 'super_admin' || user.role === 'tutor';
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
@@ -650,11 +664,12 @@ export function UserManagement() {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-granate-800 focus:border-granate-800"
             >
               <option value="all">Todos los roles</option>
               <option value="psychologist">Psicólogos</option>
               <option value="admin">Administradores</option>
+              <option value="tutor">Tutores</option>
             </select>
           </div>
 
@@ -941,11 +956,12 @@ export function UserManagement() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Rol <span className="text-red-600">*</span></label>
                         <select
                           value={createUserData.role}
-                          onChange={e => setCreateUserData(prev => ({ ...prev, role: e.target.value as 'psychologist' | 'admin' }))}
-                          className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all"
+                          onChange={e => setCreateUserData(prev => ({ ...prev, role: e.target.value as 'psychologist' | 'admin' | 'tutor' }))}
+                          className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all"
                         >
                           <option value="psychologist">Psicólogo</option>
                           <option value="admin">Administrador</option>
+                          <option value="tutor">Tutor</option>
                         </select>
                       </div>
                       {createUserData.role === 'psychologist' && (
@@ -955,11 +971,72 @@ export function UserManagement() {
                             type="text"
                             value={createUserData.specialization || ''}
                             onChange={e => setCreateUserData(prev => ({ ...prev, specialization: e.target.value }))}
-                            className={`w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all ${specializationError ? 'border-red-500 bg-red-50' : ''}`}
+                            className={`w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all ${specializationError ? 'border-red-500 bg-red-50' : ''}`}
                             placeholder="Ej: Psicología Clínica"
                           />
                           {specializationError && <div className="text-xs text-red-500 mt-1">{specializationError}</div>}
                         </div>
+                      )}
+                      
+                      {createUserData.role === 'tutor' && (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Aula/Salón <span className="text-red-600">*</span></label>
+                            <input
+                              type="text"
+                              value={createUserData.classroom || ''}
+                              onChange={e => setCreateUserData(prev => ({ ...prev, classroom: e.target.value }))}
+                              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all"
+                              placeholder="Ej: A-101, B-205"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Programa de Estudios <span className="text-red-600">*</span></label>
+                            <select
+                              value={createUserData.study_program || ''}
+                              onChange={e => setCreateUserData(prev => ({ ...prev, study_program: e.target.value }))}
+                              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all"
+                            >
+                              <option value="">Seleccionar programa</option>
+                              <option value="Enfermería Técnica">Enfermería Técnica</option>
+                              <option value="Farmacia Técnica">Farmacia Técnica</option>
+                              <option value="Laboratorio Clínico">Laboratorio Clínico</option>
+                              <option value="Fisioterapia">Fisioterapia</option>
+                              <option value="Radiología">Radiología</option>
+                              <option value="Prótesis Dental">Prótesis Dental</option>
+                              <option value="Computación e Informática">Computación e Informática</option>
+                              <option value="Administración">Administración</option>
+                              <option value="Contabilidad">Contabilidad</option>
+                              <option value="Marketing">Marketing</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Semestre</label>
+                            <select
+                              value={createUserData.semester || ''}
+                              onChange={e => setCreateUserData(prev => ({ ...prev, semester: e.target.value }))}
+                              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all"
+                            >
+                              <option value="">Seleccionar semestre</option>
+                              <option value="I">I Semestre</option>
+                              <option value="II">II Semestre</option>
+                              <option value="III">III Semestre</option>
+                              <option value="IV">IV Semestre</option>
+                              <option value="V">V Semestre</option>
+                              <option value="VI">VI Semestre</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Curso/Materia</label>
+                            <input
+                              type="text"
+                              value={createUserData.course || ''}
+                              onChange={e => setCreateUserData(prev => ({ ...prev, course: e.target.value }))}
+                              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all"
+                              placeholder="Ej: Anatomía, Matemáticas, Comunicación"
+                            />
+                          </div>
+                        </>
                       )}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">

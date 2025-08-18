@@ -56,12 +56,12 @@ interface Psychologist {
   available: boolean;
 }
 
-// Colores para los estados
-const COLOR_DISPONIBLE = 'rgba(29, 185, 84, 0.18)'; // Verde claro transparente
-const COLOR_OCUPADO = 'rgba(142, 22, 26, 0.18)'; // Granate oscuro claro transparente
-const COLOR_BLOQUEADO = 'rgba(200,200,200,0.35)'; // Gris claro transparente
-const COLOR_TEXTO_BLOQUEADO = '#b0b0b0';
-const COLOR_TEXTO_NORMAL = '#222';
+// Colores institucionales del sistema
+const COLOR_DISPONIBLE = 'rgba(142, 22, 26, 0.18)'; // Granate institucional transparente
+const COLOR_OCUPADO = 'rgba(52, 73, 94, 0.18)'; // Gris azul medio transparente
+const COLOR_BLOQUEADO = 'rgba(44, 62, 80, 0.35)'; // Gris azul oscuro transparente
+const COLOR_TEXTO_BLOQUEADO = '#34495e'; // Gris azul medio
+const COLOR_TEXTO_NORMAL = '#2c3e50'; // Gris azul oscuro
 
 export function AppointmentCalendar() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);

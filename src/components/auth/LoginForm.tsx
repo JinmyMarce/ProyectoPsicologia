@@ -12,14 +12,13 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isAnimated, setIsAnimated] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showChatBot, setShowChatBot] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{
     email?: string;
     password?: string;
-    terms?: string;
   }>({});
   const { login, loginWithGoogle, loading, error, setUser, setToken } = useAuth();
 
@@ -115,11 +114,7 @@ export function LoginForm() {
       isValid = false;
     }
 
-    // Validar términos y condiciones
-    if (!acceptedTerms) {
-      newErrors.terms = 'Debes aceptar los términos y condiciones para continuar';
-      isValid = false;
-    }
+    // Los términos y condiciones se aceptan automáticamente al iniciar sesión
 
     setFieldErrors(newErrors);
     return isValid;
@@ -146,35 +141,63 @@ export function LoginForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-1 sm:p-2 lg:p-3" style={{
-      background: 'linear-gradient(135deg, #0a0a0f 0%, #0f172a 25%, #1e293b 50%, #334155 75%, rgba(255, 255, 255, 0.02) 100%)',
-      backgroundSize: '400% 400%',
-      animation: 'professionalGradient 15s ease-in-out infinite'
+      background: `
+        linear-gradient(135deg, 
+          #0f1419 0%, 
+          #1a1f29 12%, 
+          #2c1d1d 25%, 
+          #1e2a37 38%, 
+          #3d1f1f 50%, 
+          #2c3e50 62%, 
+          #4a2020 75%, 
+          #34495e 88%, 
+          #8e161a 100%
+        ),
+        radial-gradient(ellipse at 20% 20%, rgba(142, 22, 26, 0.35) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 80%, rgba(44, 62, 80, 0.25) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 5%, rgba(25, 42, 61, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse at 10% 90%, rgba(142, 22, 26, 0.15) 0%, transparent 50%),
+        linear-gradient(45deg, rgba(44, 62, 80, 0.08) 0%, rgba(142, 22, 26, 0.06) 50%, rgba(25, 42, 61, 0.04) 100%)
+      `,
+      backgroundSize: '500% 500%, 60% 60%, 55% 55%, 75% 75%, 65% 65%, 250% 250%',
+      animation: 'professionalGradient 25s ease-in-out infinite'
     }}>
-      {/* Efecto de partículas brillantes sutil */}
+      {/* Partículas ultra modernas del sistema */}
       <div className="absolute inset-0 overflow-hidden opacity-30">
         <div className="absolute top-0 left-0 w-full h-full" style={{
           backgroundImage: `
-            radial-gradient(1px 1px at 20px 30px, rgba(251, 191, 36, 0.3), transparent),
-            radial-gradient(1px 1px at 40px 70px, rgba(245, 158, 11, 0.3), transparent),
-            radial-gradient(1px 1px at 90px 40px, rgba(234, 179, 8, 0.3), transparent)
+            radial-gradient(2px 2px at 25px 35px, rgba(142, 22, 26, 0.8), transparent),
+            radial-gradient(1.8px 1.8px at 50px 80px, rgba(44, 62, 80, 0.7), transparent),
+            radial-gradient(1.4px 1.4px at 100px 50px, rgba(25, 42, 61, 0.6), transparent),
+            radial-gradient(1.2px 1.2px at 75px 25px, rgba(142, 22, 26, 0.5), transparent),
+            radial-gradient(1.6px 1.6px at 120px 90px, rgba(52, 73, 94, 0.5), transparent),
+            radial-gradient(1px 1px at 40px 110px, rgba(255, 255, 255, 0.3), transparent),
+            radial-gradient(0.8px 0.8px at 160px 60px, rgba(25, 42, 61, 0.4), transparent),
+            radial-gradient(1.2px 1.2px at 30px 140px, rgba(44, 62, 80, 0.4), transparent)
           `,
           backgroundRepeat: 'repeat',
-          backgroundSize: '200px 100px',
+          backgroundSize: '180px 120px',
           animation: 'sparkle 12s linear infinite'
         }}></div>
       </div>
 
-      {/* Patrón geométrico de fondo mejorado */}
-      <div className="absolute inset-0 overflow-hidden opacity-5">
+      {/* Patrón ultra moderno de psicología */}
+      <div className="absolute inset-0 overflow-hidden opacity-15">
         <div className="absolute top-0 left-0 w-full h-full" style={{
           backgroundImage: `
-            radial-gradient(circle at 20% 20%, #334155 1px, transparent 1px),
-            radial-gradient(circle at 80% 80%, #1e293b 1px, transparent 1px),
-            radial-gradient(circle at 40% 60%, #0f172a 1px, transparent 1px),
-            radial-gradient(circle at 60% 40%, #475569 1px, transparent 1px)
+            radial-gradient(circle at 25% 25%, rgba(142, 22, 26, 0.2) 1.2px, transparent 1.2px),
+            radial-gradient(circle at 75% 75%, rgba(44, 62, 80, 0.18) 1px, transparent 1px),
+            radial-gradient(circle at 50% 50%, rgba(25, 42, 61, 0.15) 0.8px, transparent 0.8px),
+            radial-gradient(circle at 75% 25%, rgba(142, 22, 26, 0.12) 0.9px, transparent 0.9px),
+            radial-gradient(circle at 25% 75%, rgba(52, 73, 94, 0.14) 0.7px, transparent 0.7px),
+            radial-gradient(circle at 60% 40%, rgba(25, 42, 61, 0.1) 0.6px, transparent 0.6px),
+            linear-gradient(90deg, transparent 49.2%, rgba(142, 22, 26, 0.08) 50%, transparent 50.8%),
+            linear-gradient(45deg, transparent 49.2%, rgba(44, 62, 80, 0.06) 50%, transparent 50.8%),
+            linear-gradient(-45deg, transparent 49.2%, rgba(25, 42, 61, 0.05) 50%, transparent 50.8%),
+            linear-gradient(0deg, transparent 49.3%, rgba(52, 73, 94, 0.04) 50%, transparent 50.7%)
           `,
-          backgroundSize: '120px 120px, 180px 180px, 150px 150px, 200px 200px',
-          animation: 'patternMove 30s linear infinite'
+          backgroundSize: '100px 100px, 140px 140px, 80px 80px, 120px 120px, 90px 90px, 110px 110px, 200px 200px, 230px 230px, 260px 260px, 180px 180px',
+          animation: 'patternMove 25s linear infinite'
         }}></div>
       </div>
 
@@ -182,14 +205,14 @@ export function LoginForm() {
       <div className="absolute inset-0 overflow-hidden opacity-30">
         <div className="absolute top-0 left-0 w-full h-full" style={{
           backgroundImage: `
-            radial-gradient(circle at 15% 25%, rgba(117, 13, 13, 0.4) 1px, transparent 1px),
-            radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
-            radial-gradient(circle at 25% 75%, rgba(255, 255, 255, 0.5) 1px, transparent 1px),
-            radial-gradient(circle at 75% 85%, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+            radial-gradient(circle at 15% 25%, rgba(142, 22, 26, 0.4) 1px, transparent 1px),
+            radial-gradient(circle at 85% 15%, rgba(44, 62, 80, 0.3) 1px, transparent 1px),
+            radial-gradient(circle at 25% 75%, rgba(25, 42, 61, 0.5) 1px, transparent 1px),
+            radial-gradient(circle at 75% 85%, rgba(52, 73, 94, 0.3) 1px, transparent 1px),
             radial-gradient(circle at 45% 35%, rgba(255, 255, 255, 0.4) 1px, transparent 1px),
-            radial-gradient(circle at 65% 65%, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
-            radial-gradient(circle at 35% 55%, rgba(255, 255, 255, 0.4) 1px, transparent 1px),
-            radial-gradient(circle at 55% 25%, rgba(255, 255, 255, 0.3) 1px, transparent 1px)
+            radial-gradient(circle at 65% 65%, rgba(142, 22, 26, 0.3) 1px, transparent 1px),
+            radial-gradient(circle at 35% 55%, rgba(25, 42, 61, 0.4) 1px, transparent 1px),
+            radial-gradient(circle at 55% 25%, rgba(44, 62, 80, 0.3) 1px, transparent 1px)
           `,
           backgroundSize: '80px 80px, 120px 120px, 100px 100px, 140px 140px, 90px 90px, 110px 110px, 95px 95px, 125px 125px',
           animation: 'floatDots 20s ease-in-out infinite'
@@ -203,27 +226,27 @@ export function LoginForm() {
           {/* Ondas de tranquilidad en el centro */}
           <g className="animate-pulse-gentle">
             <circle cx="400" cy="400" r="120" fill="none" stroke="rgba(142, 22, 26, 0.35)" strokeWidth="3" className="animate-wave-expand" />
-            <circle cx="400" cy="400" r="180" fill="none" stroke="rgba(211, 183, 160, 0.25)" strokeWidth="2.5" className="animate-wave-expand-delayed" />
-            <circle cx="400" cy="400" r="240" fill="none" stroke="rgba(142, 22, 26, 0.18)" strokeWidth="2" className="animate-wave-expand-slow" />
+            <circle cx="400" cy="400" r="180" fill="none" stroke="rgba(44, 62, 80, 0.25)" strokeWidth="2.5" className="animate-wave-expand-delayed" />
+            <circle cx="400" cy="400" r="240" fill="none" stroke="rgba(25, 42, 61, 0.18)" strokeWidth="2" className="animate-wave-expand-slow" />
           </g>
           
           {/* Elementos de equilibrio distribuidos */}
           <g className="animate-float-gentle">
             {/* Hojas minimalistas superior izquierda */}
-            <path d="M200 200 Q220 180 240 200 Q220 220 200 200" fill="rgba(211, 183, 160, 0.4)" className="animate-leaf-1" />
+            <path d="M200 200 Q220 180 240 200 Q220 220 200 200" fill="rgba(44, 62, 80, 0.4)" className="animate-leaf-1" />
             <path d="M160 240 Q180 220 200 240 Q180 260 160 240" fill="rgba(142, 22, 26, 0.3)" className="animate-leaf-2" />
             
             {/* Hojas superior derecha */}
             <path d="M600 200 Q620 180 640 200 Q620 220 600 200" fill="rgba(142, 22, 26, 0.3)" className="animate-leaf-1" />
-            <path d="M580 160 Q600 140 620 160 Q600 180 580 160" fill="rgba(211, 183, 160, 0.4)" className="animate-leaf-2" />
+            <path d="M580 160 Q600 140 620 160 Q600 180 580 160" fill="rgba(25, 42, 61, 0.4)" className="animate-leaf-2" />
             
             {/* Hojas inferior izquierda */}
-            <path d="M180 580 Q200 560 220 580 Q200 600 180 580" fill="rgba(211, 183, 160, 0.4)" className="animate-leaf-2" />
+            <path d="M180 580 Q200 560 220 580 Q200 600 180 580" fill="rgba(52, 73, 94, 0.4)" className="animate-leaf-2" />
             <path d="M140 620 Q160 600 180 620 Q160 640 140 620" fill="rgba(142, 22, 26, 0.3)" className="animate-leaf-1" />
             
             {/* Hojas inferior derecha */}
-            <path d="M620 600 Q640 580 660 600 Q640 620 620 600" fill="rgba(142, 22, 26, 0.3)" className="animate-leaf-2" />
-            <path d="M580 640 Q600 620 620 640 Q600 660 580 640" fill="rgba(211, 183, 160, 0.4)" className="animate-leaf-1" />
+            <path d="M620 600 Q640 580 660 600 Q640 620 620 600" fill="rgba(25, 42, 61, 0.3)" className="animate-leaf-2" />
+            <path d="M580 640 Q600 620 620 640 Q600 660 580 640" fill="rgba(44, 62, 80, 0.4)" className="animate-leaf-1" />
           </g>
           
           {/* Símbolos de mente saludable dispersos - Muchos más círculos */}
@@ -299,20 +322,22 @@ export function LoginForm() {
         </svg>
       </div>
 
-      {/* Circulitos más pequeños con colores suaves */}
-      <div className="absolute inset-0 overflow-hidden opacity-20">
+      {/* Textura ultra moderna del sistema */}
+      <div className="absolute inset-0 overflow-hidden opacity-22">
         <div className="absolute top-0 left-0 w-full h-full" style={{
           backgroundImage: `
-            radial-gradient(circle at 30% 20%, rgba(142, 22, 26, 0.3) 0.5px, transparent 0.5px),
-            radial-gradient(circle at 70% 30%, rgba(211, 183, 160, 0.3) 0.5px, transparent 0.5px),
-            radial-gradient(circle at 20% 70%, rgba(142, 22, 26, 0.2) 0.5px, transparent 0.5px),
-            radial-gradient(circle at 80% 70%, rgba(211, 183, 160, 0.2) 0.5px, transparent 0.5px),
-            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.3) 0.5px, transparent 0.5px),
-            radial-gradient(circle at 10% 40%, rgba(142, 22, 26, 0.25) 0.5px, transparent 0.5px),
-            radial-gradient(circle at 90% 60%, rgba(211, 183, 160, 0.25) 0.5px, transparent 0.5px)
+            radial-gradient(circle at 30% 25%, rgba(142, 22, 26, 0.35) 0.5px, transparent 0.5px),
+            radial-gradient(circle at 70% 35%, rgba(211, 183, 160, 0.3) 0.45px, transparent 0.45px),
+            radial-gradient(circle at 25% 75%, rgba(142, 22, 26, 0.25) 0.4px, transparent 0.4px),
+            radial-gradient(circle at 75% 65%, rgba(186, 158, 134, 0.22) 0.35px, transparent 0.35px),
+            radial-gradient(circle at 50% 50%, rgba(211, 183, 160, 0.28) 0.4px, transparent 0.4px),
+            radial-gradient(circle at 15% 55%, rgba(142, 22, 26, 0.18) 0.3px, transparent 0.3px),
+            radial-gradient(circle at 85% 45%, rgba(255, 255, 255, 0.15) 0.25px, transparent 0.25px),
+            radial-gradient(circle at 40% 80%, rgba(186, 158, 134, 0.16) 0.3px, transparent 0.3px),
+            radial-gradient(circle at 60% 20%, rgba(211, 183, 160, 0.2) 0.3px, transparent 0.3px)
           `,
-          backgroundSize: '60px 60px, 85px 85px, 70px 70px, 95px 95px, 75px 75px, 65px 65px, 80px 80px',
-          animation: 'twinkleDots 15s ease-in-out infinite reverse'
+          backgroundSize: '60px 60px, 85px 85px, 70px 70px, 100px 100px, 55px 55px, 110px 110px, 75px 75px, 90px 90px, 65px 65px',
+          animation: 'twinkleDots 14s ease-in-out infinite'
         }}></div>
       </div>
 
@@ -379,28 +404,48 @@ export function LoginForm() {
         }}>🧠</div>
       </div>
 
-      {/* Estrella Lejana Transparente */}
-      <div className="absolute top-8 right-8 sm:top-12 sm:right-10 md:top-16 md:right-12 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full" style={{
-        animation: 'starTwinkle 6s ease-in-out infinite',
-        boxShadow: '0 0 10px rgba(255, 255, 255, 0.15), 0 0 20px rgba(255, 255, 255, 0.1), 0 0 30px rgba(255, 255, 255, 0.05)',
+      {/* Elementos decorativos modernos del sistema */}
+      <div className="absolute top-8 right-8 sm:top-10 sm:right-10 md:top-12 md:right-12 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 opacity-25" style={{
+        animation: 'starTwinkle 8s ease-in-out infinite',
         background: `
-          radial-gradient(circle at center, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.3) 30%, rgba(255, 255, 255, 0.2) 60%, rgba(255, 255, 255, 0.1) 80%, transparent 100%),
-          radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%)
-        `
+          radial-gradient(circle at center, 
+            rgba(142, 22, 26, 0.6) 0%, 
+            rgba(44, 62, 80, 0.4) 30%, 
+            rgba(25, 42, 61, 0.3) 60%, 
+            rgba(255, 255, 255, 0.1) 80%, 
+            transparent 100%
+          )
+        `,
+        borderRadius: '50%',
+        boxShadow: '0 0 15px rgba(142, 22, 26, 0.2), 0 0 30px rgba(44, 62, 80, 0.1)'
       }}>
-        {/* Puntos de luz de la estrella */}
-        <div className="absolute top-1 left-1 w-1 h-1 bg-white rounded-full opacity-90" style={{ animation: 'starSparkle 3s ease-in-out infinite' }}></div>
-        <div className="absolute top-2 right-1 w-0.5 h-0.5 bg-white rounded-full opacity-80" style={{ animation: 'starSparkle 3.5s ease-in-out infinite 0.5s' }}></div>
-        <div className="absolute bottom-1 left-2 w-0.5 h-0.5 bg-white rounded-full opacity-85" style={{ animation: 'starSparkle 2.8s ease-in-out infinite 1s' }}></div>
-        
-        {/* Rayos de luz sutil */}
-        <div className="absolute inset-0 rounded-full" style={{
-          background: `
-            conic-gradient(from 0deg, transparent 0deg, rgba(255, 255, 255, 0.05) 45deg, transparent 90deg, rgba(255, 255, 255, 0.05) 135deg, transparent 180deg, rgba(255, 255, 255, 0.05) 225deg, transparent 270deg, rgba(255, 255, 255, 0.05) 315deg, transparent 360deg)
-          `,
-          animation: 'starRays 8s linear infinite'
+        {/* Puntos de acento del sistema de psicología */}
+        <div className="absolute top-1 left-1 w-1 h-1 rounded-full opacity-80" style={{ 
+          background: 'rgba(142, 22, 26, 0.9)',
+          animation: 'starSparkle 3s ease-in-out infinite' 
+        }}></div>
+        <div className="absolute top-2 right-1 w-0.5 h-0.5 rounded-full opacity-70" style={{ 
+          background: 'rgba(44, 62, 80, 0.9)',
+          animation: 'starSparkle 3.5s ease-in-out infinite 0.5s' 
+        }}></div>
+        <div className="absolute bottom-1 left-2 w-0.5 h-0.5 rounded-full opacity-75" style={{ 
+          background: 'rgba(25, 42, 61, 0.8)',
+          animation: 'starSparkle 4s ease-in-out infinite 1s' 
         }}></div>
       </div>
+      
+      {/* Elemento decorativo adicional esquina inferior */}
+      <div className="absolute bottom-12 left-8 sm:bottom-16 sm:left-12 md:bottom-20 md:left-16 w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 opacity-20" style={{
+        animation: 'floatDots 12s ease-in-out infinite 2s',
+        background: `
+          linear-gradient(45deg, 
+            rgba(142, 22, 26, 0.5) 0%, 
+            rgba(44, 62, 80, 0.4) 50%, 
+            rgba(25, 42, 61, 0.3) 100%
+          )
+        `,
+        borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%'
+      }}></div>
 
       <div className={`w-full max-w-full flex flex-col items-center relative z-10 transition-all duration-1000 ${showForm ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-8'}`}>
         <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4 items-center">
@@ -515,30 +560,51 @@ export function LoginForm() {
         {/* Columna derecha - Formulario de login mejorado */}
         <div className="flex flex-col items-center px-1 sm:px-2 lg:px-3 pt-2 sm:pt-4 md:pt-6 lg:pt-8 pb-2 sm:pb-4 md:pb-6 lg:pb-8">
           <div 
-            className={`w-full max-w-xs sm:max-w-sm lg:max-w-md shadow-2xl rounded-xl sm:rounded-2xl bg-white/40 backdrop-blur-xl transition-all duration-700 ${isAnimated ? 'transform scale-100 translate-y-0' : 'transform scale-95 translate-y-4'}`}
+            className={`w-full max-w-sm sm:max-w-md lg:max-w-lg rounded-3xl sm:rounded-[2rem] transition-all duration-700 ${isAnimated ? 'transform scale-100 translate-y-0' : 'transform scale-95 translate-y-4'}`}
             style={{
               animation: isAnimated ? 'formSlideIn 1s ease-out forwards' : 'none',
-              boxShadow: '0 15px 35px -8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.03)'
+              background: 'rgba(255, 255, 255, 0.65)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              boxShadow: `
+                0 25px 50px -12px rgba(0, 0, 0, 0.25),
+                0 8px 32px -8px rgba(142, 22, 26, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.25)
+              `
             }}
           >
-            <Card padding="sm" className="p-3 sm:p-4 lg:p-5">
+            <Card padding="sm" className="p-3 sm:p-4 lg:p-5 bg-transparent border-0 shadow-none">
               <div className={`text-center mb-3 sm:mb-4 lg:mb-5 transition-all duration-1000 delay-300 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
-                <div className="flex items-center justify-center gap-3 sm:gap-4 mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
-                    <UserRound className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
-                </div>
-                <div className="text-left">
-                    <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-800 tracking-tight">
-                    Iniciar Sesión
-                  </h3>
-                    <p className="text-gray-500 font-medium text-xs sm:text-sm">
-                    Accede a tu cuenta profesional
-                  </p>
+                <div className="flex flex-col items-center justify-center mb-3">
+                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center mb-2 overflow-hidden"
+                    style={{
+                      background: `
+                        linear-gradient(135deg, 
+                          #8e161a 0%, 
+                          #b91c1c 50%, 
+                          #d3b7a0 100%
+                        )
+                      `,
+                      boxShadow: `
+                        0 10px 30px -5px rgba(142, 22, 26, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                        0 0 0 1px rgba(142, 22, 26, 0.1)
+                      `
+                    }}>
+                    <UserRound className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white drop-shadow-sm" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/10 pointer-events-none"></div>
+                  </div>
+                  <div className="text-center">
+                    
+                    <p className="text-gray-700 font-medium text-xs sm:text-sm">
+                      Inicia sesión en tu cuenta
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 lg:space-y-4" noValidate>
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 lg:space-y-5" noValidate>
           <div className={`transition-all duration-1000 delay-500 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
             <Input
               type="email"
@@ -594,23 +660,14 @@ export function LoginForm() {
             </div>
           )}
 
-                          {/* Checkbox de términos y condiciones */}
+                          {/* Aviso de términos y condiciones */}
                           <div className={`transition-all duration-1000 delay-900 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
-                            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 max-w-sm mx-auto">
-                              <input
-                                type="checkbox"
-                                id="acceptTerms"
-                                checked={acceptedTerms}
-                                onChange={(e) => {
-                                  setAcceptedTerms(e.target.checked);
-                                  if (e.target.checked) {
-                                    setFieldErrors(prev => ({ ...prev, terms: undefined }));
-                                  }
-                                }}
-                                className="mt-1 w-4 h-4 text-[#000000] rounded focus:ring-white focus:ring-2"
-                              />
-                              <label htmlFor="acceptTerms" className="text-xs text-gray-600 leading-relaxed">
-                                Acepto los{' '}
+                            <div className="p-3 bg-white/70 rounded-xl border border-gray-300/40 max-w-sm mx-auto backdrop-blur-sm text-left"
+                              style={{
+                                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.08)'
+                              }}>
+                              <p className="text-xs text-gray-600 leading-relaxed">
+                              Al acceder al sistema, reconoces y aceptas de manera automática nuestros{' '}
                                 <button
                                   type="button"
                                   onClick={() => setShowTermsModal(true)}
@@ -618,7 +675,7 @@ export function LoginForm() {
                                 >
                                   Términos y Condiciones
                                 </button>
-                                {' '}y la{' '}
+                                {' '}y{' '}
                                 <button
                                   type="button"
                                   onClick={() => setShowPrivacyModal(true)}
@@ -626,18 +683,9 @@ export function LoginForm() {
                                 >
                                   Política de Privacidad
                                 </button>
-                                {' '}del Instituto Túpac Amaru.
-                              </label>
+                                .
+                              </p>
                             </div>
-                            {/* Error pequeño para términos y condiciones */}
-                            {fieldErrors.terms && (
-                              <div className="mt-2 max-w-sm mx-auto">
-                                <p className="text-xs text-red-600 font-medium flex items-center gap-1">
-                                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
-                                  {fieldErrors.terms}
-                                </p>
-                              </div>
-                            )}
                           </div>
 
                           <div className="flex justify-center">
@@ -652,13 +700,18 @@ export function LoginForm() {
                 </div>
         </form>
 
-              <div className="mt-4">
-                <div className="relative mb-3">
+              <div className="mt-3">
+                <div className="relative mb-2">
             <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-200" />
             </div>
             <div className="relative flex justify-center text-sm">
-                    <span className="px-3 bg-white text-gray-500 font-semibold">O continúa con</span>
+                    <span className="px-4 py-1 bg-white/80 text-gray-700 font-semibold rounded-lg shadow-sm border border-gray-200/50"
+                      style={{
+                        backdropFilter: 'blur(8px)'
+                      }}>
+                      O continúa con
+                    </span>
             </div>
           </div>
 
@@ -681,15 +734,18 @@ export function LoginForm() {
                 </div>
         </div>
 
-              <div className="mt-4 p-2 bg-gradient-to-r from-[#8e161a]/5 to-[#6d1115]/5 rounded-lg border border-[#8e161a]/10">
+              <div className="mt-3 p-3 bg-white/70 rounded-2xl border border-gray-300/40 backdrop-blur-sm"
+                style={{
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 8px rgba(0, 0, 0, 0.08)'
+                }}>
                 <div className="text-center">
-                  <h4 className="text-sm font-bold text-gray-600 mb-2">Instrucciones de Acceso</h4>
-                  <div className="space-y-1 text-sm text-gray-500">
+                  <h4 className="text-xs font-bold text-gray-800 mb-2">Instrucciones de Acceso</h4>
+                  <div className="space-y-1 text-xs text-gray-700">
                     <p><span className="font-semibold text-[#8e161a]">Estudiantes:</span> Usa tu cuenta de Google institucional</p>
-                    <p><span className="font-semibold text-[#d3b7a0]">Psicólogos/Admin/Tutores:</span> Usa tu correo personal y contraseña</p>
+                    <p><span className="font-semibold text-[#8e161a]">Personal:</span> Usa tu correo y contraseña</p>
                   </div>
                 </div>
-            </div>
+              </div>
             </Card>
           </div>
         </div>
