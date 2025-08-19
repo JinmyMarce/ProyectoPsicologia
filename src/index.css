@@ -88,3 +88,314 @@ body, html {
     text-shadow: 0 0 6px rgba(255, 255, 255, 0.4), 0 0 12px rgba(211, 183, 160, 0.3);
   }
 }
+
+/* Animaciones para el logo profesional de la sidebar */
+@keyframes professionalGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 40px rgba(142, 22, 26, 0.4),
+      0 0 80px rgba(211, 183, 160, 0.2),
+      inset 0 0 30px rgba(255, 255, 255, 0.1),
+      inset 0 0 60px rgba(142, 22, 26, 0.2);
+  }
+  25% {
+    box-shadow: 
+      0 0 50px rgba(142, 22, 26, 0.5),
+      0 0 100px rgba(211, 183, 160, 0.3),
+      inset 0 0 40px rgba(255, 255, 255, 0.15),
+      inset 0 0 80px rgba(142, 22, 26, 0.25);
+  }
+  50% {
+    box-shadow: 
+      0 0 60px rgba(211, 183, 160, 0.4),
+      0 0 120px rgba(142, 22, 26, 0.3),
+      inset 0 0 50px rgba(255, 255, 255, 0.2),
+      inset 0 0 100px rgba(211, 183, 160, 0.2);
+  }
+  75% {
+    box-shadow: 
+      0 0 50px rgba(142, 22, 26, 0.5),
+      0 0 100px rgba(211, 183, 160, 0.3),
+      inset 0 0 40px rgba(255, 255, 255, 0.15),
+      inset 0 0 80px rgba(142, 22, 26, 0.25);
+  }
+}
+
+@keyframes logoRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes innerPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes symbolGlow {
+  0%, 100% {
+    text-shadow: 
+      0 0 10px rgba(142, 22, 26, 0.5), 
+      0 2px 4px rgba(0, 0, 0, 0.3),
+      0 0 20px rgba(211, 183, 160, 0.3);
+  }
+  50% {
+    text-shadow: 
+      0 0 15px rgba(142, 22, 26, 0.7), 
+      0 2px 6px rgba(0, 0, 0, 0.4),
+      0 0 30px rgba(211, 183, 160, 0.5);
+  }
+}
+
+@keyframes auraGlow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes float1 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.6;
+  }
+  33% {
+    transform: translateY(-3px) translateX(2px);
+    opacity: 0.8;
+  }
+  66% {
+    transform: translateY(2px) translateX(-1px);
+    opacity: 0.4;
+  }
+}
+
+@keyframes float2 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-4px) translateX(-2px);
+    opacity: 0.6;
+  }
+}
+
+@keyframes float3 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translateY(-2px) translateX(3px);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translateY(3px) translateX(-2px);
+    opacity: 0.3;
+  }
+}
+
+/* Animaciones para el título institucional */
+@keyframes titleGlow {
+  0%, 100% {
+    text-shadow: 
+      0 0 20px rgba(255, 255, 255, 0.8), 
+      0 2px 4px rgba(0, 0, 0, 0.5), 
+      0 0 40px rgba(211, 183, 160, 0.4);
+  }
+  50% {
+    text-shadow: 
+      0 0 30px rgba(255, 255, 255, 1), 
+      0 2px 6px rgba(0, 0, 0, 0.6), 
+      0 0 60px rgba(211, 183, 160, 0.6);
+  }
+}
+
+@keyframes subtitleGlow {
+  0%, 100% {
+    text-shadow: 
+      0 0 15px rgba(211, 183, 160, 0.8), 
+      0 1px 3px rgba(0, 0, 0, 0.7);
+  }
+  50% {
+    text-shadow: 
+      0 0 25px rgba(211, 183, 160, 1), 
+      0 1px 4px rgba(0, 0, 0, 0.8);
+  }
+}
+
+@keyframes lineGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1.1);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Animaciones adicionales para el Header */
+@keyframes headerLogoGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(255, 255, 255, 0.3),
+      inset 0 0 10px rgba(255, 255, 255, 0.2),
+      0 0 30px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(255, 255, 255, 0.5),
+      inset 0 0 15px rgba(255, 255, 255, 0.3),
+      0 0 45px rgba(255, 255, 255, 0.3);
+  }
+}
+
+@keyframes titleShimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes waveSlide {
+  0% {
+    transform: translateX(-100px);
+  }
+  100% {
+    transform: translateX(100px);
+  }
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.9);
+  }
+}
+
+/* Animaciones lunares del login */
+@keyframes moonGlow {
+  0%, 100% {
+    box-shadow: 0 0 60px rgba(255, 255, 255, 0.6), inset 0 0 40px rgba(255, 255, 255, 0.2), 0 0 100px rgba(255, 255, 255, 0.3);
+  }
+  25% {
+    box-shadow: 0 0 80px rgba(255, 255, 255, 0.7), inset 0 0 50px rgba(255, 255, 255, 0.25), 0 0 120px rgba(255, 255, 255, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 100px rgba(255, 255, 255, 0.8), inset 0 0 60px rgba(255, 255, 255, 0.3), 0 0 140px rgba(255, 255, 255, 0.4);
+  }
+  75% {
+    box-shadow: 0 0 80px rgba(255, 255, 255, 0.7), inset 0 0 50px rgba(255, 255, 255, 0.25), 0 0 120px rgba(255, 255, 255, 0.35);
+  }
+}
+
+@keyframes moonFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(0.5deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-3px) rotate(-0.5deg);
+  }
+}
+
+/* Animaciones adicionales para la sidebar mejorada */
+@keyframes activeIndicator {
+  0%, 100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scaleY(0.8);
+  }
+}
+
+@keyframes iconGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(211, 183, 160, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(211, 183, 160, 0.8));
+  }
+}
+
+@keyframes menuShine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Animación para el logo formal */
+@keyframes formalGlow {
+  0%, 100% {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 40px rgba(142, 22, 26, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      0 0 60px rgba(142, 22, 26, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Animación para el brillo del header */
+@keyframes headerShine {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateX(100%);
+  }
+}

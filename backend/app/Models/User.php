@@ -41,7 +41,6 @@ class User extends Authenticatable
         // Campos específicos para tutores
         'classroom',
         'study_program',
-        'semester',
         'course',
         'total_students',
         'active_derivations'
@@ -193,7 +192,6 @@ class User extends Authenticatable
             // Campos específicos para tutores
             'classroom' => $this->classroom,
             'study_program' => $this->study_program,
-            'semester' => $this->semester,
             'course' => $this->course,
             'total_students' => $this->total_students,
             'active_derivations' => $this->active_derivations,

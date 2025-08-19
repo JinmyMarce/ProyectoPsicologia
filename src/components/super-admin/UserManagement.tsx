@@ -7,18 +7,14 @@ import {
   UserPlus, 
   UserCheck, 
   UserX, 
-  Mail, 
-  Lock, 
+  Mail,
   Search,
   Filter,
-  MoreVertical,
   Edit,
-  Trash2,
   Eye,
-  EyeOff,
-  AlertCircle
+  EyeOff
 } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+// import { useAuth } from '../../contexts/AuthContext'; // Not used currently
 
 interface User {
   id: number;
@@ -31,7 +27,7 @@ interface User {
   updated_at: string;
   specialization?: string;
   career?: string;
-  semester?: number;
+  semester?: number | string; // Puede ser number para estudiantes o string para tutores
   dni?: string; // Added dni to User interface
   phone?: string; // Añadido para evitar error de linter
   birthdate?: string; // Añadido para evitar error de linter
@@ -40,7 +36,6 @@ interface User {
   // Campos específicos para tutores
   classroom?: string;
   study_program?: string;
-  semester?: string;
   course?: string;
 }
 
@@ -64,7 +59,7 @@ interface CreateUserData {
 }
 
 export function UserManagement() {
-  const { user: currentUser } = useAuth();
+  // const { user: currentUser } = useAuth(); // Commented out as not used
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -285,7 +280,14 @@ export function UserManagement() {
           specialization: createUserData.specialization?.trim() || '',
           verified: true,
           birthdate: createUserData.birthdate, // Add birthdate
-          gender: createUserData.gender // Add gender
+          gender: createUserData.gender, // Add gender
+          // Campos específicos para tutores
+          ...(createUserData.role === 'tutor' && {
+            classroom: createUserData.classroom?.trim() || '',
+            study_program: createUserData.study_program?.trim() || '',
+            semester: createUserData.semester?.trim() || '',
+            course: createUserData.course?.trim() || 'Tutoría'
+          })
         })
       });
 
@@ -412,24 +414,24 @@ export function UserManagement() {
     }
   };
 
-  const handleVerifyUser = async (userId: number) => {
-    try {
-      const response = await fetch(`http://localhost:8000/api/users/${userId}/verify`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Error al verificar usuario');
-      }
-      setSuccessMessage('Usuario verificado exitosamente');
-      fetchUsers();
-    } catch (error: any) {
-      setError(error.message);
-    }
-  };
+  // const handleVerifyUser = async (userId: number) => {
+  //   try {
+  //     const response = await fetch(`http://localhost:8000/api/users/${userId}/verify`, {
+  //       method: 'PATCH',
+  //       headers: {
+  //         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
+  //     if (!response.ok) {
+  //       throw new Error('Error al verificar usuario');
+  //     }
+  //     setSuccessMessage('Usuario verificado exitosamente');
+  //     fetchUsers();
+  //   } catch (error: any) {
+  //     setError(error.message);
+  //   }
+  // };
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -595,7 +597,7 @@ export function UserManagement() {
   // En la tarjeta lateral del super admin, usa la URL absoluta si es relativa
   const avatarUrl = superAdminAvatar
     ? (superAdminAvatar.startsWith('/') ? `http://localhost:8000${superAdminAvatar}` : superAdminAvatar)
-    : (superAdmin.avatar && superAdmin.avatar.startsWith('/') ? `http://localhost:8000${superAdmin.avatar}` : superAdmin.avatar);
+    : (superAdmin?.avatar && superAdmin.avatar.startsWith('/') ? `http://localhost:8000${superAdmin.avatar}` : superAdmin?.avatar);
 
   return (
     <div className="p-6">
@@ -620,7 +622,12 @@ export function UserManagement() {
               role: 'psychologist',
               specialization: '',
               birthdate: '',
-              gender: ''
+              gender: '',
+              // Campos específicos para tutores
+              classroom: '',
+              study_program: '',
+              semester: '',
+              course: ''
             });
             setPasswordError(null);
             setShowPassword(false);
@@ -956,7 +963,11 @@ export function UserManagement() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Rol <span className="text-red-600">*</span></label>
                         <select
                           value={createUserData.role}
-                          onChange={e => setCreateUserData(prev => ({ ...prev, role: e.target.value as 'psychologist' | 'admin' | 'tutor' }))}
+                          onChange={e => setCreateUserData(prev => ({ 
+                            ...prev, 
+                            role: e.target.value as 'psychologist' | 'admin' | 'tutor',
+                            course: e.target.value === 'tutor' ? 'Tutoría' : prev.course
+                          }))}
                           className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all"
                         >
                           <option value="psychologist">Psicólogo</option>
@@ -998,16 +1009,16 @@ export function UserManagement() {
                               className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all"
                             >
                               <option value="">Seleccionar programa</option>
-                              <option value="Enfermería Técnica">Enfermería Técnica</option>
-                              <option value="Farmacia Técnica">Farmacia Técnica</option>
-                              <option value="Laboratorio Clínico">Laboratorio Clínico</option>
-                              <option value="Fisioterapia">Fisioterapia</option>
-                              <option value="Radiología">Radiología</option>
-                              <option value="Prótesis Dental">Prótesis Dental</option>
-                              <option value="Computación e Informática">Computación e Informática</option>
-                              <option value="Administración">Administración</option>
+                              <option value="Administración de Servicios de Hostelería y Restaurantes">Administración de Servicios de Hostelería y Restaurantes</option>
                               <option value="Contabilidad">Contabilidad</option>
-                              <option value="Marketing">Marketing</option>
+                              <option value="Desarrollo de Sistemas de Información">Desarrollo de Sistemas de Información</option>
+                              <option value="Electricidad Industrial">Electricidad Industrial</option>
+                              <option value="Electrónica Industrial">Electrónica Industrial</option>
+                              <option value="Enfermería Técnica">Enfermería Técnica</option>
+                              <option value="Guía Oficial de Turismo">Guía Oficial de Turismo</option>
+                              <option value="Laboratorio Clínico y Anatomía Patológica">Laboratorio Clínico y Anatomía Patológica</option>
+                              <option value="Mecánica Automotriz">Mecánica Automotriz</option>
+                              <option value="Mecánica de Producción Industrial">Mecánica de Producción Industrial</option>
                             </select>
                           </div>
                           <div>
@@ -1018,22 +1029,36 @@ export function UserManagement() {
                               className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all"
                             >
                               <option value="">Seleccionar semestre</option>
-                              <option value="I">I Semestre</option>
-                              <option value="II">II Semestre</option>
-                              <option value="III">III Semestre</option>
-                              <option value="IV">IV Semestre</option>
-                              <option value="V">V Semestre</option>
-                              <option value="VI">VI Semestre</option>
+                              {(() => {
+                                const currentDate = new Date();
+                                const currentMonth = currentDate.getMonth() + 1;
+                                // Abril a Julio (meses 4-7): Semestres 1, 3, 5
+                                // Agosto a Diciembre (meses 8-12): Semestres 2, 4, 6
+                                if (currentMonth >= 4 && currentMonth <= 7) {
+                                  return [
+                                    <option key="1" value="1">1er Semestre</option>,
+                                    <option key="3" value="3">3er Semestre</option>,
+                                    <option key="5" value="5">5to Semestre</option>
+                                  ];
+                                } else {
+                                  return [
+                                    <option key="2" value="2">2do Semestre</option>,
+                                    <option key="4" value="4">4to Semestre</option>,
+                                    <option key="6" value="6">6to Semestre</option>
+                                  ];
+                                }
+                              })()}
                             </select>
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Curso/Materia</label>
                             <input
                               type="text"
-                              value={createUserData.course || ''}
+                              value={createUserData.course || 'Tutoría'}
                               onChange={e => setCreateUserData(prev => ({ ...prev, course: e.target.value }))}
-                              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all"
-                              placeholder="Ej: Anatomía, Matemáticas, Comunicación"
+                              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-granate-800 focus:border-granate-800 transition-all bg-gray-100 text-gray-700"
+                              placeholder="Tutoría"
+                              readOnly
                             />
                           </div>
                         </>
@@ -1416,8 +1441,8 @@ export function UserManagement() {
                               setSuccessMessage('Usuario actualizado exitosamente');
                               fetchUsers();
                               setTimeout(() => setSuccessMessage(null), 3000);
-                            } catch (error) {
-                              setError(error.message);
+                            } catch (error: any) {
+                              setError(error.message || 'Error desconocido');
                             }
                           } else {
                             await handleEditUser();

@@ -114,8 +114,8 @@ class UserController extends Controller
                 ], 403);
             }
 
-            // Solo se pueden crear usuarios con rol admin o psychologist desde el panel de gestión
-            $allowedRoles = ['admin', 'psychologist'];
+            // Solo se pueden crear usuarios con rol admin, psychologist o tutor desde el panel de gestión
+            $allowedRoles = ['admin', 'psychologist', 'tutor'];
 
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
@@ -134,6 +134,11 @@ class UserController extends Controller
                 'gender' => 'required|in:masculino,femenino,otro',
                 'specialization' => 'nullable|string|max:255',
                 'verified' => 'boolean',
+                // Campos específicos para tutores
+                'classroom' => 'required_if:role,tutor|string|max:255',
+                'study_program' => 'required_if:role,tutor|string|max:255',
+                'semester' => 'required_if:role,tutor|string|max:255',
+                'course' => 'required_if:role,tutor|string|max:255',
             ], [
                 'name.required' => 'El nombre completo es obligatorio',
                 'email.required' => 'El correo es obligatorio',
@@ -153,6 +158,11 @@ class UserController extends Controller
                 'birthdate.date' => 'La fecha de nacimiento no es válida',
                 'gender.required' => 'El género es obligatorio',
                 'gender.in' => 'El género debe ser masculino, femenino u otro',
+                // Mensajes para campos de tutor
+                'classroom.required_if' => 'El aula/salón es obligatorio para tutores',
+                'study_program.required_if' => 'El programa de estudios es obligatorio para tutores',
+                'semester.required_if' => 'El semestre es obligatorio para tutores',
+                'course.required_if' => 'El curso es obligatorio para tutores',
             ]);
 
             if ($validator->fails()) {
@@ -163,7 +173,7 @@ class UserController extends Controller
                 ], 422);
             }
 
-            $user = User::create([
+            $userData = [
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
@@ -175,7 +185,17 @@ class UserController extends Controller
                 'specialization' => $request->specialization,
                 'verified' => $request->verified ?? false,
                 'active' => true,
-            ]);
+            ];
+
+            // Agregar campos específicos para tutores
+            if ($request->role === 'tutor') {
+                $userData['classroom'] = $request->classroom;
+                $userData['study_program'] = $request->study_program;
+                $userData['semester'] = $request->semester;
+                $userData['course'] = $request->course;
+            }
+
+            $user = User::create($userData);
 
             return response()->json([
                 'success' => true,

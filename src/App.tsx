@@ -9,6 +9,10 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { PsychologistDashboard } from './components/psychologist/PsychologistDashboard';
 import { SuperAdminDashboard } from './components/super-admin/SuperAdminDashboard';
 import { StudentDashboard } from './components/dashboard/StudentDashboard';
+import { TutorDashboard } from './components/tutor/TutorDashboard';
+import { StudentManagement } from './components/tutor/StudentManagement';
+import { DerivationManagement } from './components/tutor/DerivationManagement';
+import { GroupSessionManagement } from './components/tutor/GroupSessionManagement';
 import { UserProfile } from './components/profile/UserProfile';
 import AppointmentsPage from './components/appointments';
 import { AppointmentBooking } from './components/appointments/AppointmentBooking';
@@ -204,6 +208,19 @@ function AppContent() {
                   <Route path="/appointments/calendar" element={<AppointmentCalendar />} />
                   <Route path="/appointments/history" element={<StudentAppointmentHistory />} />
                   <Route path="/appointments/reschedule" element={<RescheduleAppointment />} />
+                  <Route path="/notifications" element={<NotificationCenter />} />
+                  <Route path="/profile" element={<UserProfile />} />
+                </>
+              )}
+
+              {/* Rutas para Tutor */}
+              {user.role === 'tutor' && (
+                <>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<TutorDashboard />} />
+                  <Route path="/students" element={<StudentManagement />} />
+                  <Route path="/derivations" element={<DerivationManagement />} />
+                  <Route path="/sessions" element={<GroupSessionManagement />} />
                   <Route path="/notifications" element={<NotificationCenter />} />
                   <Route path="/profile" element={<UserProfile />} />
                 </>
