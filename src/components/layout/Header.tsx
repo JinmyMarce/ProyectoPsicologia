@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Menu, Bell, User, LogOut } from 'lucide-react';
+import { Menu, Bell, User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { getNotificationStats } from '../../services/notifications';
@@ -8,7 +8,7 @@ import { messageService } from '../../services/messages';
 import { getPsychologistStats } from '../../services/appointments';
 import { psychologicalSessionsService } from '../../services/psychologicalSessions';
 import { getUserStats } from '../../services/users';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -18,23 +18,17 @@ interface HeaderProps {
 export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(notifications);
-  const notificationRef = useRef<HTMLDivElement>(null);
-
-  // Estados para el menú de usuario
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  
+  const notificationRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Estados para estadísticas reales del usuario
-  const [userStats, setUserStats] = useState({
-    stat1: 0,
-    stat2: 0,
-    progress: 0,
-    lastSession: 'Sin datos'
-  });
-
-  // Cargar estadísticas de notificaciones y del usuario
+  // Cargar estadísticas de notificaciones
   useEffect(() => {
     const loadStats = async () => {
       try {
@@ -48,84 +42,8 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
       }
     };
 
-    const loadUserStats = async () => {
-      if (!user) return;
-
-      try {
-        let stats = { stat1: 0, stat2: 0, progress: 0, lastSession: 'Sin datos' };
-
-        switch (user.role) {
-          case 'student':
-            try {
-              // Para estudiantes: sesiones psicológicas
-              const sessionData = await psychologicalSessionsService.getStats();
-              if (sessionData.success) {
-                stats = {
-                  stat1: sessionData.data.realizadas || 0,
-                  stat2: sessionData.data.programadas || 0,
-                  progress: sessionData.data.total_sessions > 0 
-                    ? Math.round((sessionData.data.realizadas / sessionData.data.total_sessions) * 100)
-                    : 0,
-                  lastSession: 'Hoy 10:30 AM' // Esto debería venir del API
-                };
-              }
-            } catch (error) {
-              console.log('Error cargando estadísticas de estudiante:', error);
-            }
-            break;
-
-          case 'psychologist':
-            try {
-              // Para psicólogos: citas y reportes
-              const psychStats = await getPsychologistStats();
-              stats = {
-                stat1: psychStats.total_patients || 0,
-                stat2: psychStats.total_reports || 0,
-                progress: psychStats.completion_rate || 95,
-                lastSession: psychStats.last_session || 'Sin datos'
-              };
-            } catch (error) {
-              console.log('Error cargando estadísticas de psicólogo:', error);
-            }
-            break;
-
-          case 'admin':
-          case 'super_admin':
-            try {
-              // Para admins: estadísticas generales
-              const adminStats = await getUserStats();
-              stats = {
-                stat1: (adminStats.active_users as number) || 0,
-                stat2: (adminStats.new_registrations as number) || 0,
-                progress: (adminStats.system_health as number) || 98,
-                lastSession: 'Hoy 09:15 AM'
-              };
-            } catch (error) {
-              console.log('Error cargando estadísticas de admin:', error);
-            }
-            break;
-
-          case 'tutor':
-            // Para tutores: estudiantes y derivaciones
-            const tutorUser = user as any; // Casting temporal para propiedades específicas de tutor
-            stats = {
-              stat1: tutorUser.total_students || 0,
-              stat2: tutorUser.active_derivations || 0,
-              progress: 92,
-              lastSession: 'Ayer 3:45 PM'
-            };
-            break;
-        }
-
-        setUserStats(stats);
-      } catch (error) {
-        console.log('Error cargando estadísticas del usuario:', error);
-      }
-    };
-
     loadStats();
-    loadUserStats();
-  }, [user]);
+  }, []);
 
   // Cerrar paneles al hacer clic fuera
   useEffect(() => {
@@ -136,6 +54,9 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setShowUserMenu(false);
       }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setShowMobileMenu(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -143,6 +64,23 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Cerrar menús al cambiar de ruta
+  useEffect(() => {
+    setShowNotifications(false);
+    setShowUserMenu(false);
+    setShowMobileMenu(false);
+  }, [location.pathname]);
+
+  // Recalcular posición del modal cuando cambie el tamaño de la ventana
+  useEffect(() => {
+    const handleResize = () => {
+      // Recalcular posición si es necesario
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [showUserMenu]);
 
   const getRoleDisplayName = (role: string) => {
     switch (role) {
@@ -161,393 +99,429 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
     }
   };
 
-  const getStatsLabels = (role: string) => {
-    switch (role) {
-      case 'student':
-        return { 
-          stat1: 'Realizadas', 
-          stat2: 'Programadas', 
-          progress: 'Progreso' 
-        };
-      case 'psychologist':
-        return { 
-          stat1: 'Pacientes', 
-          stat2: 'Reportes', 
-          progress: 'Progreso' 
-        };
-      case 'admin':
-      case 'super_admin':
-        return { 
-          stat1: 'Usuarios', 
-          stat2: 'Nuevos', 
-          progress: 'Sistema' 
-        };
-      case 'tutor':
-        return { 
-          stat1: 'Estudiantes', 
-          stat2: 'Derivaciones', 
-          progress: 'Progreso' 
-        };
-      default:
-        return { 
-          stat1: 'Datos', 
-          stat2: 'Actividad', 
-          progress: 'Estado' 
-        };
-    }
+  // Calcular posición cuando se abre el modal
+  const handleUserMenuToggle = () => {
+    setShowUserMenu((v) => !v);
   };
 
   return (
-    <header className="sticky top-0 z-50 h-[80px] md:h-[90px] flex items-center shadow-xl" style={{
-      background: `
-        linear-gradient(135deg, 
-          #0f1419 0%, 
-          #1a1f29 12%, 
-          #2c1d1d 24%, 
-          #1e2a37 36%, 
-          #142025 48%, 
-          #1a1f29 60%, 
-          #2c1d1d 72%, 
-          #1e2a37 84%, 
-          #0f1419 100%
-        ),
-        radial-gradient(ellipse at 15% 50%, rgba(142, 22, 26, 0.08) 0%, transparent 65%),
-        radial-gradient(ellipse at 85% 50%, rgba(211, 183, 160, 0.06) 0%, transparent 65%),
-        linear-gradient(90deg, transparent 0%, rgba(211, 183, 160, 0.02) 50%, transparent 100%)
-      `,
-      borderBottom: '2px solid rgba(211, 183, 160, 0.2)',
-      boxShadow: `
-        0 4px 20px rgba(0, 0, 0, 0.25),
-        0 8px 40px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 rgba(211, 183, 160, 0.1)
-      `,
-      backdropFilter: 'blur(12px)'
+    <header className="absolute top-0 left-0 right-0 z-40" style={{
+      background: 'linear-gradient(135deg, #0f1419 0%, #1a2332 20%, #2c3e50 40%, #1a2332 60%, #0f1419 80%, #1a2332 100%)',
+      borderBottom: '2px solid rgba(255, 255, 255, 0.3)',
+      backdropFilter: 'blur(20px)',
+      zIndex: 40,
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(142, 22, 26, 0.2)'
     }}>
-      {/* Efectos de fondo mejorados */}
+      {/* Efectos de fondo estáticos */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Partículas elegantes */}
-        <div className="absolute top-4 left-20 w-1 h-1 bg-[#d3b7a0] rounded-full opacity-50" style={{animation: 'sparkle 10s ease-in-out infinite'}}></div>
-        <div className="absolute top-6 right-32 w-0.5 h-0.5 bg-white rounded-full opacity-60" style={{animation: 'twinkle 12s ease-in-out infinite 2s'}}></div>
-        <div className="absolute bottom-5 left-48 w-0.5 h-0.5 bg-[#8e161a] rounded-full opacity-40" style={{animation: 'sparkle 14s ease-in-out infinite 4s'}}></div>
-        <div className="absolute top-3 right-64 w-1 h-1 bg-[#d3b7a0] rounded-full opacity-35" style={{animation: 'twinkle 16s ease-in-out infinite 6s'}}></div>
+        {/* Partículas estáticas */}
+        <div className="absolute top-2 left-4 w-0.5 h-0.5 bg-white rounded-full opacity-50"></div>
+        <div className="absolute top-3 right-8 w-0.5 h-0.5 bg-[#d3b7a0] rounded-full opacity-60"></div>
+        <div className="absolute bottom-2 left-12 w-0.5 h-0.5 bg-white rounded-full opacity-40"></div>
+        <div className="absolute top-3 right-20 w-0.5 h-0.5 bg-[#8e161a] rounded-full opacity-30"></div>
+        <div className="absolute top-4 left-20 w-0.5 h-0.5 bg-white rounded-full opacity-25"></div>
         
-        {/* Ondas decorativas */}
+        {/* Ondas sutiles estáticas */}
         <div className="absolute inset-0" style={{
           background: `
             repeating-linear-gradient(
               45deg,
               transparent,
-              transparent 80px,
-              rgba(211, 183, 160, 0.02) 82px,
-              rgba(211, 183, 160, 0.02) 84px,
-              transparent 86px
+              transparent 100px,
+              rgba(255, 255, 255, 0.005) 102px,
+              rgba(255, 255, 255, 0.005) 104px,
+              transparent 106px
             )
-          `,
-          animation: 'waveSlide 25s linear infinite'
+          `
         }}></div>
         
-        {/* Efecto de brillo superior */}
-        <div className="absolute top-0 left-0 w-full h-1" style={{
-          background: 'linear-gradient(90deg, transparent 0%, rgba(211, 183, 160, 0.3) 50%, transparent 100%)',
-          animation: 'headerShine 20s ease-in-out infinite'
+        {/* Efecto de brillo superior estático */}
+        <div className="absolute top-0 left-0 w-full h-0.5" style={{
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%)'
         }}></div>
+
+        {/* Efecto de profundidad estático */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/15"></div>
       </div>
 
-      <div className="relative z-10 flex items-center justify-between px-4 h-full max-w-7xl mx-auto w-full">
-        <div className="flex items-center space-x-4 pl-0">
-          <Button
-            variant="ghost"
-            size="lg"
-            onClick={onMenuClick}
-            className="text-white hover:bg-white/8 focus:bg-white/8 rounded-lg p-3 transition-all duration-300 lg:hidden"
-            style={{
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)'
-            }}
-            aria-label="Abrir menú"
-          >
-            <Menu className="w-7 h-7" />
-          </Button>
-          
-          {/* Título sin logo */}
-          <div className="flex items-center">
+      <div className="relative z-10 px-4 py-3">
+        <div className="flex items-center justify-between w-full">
+          {/* Lado izquierdo - Botón de menú y título */}
+          <div className="flex items-center space-x-4">
+            {/* Botón de menú móvil */}
+            <button
+              onClick={onMenuClick}
+              className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-all duration-300 group" style={{
+                background: 'linear-gradient(135deg, rgba(142, 22, 26, 0.3) 0%, rgba(44, 62, 80, 0.3) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              <Menu className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-300" />
+            </button>
+            
+            {/* Título */}
             <div>
-              <h1 className="font-bold text-xl md:text-2xl lg:text-3xl tracking-wide leading-tight" style={{
-                background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 20%, #d3b7a0 40%, #e8e8e8 60%, #ffffff 80%, #f5f5f5 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                backgroundSize: '200% 100%',
-                textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                fontFamily: 'Georgia, serif',
-                animation: 'titleShimmer 15s ease-in-out infinite'
+              <h1 className="text-lg font-bold text-white" style={{
+                textShadow: '0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(0, 0, 0, 0.6)'
               }}>
-                Portal Psicológico Túpac Amaru
-          </h1>
-              <p className="hidden md:block text-sm lg:text-base text-[#d3b7a0] font-medium tracking-wide" style={{
-                textShadow: '0 1px 3px rgba(0, 0, 0, 0.4)',
-                opacity: 0.9,
-                animation: 'subtitleGlow 12s ease-in-out infinite 2s'
-              }}>
-                Sistema Integral de Psicología
-              </p>
+                Espacio Psicológico
+              </h1>
             </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-6">
-          {/* Área de notificaciones mejorada */}
+
+          {/* Lado derecho - Notificaciones y usuario */}
           <div className="flex items-center space-x-4">
-            {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'psychologist' || user?.role === 'student') && (
-              <div className="relative" ref={notificationRef}>
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="text-white hover:bg-white/8 focus:bg-white/8 relative rounded-lg p-3 transition-all duration-300"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)'
-                  }}
-                  onClick={() => setShowNotifications((v) => !v)}
-                  aria-label="Notificaciones"
-                >
-                  <Bell className="w-5 h-5 opacity-90" />
-                  {notificationCount > 0 && (
-                    <div 
-                      className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs text-white font-medium"
-                      style={{
-                        background: 'linear-gradient(135deg, #8e161a 0%, #b91c1c 100%)',
-                        boxShadow: '0 1px 4px rgba(142, 22, 26, 0.3)'
-                      }}
-                    >
-                      {notificationCount > 9 ? '9+' : notificationCount}
-                    </div>
-                  )}
-                </Button>
-                {showNotifications && (
-                  <div className="absolute right-0 mt-4 w-80 bg-white rounded-xl shadow-2xl z-50 max-h-96 overflow-hidden animate-fade-in border border-[#d3b7a0]/30">
-                    <NotificationPanel 
-                      onClose={() => setShowNotifications(false)} 
-                      onNotificationUpdate={() => {}} 
-                    />
+            {/* Botón de notificaciones */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="p-2 rounded-lg hover:bg-white/10 transition-all duration-300 group" style={{
+                  background: 'linear-gradient(135deg, rgba(142, 22, 26, 0.3) 0%, rgba(44, 62, 80, 0.3) 100%)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
+                }}
+              >
+                <Bell className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-300" />
+                
+                {/* Badge de notificaciones */}
+                {notificationCount > 0 && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center" style={{
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.8)'
+                  }}>
+                    <span className="text-white text-xs font-bold">{notificationCount}</span>
                   </div>
                 )}
-              </div>
-            )}
-          </div>
+              </button>
 
-          {/* Área de usuario mejorada */}
-          <div className="flex items-center space-x-4 pr-6">
-            {/* Información del usuario con diseño mejorado */}
-            <div className="hidden md:block text-right">
-              <p className="font-semibold text-base leading-tight" style={{
-                background: 'linear-gradient(135deg, #ffffff 0%, #d3b7a0 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
-              }}>
-                {user?.name}
-              </p>
-              <p className="text-[#d3b7a0] text-sm font-medium" style={{
-                textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
-              }}>
-                {getRoleDisplayName(user?.role || '')}
-              </p>
-            </div>
-
-            {/* Avatar mejorado con efectos */}
-            <div className="relative">
-              <div 
-                className="flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full cursor-pointer relative group transition-all duration-300 hover:scale-105"
-                style={{
-                  background: `
-                    linear-gradient(135deg, 
-                      #8e161a 0%, 
-                      #a52a2a 50%, 
-                      #8e161a 100%
-                    )
-                  `,
-                  boxShadow: `
-                    0 2px 8px rgba(142, 22, 26, 0.25),
-                    0 4px 15px rgba(0, 0, 0, 0.2),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.15)
-                  `,
-                  border: '1px solid rgba(211, 183, 160, 0.2)'
-                }}
-                onClick={() => setShowUserMenu((v) => !v)}
-              >
-                {/* Efectos de brillo sutiles en el avatar */}
-                <div className="absolute inset-0 rounded-full opacity-20 group-hover:opacity-35 transition-opacity duration-300" style={{
-                  background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 70%)'
-                }}></div>
-                
-                <User className="w-5 h-5 md:w-6 md:h-6 text-white relative z-10 opacity-90" />
-                
-                {/* Indicador de estado más sutil */}
-                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border border-white opacity-80" style={{
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)'
-                }}></div>
-              </div>
-
-              {/* Modal de usuario mejorado */}
-              {showUserMenu && (
-                <div ref={userMenuRef} className="absolute right-0 top-16 w-80 bg-white text-gray-900 rounded-2xl shadow-2xl border-2 border-[#d3b7a0]/40 z-50 animate-fade-in overflow-hidden" style={{
-                  boxShadow: `
-                    0 25px 80px rgba(0, 0, 0, 0.4), 
-                    0 15px 40px rgba(142, 22, 26, 0.3),
-                    0 5px 15px rgba(0, 0, 0, 0.2),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.2)
-                  `,
-                  backdropFilter: 'blur(10px)'
+              {/* Panel de notificaciones */}
+              {showNotifications && (
+                <div ref={notificationRef} className="absolute top-full right-0 mt-2 w-80 rounded-md shadow-xl border z-50 animate-fade-in overflow-hidden" style={{
+                  maxHeight: '480px',
+                  background: '#ffffff',
+                  borderColor: '#0a0f14',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 6px rgba(0, 0, 0, 0.1)'
                 }}>
-                  {/* Header del modal con avatar y información */}
-                  <div className="relative px-6 py-6" style={{
-                    background: `
-                      linear-gradient(135deg, 
-                        #0f1419 0%, 
-                        #1a1f29 25%, 
-                        #2c1d1d 50%, 
-                        #8e161a 75%, 
-                        #d3b7a0 100%
-                      )
-                    `
+                  {/* Header del modal */}
+                  <div className="px-4 py-3 border-b" style={{
+                    background: '#0a0f14',
+                    borderColor: '#1a0f14'
                   }}>
-                    {/* Efectos de fondo en el header */}
-                    <div className="absolute inset-0 opacity-20">
-                      <div className="absolute top-2 right-4 w-1 h-1 bg-white rounded-full animate-pulse"></div>
-                      <div className="absolute bottom-3 left-6 w-0.5 h-0.5 bg-[#d3b7a0] rounded-full" style={{animation: 'sparkle 4s ease-in-out infinite'}}></div>
-                    </div>
-                    
-                    <div className="relative z-10 flex items-center space-x-4">
-                      {/* Avatar grande */}
-                      <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{
-                        background: `
-                          linear-gradient(135deg, 
-                            #8e161a 0%, 
-                            #a52a2a 50%, 
-                            #d3b7a0 100%
-                          )
-                        `,
-                        boxShadow: `
-                          0 4px 15px rgba(0, 0, 0, 0.3),
-                          inset 0 1px 0 rgba(255, 255, 255, 0.2)
-                        `
-                      }}>
-                        <User className="w-8 h-8 text-white" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Bell className="w-4 h-4 text-white" />
+                        <span className="text-sm font-medium text-white">
+                          Notificaciones
+                        </span>
                       </div>
-                      
-                      {/* Información del usuario */}
-                      <div className="flex-1">
-                        <h3 className="text-white font-bold text-lg leading-tight" style={{
-                          textShadow: '0 1px 3px rgba(0, 0, 0, 0.5)'
-                        }}>
-                          {user?.name}
-                        </h3>
-                        <p className="text-[#d3b7a0] text-sm font-medium opacity-90" style={{
-                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
-                        }}>
-                          {getRoleDisplayName(user?.role || '')}
-                        </p>
-                        {user?.email && (
-                          <p className="text-white/70 text-xs mt-1 truncate">
-                            {user.email}
-                          </p>
-                        )}
-                      </div>
-                      
-                      {/* Indicador de estado */}
-                      <div className="flex flex-col items-center">
-                        <div className="w-3 h-3 bg-green-500 rounded-full mb-1" style={{
-                          boxShadow: '0 0 8px rgba(34, 197, 94, 0.6)',
-                          animation: 'statusPulse 2s ease-in-out infinite'
-                        }}></div>
-                        <span className="text-white/60 text-xs">En línea</span>
-                      </div>
+                      <button
+                        onClick={() => setShowNotifications(false)}
+                        className="text-white/70 hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
-
-                  {/* Sección de estadísticas reales */}
-                  <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-[#8e161a]">
-                          {userStats.stat1}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {getStatsLabels(user?.role || '').stat1}
-                        </div>
-                      </div>
-                      <div className="text-center border-x border-gray-300">
-                        <div className="text-lg font-bold text-[#8e161a]">
-                          {userStats.stat2}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {getStatsLabels(user?.role || '').stat2}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-green-600">
-                          {userStats.progress}%
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {getStatsLabels(user?.role || '').progress}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Opciones del menú mejoradas */}
-                  <div className="py-2">
-                  <button
-                      className="w-full text-left px-6 py-4 hover:bg-gradient-to-r hover:from-[#8e161a]/8 hover:to-[#d3b7a0]/8 text-base font-medium flex items-center gap-4 transition-all duration-300 group"
-                    onClick={() => { setShowUserMenu(false); navigate('/profile'); }}
-                  >
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#8e161a]/10 to-[#d3b7a0]/10 flex items-center justify-center group-hover:from-[#8e161a]/20 group-hover:to-[#d3b7a0]/20 transition-all duration-300">
-                    <User className="w-5 h-5 text-[#8e161a]" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-gray-800 font-medium">Mi perfil</div>
-                        <div className="text-gray-500 text-sm">Configurar cuenta y preferencias</div>
-                      </div>
-                      <div className="w-5 h-5 text-gray-400 group-hover:text-[#8e161a] transition-colors duration-300">
-                        →
-                      </div>
-                  </button>
-                    
-                  <button
-                      className="w-full text-left px-6 py-4 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 text-base font-medium flex items-center gap-4 transition-all duration-300 group text-red-600"
-                    onClick={logout}
-                  >
-                      <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-all duration-300">
-                        <LogOut className="w-5 h-5 text-red-500" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-red-600 font-medium">Cerrar sesión</div>
-                        <div className="text-red-400 text-sm">Salir de forma segura</div>
-                      </div>
-                      <div className="w-5 h-5 text-red-400 group-hover:text-red-600 transition-colors duration-300">
-                        ↗
-                      </div>
-                  </button>
-                  </div>
-
-                  {/* Footer con información real */}
-                  <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>Última sesión: {userStats.lastSession}</span>
-                      <span className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        {user?.active ? 'Conectado' : 'Desconectado'}
-                      </span>
-                    </div>
-                  </div>
+                  
+                  <NotificationPanel 
+                    onClose={() => setShowNotifications(false)} 
+                    onNotificationUpdate={() => {}} 
+                  />
                 </div>
               )}
             </div>
+
+            {/* Información del usuario */}
+            <div className="flex items-center space-x-3">
+              <div className="hidden sm:block text-right">
+                <p className="text-white text-sm font-medium" style={{
+                  textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)',
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #d3b7a0 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
+                  {user?.name}
+                </p>
+                <p className="text-white/70 text-xs" style={{
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)'
+                }}>
+                  {getRoleDisplayName(user?.role || '')}
+                </p>
+              </div>
+
+              {/* Avatar del usuario */}
+              <div className="relative">
+                <button
+                  onClick={() => handleUserMenuToggle()}
+                  className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden hover:scale-105 transition-all duration-300 group" style={{
+                    background: 'linear-gradient(135deg, #0f1419 0%, #1a2332 25%, #2c3e50 50%, #1a2332 75%, #0f1419 100%)',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4)'
+                  }}
+                >
+                  {/* Efecto de brillo en hover */}
+                  <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-300" style={{
+                    background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 70%)'
+                  }}></div>
+                  
+                  {(() => {
+                    // Para estudiantes y super_admin, mostrar google_avatar si existe
+                    if ((user?.role === 'student' || user?.role === 'super_admin') && user?.google_avatar) {
+                      return (
+                        <img 
+                          src={user.google_avatar}
+                          alt={`Avatar de ${user.name}`}
+                          className="w-full h-full object-cover rounded-full relative z-10"
+                        />
+                      );
+                    }
+                    // Para otros usuarios, mostrar avatar si existe
+                    else if (user?.avatar) {
+                      return (
+                        <img 
+                          src={user.avatar}
+                          alt={`Avatar de ${user.name}`}
+                          className="w-full h-full object-cover rounded-full relative z-10"
+                        />
+                      );
+                    }
+                    // Si no hay avatar, mostrar icono por defecto
+                    else {
+                      return <User className="w-5 h-5 text-white relative z-10" />;
+                    }
+                  })()}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Modal de usuario - Posicionado relativo al header */}
+      {showUserMenu && (
+        <div ref={userMenuRef} className="absolute top-full right-0 mt-2 w-56 sm:w-60 md:w-64 lg:w-68 xl:w-72 rounded-xl sm:rounded-xl shadow-2xl border z-50 animate-fade-in overflow-hidden" style={{
+          background: 'linear-gradient(135deg, #1a0f0f 0%, #4a0f0f 20%, #8e161a 40%, #4a0f0f 60%, #8e161a 80%, #1a0f0f 100%)',
+          borderColor: 'rgba(255, 255, 255, 0.4)',
+          boxShadow: `
+            0 25px 80px rgba(0, 0, 0, 0.9), 
+            0 15px 40px rgba(142, 22, 26, 0.6),
+            0 5px 15px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4),
+            0 0 0 1px rgba(255, 255, 255, 0.2)
+          `,
+          backdropFilter: 'blur(25px)',
+          maxWidth: 'calc(100vw - 2rem)',
+          minWidth: '300px'
+        }}>
+          {/* Header del modal */}
+          <div className="relative px-3 sm:px-3 md:px-4 lg:px-4 py-2 sm:py-3 md:py-3 lg:py-4" style={{
+            background: 'linear-gradient(135deg, #0f1419 0%, #1a2332 20%, #2c3e50 40%, #1a2332 60%, #0f1419 80%, #1a2332 100%)'
+          }}>
+            {/* Efectos de fondo en el header */}
+            <div className="absolute inset-0 opacity-50">
+              <div className="absolute top-2 sm:top-2 right-3 sm:right-4 w-0.5 sm:w-0.5 h-0.5 sm:h-0.5 bg-white rounded-full"></div>
+              <div className="absolute bottom-2 sm:bottom-3 left-4 sm:left-5 w-0.5 h-0.5 bg-[#d3b7a0] rounded-full"></div>
+              <div className="absolute top-2 sm:top-3 left-2 sm:left-3 w-0.5 h-0.5 bg-white rounded-full opacity-60"></div>
+              <div className="absolute top-1/2 left-1/4 w-0.5 h-0.5 bg-[#d3b7a0] rounded-full opacity-50"></div>
+              <div className="absolute top-1/3 right-1/3 w-0.5 h-0.5 bg-white rounded-full opacity-30"></div>
+              <div className="absolute top-1/4 right-1/4 w-0.5 h-0.5 bg-[#8e161a] rounded-full opacity-40"></div>
+              <div className="absolute bottom-1/4 right-1/3 w-0.5 h-0.5 bg-[#d3b7a0] rounded-full opacity-35"></div>
+            </div>
+            
+            <div className="relative z-10 flex items-center space-x-2 sm:space-x-3 md:space-x-3 lg:space-x-4 xl:space-x-4">
+              {/* Lado izquierdo - Avatar y punto verde */}
+              <div className="flex flex-col items-center space-y-1 sm:space-y-2 md:space-y-2">
+                {/* Avatar grande */}
+                <div className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 lg:w-12 lg:h-12 xl:w-12 xl:h-12 rounded-full flex items-center justify-center overflow-hidden relative" style={{
+                  background: 'linear-gradient(135deg, #0f1419 0%, #1a2332 25%, #2c3e50 50%, #1a2332 75%, #0f1419 100%)',
+                  boxShadow: `
+                    0 10px 30px rgba(0, 0, 0, 0.8),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                    0 0 0 2px rgba(255, 255, 255, 0.5),
+                    0 0 0 3px rgba(0, 0, 0, 0.3)
+                  `,
+                  border: '3px solid rgba(255, 255, 255, 0.95)'
+                }}>
+                  {/* Efecto de brillo en el avatar */}
+                  <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-40 transition-opacity duration-300" style={{
+                    background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6) 0%, transparent 70%)'
+                  }}></div>
+                  
+                  {(() => {
+                    // Para estudiantes y super_admin, mostrar google_avatar si existe
+                    if ((user?.role === 'student' || user?.role === 'super_admin') && user?.google_avatar) {
+                      return (
+                        <img 
+                          src={user.google_avatar}
+                          alt={`Avatar de ${user.name}`}
+                          className="w-full h-full object-cover rounded-full relative z-10"
+                        />
+                      );
+                    }
+                    // Para otros usuarios, mostrar avatar si existe
+                    else if (user?.avatar) {
+                      return (
+                        <img 
+                          src={user.avatar}
+                          alt={`Avatar de ${user.name}`}
+                          className="w-full h-full object-cover rounded-full relative z-10"
+                        />
+                      );
+                    }
+                    // Si no hay avatar, mostrar icono por defecto
+                    else {
+                      return <User className="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-6 lg:h-6 xl:w-6 xl:h-6 text-white relative z-10" />;
+                    }
+                  })()}
+                </div>
+                
+                {/* Indicador de estado debajo del avatar */}
+                <div className="flex flex-col items-center">
+                  <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3 lg:h-3 xl:w-3 xl:h-3 bg-green-500 rounded-full border-2 border-white mb-0.5 relative" style={{
+                    boxShadow: '0 0 20px rgba(34, 197, 94, 1), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
+                  }}>
+                    {/* Efecto de pulso */}
+                    <div className="absolute inset-0 bg-green-500 rounded-full animate-pulse opacity-60"></div>
+                  </div>
+                  <span className="text-white/95 text-xs font-medium" style={{
+                    textShadow: '0 1px 4px rgba(0, 0, 0, 0.9)'
+                  }}>En línea</span>
+                </div>
+              </div>
+              
+              {/* Lado derecho - Información del usuario */}
+              <div className="flex-1">
+                <h3 className="text-white font-bold text-xs sm:text-sm md:text-sm lg:text-sm xl:text-sm leading-tight" style={{
+                  textShadow: '0 2px 10px rgba(0, 0, 0, 0.9), 0 4px 20px rgba(0, 0, 0, 0.8)'
+                }}>
+                  {user?.name}
+                </h3>
+                {user?.email && (
+                  <p className="text-white/80 text-xs mt-0.5 truncate" style={{
+                    textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)'
+                  }}>
+                    {user.email}
+                  </p>
+                )}
+              </div>
+              
+              {/* Rol a la derecha */}
+              <div className="text-right">
+                <p className="text-[#d3b7a0] text-xs sm:text-xs md:text-xs lg:text-xs xl:text-xs font-medium opacity-95" style={{
+                  textShadow: '0 1px 5px rgba(0, 0, 0, 0.8)'
+                }}>
+                  {getRoleDisplayName(user?.role || '')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Opciones del menú */}
+          <div className="py-1 sm:py-1 md:py-2 lg:py-2 xl:py-2" style={{
+            background: 'linear-gradient(135deg, rgba(15, 20, 25, 0.98) 0%, rgba(26, 35, 50, 0.98) 50%, rgba(15, 20, 25, 0.98) 100%)'
+          }}>
+            <button
+              className="w-full text-left px-3 sm:px-3 md:px-3 lg:px-4 xl:px-4 py-1.5 sm:py-2 md:py-2 lg:py-2.5 xl:py-2.5 hover:bg-gradient-to-r hover:from-[#8e161a]/25 hover:to-[#d3b7a0]/25 text-sm font-medium flex items-center gap-2 sm:gap-2 md:gap-3 lg:gap-3 xl:gap-3 transition-all duration-300 group"
+              onClick={() => { setShowUserMenu(false); navigate('/profile'); }}
+            >
+              <div className="w-6 h-6 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-7 lg:h-7 xl:w-7 xl:h-7 rounded-lg bg-gradient-to-br from-[#8e161a]/25 to-[#d3b7a0]/25 flex items-center justify-center group-hover:from-[#8e161a]/35 group-hover:to-[#d3b7a0]/35 transition-all duration-300" style={{
+                boxShadow: '0 3px 12px rgba(142, 22, 26, 0.4)'
+              }}>
+                <User className="w-3 h-3 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 lg:w-3.5 lg:h-3.5 xl:w-3.5 xl:h-3.5 text-white" />
+              </div>
+              <div className="flex-1">
+                <div className="text-white font-medium text-xs sm:text-xs md:text-sm lg:text-sm xl:text-sm">Mi perfil</div>
+                <div className="text-white/75 text-xs">Datos personales</div>
+              </div>
+              <div className="w-2.5 h-2.5 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3 lg:h-3 xl:w-3 xl:h-3 text-white/70 group-hover:text-white transition-colors duration-300">
+                →
+              </div>
+            </button>
+            
+            <button
+              className="w-full text-left px-3 sm:px-3 md:px-3 lg:px-4 xl:px-4 py-1.5 sm:py-2 md:py-2 lg:py-2.5 xl:py-2.5 hover:bg-gradient-to-r hover:from-red-500/25 hover:to-red-400/25 text-sm font-medium flex items-center gap-2 sm:gap-2 md:gap-3 lg:gap-3 xl:gap-3 transition-all duration-300 group text-red-200"
+              onClick={logout}
+            >
+              <div className="w-6 h-6 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-7 lg:h-7 xl:w-7 xl:h-7 rounded-lg bg-gradient-to-br from-red-500/25 to-red-400/25 flex items-center justify-center group-hover:from-red-500/35 group-hover:to-red-400/35 transition-all duration-300" style={{
+                boxShadow: '0 3px 12px rgba(239, 68, 68, 0.4)'
+              }}>
+                <LogOut className="w-3 h-3 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 lg:w-3.5 lg:h-3.5 xl:w-3.5 xl:h-3.5 text-red-200" />
+              </div>
+              <div className="flex-1">
+                <div className="text-red-200 font-medium text-xs sm:text-xs md:text-sm lg:text-sm xl:text-sm">Cerrar sesión</div>
+                <div className="text-red-300/80 text-xs">Salir de forma segura</div>
+              </div>
+              <div className="w-2.5 h-2.5 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3 lg:h-3 xl:w-3 xl:h-3 text-red-300/70 group-hover:text-red-200 transition-colors duration-300">
+                ↗
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Menú móvil expandido */}
+      {showMobileMenu && (
+        <div ref={mobileMenuRef} className="lg:hidden absolute top-full left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-40" style={{
+          backdropFilter: 'blur(20px)'
+        }}>
+          <div className="px-3 sm:px-4 py-3 sm:py-4 space-y-2 sm:space-y-3">
+            <div className="flex items-center space-x-2 sm:space-x-3 p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg sm:rounded-xl border border-gray-200">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center overflow-hidden" style={{
+                background: '#1a2332',
+                border: '2px solid rgba(255, 255, 255, 0.8)'
+              }}>
+                {(() => {
+                  // Para estudiantes y super_admin, mostrar google_avatar si existe
+                  if ((user?.role === 'student' || user?.role === 'super_admin') && user?.google_avatar) {
+                    return (
+                      <img 
+                        src={user.google_avatar}
+                        alt={`Avatar de ${user.name}`}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    );
+                  }
+                  // Para otros usuarios, mostrar avatar si existe
+                  else if (user?.avatar) {
+                    return (
+                      <img 
+                        src={user.avatar}
+                        alt={`Avatar de ${user.name}`}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    );
+                  }
+                  // Si no hay avatar, mostrar icono por defecto
+                  else {
+                    return <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />;
+                  }
+                })()}
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 text-sm sm:text-base">{user?.name}</p>
+                <p className="text-gray-600 text-xs sm:text-sm">{getRoleDisplayName(user?.role || '')}</p>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => { setShowMobileMenu(false); navigate('/profile'); }}
+              className="w-full text-left p-3 sm:p-4 hover:bg-gray-50 rounded-lg sm:rounded-xl transition-colors duration-200 flex items-center space-x-2 sm:space-x-3 group"
+            >
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-[#8e161a] group-hover:scale-110 transition-transform duration-200" />
+              <span className="text-gray-700 font-medium text-sm sm:text-base">Mi perfil</span>
+            </button>
+            
+            <button
+              onClick={() => { setShowMobileMenu(false); logout(); }}
+              className="w-full text-left p-3 sm:p-4 hover:bg-red-50 rounded-lg sm:rounded-xl transition-colors duration-200 flex items-center space-x-2 sm:space-x-3 text-red-600 group"
+            >
+              <LogOut className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-medium text-sm sm:text-base">Cerrar sesión</span>
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -90,16 +90,16 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
       case 'warning':
       case 'error':
-        return <AlertCircle className="w-4 h-4 text-red-500" />;
+        return <AlertCircle className="w-4 h-4 text-red-600" />;
       case 'appointment':
-        return <Bell className="w-4 h-4 text-blue-500" />;
+        return <Bell className="w-4 h-4 text-blue-600" />;
       case 'reminder':
-        return <Bell className="w-4 h-4 text-yellow-500" />;
+        return <Bell className="w-4 h-4 text-yellow-600" />;
       default:
-        return <Info className="w-4 h-4 text-gray-500" />;
+        return <Info className="w-4 h-4 text-gray-600" />;
     }
   };
 
@@ -143,119 +143,149 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
   }
 
   return (
-    <div className="p-4">
-      {/* Header con acciones */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <Bell className="w-4 h-4 text-[#8e161a]" />
-          <span className="text-sm font-medium text-gray-900">
-            {unreadCount > 0 ? `${unreadCount} sin leer` : 'Todas leídas'}
+    <div className="p-0">
+      {/* Contador de notificaciones */}
+      <div className="px-4 py-3 border-b bg-gray-50" style={{
+        borderColor: '#e5e7eb'
+      }}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">
+            {unreadCount > 0 ? `${unreadCount} notificación${unreadCount > 1 ? 'es' : ''} sin leer` : 'Todas las notificaciones leídas'}
           </span>
+          {unreadCount > 0 && (
+            <button
+              onClick={handleMarkAllAsRead}
+              className="text-xs font-medium px-2 py-1 rounded border transition-colors"
+              style={{
+                background: '#0a0f14', // Azul super oscuro
+                color: 'white',
+                borderColor: '#0a0f14'
+              }}
+            >
+              Marcar todas
+            </button>
+          )}
         </div>
-        {unreadCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleMarkAllAsRead}
-            className="text-xs text-[#8e161a] hover:bg-[#8e161a] hover:text-white"
-          >
-            Marcar todas
-          </Button>
-        )}
       </div>
 
       {/* Error */}
       {error && (
-        <div className="mb-3 p-2 bg-red-50 border border-red-200 text-red-700 rounded text-xs">
-          {error}
+        <div className="mx-4 mt-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-xs">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="w-4 h-4" />
+            <span className="font-medium">{error}</span>
+          </div>
         </div>
       )}
 
       {/* Lista de notificaciones */}
       {notifications.length === 0 ? (
-        <div className="text-center py-6">
-          <Bell className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600">No tienes notificaciones</p>
+        <div className="text-center py-12">
+          <Bell className="w-12 h-12 mx-auto mb-3" style={{ color: '#0a0f14' }} /> {/* Azul super oscuro */}
+          <p className="text-sm font-medium text-gray-500">
+            No tienes notificaciones
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            Las notificaciones aparecerán aquí cuando las recibas
+          </p>
         </div>
       ) : (
-        <div className="space-y-2 max-h-64 overflow-y-auto">
+        <div className="max-h-80 overflow-y-auto">
           {notifications.slice(0, 10).map((notification) => (
             <div 
               key={notification.id}
-              className={`p-3 border rounded-lg transition-all duration-200 ${
-                notification.read_at 
-                  ? 'bg-gray-50 border-gray-200' 
-                  : 'bg-blue-50 border-blue-200'
+              className={`border-b last:border-b-0 ${
+                notification.read_at ? 'bg-white' : 'bg-blue-50'
               }`}
+              style={{
+                borderColor: '#f3f4f6'
+              }}
             >
-              <div className="flex items-start space-x-2">
-                <div className="mt-0.5">
-                  {getNotificationIcon(notification.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <h4 className="text-sm font-medium text-gray-900 truncate">
-                      {notification.title}
-                    </h4>
-                    {!notification.read_at && (
-                      <Badge variant="warning" className="text-xs px-1 py-0">
-                        Nueva
-                      </Badge>
-                    )}
+              <div className="px-4 py-3">
+                <div className="flex items-start space-x-3">
+                  <div className="mt-0.5 flex-shrink-0">
+                    {getNotificationIcon(notification.type)}
                   </div>
-                  <p className="text-xs text-gray-600 mb-1 line-clamp-2">
-                    {notification.message}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {formatDate(notification.created_at)}
-                  </p>
-                </div>
-                <div className="flex space-x-1 ml-2">
-                  {!notification.read_at && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleMarkAsRead(notification.id)}
-                      className="p-1 h-6 w-6"
-                      title="Marcar como leída"
-                    >
-                      <CheckCircle className="w-3 h-3" />
-                    </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteNotification(notification.id)}
-                    className="p-1 h-6 w-6 text-red-600 hover:bg-red-50"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h4 className={`text-sm font-medium truncate ${
+                            notification.read_at ? 'text-gray-900' : 'text-gray-900'
+                          }`}>
+                            {notification.title}
+                          </h4>
+                          {!notification.read_at && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style={{
+                              background: '#1a0f14',
+                              color: 'white'
+                            }}>
+                              Nueva
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-600 mt-1 mb-2">
+                          {notification.message}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-500">
+                            {formatDate(notification.created_at)}
+                          </span>
+                          <div className="flex space-x-1">
+                            {!notification.read_at && (
+                              <button
+                                onClick={() => handleMarkAsRead(notification.id)}
+                                className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                title="Marcar como leída"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeleteNotification(notification.id)}
+                              className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
           
           {notifications.length > 10 && (
-            <div className="text-center py-2">
-              <p className="text-xs text-gray-500">
-                Y {notifications.length - 10} notificaciones más...
+            <div className="px-4 py-3 bg-gray-50 border-t" style={{
+              borderColor: '#e5e7eb'
+            }}>
+              <p className="text-xs text-gray-500 text-center">
+                Y {notifications.length - 10} notificación{notifications.length - 10 > 1 ? 'es' : ''} más...
               </p>
             </div>
           )}
         </div>
       )}
 
-      {/* Footer */}
-      <div className="mt-4 pt-3 border-t border-gray-200">
-        <Button
-          variant="outline"
-          size="sm"
+      {/* Footer con botón de ver todas */}
+      <div className="px-4 py-3 border-t" style={{
+        background: '#0a0f14',
+        borderColor: '#1a0f14'
+      }}>
+        <button
           onClick={() => { onClose(); navigate('/notifications'); }}
-          className="w-full text-xs"
+          className="w-full py-2 px-4 rounded text-sm font-medium transition-colors"
+          style={{
+            background: '#1a2332', // Azul oscuro que combina
+            color: 'white',
+            border: '1px solid #1a2332'
+          }}
         >
           Ver todas las notificaciones
-        </Button>
+        </button>
       </div>
     </div>
   );

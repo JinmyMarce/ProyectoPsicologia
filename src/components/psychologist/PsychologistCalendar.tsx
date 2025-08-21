@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, AlertCircle, CheckCircle, Loader2, Info, Search, User } from 'lucide-react';
+import { Calendar, AlertCircle, CheckCircle, Loader2, Info, Search, User, Star } from 'lucide-react';
 import { getAvailableSlots, createAppointment, searchStudent, Student } from '../../services/appointments';
 import { getBlockedDatesForCalendar } from '../../services/schedule';
-import { holidayService, Holiday } from '../../services/holidays';
+import { holidayService } from '../../services/holidays';
 import { holidayLocalService } from '../../services/holidaysLocal';
+import { Holiday } from '../../services/holidays';
 import { useSchedule } from '../../contexts/ScheduleContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -412,17 +413,14 @@ export const PsychologistCalendar: React.FC = () => {
   const diasOcupados = blockedDates;
 
   // Transformar feriados a eventos para BigCalendar
-  const holidayEvents: any[] = holidays.map((holiday) => {
-    const holidayDate = new Date(holiday.date);
-    return {
-      id: `holiday-${holiday.id}`,
-      title: `🎉 ${holiday.name}`,
-      start: holidayDate,
-      end: holidayDate,
-      resource: { type: 'holiday', data: holiday },
-      allDay: true,
-    };
-  });
+  const holidayEvents: Event[] = holidays.map((holiday) => ({
+    id: `holiday-${holiday.id}`,
+    title: `🎉 ${holiday.name}`,
+    start: parseLocalDate(holiday.date),
+    end: parseLocalDate(holiday.date),
+    resource: { type: 'holiday', data: holiday },
+    allDay: true,
+  }));
 
   // Transformar días a eventos para BigCalendar
   const dayEvents: any[] = monthDays.map(day => {
@@ -488,97 +486,100 @@ export const PsychologistCalendar: React.FC = () => {
     date1.getMonth() === date2.getMonth() &&
     date1.getDate() === date2.getDate();
 
-  // Leyenda visual igual que el estudiante
+  // Leyenda visual mejorada con colores más atractivos
   const Legend = () => (
-    <div className="mt-8 p-6 bg-white rounded-xl border border-gray-200 shadow-sm">
-      <h4 className="text-base font-semibold text-gray-800 mb-4 flex items-center">
-        <Info className="w-5 h-5 mr-2 text-blue-600" />
-        Leyenda de disponibilidad
+    <div className="mt-8 p-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border border-blue-200 shadow-xl">
+      <h4 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
+        <span className="w-8 h-8 mr-3 text-blue-600">📅</span>
+        Leyenda de Disponibilidad
       </h4>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Columna 1 - Estados principales */}
-        <div className="space-y-3">
-          <h5 className="text-sm font-medium text-gray-700 mb-3">Estados principales</h5>
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_DISPONIBLE, color: '#059669'}}>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Disponible</span>
-                <p className="text-xs text-gray-500">Puedes agendar cita</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_OCUPADO, color: '#b91c1c'}}>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Ocupado</span>
-                <p className="text-xs text-gray-500">No hay horarios disponibles</p>
-              </div>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-green-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 border-2 border-green-600 shadow-lg flex items-center justify-center">
+            <span className="text-white text-sm font-bold">✓</span>
+          </div>
+          <div>
+            <span className="text-sm font-bold text-gray-800">Disponible</span>
+            <p className="text-xs text-gray-600">Puedes agendar cita</p>
           </div>
         </div>
         
-        {/* Columna 2 - Restricciones */}
-        <div className="space-y-3">
-          <h5 className="text-sm font-medium text-gray-700 mb-3">Restricciones</h5>
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_BLOQUEADO, color: '#d97706'}}>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Fin de semana</span>
-                <p className="text-xs text-gray-500">No se atiende</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_PASADO, color: '#7c3aed'}}>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Día pasado</span>
-                <p className="text-xs text-gray-500">No disponible</p>
-              </div>
-            </div>
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-red-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-red-400 to-rose-500 border-2 border-red-600 shadow-lg flex items-center justify-center">
+            <span className="text-white text-sm font-bold">✗</span>
+          </div>
+          <div>
+            <span className="text-sm font-bold text-gray-800">Ocupado</span>
+            <p className="text-xs text-gray-600">No hay horarios disponibles</p>
           </div>
         </div>
         
-        {/* Columna 3 - Límites */}
-        <div className="space-y-3">
-          <h5 className="text-sm font-medium text-gray-700 mb-3">Límites de tiempo</h5>
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FUTURO_LIMITE, color: '#a16207'}}>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Fuera de límite</span>
-                <p className="text-xs text-gray-500">Más de 2 semanas</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border-2 border-blue-500 text-blue-600">
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Día actual</span>
-                <p className="text-xs text-gray-500">Hoy</p>
-              </div>
-            </div>
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gray-400 to-slate-500 border-2 border-gray-600 shadow-lg flex items-center justify-center">
+            <span className="text-white text-sm font-bold">⊘</span>
+          </div>
+          <div>
+            <span className="text-sm font-bold text-gray-800">No disponible</span>
+            <p className="text-xs text-gray-600">Bloqueado o fuera de límite</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-orange-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-orange-600 shadow-lg flex items-center justify-center">
+            <span className="text-white text-sm font-bold">⭐</span>
+          </div>
+          <div>
+            <span className="text-sm font-bold text-gray-800">Feriado Nacional</span>
+            <p className="text-xs text-gray-600">No se atiende en todo el país</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-purple-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-400 to-violet-500 border-2 border-purple-600 shadow-lg flex items-center justify-center">
+            <span className="text-white text-sm font-bold">⭐</span>
+          </div>
+          <div>
+            <span className="text-sm font-bold text-gray-800">Feriado Regional</span>
+            <p className="text-xs text-gray-600">Feriado específico de Lima</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-yellow-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 border-2 border-yellow-600 shadow-lg flex items-center justify-center">
+            <span className="text-white text-sm font-bold">☀</span>
+          </div>
+          <div>
+            <span className="text-sm font-bold text-gray-800">Fin de semana</span>
+            <p className="text-xs text-gray-600">No se atiende sábados ni domingos</p>
           </div>
         </div>
       </div>
       
-      {/* Información adicional */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div className="flex items-start gap-3">
-          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <Info className="w-4 h-4 text-blue-600" />
+      {/* Información adicional mejorada */}
+      <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 shadow-lg">
+        <div className="flex items-start gap-4">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-lg">
+            <span className="text-white text-sm font-bold">ℹ</span>
           </div>
           <div>
-            <h6 className="text-sm font-semibold text-blue-800 mb-1">Información importante</h6>
-            <ul className="text-xs text-blue-700 space-y-1">
-              <li>• Solo se pueden agendar citas hasta 2 semanas en adelante</li>
-              <li>• El horario de atención es de lunes a viernes</li>
-              <li>• Los fines de semana no se atiende</li>
-              <li>• No se pueden agendar citas en días pasados</li>
+            <h6 className="text-lg font-bold text-blue-800 mb-3">Información importante</h6>
+            <ul className="text-sm text-blue-700 space-y-2">
+              <li className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                Solo se pueden agendar citas hasta 2 semanas en adelante
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                El horario de atención es de lunes a viernes
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                Los fines de semana no se atiende
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                No se pueden agendar citas en días pasados
+              </li>
             </ul>
           </div>
         </div>
@@ -716,25 +717,75 @@ export const PsychologistCalendar: React.FC = () => {
           views={['month']}
           onSelectSlot={handleDateClick}
           eventPropGetter={(event: any) => {
-            // Mostrar solo los eventos de feriados
+            // Si es un evento de feriado
             if (event.resource?.type === 'holiday') {
               const holiday = event.resource.data;
-              const backgroundColor = holiday.is_national ? '#ffcdd2' : '#fff9c4';
-              const textColor = holiday.is_national ? '#d32f2f' : '#f57c00';
+              const isNational = holiday.is_national;
               return { 
                 style: { 
-                  backgroundColor, 
-                  color: textColor, 
-                  borderRadius: 8, 
-                  border: 'none', 
-                  fontWeight: 700,
+                  background: isNational 
+                    ? 'linear-gradient(135deg, rgba(251, 191, 36, 1) 0%, rgba(245, 158, 11, 0.95) 100%)'
+                    : 'linear-gradient(135deg, rgba(168, 85, 247, 1) 0%, rgba(139, 92, 246, 0.95) 100%)',
+                  color: isNational ? '#92400e' : '#581c87',
+                  borderRadius: 12,
+                  border: isNational 
+                    ? '3px solid #f59e0b'
+                    : '3px solid #8b5cf6',
+                  fontWeight: 800,
                   fontSize: '12px',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                  padding: '8px 12px',
+                  textAlign: 'center',
+                  boxShadow: isNational 
+                    ? '0 6px 20px rgba(251, 191, 36, 0.6)'
+                    : '0 6px 20px rgba(168, 85, 247, 0.6)',
+                  minHeight: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                  transform: 'scale(1.02)'
                 } 
               };
             }
-            // Ocultar otros eventos (días disponibles/ocupados)
-            return { style: { display: 'none' } };
+            
+            // Si es un evento de disponibilidad
+            if (event.resource?.type === 'availability') {
+              return { 
+                style: { 
+                  background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(22, 163, 74, 0.8) 100%)',
+                  color: '#ffffff',
+                  borderRadius: 8,
+                  border: '2px solid #16a34a',
+                  fontWeight: 700,
+                  boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)'
+                } 
+              };
+            }
+            
+            // Si es una cita
+            if (event.resource?.status === 'confirmada') {
+              return { 
+                style: { 
+                  background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(220, 38, 38, 0.8) 100%)',
+                  color: '#ffffff',
+                  borderRadius: 8,
+                  border: '2px solid #dc2626',
+                  fontWeight: 700,
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)'
+                } 
+              };
+            }
+            
+            return { 
+              style: { 
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(22, 163, 74, 0.8) 100%)',
+                color: '#ffffff',
+                borderRadius: 8,
+                border: '2px solid #16a34a',
+                fontWeight: 700,
+                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)'
+              } 
+            };
           }}
           components={{
             toolbar: (props: any) => (
@@ -759,158 +810,182 @@ export const PsychologistCalendar: React.FC = () => {
             )
           }}
           dayPropGetter={(date: any) => {
-          const month = currentMonth.getMonth();
-          const year = currentMonth.getFullYear();
-          if (
-            date.getFullYear() < year ||
-            (date.getFullYear() === year && date.getMonth() < month)
-          ) {
-            return { style: { backgroundColor: 'transparent', color: COLOR_TEXTO_NORMAL } };
-          }
-          
-          // Verificar si es feriado PRIMERO
-          const holiday = holidayService.isHolidayDate(date, holidays);
-          if (holiday) {
-            const backgroundColor = holiday.is_national ? COLOR_FERIADO_NACIONAL : COLOR_FERIADO;
-            const borderColor = holiday.is_national ? '#dc3545' : '#ffc107';
+            const today = new Date();
+            const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
+            const todayStart = startOfDay(peruTime);
+            const futureLimit = addDays(todayStart, 14);
+            const day = date.getDay();
+            
+            // Verificar si es feriado
+            const holiday = holidayLocalService.isHolidayDate(date, holidays);
+            
+            if (holiday) {
+              // Día feriado: diseño más atractivo con gradientes y efectos
+              const isNational = holiday.is_national;
+              return { 
+                style: { 
+                  background: isNational 
+                    ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.9) 0%, rgba(245, 158, 11, 0.8) 100%)'
+                    : 'linear-gradient(135deg, rgba(168, 85, 247, 0.9) 0%, rgba(139, 92, 246, 0.8) 100%)',
+                  color: isNational ? '#92400e' : '#581c87',
+                  fontWeight: 800,
+                  borderRadius: 16,
+                  boxShadow: isNational 
+                    ? '0 8px 25px rgba(251, 191, 36, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                    : '0 8px 25px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                  border: isNational 
+                    ? '3px solid #f59e0b'
+                    : '3px solid #8b5cf6',
+                  cursor: 'not-allowed',
+                  pointerEvents: 'none',
+                  position: 'relative',
+                  transform: 'scale(1.05)',
+                  transition: 'all 0.3s ease',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                } 
+              };
+            }
+            
+            if (day === 0 || day === 6) {
+              return { 
+                style: { 
+                  background: 'linear-gradient(135deg, rgba(253, 186, 116, 0.8) 0%, rgba(251, 146, 60, 0.7) 100%)',
+                  color: '#c2410c',
+                  pointerEvents: 'none',
+                  cursor: 'not-allowed',
+                  fontWeight: 700,
+                  borderRadius: 12,
+                  boxShadow: '0 4px 15px rgba(253, 186, 116, 0.3)',
+                  border: '2px solid #f97316',
+                  opacity: 0.8
+                } 
+              };
+            }
+            if (isBefore(date, todayStart)) {
+              return { 
+                style: { 
+                  background: 'linear-gradient(135deg, rgba(156, 163, 175, 0.6) 0%, rgba(107, 114, 128, 0.5) 100%)',
+                  color: '#374151',
+                  fontWeight: 600,
+                  borderRadius: 12,
+                  boxShadow: '0 4px 12px rgba(156, 163, 175, 0.2)',
+                  border: '1px solid #9ca3af',
+                  cursor: 'not-allowed',
+                  opacity: 0.6
+                } 
+              };
+            }
+            if (isAfter(date, futureLimit)) {
+              return { 
+                style: { 
+                  background: 'linear-gradient(135deg, rgba(253, 224, 71, 0.6) 0%, rgba(250, 204, 21, 0.5) 100%)',
+                  color: '#a16207',
+                  fontWeight: 600,
+                  opacity: 0.7,
+                  borderRadius: 12,
+                  boxShadow: '0 4px 12px rgba(253, 224, 71, 0.2)',
+                  border: '1px solid #facc15'
+                } 
+              };
+            }
             return { 
               style: { 
-                backgroundColor,
-                color: COLOR_TEXTO_FERIADO,
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.8) 0%, rgba(22, 163, 74, 0.7) 100%)',
+                color: '#064e3b',
                 fontWeight: 700,
                 borderRadius: 12,
-                boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)',
-                border: `2px solid ${borderColor}`,
+                boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)',
+                border: '2px solid #16a34a',
                 cursor: 'pointer',
-                position: 'relative',
-                minHeight: '60px',
-                height: '60px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                transition: 'all 0.2s ease',
+                textShadow: '0 1px 2px rgba(0,0,0,0.1)'
               } 
             };
-          }
-          const today = new Date();
-          const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
-          const todayStart = startOfDay(peruTime);
-          const twoWeeksLimit = addDays(todayStart, 14);
-          // Solo colorea el primer día del límite
-          if (
-            date.getFullYear() === twoWeeksLimit.getFullYear() &&
-            date.getMonth() === twoWeeksLimit.getMonth() &&
-            date.getDate() === twoWeeksLimit.getDate()
-          ) {
-            return { style: { backgroundColor: COLOR_FUTURO_LIMITE, color: '#a16207', opacity: 1, cursor: 'not-allowed', fontWeight: 600 } };
-          }
-          // Días después del límite: sin color especial
-          if (isAfter(date, twoWeeksLimit)) {
-            return { style: { backgroundColor: 'transparent', color: COLOR_TEXTO_NORMAL, cursor: 'not-allowed', opacity: 0.7 } };
-          }
-          if (isBefore(date, todayStart) && date.getMonth() === month && date.getFullYear() === year) {
-            return { style: { backgroundColor: COLOR_PASADO, color: COLOR_TEXTO_NORMAL } };
-          }
-          const dateStr = toLocalDateString(date);
-          const dayData = monthDays.find(d => d.date === dateStr);
-          let style: any = {
-            fontWeight: 700,
-            fontSize: 18,
-            borderRadius: 12,
-            minHeight: '60px',
-            height: '60px',
-            width: '100%',
-            boxSizing: 'border-box',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: 0,
-            padding: 0,
-            background: 'none',
-            color: COLOR_TEXTO_NORMAL,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-            transition: 'background 0.3s, color 0.3s, box-shadow 0.3s',
-            position: 'relative',
-            cursor: 'pointer',
-            zIndex: 0
-          };
-
-          if (dayData) {
-            // Aplicar colores según el estado del día (excepto para el día actual)
-            if (dayData.isToday) {
-              // Para el día actual: solo borde azul, sin color de fondo
-              style.background = 'transparent';
-              style.color = COLOR_TEXTO_NORMAL;
-              style.border = `2px solid ${COLOR_BORDE_ACTUAL}`;
-              style.boxShadow = `0 4px 12px rgba(59, 130, 246, 0.3)`;
-              style.cursor = dayData.isAvailable ? 'pointer' : 'not-allowed';
-            } else {
-              // Para otros días: aplicar colores normales
-              if (dayData.isPast) {
-                style.background = COLOR_PASADO;
-                style.color = '#7c3aed'; // Púrpura para día pasado
-                style.cursor = 'not-allowed';
-                style.borderRadius = 12;
-                style.fontWeight = 700;
-                style.boxShadow = '0 4px 12px rgba(124, 58, 237, 0.15)';
-                style.border = 'none';
-              } else if (dayData.isFutureLimit) {
-                style.background = COLOR_FUTURO_LIMITE;
-                style.color = '#a16207'; // Amarillo oscuro para fuera de límite
-                style.cursor = 'not-allowed';
-                style.borderRadius = 12;
-                style.fontWeight = 700;
-                style.boxShadow = '0 4px 12px rgba(253, 224, 71, 0.15)';
-                style.border = 'none';
-              } else if (dayData.isBlocked) {
-                style.background = COLOR_BLOQUEADO;
-                style.color = '#d97706'; // Naranja claro para fin de semana
-                style.cursor = 'not-allowed';
-              } else if (dayData.isAvailable) {
-                style.background = COLOR_DISPONIBLE;
-                style.color = '#059669'; // Verde oscuro para disponible
-                style.cursor = 'pointer';
-                style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.2)';
-              } else {
-                // Para días que no están disponibles pero no están bloqueados (ocupados)
-                style.background = COLOR_OCUPADO;
-                style.color = '#b91c1c'; // Rojo oscuro para ocupado
-                style.cursor = 'not-allowed';
-                style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.2)';
+          }}
+          components={{
+            toolbar: (props: any) => {
+              // Solo permitir avanzar o volver a hoy, no retroceder
+              const today = new Date();
+              const currentMonth = props.date.getMonth();
+              const currentYear = props.date.getFullYear();
+              const minMonth = today.getMonth();
+              const minYear = today.getFullYear();
+              const canGoPrev = currentYear > minYear || (currentYear === minYear && currentMonth > minMonth);
+              return (
+                <div className="rbc-toolbar">
+                  <span className="rbc-btn-group">
+                    <button type="button" onClick={() => props.onNavigate('TODAY')}>Hoy</button>
+                    <button type="button" onClick={() => props.onNavigate('PREV')} disabled={!canGoPrev}>Anterior</button>
+                    <button type="button" onClick={() => props.onNavigate('NEXT')}>Siguiente</button>
+                  </span>
+                  <span className="rbc-toolbar-label">{props.label}</span>
+                </div>
+              );
+            },
+            event: (props: any) => {
+              // Si es un evento de feriado
+              if (props.event.resource?.type === 'holiday') {
+                const holiday = props.event.resource.data;
+                const isNational = holiday.is_national;
+                return (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '4px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      textAlign: 'center',
+                      lineHeight: '1.2',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '2px',
+                      marginBottom: '2px'
+                    }}>
+                      <span style={{ fontSize: '8px' }}>⭐</span>
+                      <span style={{ 
+                        fontSize: '8px',
+                        fontWeight: 800,
+                        color: isNational ? '#92400e' : '#581c87'
+                      }}>
+                        {isNational ? 'NACIONAL' : 'REGIONAL'}
+                      </span>
+                    </div>
+                    <div style={{
+                      fontSize: '9px',
+                      fontWeight: 600,
+                      color: isNational ? '#92400e' : '#581c87',
+                      wordBreak: 'break-word',
+                      hyphens: 'auto',
+                      maxHeight: '100%',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical'
+                    }}>
+                      {holiday.name}
+                    </div>
+                  </div>
+                );
               }
+              
+              // Para otros eventos (citas o disponibilidad)
+              return (
+                <div style={{ padding: '2px 4px', fontSize: '11px' }}>
+                  {props.title}
+                </div>
+              );
             }
-
-            // Aplicar borde rojo para el día seleccionado (sobrescribe el borde azul si es necesario)
-            if (dateStr === selectedDate) {
-              style.border = `2px solid ${COLOR_BORDE_SELECCIONADO}`;
-              style.boxShadow = `0 4px 12px rgba(142, 22, 26, 0.3)`;
-            }
-          }
-
-          return { style };
-        }}
-        components={{
-          toolbar: (props: any) => {
-            // Solo permitir avanzar o volver a hoy, no retroceder
-            const today = new Date();
-            const currentMonth = props.date.getMonth();
-            const currentYear = props.date.getFullYear();
-            const minMonth = today.getMonth();
-            const minYear = today.getFullYear();
-            const canGoPrev = currentYear > minYear || (currentYear === minYear && currentMonth > minMonth);
-            return (
-              <div className="rbc-toolbar">
-                <span className="rbc-btn-group">
-                  <button type="button" onClick={() => props.onNavigate('TODAY')}>Hoy</button>
-                  <button type="button" onClick={() => props.onNavigate('PREV')} disabled={!canGoPrev}>Anterior</button>
-                  <button type="button" onClick={() => props.onNavigate('NEXT')}>Siguiente</button>
-                </span>
-                <span className="rbc-toolbar-label">{props.label}</span>
-              </div>
-            );
-          },
-          event: () => null
-        }}
-      />
+          }}
+        />
       </div>
 
       {/* Leyenda */}

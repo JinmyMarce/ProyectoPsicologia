@@ -14,6 +14,8 @@ export interface User {
   phone?: string;
   birthdate?: string;
   gender?: string;
+  google_avatar?: string;
+  avatar?: string;
 }
 
 export interface Appointment {

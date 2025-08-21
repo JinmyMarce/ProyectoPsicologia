@@ -35,6 +35,7 @@ import MessagePanel from './components/messages/MessagePanel';
 import { SyncNotification } from './components/ui/SyncNotification';
 import { WelcomeMessage } from './components/auth/WelcomeMessage';
 import { AdminStats } from './components/dashboard/AdminStats';
+import { LoadingScreen } from './components/ui/LoadingScreen';
 
 // Componente para manejar la navegación
 function NavigationHandler({ onPageChange }: { onPageChange: (page: string) => void }) {
@@ -84,23 +85,13 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{
-        background: 'linear-gradient(135deg, rgba(142, 22, 26, 0.05) 0%, rgba(211, 183, 160, 0.05) 100%)'
-      }}>
-        <div className="text-center">
-          <img 
-            src="/images/icons/psicologia.png"
-            alt="Logo Institucional"
-            className="w-24 h-24 object-contain mx-auto mb-4"
-          />
-          <div className="flex items-center justify-center space-x-2">
-            <div className="w-4 h-4 rounded-full animate-bounce" style={{backgroundColor: '#8e161a'}}></div>
-            <div className="w-4 h-4 rounded-full animate-bounce [animation-delay:-.3s]" style={{backgroundColor: '#d3b7a0'}}></div>
-            <div className="w-4 h-4 rounded-full animate-bounce [animation-delay:-.5s]" style={{backgroundColor: '#34495e'}}></div>
-          </div>
-          <p className="font-semibold mt-4" style={{color: '#2c3e50'}}>Cargando...</p>
-        </div>
-      </div>
+      <LoadingScreen 
+        title="Instituto Túpac Amaru"
+        subtitle="Sistema de Gestión Psicológica"
+        size="lg"
+        showParticles={true}
+        showWaves={true}
+      />
     );
   }
 
@@ -111,126 +102,135 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-gray-50 flex" style={{fontFamily: undefined}}>
       <NavigationHandler onPageChange={setCurrentPage} />
-      <Sidebar 
-        isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)}
-        onPageChange={handlePageChange}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-      />
-      <div className={`flex-1 flex flex-col transition-all duration-300
-        ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'}
-        ${sidebarOpen ? 'z-0' : ''}
-      `}>
-        <Header 
-          onMenuClick={() => setSidebarOpen(true)} 
+      
+      {/* Contenedor unificado con sidebar y contenido */}
+      <div className="flex w-full h-screen bg-gray-50">
+        {/* Sidebar */}
+        <Sidebar 
+          isOpen={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)}
+          onPageChange={handlePageChange}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
         
-        {/* Notificación de sincronización */}
-        {syncMessage && (
-          <SyncNotification
-            isVisible={syncMessage.visible}
-            message={syncMessage.message}
-            type={syncMessage.type}
-            onClose={() => setSyncMessage(null)}
+        {/* Área de contenido principal */}
+        <div className="flex-1 flex flex-col relative bg-white">
+          {/* Header */}
+          <Header 
+            onMenuClick={() => setSidebarOpen(true)} 
           />
-        )}
-        
-        {/* Mensaje de bienvenida */}
-        {welcomeMessage && (
-          <WelcomeMessage
-            type={welcomeMessage.type}
-            userName={welcomeMessage.userName}
-            isVisible={welcomeMessage.visible}
-            onClose={() => setWelcomeMessage(null)}
-          />
-        )}
-        <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
-            <Routes>
-              {/* Rutas para Super Admin */}
-              {user.role === 'super_admin' && user.email === 'marcelojinmy2024@gmail.com' && (
-                <>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<SuperAdminDashboard />} />
-                  <Route path="/users" element={<SuperAdminUserManagement />} />
-                  <Route path="/monitoring" element={<SystemMonitoring />} />
-                  <Route path="/reports" element={<ReportsAnalytics />} />
-                  <Route path="/notifications" element={<NotificationCenter />} />
-                  <Route path="/profile" element={<UserProfile />} />
-                </>
-              )}
-              {/* Si es super_admin pero no tiene el email correcto, mostrar acceso denegado */}
-              {user.role === 'super_admin' && user.email !== 'marcelojinmy2024@gmail.com' && (
-                <Route path="*" element={<div className="flex items-center justify-center min-h-screen"><h2 className="text-2xl text-red-600 font-bold">Acceso denegado. Solo el superadministrador autorizado puede acceder.</h2></div>} />
-              )}
+          
+          {/* Notificación de sincronización */}
+          {syncMessage && (
+            <SyncNotification
+              isVisible={syncMessage.visible}
+              message={syncMessage.message}
+              type={syncMessage.type}
+              onClose={() => setSyncMessage(null)}
+            />
+          )}
+          
+          {/* Mensaje de bienvenida */}
+          {welcomeMessage && (
+            <WelcomeMessage
+              type={welcomeMessage.type}
+              userName={welcomeMessage.userName}
+              isVisible={welcomeMessage.visible}
+              onClose={() => setWelcomeMessage(null)}
+            />
+          )}
 
-              {/* Rutas para Admin */}
-              {user.role === 'admin' && (
-                <>
-                  <Route path="/admin-stats" element={<AdminStats />} />
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<AdminDashboard />} />
-                  <Route path="/users" element={<UserManagement />} />
-                  <Route path="/reports" element={<ReportsAnalytics />} />
-                  <Route path="/notifications" element={<NotificationCenter />} />
-                  <Route path="/profile" element={<UserProfile />} />
-                </>
-              )}
+          {/* Contenido principal */}
+          <main className="flex-1 p-8 overflow-y-auto bg-gray-50" style={{
+            marginTop: '60px'
+          }}>
+            <div className="max-w-7xl mx-auto h-full">
+              <Routes>
+                {/* Rutas para Super Admin */}
+                {user.role === 'super_admin' && user.email === 'marcelojinmy2024@gmail.com' && (
+                  <>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<SuperAdminDashboard />} />
+                    <Route path="/users" element={<SuperAdminUserManagement />} />
+                    <Route path="/monitoring" element={<SystemMonitoring />} />
+                    <Route path="/reports" element={<ReportsAnalytics />} />
+                    <Route path="/notifications" element={<NotificationCenter />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                  </>
+                )}
+                {/* Si es super_admin pero no tiene el email correcto, mostrar acceso denegado */}
+                {user.role === 'super_admin' && user.email !== 'marcelojinmy2024@gmail.com' && (
+                  <Route path="*" element={<div className="flex items-center justify-center min-h-screen"><h2 className="text-2xl text-red-600 font-bold">Acceso denegado. Solo el superadministrador autorizado puede acceder.</h2></div>} />
+                )}
 
-              {/* Rutas para Psicólogo */}
-              {user.role === 'psychologist' && user.email !== 'marcelojinmy2024@gmail.com' && (
-                <>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<PsychologistDashboard />} />
-                  <Route path="/schedule" element={<ScheduleManager />} />
-                  <Route path="/patients" element={<PatientList />} />
-                  <Route path="/patients/register" element={<PatientRegistration />} />
-<Route path="/patients/registry" element={<PatientRegistration />} />
-                                              <Route path="/sessions" element={<SessionList />} />
-                            <Route path="/sessions/history" element={<SessionHistory />} />
-                  <Route path="/appointments/direct" element={<PsychologistCalendar />} />
-                  <Route path="/notifications" element={<NotificationCenter />} />
-                  <Route path="/profile" element={<UserProfile />} />
-                </>
-              )}
-              {/* Si es super_admin, nunca mostrar la interfaz de psicólogo */}
-              {user.role === 'psychologist' && user.email === 'marcelojinmy2024@gmail.com' && (
-                <Route path="*" element={<div className="flex items-center justify-center min-h-screen"><h2 className="text-2xl text-red-600 font-bold">Acceso denegado. Solo el superadministrador autorizado puede acceder a su propia interfaz.</h2></div>} />
-              )}
+                {/* Rutas para Admin */}
+                {user.role === 'admin' && (
+                  <>
+                    <Route path="/admin-stats" element={<AdminStats />} />
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<AdminDashboard />} />
+                    <Route path="/users" element={<UserManagement />} />
+                    <Route path="/reports" element={<ReportsAnalytics />} />
+                    <Route path="/notifications" element={<NotificationCenter />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                  </>
+                )}
 
-              {/* Rutas para Estudiante */}
-              {user.role === 'student' && (
-                <>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<StudentDashboard onPageChange={handlePageChange} />} />
-                  <Route path="/appointments" element={<AppointmentBooking />} />
-                  <Route path="/appointments/calendar" element={<AppointmentCalendar />} />
-                  <Route path="/appointments/history" element={<StudentAppointmentHistory />} />
-                  <Route path="/appointments/reschedule" element={<RescheduleAppointment />} />
-                  <Route path="/notifications" element={<NotificationCenter />} />
-                  <Route path="/profile" element={<UserProfile />} />
-                </>
-              )}
+                {/* Rutas para Psicólogo */}
+                {user.role === 'psychologist' && user.email !== 'marcelojinmy2024@gmail.com' && (
+                  <>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<PsychologistDashboard />} />
+                    <Route path="/schedule" element={<ScheduleManager />} />
+                    <Route path="/patients" element={<PatientList onRegisterClick={() => navigate('/patients/register')} />} />
+                    <Route path="/patients/register" element={<PatientRegistration />} />
+                    <Route path="/patients/registry" element={<PatientRegistration />} />
+                    <Route path="/sessions" element={<SessionList />} />
+                    <Route path="/sessions/history" element={<SessionHistory />} />
+                    <Route path="/appointments/direct" element={<PsychologistCalendar />} />
+                    <Route path="/notifications" element={<NotificationCenter />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                  </>
+                )}
+                {/* Si es super_admin, nunca mostrar la interfaz de psicólogo */}
+                {user.role === 'psychologist' && user.email === 'marcelojinmy2024@gmail.com' && (
+                  <Route path="*" element={<div className="flex items-center justify-center min-h-screen"><h2 className="text-2xl text-red-600 font-bold">Acceso denegado. Solo el superadministrador autorizado puede acceder a su propia interfaz.</h2></div>} />
+                )}
 
-              {/* Rutas para Tutor */}
-              {user.role === 'tutor' && (
-                <>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<TutorDashboard />} />
-                  <Route path="/students" element={<StudentManagement />} />
-                  <Route path="/derivations" element={<DerivationManagement />} />
-                  <Route path="/sessions" element={<GroupSessionManagement />} />
-                  <Route path="/notifications" element={<NotificationCenter />} />
-                  <Route path="/profile" element={<UserProfile />} />
-                </>
-              )}
+                {/* Rutas para Estudiante */}
+                {user.role === 'student' && (
+                  <>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<StudentDashboard onPageChange={handlePageChange} />} />
+                    <Route path="/appointments" element={<AppointmentBooking />} />
+                    <Route path="/appointments/calendar" element={<AppointmentCalendar />} />
+                    <Route path="/appointments/history" element={<StudentAppointmentHistory />} />
+                    <Route path="/appointments/reschedule" element={<RescheduleAppointment />} />
+                    <Route path="/notifications" element={<NotificationCenter />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                  </>
+                )}
 
-              {/* Ruta por defecto */}
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </div>
-        </main>
+                {/* Rutas para Tutor */}
+                {user.role === 'tutor' && (
+                  <>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<TutorDashboard />} />
+                    <Route path="/students" element={<StudentManagement />} />
+                    <Route path="/derivations" element={<DerivationManagement />} />
+                    <Route path="/sessions" element={<GroupSessionManagement />} />
+                    <Route path="/notifications" element={<NotificationCenter />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                  </>
+                )}
+
+                {/* Ruta por defecto */}
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
+            </div>
+          </main>
+        </div>
       </div>
       {/* Panel de mensajes global */}
       <MessagePanel isOpen={showMessagesPanel} onClose={() => setShowMessagesPanel(false)} />

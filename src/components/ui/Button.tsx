@@ -22,20 +22,80 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    'inline-flex items-center justify-center rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center rounded-md font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variants = {
-    primary:
-      'bg-granate-800 text-blanco hover:bg-granate-700 focus:ring-granate-500 border border-granate-800 shadow-lg hover:shadow-xl transition-all duration-200',
-    secondary:
-      'bg-azul-marino-800 text-blanco hover:bg-azul-marino-700 focus:ring-azul-marino-500 border border-azul-marino-800 shadow-lg hover:shadow-xl transition-all duration-200',
-    outline:
-      'bg-transparent text-granate-800 border-2 border-granate-800 hover:bg-granate-800 hover:text-blanco shadow-md hover:shadow-lg transition-all duration-200',
-    ghost:
-      'bg-transparent text-granate-800 hover:bg-granate-100 border border-transparent hover:border-granate-300 transition-all duration-200',
-    danger:
-      'bg-red-600 text-blanco hover:bg-red-700 focus:ring-red-500 border border-red-600 shadow-lg hover:shadow-xl transition-all duration-200',
+    primary: 'text-white shadow-lg hover:shadow-xl transition-all duration-200 border',
+    secondary: 'text-white shadow-lg hover:shadow-xl transition-all duration-200 border',
+    outline: 'bg-transparent border-2 shadow-md hover:shadow-lg transition-all duration-200',
+    ghost: 'bg-transparent border border-transparent transition-all duration-200',
+    danger: 'text-white shadow-lg hover:shadow-xl transition-all duration-200 border',
   };
+
+  const getVariantStyles = (variant: string) => {
+    switch (variant) {
+      case 'primary':
+        return {
+          background: 'linear-gradient(135deg, #8e161a 0%, #a52a2a 50%, #8e161a 100%)',
+          borderColor: 'rgba(211, 183, 160, 0.3)',
+          boxShadow: '0 4px 15px rgba(142, 22, 26, 0.3)',
+          hoverBackground: 'linear-gradient(135deg, #a52a2a 0%, #b91c1c 50%, #a52a2a 100%)',
+          hoverBoxShadow: '0 6px 20px rgba(142, 22, 26, 0.4)',
+          focusRing: 'rgba(142, 22, 26, 0.5)'
+        };
+      case 'secondary':
+        return {
+          background: 'linear-gradient(135deg, #1e2a37 0%, #334155 50%, #1e2a37 100%)',
+          borderColor: 'rgba(211, 183, 160, 0.3)',
+          boxShadow: '0 4px 15px rgba(30, 42, 55, 0.3)',
+          hoverBackground: 'linear-gradient(135deg, #334155 0%, #475569 50%, #334155 100%)',
+          hoverBoxShadow: '0 6px 20px rgba(30, 42, 55, 0.4)',
+          focusRing: 'rgba(30, 42, 55, 0.5)'
+        };
+      case 'outline':
+        return {
+          background: 'transparent',
+          borderColor: '#8e161a',
+          color: '#8e161a',
+          boxShadow: '0 2px 8px rgba(142, 22, 26, 0.2)',
+          hoverBackground: 'linear-gradient(135deg, #8e161a 0%, #a52a2a 100%)',
+          hoverColor: 'white',
+          hoverBoxShadow: '0 4px 15px rgba(142, 22, 26, 0.3)',
+          focusRing: 'rgba(142, 22, 26, 0.5)'
+        };
+      case 'ghost':
+        return {
+          background: 'transparent',
+          borderColor: 'transparent',
+          color: '#8e161a',
+          boxShadow: 'none',
+          hoverBackground: 'rgba(142, 22, 26, 0.1)',
+          hoverBorderColor: 'rgba(142, 22, 26, 0.3)',
+          hoverBoxShadow: '0 2px 8px rgba(142, 22, 26, 0.2)',
+          focusRing: 'rgba(142, 22, 26, 0.3)'
+        };
+      case 'danger':
+        return {
+          background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #dc2626 100%)',
+          borderColor: 'rgba(220, 38, 38, 0.3)',
+          boxShadow: '0 4px 15px rgba(220, 38, 38, 0.3)',
+          hoverBackground: 'linear-gradient(135deg, #ef4444 0%, #f87171 50%, #ef4444 100%)',
+          hoverBoxShadow: '0 6px 20px rgba(220, 38, 38, 0.4)',
+          focusRing: 'rgba(220, 38, 38, 0.5)'
+        };
+      default:
+        return {
+          background: 'linear-gradient(135deg, #8e161a 0%, #a52a2a 50%, #8e161a 100%)',
+          borderColor: 'rgba(211, 183, 160, 0.3)',
+          boxShadow: '0 4px 15px rgba(142, 22, 26, 0.3)',
+          hoverBackground: 'linear-gradient(135deg, #a52a2a 0%, #b91c1c 50%, #a52a2a 100%)',
+          hoverBoxShadow: '0 6px 20px rgba(142, 22, 26, 0.4)',
+          focusRing: 'rgba(142, 22, 26, 0.5)'
+        };
+    }
+  };
+
+  const styles = getVariantStyles(variant);
 
   return (
     <button
@@ -49,6 +109,31 @@ export function Button({
         },
         className
       )}
+      style={{
+        background: styles.background,
+        borderColor: styles.borderColor,
+        color: styles.color || 'white',
+        boxShadow: styles.boxShadow,
+        ...(variant === 'outline' && { color: styles.color }),
+        ...(variant === 'ghost' && { color: styles.color }),
+      }}
+      onMouseEnter={(e) => {
+        if (variant === 'outline' || variant === 'ghost') {
+          e.currentTarget.style.background = styles.hoverBackground;
+          e.currentTarget.style.color = styles.hoverColor || 'white';
+          e.currentTarget.style.borderColor = styles.hoverBorderColor || styles.borderColor;
+          e.currentTarget.style.boxShadow = styles.hoverBoxShadow;
+        } else {
+          e.currentTarget.style.background = styles.hoverBackground;
+          e.currentTarget.style.boxShadow = styles.hoverBoxShadow;
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = styles.background;
+        e.currentTarget.style.color = styles.color || 'white';
+        e.currentTarget.style.borderColor = styles.borderColor;
+        e.currentTarget.style.boxShadow = styles.boxShadow;
+      }}
       disabled={disabled || loading}
       {...props}
     >

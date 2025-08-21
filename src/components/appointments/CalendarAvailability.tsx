@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, AlertCircle, CheckCircle, Clock, Loader2, Lock, Info } from 'lucide-react';
+import { Calendar, AlertCircle, CheckCircle, Clock, Loader2, Lock, Info, Star } from 'lucide-react';
 import { getAvailableSlots } from '../../services/appointments';
-import { holidayLocalService, Holiday } from '../../services/holidaysLocal';
+import { holidayLocalService } from '../../services/holidaysLocal';
+import { Holiday } from '../../services/holidays';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Calendar as BigCalendar, dateFnsLocalizer, Event } from 'react-big-calendar';
@@ -364,6 +365,31 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
     return null;
   }).filter(Boolean);
 
+  // Transformar días disponibles a eventos para Big Calendar
+  const availabilityEvents: Event[] = monthDays
+    .filter(day => day.isAvailable)
+    .map(day => ({
+      id: `available-${day.date}`,
+      title: `${day.availableSlots} horarios disponibles`,
+      start: new Date(day.date),
+      end: new Date(day.date),
+      resource: { type: 'availability', data: day },
+      allDay: true,
+    }));
+
+  // Agregar eventos de feriados al calendario
+  const holidayEvents: Event[] = holidays.map((holiday) => ({
+    id: `holiday-${holiday.id}`,
+    title: `🎉 ${holiday.name}`,
+    start: parseLocalDate(holiday.date),
+    end: parseLocalDate(holiday.date),
+    resource: { type: 'holiday', data: holiday },
+    allDay: true,
+  }));
+
+  // Combinar eventos de disponibilidad y feriados
+  const allEvents = [...availabilityEvents, ...holidayEvents];
+
   const handleSelectSlot = (slotInfo: any) => {
     const dateStr = toLocalDateString(slotInfo.start);
     const day = monthDays.find(d => d.date === dateStr);
@@ -438,7 +464,7 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
       </div>
       <BigCalendar
         localizer={localizer}
-        events={events}
+        events={allEvents}
         startAccessor="start"
         endAccessor="end"
         selectable
@@ -570,120 +596,233 @@ export const CalendarAvailability: React.FC<CalendarAvailabilityProps> = ({
 
           return { style };
         }}
+        eventPropGetter={() => ({ style: { display: 'none' } }) // Ocultar eventos visuales, solo fondo de celda
+        }
+        dayPropGetter={(date: any) => {
+          const today = new Date();
+          const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
+          const todayStart = startOfDay(peruTime);
+          const futureLimit = addDays(todayStart, 14);
+          const dayOfWeek = date.getDay();
+          
+          // Verificar si es feriado
+          const holiday = holidayLocalService.isHolidayDate(date, holidays);
+          
+          if (holiday) {
+            // Día feriado: fondo especial con borde
+            const isNational = holiday.is_national;
+            return { 
+              style: { 
+                backgroundColor: isNational ? 'rgba(251, 191, 36, 0.25)' : 'rgba(168, 85, 247, 0.25)',
+                color: isNational ? '#d97706' : '#7c3aed',
+                fontWeight: 700,
+                borderRadius: 12,
+                boxShadow: isNational ? '0 4px 12px rgba(251, 191, 36, 0.3)' : '0 4px 12px rgba(168, 85, 247, 0.3)',
+                border: isNational ? '2px solid #f59e0b' : '2px solid #8b5cf6',
+                cursor: 'not-allowed',
+                pointerEvents: 'none',
+                position: 'relative'
+              } 
+            };
+          }
+          
+          if (dayOfWeek === 0 || dayOfWeek === 6) {
+            return { style: { backgroundColor: 'rgba(253, 186, 116, 0.3)', color: '#d97706', pointerEvents: 'none', cursor: 'not-allowed', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(253, 186, 116, 0.15)', border: 'none' } };
+          }
+          if (isBefore(date, todayStart)) {
+            return { style: { backgroundColor: 'rgba(196, 181, 253, 0.3)', color: '#7c3aed', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(124, 58, 237, 0.15)', border: 'none', cursor: 'not-allowed' } };
+          }
+          if (isAfter(date, futureLimit)) {
+            return { style: { backgroundColor: 'rgba(253, 224, 71, 0.3)', color: '#a16207', fontWeight: 600, opacity: 0.7, borderRadius: 12, boxShadow: '0 4px 12px rgba(253, 224, 71, 0.15)', border: 'none' } };
+          }
+          return { style: { backgroundColor: 'rgba(134, 239, 172, 0.3)', color: '#059669', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)', border: 'none', cursor: 'pointer' } };
+        }}
+        eventPropGetter={(event: any) => {
+          // Si es un evento de feriado
+          if (event.resource?.type === 'holiday') {
+            const holiday = event.resource.data;
+            const isNational = holiday.is_national;
+            return { 
+              style: { 
+                background: isNational 
+                  ? 'linear-gradient(135deg, rgba(251, 191, 36, 1) 0%, rgba(245, 158, 11, 0.95) 100%)'
+                  : 'linear-gradient(135deg, rgba(168, 85, 247, 1) 0%, rgba(139, 92, 246, 0.95) 100%)',
+                color: isNational ? '#92400e' : '#581c87',
+                borderRadius: 12,
+                border: isNational 
+                  ? '3px solid #f59e0b'
+                  : '3px solid #8b5cf6',
+                fontWeight: 800,
+                fontSize: '12px',
+                padding: '8px 12px',
+                textAlign: 'center',
+                boxShadow: isNational 
+                  ? '0 6px 20px rgba(251, 191, 36, 0.6)'
+                  : '0 6px 20px rgba(168, 85, 247, 0.6)',
+                minHeight: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                transform: 'scale(1.02)'
+              } 
+            };
+          }
+          
+          // Si es un evento de disponibilidad
+          if (event.resource?.type === 'availability') {
+            return { 
+              style: { 
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(22, 163, 74, 0.8) 100%)',
+                color: '#ffffff',
+                borderRadius: 8,
+                border: '2px solid #16a34a',
+                fontWeight: 700,
+                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)'
+              } 
+            };
+          }
+          
+          return { 
+            style: { 
+              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(22, 163, 74, 0.8) 100%)',
+              color: '#ffffff',
+              borderRadius: 8,
+              border: '2px solid #16a34a',
+              fontWeight: 700,
+              boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)'
+            } 
+          };
+        }}
         components={{
-          event: () => null // No mostrar badges ni íconos
+          event: (props: any) => {
+            // Si es un evento de feriado
+            if (props.event.resource?.type === 'holiday') {
+              const holiday = props.event.resource.data;
+              const isNational = holiday.is_national;
+              return (
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '4px',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    textAlign: 'center',
+                    lineHeight: '1.2',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '2px',
+                    marginBottom: '2px'
+                  }}>
+                    <span style={{ fontSize: '8px' }}>⭐</span>
+                    <span style={{ 
+                      fontSize: '8px',
+                      fontWeight: 800,
+                      color: isNational ? '#92400e' : '#581c87'
+                    }}>
+                      {isNational ? 'NACIONAL' : 'REGIONAL'}
+                    </span>
+                  </div>
+                  <div style={{
+                    fontSize: '9px',
+                    fontWeight: 600,
+                    color: isNational ? '#92400e' : '#581c87',
+                    wordBreak: 'break-word',
+                    hyphens: 'auto',
+                    maxHeight: '100%',
+                    overflow: 'hidden',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical'
+                  }}>
+                    {holiday.name}
+                  </div>
+                </div>
+              );
+            }
+            
+            // Para otros eventos (disponibilidad)
+            return (
+              <div style={{ padding: '2px 4px', fontSize: '11px' }}>
+                {props.title}
+              </div>
+            );
+          }
         }}
       />
-      
-      {/* Leyenda visual mejorada */}
-      <div className="mt-8 p-6 bg-white rounded-xl border border-gray-200 shadow-sm">
-        <h4 className="text-base font-semibold text-gray-800 mb-4 flex items-center">
-          <Info className="w-5 h-5 mr-2 text-blue-600" />
-          Leyenda de disponibilidad
+      {/* Leyenda visual mejorada con colores más atractivos */}
+      <div className="mt-6 p-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border border-blue-200 shadow-xl">
+        <h4 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
+          <span className="w-8 h-8 mr-3 text-blue-600">📅</span>
+          Leyenda de Disponibilidad
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Columna 1 - Estados principales */}
-          <div className="space-y-3">
-            <h5 className="text-sm font-medium text-gray-700 mb-3">Estados principales</h5>
-            <div className="space-y-2">
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_DISPONIBLE, color: '#8e161a'}}>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Disponible</span>
-                <p className="text-xs text-gray-500">Puedes agendar cita</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_OCUPADO, color: '#2c3e50'}}>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Ocupado</span>
-                <p className="text-xs text-gray-500">No hay horarios disponibles</p>
-              </div>
-            </div>
-            </div>
-          </div>
-          
-          {/* Columna 2 - Restricciones */}
-          <div className="space-y-3">
-            <h5 className="text-sm font-medium text-gray-700 mb-3">Restricciones</h5>
-            <div className="space-y-2">
-                          <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_BLOQUEADO, color: '#34495e'}}>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Fin de semana</span>
-                <p className="text-xs text-gray-500">No se atiende</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_PASADO, color: '#7c3aed'}}>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Día pasado</span>
-                <p className="text-xs text-gray-500">No disponible</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FERIADO, color: '#dc2626'}}>
-                🎉
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Feriado Nacional</span>
-                <p className="text-xs text-gray-500">No hay atención</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FERIADO_REGIONAL, color: '#d97706'}}>
-                🏛️
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-700">Feriado Regional</span>
-                <p className="text-xs text-gray-500">No hay atención</p>
-              </div>
-            </div>
-            </div>
-          </div>
-          
-          {/* Columna 3 - Límites */}
-          <div className="space-y-3">
-            <h5 className="text-sm font-medium text-gray-700 mb-3">Límites de tiempo</h5>
-            <div className="space-y-2">
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FUTURO_LIMITE, color: '#a16207'}}>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Fuera de límite</span>
-                  <p className="text-xs text-gray-500">Más de 2 semanas</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border-2 border-blue-500 text-blue-600">
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Día actual</span>
-                  <p className="text-xs text-gray-500">Hoy</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Información adicional */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Info className="w-4 h-4 text-blue-600" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-green-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 border-2 border-green-600 shadow-lg flex items-center justify-center">
+              <span className="text-white text-sm font-bold">✓</span>
             </div>
             <div>
-              <h6 className="text-sm font-semibold text-blue-800 mb-1">Información importante</h6>
-              <ul className="text-xs text-blue-700 space-y-1">
-                <li>• Solo se pueden agendar citas hasta 2 semanas en adelante</li>
-                <li>• El horario de atención es de lunes a viernes</li>
-                <li>• Los fines de semana no se atiende</li>
-                <li>• No se pueden agendar citas en días pasados</li>
-              </ul>
+              <span className="text-sm font-bold text-gray-800">Disponible</span>
+              <p className="text-xs text-gray-600">Puedes agendar cita</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-red-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-red-400 to-rose-500 border-2 border-red-600 shadow-lg flex items-center justify-center">
+              <span className="text-white text-sm font-bold">✗</span>
+            </div>
+            <div>
+              <span className="text-sm font-bold text-gray-800">Ocupado</span>
+              <p className="text-xs text-gray-600">Cita ya agendada</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gray-400 to-slate-500 border-2 border-gray-600 shadow-lg flex items-center justify-center">
+              <span className="text-white text-sm font-bold">⊘</span>
+            </div>
+            <div>
+              <span className="text-sm font-bold text-gray-800">No disponible</span>
+              <p className="text-xs text-gray-600">Bloqueado o fuera de límite</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-orange-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-orange-600 shadow-lg flex items-center justify-center">
+              <span className="text-white text-sm font-bold">⭐</span>
+            </div>
+            <div>
+              <span className="text-sm font-bold text-gray-800">Feriado Nacional</span>
+              <p className="text-xs text-gray-600">No se atiende en todo el país</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-purple-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-400 to-violet-500 border-2 border-purple-600 shadow-lg flex items-center justify-center">
+              <span className="text-white text-sm font-bold">⭐</span>
+            </div>
+            <div>
+              <span className="text-sm font-bold text-gray-800">Feriado Regional</span>
+              <p className="text-xs text-gray-600">Feriado específico de Lima</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-lg border border-yellow-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 border-2 border-yellow-600 shadow-lg flex items-center justify-center">
+              <span className="text-white text-sm font-bold">☀</span>
+            </div>
+            <div>
+              <span className="text-sm font-bold text-gray-800">Fin de semana</span>
+              <p className="text-xs text-gray-600">No se atiende sábados ni domingos</p>
             </div>
           </div>
         </div>

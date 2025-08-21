@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
-import { CheckCircle, XCircle, Clock as ClockIcon } from 'lucide-react';
+import { CheckCircle, XCircle, Clock as ClockIcon, Star } from 'lucide-react';
 import { getUserAppointments } from '../../services/appointments';
 import { getBlockedDatesForCalendar } from '../../services/schedule';
 import { Holiday } from '../../services/holidays';
@@ -41,6 +41,7 @@ export const StudentCalendar: React.FC = () => {
   const { user } = useAuth();
   const { getBlockedDates } = useSchedule();
   const [appointments, setAppointments] = useState<StudentAppointment[]>([]);
+  // Cargar feriados al inicializar el componente
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [loading, setLoading] = useState(true);
   // Estado para la fecha seleccionada y error
@@ -211,18 +212,15 @@ export const StudentCalendar: React.FC = () => {
     allDay: false,
   }));
 
-  // Transformar feriados a eventos para Big Calendar
-  const holidayEvents: Event[] = holidays.map((holiday) => {
-    const holidayDate = new Date(holiday.date);
-    return {
-      id: `holiday-${holiday.id}`,
-      title: `🎉 ${holiday.name}`,
-      start: holidayDate,
-      end: holidayDate,
-      resource: { type: 'holiday', data: holiday },
-      allDay: true,
-    };
-  });
+  // Agregar eventos de feriados al calendario
+  const holidayEvents: Event[] = holidays.map((holiday) => ({
+    id: `holiday-${holiday.id}`,
+    title: `🎉 ${holiday.name}`,
+    start: parseLocalDate(holiday.date),
+    end: parseLocalDate(holiday.date),
+    resource: { type: 'holiday', data: holiday },
+    allDay: true,
+  }));
 
   // Combinar todos los eventos
   const events: Event[] = [...appointmentEvents, ...holidayEvents];
@@ -375,194 +373,314 @@ export const StudentCalendar: React.FC = () => {
           views={['month']}
           onSelectSlot={handleDateClick}
           eventPropGetter={(event: any) => {
-            // Estilos para feriados
+            // Si es un evento de feriado
             if (event.resource?.type === 'holiday') {
               const holiday = event.resource.data;
-              const backgroundColor = holiday.is_national ? COLOR_FERIADO_NACIONAL : COLOR_FERIADO;
+              const isNational = holiday.is_national;
               return { 
                 style: { 
-                  backgroundColor, 
-                  color: COLOR_TEXTO_FERIADO, 
-                  borderRadius: 8, 
-                  border: 'none', 
-                  fontWeight: 700,
+                  background: isNational 
+                    ? 'linear-gradient(135deg, rgba(251, 191, 36, 1) 0%, rgba(245, 158, 11, 0.95) 100%)'
+                    : 'linear-gradient(135deg, rgba(168, 85, 247, 1) 0%, rgba(139, 92, 246, 0.95) 100%)',
+                  color: isNational ? '#92400e' : '#581c87',
+                  borderRadius: 12,
+                  border: isNational 
+                    ? '3px solid #f59e0b'
+                    : '3px solid #8b5cf6',
+                  fontWeight: 800,
                   fontSize: '12px',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                  padding: '8px 12px',
+                  textAlign: 'center',
+                  boxShadow: isNational 
+                    ? '0 6px 20px rgba(251, 191, 36, 0.6)'
+                    : '0 6px 20px rgba(168, 85, 247, 0.6)',
+                  minHeight: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                  transform: 'scale(1.02)'
                 } 
               };
             }
             
-            // Estilos para citas
-            if (event.resource?.type === 'appointment') {
-              const appointment = event.resource.data;
-              if (appointment.status === 'confirmada') {
-                return { style: { backgroundColor: COLOR_DISPONIBLE, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
-              } else if (appointment.status === 'cancelada' || appointment.status === 'rechazada') {
-                return { style: { backgroundColor: COLOR_OCUPADO, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
-              }
+            // Si es una cita
+            if (event.resource?.data?.status === 'confirmada') {
+              return { 
+                style: { 
+                  background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(220, 38, 38, 0.8) 100%)',
+                  color: '#ffffff',
+                  borderRadius: 8,
+                  border: '2px solid #dc2626',
+                  fontWeight: 700,
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)'
+                } 
+              };
             }
-            
-            // Estilo por defecto
-            return { style: { backgroundColor: COLOR_DISPONIBLE, color: COLOR_TEXTO_NORMAL, borderRadius: 8, border: 'none', fontWeight: 600 } };
+            return { 
+              style: { 
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(22, 163, 74, 0.8) 100%)',
+                color: '#ffffff',
+                borderRadius: 8,
+                border: '2px solid #16a34a',
+                fontWeight: 700,
+                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)'
+              } 
+            };
           }}
           dayPropGetter={(date: any) => {
-            const currentMonth = calendarMonth.getMonth();
-            const currentYear = calendarMonth.getFullYear();
-            const dateStr = toLocalDateString(date);
-            
-            // Si el día pertenece a un mes diferente al mostrado actualmente, no aplicar color ni estilos
-            if (
-              date.getFullYear() !== currentYear ||
-              date.getMonth() !== currentMonth
-            ) {
-              return { style: { backgroundColor: 'transparent', color: COLOR_TEXTO_NORMAL } };
-            }
-            
-            // Verificar si el día es feriado
-            const holiday = holidayLocalService.isHolidayDate(date, holidays);
-            if (holiday) {
-              console.log('🎉 DÍA FERIADO DETECTADO:', date, holiday.name);
-              const backgroundColor = holiday.is_national ? COLOR_FERIADO_NACIONAL : COLOR_FERIADO;
-              return { 
-                style: { 
-                  backgroundColor, 
-                  color: COLOR_TEXTO_FERIADO, 
-                  fontWeight: 700, 
-                  borderRadius: 12, 
-                  boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)', 
-                  border: '2px solid #dc3545', 
-                  cursor: 'pointer',
-                  position: 'relative'
-                } 
-              };
-            }
-
-            // Verificar si el día está bloqueado por el psicólogo
-            const isBlockedByPsychologist = blockedDates.includes(dateStr);
-            if (isBlockedByPsychologist) {
-              return { style: { backgroundColor: COLOR_OCUPADO, color: '#b91c1c', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(220, 38, 38, 0.2)', border: 'none', cursor: 'not-allowed' } };
-            }
-            
-            // Lógica para el límite de 2 semanas
             const today = new Date();
             const peruTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Lima"}));
             const todayStart = startOfDay(peruTime);
             const futureLimit = addDays(todayStart, 14);
-            if (isAfter(date, futureLimit)) {
-              // Día fuera del límite de agendamiento
-              return { style: { backgroundColor: COLOR_FUTURO_LIMITE, color: COLOR_TEXTO_NORMAL, fontWeight: 600, opacity: 0.7, borderRadius: 12, boxShadow: '0 4px 12px rgba(253, 224, 71, 0.15)', border: 'none' } };
+            const dayOfWeek = date.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            
+            // Verificar si es feriado
+            const holiday = holidayLocalService.isHolidayDate(date, holidays);
+            
+            if (holiday) {
+              // Día feriado: diseño moderno y atractivo
+              const isNational = holiday.is_national;
+              return { 
+                style: { 
+                  background: isNational 
+                    ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.95) 0%, rgba(245, 158, 11, 0.9) 100%)'
+                    : 'linear-gradient(135deg, rgba(168, 85, 247, 0.95) 0%, rgba(139, 92, 246, 0.9) 100%)',
+                  color: isNational ? '#92400e' : '#581c87',
+                  fontWeight: 800,
+                  borderRadius: 16,
+                  boxShadow: isNational 
+                    ? '0 8px 25px rgba(251, 191, 36, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+                    : '0 8px 25px rgba(168, 85, 247, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                  border: isNational 
+                    ? '3px solid #f59e0b'
+                    : '3px solid #8b5cf6',
+                  cursor: 'not-allowed',
+                  pointerEvents: 'none',
+                  position: 'relative',
+                  transform: 'scale(1.05)',
+                  transition: 'all 0.3s ease',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)'
+                } 
+              };
             }
-            const day = date.getDay();
-            if (day === 0 || day === 6) {
-              return { style: { backgroundColor: COLOR_BLOQUEADO, color: COLOR_TEXTO_BLOQUEADO, pointerEvents: 'none', opacity: 1, cursor: 'not-allowed', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(253, 186, 116, 0.15)', border: 'none' } };
+            
+            if (isWeekend) {
+              return { 
+                style: { 
+                  background: 'linear-gradient(135deg, rgba(253, 186, 116, 0.9) 0%, rgba(251, 146, 60, 0.8) 100%)',
+                  color: '#c2410c',
+                  pointerEvents: 'none',
+                  cursor: 'not-allowed',
+                  fontWeight: 700,
+                  borderRadius: 12,
+                  boxShadow: '0 6px 20px rgba(253, 186, 116, 0.4)',
+                  border: '2px solid #f97316',
+                  opacity: 0.9,
+                  backdropFilter: 'blur(5px)',
+                  WebkitBackdropFilter: 'blur(5px)'
+                } 
+              };
             }
-            // Día pasado
             if (isBefore(date, todayStart)) {
-              return { style: { backgroundColor: COLOR_PASADO, color: '#7c3aed', fontWeight: 600, borderRadius: 12, boxShadow: '0 4px 12px rgba(124, 58, 237, 0.15)', border: 'none', cursor: 'not-allowed' } };
+              return { 
+                style: { 
+                  background: 'linear-gradient(135deg, rgba(156, 163, 175, 0.7) 0%, rgba(107, 114, 128, 0.6) 100%)',
+                  color: '#374151',
+                  fontWeight: 600,
+                  borderRadius: 12,
+                  boxShadow: '0 4px 15px rgba(156, 163, 175, 0.3)',
+                  border: '1px solid #9ca3af',
+                  cursor: 'not-allowed',
+                  opacity: 0.7,
+                  backdropFilter: 'blur(5px)',
+                  WebkitBackdropFilter: 'blur(5px)'
+                } 
+              };
             }
-            // Día normal disponible
-            return { style: { color: COLOR_TEXTO_NORMAL, fontWeight: 600, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: 'none' } };
+            if (isAfter(date, futureLimit)) {
+              return { 
+                style: { 
+                  background: 'linear-gradient(135deg, rgba(253, 224, 71, 0.7) 0%, rgba(250, 204, 21, 0.6) 100%)',
+                  color: '#a16207',
+                  fontWeight: 600,
+                  opacity: 0.8,
+                  borderRadius: 12,
+                  boxShadow: '0 4px 15px rgba(253, 224, 71, 0.3)',
+                  border: '1px solid #facc15',
+                  backdropFilter: 'blur(5px)',
+                  WebkitBackdropFilter: 'blur(5px)'
+                } 
+              };
+            }
+            return { 
+              style: { 
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(22, 163, 74, 0.8) 100%)',
+                color: '#064e3b',
+                fontWeight: 700,
+                borderRadius: 12,
+                boxShadow: '0 6px 20px rgba(34, 197, 94, 0.4)',
+                border: '2px solid #16a34a',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                backdropFilter: 'blur(5px)',
+                WebkitBackdropFilter: 'blur(5px)',
+                '&:hover': {
+                  transform: 'scale(1.02)',
+                  boxShadow: '0 8px 25px rgba(34, 197, 94, 0.6)'
+                }
+              } 
+            };
+          }}
+          components={{
+            event: (props: any) => {
+              // Si es un evento de feriado
+              if (props.event.resource?.type === 'holiday') {
+                const holiday = props.event.resource.data;
+                const isNational = holiday.is_national;
+                return (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '6px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      textAlign: 'center',
+                      lineHeight: '1.3',
+                      overflow: 'hidden',
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)'
+                    }}
+                  >
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '3px',
+                      marginBottom: '3px'
+                    }}>
+                      <span style={{ 
+                        fontSize: '10px',
+                        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))'
+                      }}>⭐</span>
+                      <span style={{ 
+                        fontSize: '9px',
+                        fontWeight: 800,
+                        color: isNational ? '#92400e' : '#581c87',
+                        textShadow: '0 1px 2px rgba(255,255,255,0.8)',
+                        letterSpacing: '0.5px'
+                      }}>
+                        {isNational ? 'NACIONAL' : 'REGIONAL'}
+                      </span>
+                    </div>
+                    <div style={{
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      color: isNational ? '#92400e' : '#581c87',
+                      wordBreak: 'break-word',
+                      hyphens: 'auto',
+                      maxHeight: '100%',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      textShadow: '0 1px 2px rgba(255,255,255,0.8)',
+                      lineHeight: '1.2'
+                    }}>
+                      {holiday.name}
+                    </div>
+                  </div>
+                );
+              }
+              
+              // Para otros eventos (citas)
+              return (
+                <div style={{ 
+                  padding: '4px 6px', 
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}>
+                  {props.title}
+                </div>
+              );
+            }
           }}
         />
-        {/* Leyenda visual igual que el psicólogo */}
-        <div className="mt-8 p-6 bg-white rounded-xl border border-gray-200 shadow-sm">
-          <h4 className="text-base font-semibold text-gray-800 mb-4 flex items-center">
-            <span className="w-5 h-5 mr-2 text-blue-600">ℹ️</span>
-            Leyenda de disponibilidad
+        {/* Leyenda visual moderna y atractiva */}
+        <div className="mt-8 p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 rounded-3xl border border-blue-200/50 shadow-2xl backdrop-blur-sm">
+          <h4 className="text-2xl font-bold text-gray-800 mb-8 flex items-center justify-center">
+            <span className="w-10 h-10 mr-4 text-blue-600 bg-white rounded-full flex items-center justify-center shadow-lg">📅</span>
+            Leyenda de Disponibilidad
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="space-y-3">
-              <h5 className="text-sm font-medium text-gray-700 mb-3">Estados principales</h5>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_DISPONIBLE, color: '#059669'}}></div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Disponible</span>
-                    <p className="text-xs text-gray-500">Puedes agendar cita</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_OCUPADO, color: '#b91c1c'}}></div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Ocupado/Bloqueado</span>
-                    <p className="text-xs text-gray-500">No disponible o bloqueado por psicólogo</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h5 className="text-sm font-medium text-gray-700 mb-3">Restricciones</h5>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_BLOQUEADO, color: '#d97706'}}></div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Fin de semana</span>
-                    <p className="text-xs text-gray-500">No se atiende</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_PASADO, color: '#7c3aed'}}></div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Día pasado</span>
-                    <p className="text-xs text-gray-500">No disponible</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h5 className="text-sm font-medium text-gray-700 mb-3">Límites de tiempo</h5>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FUTURO_LIMITE, color: '#a16207'}}></div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Fuera de límite</span>
-                    <p className="text-xs text-gray-500">Más de 2 semanas</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border-2 border-blue-500 text-blue-600"></div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Día actual</span>
-                    <p className="text-xs text-gray-500">Hoy</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h5 className="text-sm font-medium text-gray-700 mb-3">Feriados</h5>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FERIADO_NACIONAL, color: COLOR_TEXTO_FERIADO}}>🏛️</div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Feriado Nacional</span>
-                    <p className="text-xs text-gray-500">No se atiende en todo el país</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{background: COLOR_FERIADO, color: COLOR_TEXTO_FERIADO}}>🏢</div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Feriado Regional</span>
-                    <p className="text-xs text-gray-500">Feriado específico de Lima</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="w-4 h-4 text-blue-600">ℹ️</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="flex items-center gap-5 p-6 rounded-2xl bg-white/80 shadow-xl border border-green-200/50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 backdrop-blur-sm">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 border-2 border-green-600 shadow-xl flex items-center justify-center">
+                <span className="text-white text-lg font-bold">✓</span>
               </div>
               <div>
-                <h6 className="text-sm font-semibold text-blue-800 mb-1">Información importante</h6>
-                <ul className="text-xs text-blue-700 space-y-1">
-                  <li>• Solo puedes navegar y agendar desde este mes en adelante</li>
-                  <li>• Solo se pueden agendar citas hasta 2 semanas en adelante</li>
-                  <li>• El horario de atención es de lunes a viernes</li>
-                  <li>• Los fines de semana y feriados no se atiende</li>
-                  <li>• Los feriados nacionales y regionales están marcados automáticamente</li>
-                  <li>• No se pueden agendar citas en días pasados</li>
-                </ul>
+                <span className="text-base font-bold text-gray-800">Disponible</span>
+                <p className="text-sm text-gray-600 mt-1">Puedes agendar cita</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-5 p-6 rounded-2xl bg-white/80 shadow-xl border border-red-200/50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 backdrop-blur-sm">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-400 to-rose-500 border-2 border-red-600 shadow-xl flex items-center justify-center">
+                <span className="text-white text-lg font-bold">✗</span>
+              </div>
+              <div>
+                <span className="text-base font-bold text-gray-800">Ocupado</span>
+                <p className="text-sm text-gray-600 mt-1">Cita ya agendada</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-5 p-6 rounded-2xl bg-white/80 shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 backdrop-blur-sm">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-400 to-slate-500 border-2 border-gray-600 shadow-xl flex items-center justify-center">
+                <span className="text-white text-lg font-bold">⊘</span>
+              </div>
+              <div>
+                <span className="text-base font-bold text-gray-800">No disponible</span>
+                <p className="text-sm text-gray-600 mt-1">Bloqueado o fuera de límite</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-5 p-6 rounded-2xl bg-white/80 shadow-xl border border-orange-200/50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 backdrop-blur-sm">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-orange-600 shadow-xl flex items-center justify-center">
+                <span className="text-white text-lg font-bold">⭐</span>
+              </div>
+              <div>
+                <span className="text-base font-bold text-gray-800">Feriado Nacional</span>
+                <p className="text-sm text-gray-600 mt-1">No se atiende en todo el país</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-5 p-6 rounded-2xl bg-white/80 shadow-xl border border-purple-200/50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 backdrop-blur-sm">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-400 to-violet-500 border-2 border-purple-600 shadow-xl flex items-center justify-center">
+                <span className="text-white text-lg font-bold">⭐</span>
+              </div>
+              <div>
+                <span className="text-base font-bold text-gray-800">Feriado Regional</span>
+                <p className="text-sm text-gray-600 mt-1">Feriado específico de Lima</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-5 p-6 rounded-2xl bg-white/80 shadow-xl border border-yellow-200/50 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 backdrop-blur-sm">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-500 border-2 border-yellow-600 shadow-xl flex items-center justify-center">
+                <span className="text-white text-lg font-bold">☀</span>
+              </div>
+              <div>
+                <span className="text-base font-bold text-gray-800">Fin de semana</span>
+                <p className="text-sm text-gray-600 mt-1">No se atiende sábados ni domingos</p>
               </div>
             </div>
           </div>

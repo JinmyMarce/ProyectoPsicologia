@@ -399,3 +399,473 @@ body, html {
     transform: translateX(100%);
   }
 }
+
+/* Estilos para días feriados en calendarios */
+.holiday-day {
+  position: relative;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.25) 0%, rgba(251, 191, 36, 0.15) 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.holiday-day.regional {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0.15) 100%);
+  border: 2px solid #8b5cf6;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.holiday-day::before {
+  content: '⭐';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 8px;
+  color: #f59e0b;
+  z-index: 10;
+}
+
+.holiday-day.regional::before {
+  color: #8b5cf6;
+}
+
+/* Estilos para eventos de feriados en react-big-calendar */
+.rbc-event.holiday-event {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.9) 0%, rgba(251, 191, 36, 0.8) 100%);
+  color: #92400e;
+  border: 2px solid #f59e0b;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 8px;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+}
+
+.rbc-event.holiday-event.regional {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.9) 0%, rgba(168, 85, 247, 0.8) 100%);
+  color: #581c87;
+  border: 2px solid #8b5cf6;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.4);
+}
+
+/* Mejoras para la leyenda de calendarios */
+.calendar-legend {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.calendar-legend-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.calendar-legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-legend-color.holiday-national {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.25) 0%, rgba(251, 191, 36, 0.15) 100%);
+  border: 2px solid #f59e0b;
+}
+
+.calendar-legend-color.holiday-regional {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0.15) 100%);
+  border: 2px solid #8b5cf6;
+}
+
+/* Animaciones para días feriados */
+@keyframes holidayPulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(251, 191, 36, 0.5);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+  }
+}
+
+.holiday-day {
+  animation: holidayPulse 2s ease-in-out infinite;
+}
+
+.holiday-day.regional {
+  animation: holidayPulse 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Mejoras para tooltips de feriados */
+.holiday-tooltip {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  color: white;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #4b5563;
+}
+
+.holiday-tooltip::before {
+  content: '🎉';
+  margin-right: 4px;
+}
+
+/* Responsive para leyendas */
+@media (max-width: 768px) {
+  .calendar-legend {
+    padding: 12px;
+  }
+  
+  .calendar-legend-item {
+    font-size: 12px;
+  }
+  
+  .calendar-legend-color {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Animaciones para el header y sidebar con colores del login */
+@keyframes professionalGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes waveSlide {
+  0% { transform: translateX(0px); }
+  100% { transform: translateX(10px); }
+}
+
+@keyframes headerShine {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes titleShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes moonGlow {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.15), 0 0 30px rgba(255, 255, 255, 0.1);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.35), inset 0 0 20px rgba(255, 255, 255, 0.2), 0 0 35px rgba(255, 255, 255, 0.12);
+  }
+}
+
+@keyframes moonFloat {
+  0%, 100% { 
+    transform: translateY(0px) scale(1) rotate(0deg);
+  }
+  25% { 
+    transform: translateY(-6px) scale(1.01) rotate(0.5deg);
+  }
+  50% { 
+    transform: translateY(-10px) scale(1.02) rotate(0deg);
+  }
+  75% { 
+    transform: translateY(-6px) scale(1.01) rotate(-0.5deg);
+  }
+}
+
+@keyframes logoFloat {
+  0%, 100% { 
+    transform: translateY(0px) scale(1) rotate(0deg);
+    filter: brightness(1) drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+  }
+  25% { 
+    transform: translateY(-8px) scale(1.02) rotate(1deg);
+    filter: brightness(1.1) drop-shadow(0 0 25px rgba(255, 255, 255, 0.4));
+  }
+  50% { 
+    transform: translateY(-12px) scale(1.04) rotate(0deg);
+    filter: brightness(1.2) drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
+  }
+  75% { 
+    transform: translateY(-8px) scale(1.02) rotate(-1deg);
+    filter: brightness(1.1) drop-shadow(0 0 25px rgba(255, 255, 255, 0.4));
+  }
+}
+
+@keyframes titleGlow {
+  0%, 100% { 
+    text-shadow: 0 0 30px rgba(255, 255, 255, 1), 0 3px 8px rgba(0, 0, 0, 0.8), 0 0 50px rgba(211, 183, 160, 0.7);
+  }
+  50% { 
+    text-shadow: 0 0 40px rgba(255, 255, 255, 1.2), 0 4px 12px rgba(0, 0, 0, 0.9), 0 0 60px rgba(211, 183, 160, 0.9);
+  }
+}
+
+@keyframes subtitleGlow {
+  0%, 100% { 
+    text-shadow: 0 0 20px rgba(211, 183, 160, 1), 0 2px 5px rgba(0, 0, 0, 1);
+  }
+  50% { 
+    text-shadow: 0 0 30px rgba(211, 183, 160, 1.2), 0 3px 8px rgba(0, 0, 0, 1.1);
+  }
+}
+
+@keyframes lineGlow {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(211, 183, 160, 0.7);
+  }
+  50% { 
+    box-shadow: 0 0 15px rgba(211, 183, 160, 0.9);
+  }
+}
+
+@keyframes activeIndicator {
+  0%, 100% { 
+    opacity: 0.8;
+    box-shadow: 0 0 10px rgba(211, 183, 160, 0.6);
+  }
+  50% { 
+    opacity: 1;
+    box-shadow: 0 0 15px rgba(211, 183, 160, 0.8);
+  }
+}
+
+@keyframes iconGlow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 12px rgba(211, 183, 160, 0.6));
+  }
+  50% { 
+    filter: drop-shadow(0 0 18px rgba(211, 183, 160, 0.8));
+  }
+}
+
+@keyframes menuShine {
+  0%, 100% { 
+    opacity: 0;
+  }
+  50% { 
+    opacity: 0.4;
+  }
+}
+
+@keyframes statusPulse {
+  0%, 100% { 
+    opacity: 0.9;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+  50% { 
+    opacity: 1;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1);
+  }
+  50% { 
+    transform: scale(1.1);
+  }
+}
+
+/* Animaciones adicionales para efectos más suaves */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Efectos de hover mejorados */
+.hover\:scale-110:hover {
+  transform: scale(1.1);
+}
+
+.hover\:scale-125:hover {
+  transform: scale(1.25);
+}
+
+/* Transiciones suaves */
+.transition-all {
+  transition: all 0.3s ease-in-out;
+}
+
+.transition-transform {
+  transition: transform 0.3s ease-in-out;
+}
+
+.transition-opacity {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Efectos de backdrop blur */
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+}
+
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+}
+
+/* Sombras personalizadas */
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.shadow-3xl {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.35);
+}
+
+/* Gradientes personalizados */
+.bg-gradient-login {
+  background: linear-gradient(135deg, 
+    #0f1419 0%, 
+    #1a1f29 12%, 
+    #2c1d1d 25%, 
+    #1e2a37 38%, 
+    #3d1f1f 50%, 
+    #2c3e50 62%, 
+    #4a2020 75%, 
+    #34495e 88%, 
+    #8e161a 100%
+  );
+}
+
+/* Efectos de texto */
+.text-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 10%, #e9ecef 20%, #d3b7a0 40%, #ffffff 60%, #f8f9fa 80%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .sm\:hidden {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .sm\:block {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .md\:hidden {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:block {
+    display: block;
+  }
+}
+
+@media (max-width: 1024px) {
+  .lg\:hidden {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:block {
+    display: block;
+  }
+}
+
+/* Utilidades para animaciones de carga */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Efectos de glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Efectos de profundidad */
+.depth-1 {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.depth-2 {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.depth-3 {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+.depth-4 {
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+.depth-5 {
+  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+}
