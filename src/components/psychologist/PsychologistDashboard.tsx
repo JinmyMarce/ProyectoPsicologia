@@ -169,58 +169,61 @@ export const PsychologistDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 font-serif" style={{fontFamily: 'Georgia, Times, serif'}}>
-      <PageHeader title={''} />
-      {showWelcome && (
-        <div className="mb-4 text-2xl font-semibold text-[#8e161a] text-center transition-opacity duration-1000" style={{fontFamily: 'Georgia, Times, serif', opacity: showWelcome ? 1 : 0}}>
-          ¡Bienvenido, {user?.name || 'Usuario'}!
+      {/* Título Principal */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Panel del Psicólogo - Gestión de Pacientes
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
         </div>
-      )}
+      </div>
 
       {/* Estadísticas principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
+        <Card className="p-6 border border-gray-200">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900">{stats.totalAppointments}</p>
+              <p className="text-lg font-bold text-gray-800">{stats.totalAppointments}</p>
               <p className="text-sm font-medium text-gray-600">Total Citas</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 border border-gray-200">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
               <ClockIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900">{stats.pendingAppointments}</p>
+              <p className="text-lg font-bold text-gray-700">{stats.pendingAppointments}</p>
               <p className="text-sm font-medium text-gray-600">Citas Pendientes</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 border border-gray-200">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center">
               <Users className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900">{stats.totalPatients}</p>
+              <p className="text-lg font-bold text-gray-600">{stats.totalPatients}</p>
               <p className="text-sm font-medium text-gray-600">Pacientes</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 border border-gray-200">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-500 rounded-lg flex items-center justify-center">
               <ClipboardList className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900">{stats.totalSessions}</p>
+              <p className="text-lg font-bold text-gray-500">{stats.totalSessions}</p>
               <p className="text-sm font-medium text-gray-600">Sesiones</p>
             </div>
           </div>
@@ -228,15 +231,15 @@ export const PsychologistDashboard: React.FC = () => {
       </div>
 
       {/* Acciones rápidas */}
-      <Card className="p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-          <Plus className="w-6 h-6 mr-3 text-[#8e161a]" />
+      <Card className="p-6 border border-gray-200">
+        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <Plus className="w-6 h-6 mr-3 text-gray-800" />
           Acciones Rápidas
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Button 
-            className="p-4 text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="bg-gray-800 hover:bg-gray-700 text-white p-4 text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
             onClick={() => handleNavigation('appointments/direct')}
           >
             <Calendar className="w-5 h-5 mr-2" />
@@ -245,7 +248,7 @@ export const PsychologistDashboard: React.FC = () => {
 
           <Button 
             variant="outline"
-            className="p-4 text-sm font-semibold rounded-lg border border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-all duration-300 transform hover:scale-105"
+            className="p-4 text-sm font-semibold rounded-lg border border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white transition-all duration-300"
             onClick={() => handleNavigation('patients')}
           >
             <Users className="w-5 h-5 mr-2" />
@@ -254,7 +257,7 @@ export const PsychologistDashboard: React.FC = () => {
 
           <Button 
             variant="outline"
-            className="p-4 text-sm font-semibold rounded-lg border border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-all duration-300 transform hover:scale-105"
+            className="p-4 text-sm font-semibold rounded-lg border border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white transition-all duration-300"
             onClick={() => handleNavigation('sessions/register')}
           >
             <MessageSquare className="w-5 h-5 mr-2" />
@@ -263,7 +266,7 @@ export const PsychologistDashboard: React.FC = () => {
 
           <Button 
             variant="outline"
-            className="p-4 text-sm font-semibold rounded-lg border border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-all duration-300 transform hover:scale-105"
+            className="p-4 text-sm font-semibold rounded-lg border border-gray-700 text-gray-700 hover:bg-gray-700 hover:text-white transition-all duration-300"
             onClick={() => handleNavigation('schedule')}
           >
             <Settings className="w-5 h-5 mr-2" />
@@ -275,10 +278,10 @@ export const PsychologistDashboard: React.FC = () => {
       {/* Secciones principales */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gestión de Citas */}
-        <Card className="p-6">
+        <Card className="p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center">
-              <Calendar className="w-5 h-5 mr-2 text-[#8e161a]" />
+            <h3 className="text-lg font-bold text-gray-800 flex items-center">
+              <Calendar className="w-5 h-5 mr-2 text-gray-800" />
               Gestión de Citas
             </h3>
             <Badge variant="warning" className="text-sm">

@@ -180,23 +180,26 @@ export function DirectAppointmentScheduler() {
 
   return (
     <div className="space-y-6">
-      <PageHeader 
-        title="Agendar Cita Directamente"
-        subtitle="Busca un estudiante y agenda una cita para él"
-      >
-        <div className="flex items-center justify-between">
-          <p className="text-base text-gray-500 font-medium text-center">
-            Instituto Túpac Amaru - Psicología Clínica
-          </p>
-          <Button
-            onClick={() => navigate('/schedule')}
-            className="bg-gradient-to-r from-[#8e161a] to-[#b91c1c] hover:from-[#a01e24] hover:to-[#d92027] text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-          >
-            <Settings className="w-5 h-5 mr-2" />
-            Gestión de Horarios
-          </Button>
+      {/* Título Principal */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Agendar Cita Directamente
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
         </div>
-      </PageHeader>
+      </div>
+
+      {/* Botón de gestión de horarios */}
+      <div className="flex justify-end mb-4">
+        <Button
+          onClick={() => navigate('/schedule')}
+          className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300"
+        >
+          <Settings className="w-5 h-5 mr-2" />
+          Gestión de Horarios
+        </Button>
+      </div>
 
       {/* Mensajes de estado */}
       {error && (
@@ -298,8 +301,8 @@ export function DirectAppointmentScheduler() {
               </label>
               <div className="bg-white rounded-3xl shadow-2xl p-6 border-2 border-gray-100">
                 <div className="mb-4 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">📅 Calendario Profesional</h3>
-                  <p className="text-gray-600">Selecciona la fecha para la cita</p>
+                  <h3 className="text-xl font-bold text-[#1e293b] mb-2">📅 Calendario Profesional</h3>
+                  <p className="text-[#475569]">Selecciona la fecha para la cita</p>
                 </div>
                 <BigCalendar
                   localizer={localizer}

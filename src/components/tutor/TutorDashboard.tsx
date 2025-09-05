@@ -129,33 +129,26 @@ export function TutorDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-granate-800"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-800"></div>
       </div>
     );
   }
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-granate-800">Dashboard de Tutor</h1>
-          <p className="text-azul-marino-700 mt-1">
-            Gestiona tus estudiantes, derivaciones y sesiones grupales
-          </p>
-          {user && (
-            <div className="flex items-center gap-2 mt-2">
-              <School className="w-4 h-4 text-granate-800" />
-              <span className="text-sm text-gray-600">
-                {(user as any).classroom || 'Sin aula asignada'} - {(user as any).study_program || 'Sin programa'} - {(user as any).semester || 'Sin semestre'} - {(user as any).course || 'Sin curso'}
-              </span>
-            </div>
-          )}
+      {/* Título Principal */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Panel del Tutor - Gestión Estudiantil
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
         </div>
+      </div>
         <div className="flex gap-3">
           <Button 
             onClick={() => setShowDerivationModal(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white"
             variant="primary"
           >
             <Send className="w-4 h-4" />
@@ -163,60 +156,59 @@ export function TutorDashboard() {
           </Button>
           <Button 
             onClick={() => setShowSessionModal(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white"
             variant="secondary"
           >
             <Calendar className="w-4 h-4" />
             Sesión Grupal
           </Button>
         </div>
-      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6">
+        <Card className="p-6 border border-gray-200">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-azul-marino-100 rounded-lg">
-              <Users className="w-6 h-6 text-azul-marino-800" />
+            <div className="p-3 bg-gray-100 rounded-lg">
+              <Users className="w-6 h-6 text-gray-800" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-granate-800">{students.length}</h3>
+              <h3 className="text-2xl font-bold text-gray-800">{students.length}</h3>
               <p className="text-sm text-gray-600">Estudiantes a Cargo</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 border border-gray-200">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-granate-100 rounded-lg">
-              <Send className="w-6 h-6 text-granate-800" />
+            <div className="p-3 bg-gray-100 rounded-lg">
+              <Send className="w-6 h-6 text-gray-700" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-granate-800">{derivations.length}</h3>
+              <h3 className="text-2xl font-bold text-gray-700">{derivations.length}</h3>
               <p className="text-sm text-gray-600">Derivaciones Activas</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 border border-gray-200">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-verde-esmeralda/20 rounded-lg">
-              <Calendar className="w-6 h-6 text-verde-oscuro" />
+            <div className="p-3 bg-gray-100 rounded-lg">
+              <Calendar className="w-6 h-6 text-gray-600" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-granate-800">{groupSessions.length}</h3>
+              <h3 className="text-2xl font-bold text-gray-600">{groupSessions.length}</h3>
               <p className="text-sm text-gray-600">Sesiones Programadas</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 border border-gray-200">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-mostaza/20 rounded-lg">
-              <Clock className="w-6 h-6 text-granate-800" />
+            <div className="p-3 bg-gray-100 rounded-lg">
+              <Clock className="w-6 h-6 text-gray-500" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-granate-800">1-2 AM</h3>
+              <h3 className="text-2xl font-bold text-gray-500">1-2 AM</h3>
               <p className="text-sm text-gray-600">Horario de Sesiones</p>
             </div>
           </div>

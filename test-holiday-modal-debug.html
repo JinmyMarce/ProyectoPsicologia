@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Modal de Feriados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .debug-info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .test-button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #d97706;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug Modal de Feriados</h1>
+        
+        <div class="test-section">
+            <h3>🎯 Problema Reportado</h3>
+            <div class="status error">
+                <strong>❌ Problema:</strong> No se muestran las imágenes ni las descripciones en el modal de feriados
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Información de Debug</h3>
+            <div class="debug-info">
+                <strong>📁 Ruta de imágenes:</strong> /public/images/Feriados/<br>
+                <strong>🔧 Función:</strong> getHolidayImage()<br>
+                <strong>📋 Objeto:</strong> holidayDetails<br>
+                <strong>🎯 Modal:</strong> showHolidayModal
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Debug</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testImageLoading()">🖼️ Probar Carga de Imágenes</button>
+                <button class="test-button" onclick="testHolidayDetails()">📋 Probar holidayDetails</button>
+                <button class="test-button" onclick="testModalSimulation()">🎭 Simular Modal</button>
+                <button class="test-button" onclick="clearConsole()">🧹 Limpiar Consola</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Consola de Debug</h3>
+            <div id="console-output" class="console-output">
+                Esperando pruebas...
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega al calendario del estudiante</li>
+                    <li>Haz clic en cualquier feriado</li>
+                    <li>Abre la consola del navegador (F12)</li>
+                    <li>Busca los mensajes de debug que empiecen con 🔍, ✅, ❌</li>
+                </ul>
+            </div>
+            <div class="status warning">
+                <strong>2. Verifica en la consola:</strong>
+                <ul>
+                    <li>🔍 Buscando imagen para: [nombre del feriado]</li>
+                    <li>✅ Imagen encontrada: [ruta de la imagen]</li>
+                    <li>🔍 Buscando descripción para: [nombre del feriado]</li>
+                    <li>📋 Holiday detail encontrado: [objeto con datos]</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simular el objeto holidayDetails del código real
+        const holidayDetails = {
+            'Año Nuevo': {
+                image: '/images/Feriados/Año nuevo.png',
+                type: 'Cívico',
+                description: 'Marca el inicio del año calendario y es un día de descanso nacional.',
+                longDescription: 'El Año Nuevo es una de las celebraciones más importantes del calendario peruano.'
+            },
+            'Jueves Santo': {
+                image: '/images/Feriados/juevessanto.png',
+                type: 'Religioso',
+                description: 'Conmemora la Última Cena de Jesús con sus apóstoles.',
+                longDescription: 'El Jueves Santo es uno de los días más importantes de la Semana Santa.'
+            },
+            'Viernes Santo': {
+                image: '/images/Feriados/Viernes santo.png',
+                type: 'Religioso',
+                description: 'Recuerda la crucifixión y muerte de Jesús.',
+                longDescription: 'El Viernes Santo es el día más solemne de la Semana Santa.'
+            },
+            'Batalla de Junín': {
+                image: '/images/Feriados/batalla de junin.png',
+                type: 'Cívico',
+                description: 'Conmemora esta importante victoria independentista lograda en 1824.',
+                longDescription: 'La Batalla de Junín se libró el 6 de agosto de 1824 en la Pampa de Junín.'
+            },
+            'Navidad': {
+                image: '/images/Feriados/navidad.jpg',
+                type: 'Religioso',
+                description: 'Celebración del nacimiento de Jesucristo.',
+                longDescription: 'La Navidad en Perú es una celebración llena de tradiciones y costumbres.'
+            }
+        };
+
+        function log(message) {
+            const consoleOutput = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            consoleOutput.innerHTML += `[${timestamp}] ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            console.log(message);
+        }
+
+        function testImageLoading() {
+            log('🖼️ === PRUEBA DE CARGA DE IMÁGENES ===');
+            
+            Object.entries(holidayDetails).forEach(([name, detail]) => {
+                log(`🔍 Probando imagen para: ${name}`);
+                log(`📁 Ruta: ${detail.image}`);
+                
+                const img = new Image();
+                img.onload = function() {
+                    log(`✅ Imagen cargada correctamente: ${name}`);
+                };
+                img.onerror = function() {
+                    log(`❌ Error cargando imagen: ${name} - ${detail.image}`);
+                };
+                img.src = detail.image;
+            });
+        }
+
+        function testHolidayDetails() {
+            log('📋 === PRUEBA DE HOLIDAY DETAILS ===');
+            
+            Object.entries(holidayDetails).forEach(([name, detail]) => {
+                log(`🔍 Verificando datos para: ${name}`);
+                log(`📋 Tipo: ${detail.type}`);
+                log(`📖 Descripción: ${detail.description ? '✅ Presente' : '❌ Ausente'}`);
+                log(`📚 Descripción larga: ${detail.longDescription ? '✅ Presente' : '❌ Ausente'}`);
+                log(`🖼️ Imagen: ${detail.image ? '✅ Presente' : '❌ Ausente'}`);
+                log('---');
+            });
+        }
+
+        function testModalSimulation() {
+            log('🎭 === SIMULACIÓN DE MODAL ===');
+            
+            const testHolidays = ['Año Nuevo', 'Jueves Santo', 'Batalla de Junín', 'Navidad'];
+            
+            testHolidays.forEach(holidayName => {
+                log(`🎯 Simulando modal para: ${holidayName}`);
+                
+                // Simular getHolidayImage
+                const holidayDetail = holidayDetails[holidayName];
+                if (holidayDetail && holidayDetail.image) {
+                    log(`✅ Imagen encontrada: ${holidayDetail.image}`);
+                } else {
+                    log(`❌ No se encontró imagen para: ${holidayName}`);
+                }
+                
+                // Simular búsqueda de descripción
+                if (holidayDetail) {
+                    log(`📋 Holiday detail encontrado: ${JSON.stringify(holidayDetail, null, 2)}`);
+                    log(`📖 Descripción: ${holidayDetail.description ? '✅ Presente' : '❌ Ausente'}`);
+                    log(`📚 Descripción larga: ${holidayDetail.longDescription ? '✅ Presente' : '❌ Ausente'}`);
+                } else {
+                    log(`❌ No se encontró holiday detail para: ${holidayName}`);
+                }
+                log('---');
+            });
+        }
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = 'Consola limpiada...\n';
+        }
+
+        // Inicializar
+        log('🚀 Debug iniciado. Usa los botones para probar diferentes aspectos.');
+    </script>
+</body>
+</html>

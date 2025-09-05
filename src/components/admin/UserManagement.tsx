@@ -95,13 +95,13 @@ export function UserManagement() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'super_admin':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-gray-100 text-gray-800';
       case 'admin':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-gray-100 text-gray-700';
       case 'psychologist':
-        return 'bg-green-100 text-green-800';
+        return 'bg-gray-100 text-gray-600';
       case 'student':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-gray-100 text-gray-500';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -132,13 +132,18 @@ export function UserManagement() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <Users className="w-8 h-8 mr-3 text-[#8e161a]" />
-            Gestión de Usuarios
+      {/* Título Principal */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Gestión de Usuarios del Sistema
           </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between mb-6">
+        <div></div>
         <Button
           onClick={() => setShowAddUser(true)}
           className="flex items-center bg-[#8e161a] hover:bg-[#6b1115]"

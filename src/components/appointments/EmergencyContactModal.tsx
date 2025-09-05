@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, X, ArrowRight, ArrowLeft } from 'lucide-react';
-import { Button } from '../ui/Button';
 
 interface EmergencyContact {
   name: string;
@@ -161,19 +160,21 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
         </div>
       </div>
 
-      {/* Botones de navegación */}
-      <div className="flex justify-between pt-6">
+      {/* Botones de navegación - Compactos */}
+      <div className="flex justify-between pt-4">
         <button
           onClick={onBack}
-          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
+          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-sm hover:shadow-md text-sm"
         >
-          ← Atrás
+          <ArrowLeft className="w-3 h-3" />
+          <span>Atrás</span>
         </button>
         <button
           onClick={handleContinue}
-          className="px-6 py-2 bg-[#8e161a] text-white rounded-lg hover:bg-[#6d1115] transition-colors duration-200 font-medium"
+          className="px-4 py-2 bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white rounded-lg hover:from-black hover:to-gray-800 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg transform hover:scale-105 hover:shadow-xl text-sm"
         >
-          Continuar →
+          <span>Continuar</span>
+          <ArrowRight className="w-3 h-3" />
         </button>
       </div>
     </div>
@@ -182,34 +183,49 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
   // Si isOpen es true, renderizar el modal completo
   if (isOpen) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-          <div className="p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
+        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-3 max-h-[80vh] overflow-y-auto border border-gray-100" style={{
+          boxShadow: `
+            0 32px 64px rgba(0, 0, 0, 0.12), 
+            0 16px 32px rgba(0, 0, 0, 0.08),
+            0 8px 16px rgba(0, 0, 0, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8)
+          `,
+          background: 'linear-gradient(145deg, #ffffff 0%, #fafbfc 100%)'
+        }}>
+          <div className="p-4">
+            {/* Header Compacto */}
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <Phone className="w-6 h-6 text-blue-600" />
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center shadow-lg border border-gray-700">
+                    <Phone className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="absolute -inset-1 bg-gradient-to-br from-gray-900 to-black rounded-xl blur opacity-20 -z-10"></div>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Contacto de Emergencia</h2>
-                  <p className="text-sm text-gray-600">Paso 3 de 4</p>
+                  <h2 className="text-lg font-black text-gray-900 tracking-tight">
+                    Contacto de Emergencia
+                  </h2>
+                  <p className="text-xs text-gray-600 font-medium">
+                    Paso 3 de 4 - Información de contacto
+                  </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-50 flex items-center justify-center transition-all duration-300 shadow-md border border-gray-200 hover:border-gray-300 hover:shadow-lg"
               >
-                <X className="w-6 h-6" />
+                <X className="w-4 h-4 text-gray-600" />
               </button>
             </div>
 
-            {/* Información del Paciente */}
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-              <div className="space-y-2 text-sm">
+            {/* Información del Paciente - Compacto */}
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-3 mb-4 border border-gray-200 shadow-sm">
+              <div className="space-y-0.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Paciente:</span>
-                  <span className="font-semibold">{personalData?.fullName || 'N/A'}</span>
+                  <span className="text-gray-600 font-semibold">Paciente:</span>
+                  <span className="font-bold text-gray-800">{personalData?.fullName || 'N/A'}</span>
                 </div>
               </div>
             </div>

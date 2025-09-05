@@ -18,7 +18,8 @@ import {
   Mail,
   MapPin,
   Download,
-  Eye
+  Eye,
+  Activity
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -93,6 +94,9 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
       switch (page) {
         case 'appointments':
           navigate('/appointments');
+          break;
+        case 'reschedule':
+          navigate('/appointments/reschedule');
           break;
         case 'appointments/history':
           navigate('/appointments/history');
@@ -190,64 +194,66 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
   const pendingAppointments = appointments.filter(apt => apt.status === 'pending').length;
 
   return (
-    <div className="space-y-6 font-serif" style={{fontFamily: 'Georgia, Times, serif'}}>
-      <PageHeader title={''}>
-        {showWelcome && (
-          <div className="mb-4 text-2xl font-semibold text-[#8e161a] text-center transition-opacity duration-1000" style={{fontFamily: 'Georgia, Times, serif', opacity: showWelcome ? 1 : 0}}>
-            ¡Bienvenido, {user?.name || 'Usuario'}!
-          </div>
-        )}
-      </PageHeader>
+    <div className="space-y-6 content-card" style={{fontFamily: 'Inter, system-ui, sans-serif'}}>
+      {/* Título Principal */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 content-card border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Mi Espacio de Bienestar - Espacio del Estudiante
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
+        </div>
+      </div>
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border border-[#8e161a]/20 hover:shadow-lg transition-all duration-300">
+        <Card className="p-4 content-card border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center shadow-lg">
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900">{totalAppointments}</p>
-              <p className="text-sm font-medium text-gray-600">Total de Citas</p>
+              <p className="text-2xl font-bold text-gray-800">{totalAppointments}</p>
+              <p className="text-sm font-semibold text-gray-600">Total de Citas</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border border-[#8e161a]/20 hover:shadow-lg transition-all duration-300">
+        <Card className="p-4 content-card border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center shadow-lg">
               <CheckCircle className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900">{completedAppointments}</p>
-              <p className="text-sm font-medium text-gray-600">Citas Completadas</p>
+              <p className="text-2xl font-bold text-gray-700">{completedAppointments}</p>
+              <p className="text-sm font-semibold text-gray-600">Citas Completadas</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border border-[#8e161a]/20 hover:shadow-lg transition-all duration-300">
+        <Card className="p-4 content-card border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center shadow-lg">
               <ClockIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900">{pendingAppointments}</p>
-              <p className="text-sm font-medium text-gray-600">Citas Pendientes</p>
+              <p className="text-2xl font-bold text-gray-600">{pendingAppointments}</p>
+              <p className="text-sm font-semibold text-gray-600">Citas Pendientes</p>
             </div>
           </div>
         </Card>
       </div>
 
       {/* Acciones rápidas */}
-      <Card className="p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-          <Plus className="w-6 h-6 mr-3 text-[#8e161a]" />
+      <Card className="p-6 content-card border border-gray-200 shadow-md mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <Plus className="w-6 h-6 mr-3 text-gray-800" />
           Acciones Rápidas
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Button 
-            className="p-4 text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="bg-gray-800 hover:bg-gray-700 text-white p-4 text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
             onClick={() => handleNavigation('appointments')}
           >
             <Calendar className="w-5 h-5 mr-2" />
@@ -256,7 +262,16 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
 
           <Button 
             variant="outline"
-            className="p-4 text-sm font-semibold rounded-lg border border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-all duration-300 transform hover:scale-105"
+            className="p-4 text-sm font-semibold rounded-lg border-2 border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-md hover:shadow-lg"
+            onClick={() => handleNavigation('reschedule')}
+          >
+            <RefreshCw className="w-5 h-5 mr-2" />
+            Reprogramar Cita
+          </Button>
+
+          <Button 
+            variant="outline"
+            className="p-4 text-sm font-semibold rounded-lg border-2 border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white transition-all duration-300 shadow-md hover:shadow-lg"
             onClick={() => handleNavigation('appointments/history')}
           >
             <FileText className="w-5 h-5 mr-2" />
@@ -265,29 +280,20 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
 
           <Button 
             variant="outline"
-            className="p-4 text-sm font-semibold rounded-lg border border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-all duration-300 transform hover:scale-105"
+            className="p-4 text-sm font-semibold rounded-lg border-2 border-gray-700 text-gray-700 hover:bg-gray-700 hover:text-white transition-all duration-300 shadow-md hover:shadow-lg"
             onClick={() => handleNavigation('notifications')}
           >
             <AlertCircle className="w-5 h-5 mr-2" />
             Notificaciones
           </Button>
-
-          <Button 
-            variant="outline"
-            className="p-4 text-sm font-semibold rounded-lg border border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white transition-all duration-300 transform hover:scale-105"
-            onClick={() => handleNavigation('profile')}
-          >
-            <Settings className="w-5 h-5 mr-2" />
-            Mi Perfil
-          </Button>
         </div>
       </Card>
 
       {/* Próximas citas */}
-      <Card className="p-6">
+      <Card className="p-6 bg-gradient-to-br from-white to-indigo-50 border border-indigo-300 shadow-md">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900 flex items-center">
-            <Clock className="w-6 h-6 mr-3 text-[#8e161a]" />
+          <h2 className="text-xl font-bold text-[#1e1b4b] flex items-center">
+            <Clock className="w-6 h-6 mr-3 text-[#1e1b4b]" />
             Próximas Citas
           </h2>
           {error && (
@@ -300,7 +306,7 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
 
         {loading ? (
           <div className="text-center py-8">
-            <div className="w-12 h-12 border-4 border-[#8e161a]/30 border-t-[#8e161a] rounded-full animate-spin mx-auto mb-3"></div>
+            <div className="w-12 h-12 border-4 border-[#1e1b4b]/30 border-t-[#1e1b4b] rounded-full animate-spin mx-auto mb-3"></div>
             <p className="text-sm font-medium text-gray-600">Cargando citas...</p>
           </div>
         ) : upcomingAppointments.length === 0 ? (
@@ -318,20 +324,20 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
         ) : (
           <div className="space-y-3">
             {upcomingAppointments.map((appointment) => (
-              <div 
-                key={appointment.id}
-                className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 rounded-lg border border-[#8e161a]/20 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
-                    </div>
+                          <div 
+              key={appointment.id}
+              className="p-4 bg-gradient-to-r from-white to-blue-50 rounded-lg border-2 border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:scale-102"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-[#1e1b4b] to-[#1a0a0a] rounded-lg flex items-center justify-center shadow-md">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
                     <div>
-                      <h3 className="text-sm font-bold text-gray-900 mb-1">
+                      <h3 className="text-base font-bold text-[#1e1b4b] mb-1">
                         Dr. {appointment.psychologist_name}
                       </h3>
-                      <div className="flex items-center space-x-4 text-xs font-medium text-gray-600">
+                      <div className="flex items-center space-x-3 text-xs font-semibold text-gray-700">
                         <span className="flex items-center">
                           <Calendar className="w-3 h-3 mr-1" />
                           {new Date(appointment.date).toLocaleDateString('es-ES', {
@@ -346,7 +352,7 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
                           {appointment.time}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1 font-medium">
+                      <p className="text-xs text-gray-600 mt-1 font-medium">
                         Motivo: {appointment.reason}
                       </p>
                     </div>
@@ -393,54 +399,7 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
         )}
       </Card>
 
-      {/* Información adicional */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
-          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-            <Info className="w-5 h-5 mr-2 text-blue-600" />
-            Información Importante
-          </h2>
-          <div className="space-y-3 text-sm text-gray-700">
-            <div className="flex items-start space-x-2">
-              <span className="text-blue-600">•</span>
-              <p>Las citas se confirman automáticamente</p>
-            </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-blue-600">•</span>
-              <p>Puedes cancelar hasta 24 horas antes</p>
-            </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-blue-600">•</span>
-              <p>Llega 10 minutos antes de tu cita</p>
-            </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-blue-600">•</span>
-              <p>Trae tu documento de identidad</p>
-            </div>
-          </div>
-        </Card>
 
-        <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
-          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-            <Phone className="w-5 h-5 mr-2 text-green-600" />
-            Contacto de Emergencia
-          </h2>
-          <div className="space-y-3 text-sm text-gray-700">
-            <div className="flex items-center space-x-2">
-              <Phone className="w-4 h-4 text-green-600" />
-              <span>Línea de crisis: (01) 123-4567</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Mail className="w-4 h-4 text-green-600" />
-              <span>emergencias@tupac-amaru.edu.pe</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <MapPin className="w-4 h-4 text-green-600" />
-              <span>Oficina de Psicología - Pabellón A</span>
-            </div>
-          </div>
-        </Card>
-      </div>
 
       {/* Modal de detalles de cita */}
       {showAppointmentDetails && selectedAppointment && (

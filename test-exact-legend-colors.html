@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación - Colores Exactos de la Leyenda</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .test-button {
+            background: #1D9BF0;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #0B1F3A;
+        }
+        .color-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .color-item {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .color-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin: 0 auto 10px;
+            border: 2px solid #333;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .color-cell {
+            width: 60px;
+            height: 30px;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Verificación - Colores Exactos de la Leyenda</h1>
+        
+        <div class="test-section">
+            <h3>🎨 Colores Actualizados - Más de 2 Semanas en Blanco</h3>
+            <div class="status success">
+                <strong>✅ Cambio aplicado:</strong>
+                <ul>
+                    <li><strong>Más de 2 semanas:</strong> Ahora es blanco (#ffffff) con borde gris (#e5e7eb)</li>
+                    <li><strong>Texto:</strong> Gris (#6b7280) para mejor contraste</li>
+                    <li><strong>Todos los calendarios:</strong> Usan colores exactos de la leyenda</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Colores Finales de la Leyenda</h3>
+            <div class="color-preview">
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #1D9BF0; border-color: #1D9BF0;"></div>
+                    <strong>Hoy</strong><br>
+                    <small>Azul (#1D9BF0)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #A0A8B5; border-color: #A0A8B5;"></div>
+                    <strong>Días pasados</strong><br>
+                    <small>Gris claro (#A0A8B5)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #0B1F3A; border-color: #0B1F3A;"></div>
+                    <strong>Fin de semana</strong><br>
+                    <small>Azul oscuro (#0B1F3A)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #F26D6D; border-color: #F26D6D;"></div>
+                    <strong>Feriado</strong><br>
+                    <small>Rojo (#F26D6D)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #4B5563; border-color: #4B5563;"></div>
+                    <strong>Bloqueados</strong><br>
+                    <small>Gris (#4B5563)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #ffffff; border-color: #e5e7eb;"></div>
+                    <strong>Más de 2 semanas</strong><br>
+                    <small>Blanco (#ffffff)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #2AA198; border-color: #2AA198;"></div>
+                    <strong>Disponibles</strong><br>
+                    <small>Verde azulado (#2AA198)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Tabla de Comparación - Leyenda vs Calendarios</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Tipo de Día</th>
+                        <th>Leyenda</th>
+                        <th>BaseCalendar</th>
+                        <th>AppointmentCalendar</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Hoy</strong></td>
+                        <td><div class="color-cell" style="background-color: transparent; border-color: #1D9BF0; border-width: 2px;"></div></td>
+                        <td><div class="color-cell" style="background-color: transparent; border-color: #1D9BF0; border-width: 2px;"></div></td>
+                        <td><div class="color-cell" style="background-color: transparent; border-color: #1D9BF0; border-width: 2px;"></div></td>
+                        <td>✅ Igual</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Días pasados</strong></td>
+                        <td><div class="color-cell" style="background-color: #A0A8B5;"></div></td>
+                        <td><div class="color-cell" style="background-color: #A0A8B5;"></div></td>
+                        <td><div class="color-cell" style="background-color: #A0A8B5;"></div></td>
+                        <td>✅ Igual</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fin de semana</strong></td>
+                        <td><div class="color-cell" style="background-color: #0B1F3A;"></div></td>
+                        <td><div class="color-cell" style="background-color: #0B1F3A;"></div></td>
+                        <td><div class="color-cell" style="background-color: #0B1F3A;"></div></td>
+                        <td>✅ Igual</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Feriado</strong></td>
+                        <td><div class="color-cell" style="background-color: #F26D6D;"></div></td>
+                        <td><div class="color-cell" style="background-color: #F26D6D;"></div></td>
+                        <td><div class="color-cell" style="background-color: #F26D6D;"></div></td>
+                        <td>✅ Igual</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bloqueados</strong></td>
+                        <td><div class="color-cell" style="background-color: #4B5563;"></div></td>
+                        <td><div class="color-cell" style="background-color: #4B5563;"></div></td>
+                        <td><div class="color-cell" style="background-color: #4B5563;"></div></td>
+                        <td>✅ Igual</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Más de 2 semanas</strong></td>
+                        <td><div class="color-cell" style="background-color: #ffffff; border-color: #e5e7eb;"></div></td>
+                        <td><div class="color-cell" style="background-color: #ffffff; border-color: #e5e7eb;"></div></td>
+                        <td><div class="color-cell" style="background-color: #ffffff; border-color: #e5e7eb;"></div></td>
+                        <td>✅ Igual</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Disponibles</strong></td>
+                        <td><div class="color-cell" style="background-color: #2AA198;"></div></td>
+                        <td><div class="color-cell" style="background-color: #2AA198;"></div></td>
+                        <td><div class="color-cell" style="background-color: #2AA198;"></div></td>
+                        <td>✅ Igual</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testLegendColors()">📋 Verificar Leyenda</button>
+                <button class="test-button" onclick="testCalendarColors()">🎨 Verificar Calendarios</button>
+                <button class="test-button" onclick="testBeyondLimit()">⏰ Verificar Más de 2 Semanas</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega a todos los calendarios</li>
+                    <li>Observa la leyenda y los colores</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Aspectos específicos a verificar:</strong>
+                <ul>
+                    <li>📋 <strong>Leyenda:</strong> "Más de 2 semanas" debe ser blanco</li>
+                    <li>🎨 <strong>Calendarios:</strong> Todos los días deben coincidir con la leyenda</li>
+                    <li>⏰ <strong>Días futuros:</strong> Más de 2 semanas deben ser blancos</li>
+                    <li>🔄 <strong>Consistencia:</strong> Mismos colores en todos los calendarios</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Detalles Técnicos Finales</h3>
+            <div class="status info">
+                <strong>Configuración técnica actualizada:</strong>
+                <ul>
+                    <li><strong>Hoy:</strong> backgroundColor: 'transparent', borderColor: '#1D9BF0'</li>
+                    <li><strong>Días pasados:</strong> backgroundColor: '#A0A8B5', borderColor: '#A0A8B5'</li>
+                    <li><strong>Fines de semana:</strong> backgroundColor: '#0B1F3A', borderColor: '#0B1F3A'</li>
+                    <li><strong>Feriados:</strong> backgroundColor: '#F26D6D', borderColor: '#F26D6D'</li>
+                    <li><strong>Bloqueados:</strong> backgroundColor: '#4B5563', borderColor: '#4B5563'</li>
+                    <li><strong>Más de 2 semanas:</strong> backgroundColor: '#ffffff', borderColor: '#e5e7eb'</li>
+                    <li><strong>Disponibles:</strong> backgroundColor: '#2AA198', borderColor: '#2AA198'</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Posibles Problemas</h3>
+            <div class="status warning">
+                <strong>Si los colores no coinciden:</strong>
+                <ul>
+                    <li><strong>Reinicia el servidor:</strong> npm run dev</li>
+                    <li><strong>Limpia el caché:</strong> Ctrl+F5 o Cmd+Shift+R</li>
+                    <li><strong>Verifica la consola:</strong> Busca errores de JavaScript</li>
+                    <li><strong>Verifica los archivos:</strong> Asegúrate de que se guardaron los cambios</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testLegendColors() {
+            alert('📋 Para verificar la leyenda:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Busca la leyenda de colores\n' +
+                  '3. Verifica que "Más de 2 semanas" sea BLANCO\n' +
+                  '4. Verifica que todos los colores coincidan con la tabla\n' +
+                  '5. Si no es blanco, reinicia el servidor');
+        }
+
+        function testCalendarColors() {
+            alert('🎨 Para verificar los calendarios:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega a cada calendario:\n' +
+                  '   - Calendario del estudiante\n' +
+                  '   - Calendario del psicólogo\n' +
+                  '   - Calendario del tutor\n' +
+                  '3. Verifica que los colores coincidan con la leyenda\n' +
+                  '4. Compara con la tabla de colores');
+        }
+
+        function testBeyondLimit() {
+            alert('⏰ Para verificar "Más de 2 semanas":\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega a un mes futuro (más de 2 semanas)\n' +
+                  '3. Verifica que los días futuros sean BLANCOS\n' +
+                  '4. Verifica que la leyenda muestre "Más de 2 semanas" en blanco\n' +
+                  '5. Si no es blanco, reinicia el servidor');
+        }
+    </script>
+</body>
+</html>

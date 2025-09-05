@@ -8,28 +8,30 @@ export default {
       },
       colors: {
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: '#8e161a',
+          100: '#b91c1c',
+          200: '#dc2626',
+          300: '#ef4444',
+          400: '#f87171',
+          500: '#8e161a', // Granate oscuro - coherente con login
+          600: '#b91c1c',
+          700: '#dc2626',
+          800: '#ef4444',
+          900: '#f87171',
+          DEFAULT: '#8e161a',
         },
         secondary: {
-          50: '#f0fdfa',
-          100: '#ccfbf1',
-          200: '#99f6e4',
-          300: '#5eead4',
-          400: '#2dd4bf',
-          500: '#14b8a6',
-          600: '#0891b2',
-          700: '#0e7490',
-          800: '#155e75',
-          900: '#164e63',
+          50: '#d3b7a0',
+          100: '#c2b280',
+          200: '#b89a80',
+          300: '#a89070',
+          400: '#988660',
+          500: '#d3b7a0', // Beige/Camel - coherente con login
+          600: '#c2b280',
+          700: '#b89a80',
+          800: '#a89070',
+          900: '#988660',
+          DEFAULT: '#d3b7a0',
         },
         granate: {
           50: '#fdf2f2',
@@ -77,7 +79,7 @@ export default {
             500: '#64748b',
             600: '#475569',
             700: '#334155',
-            800: '#1e293b', // Azul marino principal
+            800: '#1e293b', // Azul marino principal - coherente con login
             900: '#0f172a',
             DEFAULT: '#1e293b',
             dark: '#0f172a',
@@ -101,7 +103,7 @@ export default {
         },
         verde: {
           oscuro: '#14532d',
-          esmeralda: '#047857',
+          esmeralda: '#10b981', // Verde esmeralda para botones secundarios
           botella: '#174c3c',
         },
         rosa: {
@@ -113,6 +115,8 @@ export default {
           quemado: '#cc5803',
           terracota: '#e2725b',
         },
+        coral: '#f97316', // Rojo coral para errores
+        dorado: '#fbbf24', // Amarillo dorado para advertencias
         mostaza: '#f4d35e',
         amarillo: {
           suave: '#fff9c4',
@@ -155,5 +159,22 @@ export default {
     'border-azul-marino',
     'hover:bg-granate-700',
     'hover:bg-azul-marino-700',
+    // Nuevos colores del tema coherentes
+    'bg-primary',
+    'bg-secondary',
+    'bg-azul-marino',
+    'bg-granate',
+    'bg-beige',
+    'text-primary',
+    'text-secondary',
+    'text-azul-marino',
+    'text-granate',
+    'text-beige',
+    'border-primary',
+    'border-secondary',
+    'border-azul-marino',
+    'hover:bg-primary',
+    'hover:bg-secondary',
+    'hover:bg-azul-marino',
   ],
 };

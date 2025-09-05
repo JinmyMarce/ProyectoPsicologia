@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación en Vivo - Calendario Estudiante</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .calendar-simulation {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+            max-width: 800px;
+        }
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 0.9em;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .month-header {
+            grid-column: 1 / -1;
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .day-header {
+            background: #6c757d;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .fix-box {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #28a745;
+            margin: 20px 0;
+        }
+        .fix-box h2 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .instruction-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #2196f3;
+            margin: 20px 0;
+        }
+        .instruction-box h2 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificación en Vivo - Calendario Estudiante</h1>
+        
+        <div class="fix-box">
+            <h2>✅ Simulación del Calendario Corregido</h2>
+            <p>Este es exactamente cómo debería verse el calendario del estudiante con los cambios aplicados.</p>
+        </div>
+
+        <div class="instruction-box">
+            <h2>📋 Compara esto con tu calendario</h2>
+            <p><strong>Si tu calendario se ve diferente a esto, los cambios no se han aplicado correctamente.</strong></p>
+        </div>
+
+        <div class="test-section">
+            <h3>📅 Simulación del Calendario Agosto 2025</h3>
+            <div id="calendar-simulation">
+                <p>Generando simulación...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Función createLocalDate Probada</h3>
+            <div id="function-test">
+                <p>Probando función...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Solución de Emergencia</h3>
+            <div id="emergency-solution">
+                <p>Generando solución...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función createLocalDate exactamente como está en el código
+        function createLocalDate(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const utcDate = new Date(Date.UTC(year, month - 1, day));
+            const localDate = new Date(utcDate.getUTCFullYear(), utcDate.getUTCMonth(), utcDate.getUTCDate());
+            return localDate;
+        }
+
+        // Feriados de agosto 2025
+        const augustHolidays = [
+            { id: 24, name: "Batalla de Junín", date: "2025-08-06" },
+            { id: 25, name: "Santa Rosa de Lima", date: "2025-08-30" }
+        ];
+
+        // Colores correctos
+        const colors = {
+            holiday: { bg: '#f59e0b', border: '#d97706', text: '#ffffff' },
+            available: { bg: '#b7e4c7', border: '#40916c', text: '#065f46' },
+            weekend: { bg: '#d4b9ff', border: '#8b5cf6', text: '#1e293b' },
+            today: { bg: '#a8dadc', border: '#457b9d', text: '#1e293b' }
+        };
+
+        // Generar calendario
+        function generateCalendar() {
+            const container = document.getElementById('calendar-simulation');
+            
+            const year = 2025;
+            const month = 7; // Agosto (0-11)
+            
+            const firstDay = new Date(year, month, 1);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            let html = `
+                <div class="month-header">Agosto 2025 - Calendario del Estudiante (CORREGIDO)</div>
+                <div class="day-header">Dom</div>
+                <div class="day-header">Lun</div>
+                <div class="day-header">Mar</div>
+                <div class="day-header">Mié</div>
+                <div class="day-header">Jue</div>
+                <div class="day-header">Vie</div>
+                <div class="day-header">Sáb</div>
+            `;
+            
+            for (let i = 0; i < 42; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + i);
+                
+                const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+                const isCurrentMonth = currentDate.getMonth() === month;
+                const isToday = currentDate.toDateString() === new Date().toDateString();
+                
+                // Verificar si es feriado usando la función corregida
+                const isHoliday = augustHolidays.some(holiday => {
+                    const holidayDate = createLocalDate(holiday.date);
+                    return holidayDate.toDateString() === currentDate.toDateString();
+                });
+                
+                const holiday = augustHolidays.find(h => {
+                    const holidayDate = createLocalDate(h.date);
+                    return holidayDate.toDateString() === currentDate.toDateString();
+                });
+                
+                let dayClass = 'calendar-day';
+                let dayStyle = '';
+                
+                if (isHoliday) {
+                    // Feriado con colores corregidos
+                    dayStyle = `background-color: ${colors.holiday.bg}; border-color: ${colors.holiday.border}; color: ${colors.holiday.text}; font-weight: bold;`;
+                } else if (isToday) {
+                    dayStyle = `background-color: ${colors.today.bg}; border-color: ${colors.today.border}; color: ${colors.today.text};`;
+                } else if (isWeekend) {
+                    dayStyle = `background-color: ${colors.weekend.bg}; border-color: ${colors.weekend.border}; color: ${colors.weekend.text};`;
+                } else if (!isCurrentMonth) {
+                    dayStyle = `background-color: #f0f0f0; border-color: #9ca3af; color: #6b7280;`;
+                } else {
+                    dayStyle = `background-color: ${colors.available.bg}; border-color: ${colors.available.border}; color: ${colors.available.text};`;
+                }
+                
+                html += `
+                    <div class="${dayClass}" style="${dayStyle}">
+                        <div style="font-weight: bold;">${currentDate.getDate()}</div>
+                        ${holiday ? `<div style="font-size: 0.7em;">🎉 ${holiday.name}</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Probar función createLocalDate
+        function testFunction() {
+            const container = document.getElementById('function-test');
+            
+            let html = '<h4>Prueba de la función createLocalDate:</h4>';
+            
+            augustHolidays.forEach(holiday => {
+                const originalDate = holiday.date;
+                const correctedDate = createLocalDate(holiday.date);
+                const expectedDate = new Date(2025, 7, parseInt(originalDate.split('-')[2]));
+                
+                const isCorrect = correctedDate.toDateString() === expectedDate.toDateString();
+                
+                html += `
+                    <div class="status ${isCorrect ? 'success' : 'error'}">
+                        <strong>${holiday.name}:</strong><br>
+                        Fecha original: ${originalDate}<br>
+                        Fecha procesada: ${correctedDate.toDateString()}<br>
+                        Fecha esperada: ${expectedDate.toDateString()}<br>
+                        Estado: ${isCorrect ? '✅ Correcto' : '❌ Incorrecto'}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Solución de emergencia
+        function emergencySolution() {
+            const container = document.getElementById('emergency-solution');
+            
+            let html = `
+                <h4>🚨 Si tu calendario no se ve así:</h4>
+                
+                <div class="status error">
+                    <strong>1. FORZAR RECARGA COMPLETA:</strong>
+                    <ul>
+                        <li>Chrome: Ctrl+Shift+R o Ctrl+F5</li>
+                        <li>Firefox: Ctrl+Shift+R</li>
+                        <li>Edge: Ctrl+Shift+R</li>
+                    </ul>
+                </div>
+                
+                <div class="status error">
+                    <strong>2. LIMPIAR CACHÉ COMPLETAMENTE:</strong>
+                    <ul>
+                        <li>Chrome: Ctrl+Shift+Delete → Todo el tiempo → Caché → Borrar datos</li>
+                        <li>Firefox: Ctrl+Shift+Delete → Todo → Caché → Limpiar ahora</li>
+                        <li>Edge: Ctrl+Shift+Delete → Todo el tiempo → Caché → Borrar</li>
+                    </ul>
+                </div>
+                
+                <div class="status error">
+                    <strong>3. REINICIAR SERVIDOR:</strong>
+                    <ul>
+                        <li>Detén el servidor (Ctrl+C en la terminal)</li>
+                        <li>Ejecuta: npm run dev</li>
+                        <li>Espera a que se inicie completamente</li>
+                    </ul>
+                </div>
+                
+                <div class="status error">
+                    <strong>4. VERIFICAR ARCHIVO:</strong>
+                    <ul>
+                        <li>Abre: src/components/ui/BaseCalendar.tsx</li>
+                        <li>Busca la función createLocalDate</li>
+                        <li>Debe tener el código UTC corregido</li>
+                    </ul>
+                </div>
+                
+                <div class="status warning">
+                    <strong>5. VERIFICAR URL:</strong>
+                    <ul>
+                        <li>Asegúrate de estar en: http://localhost:5175/</li>
+                        <li>No uses una URL en caché</li>
+                    </ul>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Ejecutar todas las pruebas
+        function runAllTests() {
+            generateCalendar();
+            testFunction();
+            emergencySolution();
+        }
+
+        // Ejecutar pruebas
+        runAllTests();
+        
+        // Recargar cada 10 segundos
+        setInterval(runAllTests, 10000);
+    </script>
+</body>
+</html>

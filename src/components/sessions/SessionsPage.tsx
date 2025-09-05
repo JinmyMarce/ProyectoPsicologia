@@ -20,29 +20,29 @@ export function SessionsPage() {
       title: 'Sesiones del Mes',
       value: '24',
       icon: Calendar,
-      color: 'bg-blue-100 text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'bg-gray-100 text-gray-800',
+      bgColor: 'bg-gray-50'
     },
     {
       title: 'Pacientes Activos',
       value: '18',
       icon: Users,
-      color: 'bg-green-100 text-green-600',
-      bgColor: 'bg-green-50'
+      color: 'bg-gray-100 text-gray-700',
+      bgColor: 'bg-gray-50'
     },
     {
       title: 'Sesiones Pendientes',
       value: '3',
       icon: Clock,
-      color: 'bg-orange-100 text-orange-600',
-      bgColor: 'bg-orange-50'
+      color: 'bg-gray-100 text-gray-600',
+      bgColor: 'bg-gray-50'
     },
     {
       title: 'Reportes Generados',
       value: '12',
       icon: FileText,
-      color: 'bg-purple-100 text-purple-600',
-      bgColor: 'bg-purple-50'
+      color: 'bg-gray-100 text-gray-500',
+      bgColor: 'bg-gray-50'
     }
   ];
 
@@ -51,78 +51,75 @@ export function SessionsPage() {
       title: 'Registrar Nueva Sesión',
       description: 'Crear un nuevo registro de sesión psicológica',
       icon: Plus,
-      color: 'bg-[#8e161a] hover:bg-[#6d1115]',
+      color: 'bg-gray-800 hover:bg-gray-700',
       action: () => setActiveView('register')
     },
     {
       title: 'Ver Historial',
       description: 'Consultar sesiones anteriores y reportes',
       icon: ClipboardList,
-      color: 'bg-blue-600 hover:bg-blue-700',
+      color: 'bg-gray-700 hover:bg-gray-600',
       action: () => setActiveView('history')
     },
     {
       title: 'Generar Reporte',
       description: 'Crear reportes estadísticos de sesiones',
       icon: BarChart3,
-      color: 'bg-green-600 hover:bg-green-700',
+      color: 'bg-gray-600 hover:bg-gray-500',
       action: () => alert('Funcionalidad en desarrollo')
     },
     {
       title: 'Programar Sesión',
       description: 'Agendar próximas sesiones con pacientes',
       icon: Calendar,
-      color: 'bg-purple-600 hover:bg-purple-700',
+      color: 'bg-gray-500 hover:bg-gray-400',
       action: () => alert('Funcionalidad en desarrollo')
     }
   ];
 
-  if (activeView === 'register') {
-    return (
-      <div>
-        <div className="mb-4">
-          <button
-            onClick={() => setActiveView('overview')}
-            className="flex items-center text-blue-600 hover:text-blue-800 font-medium"
-          >
-            ← Volver a Sesión Psicológica
-          </button>
-        </div>
-        <SessionRegistration />
-      </div>
-    );
-  }
+     if (activeView === 'register') {
+     return (
+       <div>
+         <div className="mb-4">
+           <button
+             onClick={() => setActiveView('overview')}
+             className="flex items-center text-gray-600 hover:text-gray-800 font-medium"
+           >
+             ← Volver a Sesión Psicológica
+           </button>
+         </div>
+         <SessionRegistration />
+       </div>
+     );
+   }
 
-  if (activeView === 'history') {
-    return (
-      <div>
-        <div className="mb-4">
-          <button
-            onClick={() => setActiveView('overview')}
-            className="flex items-center text-blue-600 hover:text-blue-800 font-medium"
-          >
-            ← Volver a Sesión Psicológica
-          </button>
-        </div>
-        <SessionList />
-      </div>
-    );
-  }
+     if (activeView === 'history') {
+     return (
+       <div>
+         <div className="mb-4">
+           <button
+             onClick={() => setActiveView('overview')}
+             className="flex items-center text-gray-600 hover:text-gray-800 font-medium"
+           >
+             ← Volver a Sesión Psicológica
+           </button>
+         </div>
+         <SessionList />
+       </div>
+     );
+   }
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="bg-blue-100 p-3 rounded-lg">
-            <MessageSquare className="w-8 h-8 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Sesión Psicológica</h1>
-            <p className="text-gray-600">Gestión completa de sesiones psicológicas</p>
-          </div>
-        </div>
-      </div>
+             {/* Título Principal */}
+       <div className="text-center mb-6">
+         <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+           <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+             Gestión de Sesiones Psicológicas
+           </h1>
+           <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
+         </div>
+       </div>
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -141,9 +138,9 @@ export function SessionsPage() {
         ))}
       </div>
 
-      {/* Acciones Rápidas */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Acciones Rápidas</h2>
+             {/* Acciones Rápidas */}
+       <div className="mb-8">
+         <h2 className="text-xl font-bold text-gray-800 mb-6">Acciones Rápidas</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {quickActions.map((action, index) => (
             <div 
@@ -167,12 +164,12 @@ export function SessionsPage() {
 
       {/* Información adicional */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sesiones Recientes */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Clock className="w-5 h-5 mr-2 text-blue-600" />
-            Sesiones Recientes
-          </h3>
+                 {/* Sesiones Recientes */}
+         <div className="bg-white rounded-xl p-6 border border-gray-200">
+           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+             <Clock className="w-5 h-5 mr-2 text-gray-600" />
+             Sesiones Recientes
+           </h3>
           <div className="space-y-3">
             {[1, 2, 3].map((item) => (
               <div key={item} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -184,20 +181,20 @@ export function SessionsPage() {
               </div>
             ))}
           </div>
-          <button 
-            onClick={() => setActiveView('history')}
-            className="w-full mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm"
-          >
-            Ver todas las sesiones →
-          </button>
+                     <button 
+             onClick={() => setActiveView('history')}
+             className="w-full mt-4 text-gray-600 hover:text-gray-800 font-medium text-sm"
+           >
+             Ver todas las sesiones →
+           </button>
         </div>
 
-        {/* Próximas Citas */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Calendar className="w-5 h-5 mr-2 text-green-600" />
-            Próximas Citas
-          </h3>
+                 {/* Próximas Citas */}
+         <div className="bg-white rounded-xl p-6 border border-gray-200">
+           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+             <Calendar className="w-5 h-5 mr-2 text-gray-600" />
+             Próximas Citas
+           </h3>
           <div className="space-y-3">
             {[1, 2, 3].map((item) => (
               <div key={item} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -209,9 +206,9 @@ export function SessionsPage() {
               </div>
             ))}
           </div>
-          <button className="w-full mt-4 text-green-600 hover:text-green-800 font-medium text-sm">
-            Ver calendario completo →
-          </button>
+                     <button className="w-full mt-4 text-gray-600 hover:text-gray-800 font-medium text-sm">
+             Ver calendario completo →
+           </button>
         </div>
       </div>
     </div>

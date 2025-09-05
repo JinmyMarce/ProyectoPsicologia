@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación - Imágenes Completas en Modales</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .test-button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #d97706;
+        }
+        .image-preview {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        .image-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Verificación - Imágenes Completas en Modales</h1>
+        
+        <div class="test-section">
+            <h3>✅ Cambios Implementados</h3>
+            <div class="status success">
+                <strong>✅ Mejoras en el modal de feriados:</strong>
+                <ul>
+                    <li><strong>Imágenes completas:</strong> ✅ Cambiado de 'cover' a 'contain' para mostrar la imagen completa</li>
+                    <li><strong>Altura aumentada:</strong> ✅ De 200px a 300px para mejor visualización</li>
+                    <li><strong>Fondo:</strong> ✅ Agregado fondo gris claro para mejor contraste</li>
+                    <li><strong>Fecha sobre imagen:</strong> ✅ Fecha completa agregada sobre la imagen</li>
+                    <li><strong>Tipo de feriado:</strong> ✅ Badge con el tipo (Cívico/Religioso) sobre la imagen</li>
+                    <li><strong>Información integrada:</strong> ✅ Fecha y tipo en una tarjeta sobre la imagen</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testModalImages()">🖼️ Probar Imágenes en Modales</button>
+                <button class="test-button" onclick="showImageExamples()">📋 Mostrar Ejemplos de Imágenes</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega al calendario del estudiante</li>
+                    <li>Haz clic en cualquier feriado para abrir el modal</li>
+                    <li>Verifica los siguientes aspectos:</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Aspectos a verificar en el modal:</strong>
+                <ul>
+                    <li>🖼️ <strong>Imagen completa:</strong> La imagen debe verse completa, no recortada</li>
+                    <li>📏 <strong>Tamaño:</strong> La imagen debe ocupar más espacio (300px de altura)</li>
+                    <li>🎨 <strong>Fondo:</strong> Debe tener fondo gris claro si la imagen no llena todo el espacio</li>
+                    <li>📅 <strong>Fecha:</strong> Debe aparecer la fecha completa sobre la imagen</li>
+                    <li>🏷️ <strong>Tipo:</strong> Debe aparecer un badge con el tipo de feriado (Cívico/Religioso)</li>
+                    <li>📝 <strong>Información:</strong> La fecha y tipo deben estar en una tarjeta negra sobre la imagen</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="image-examples" style="display: none;">
+            <h3>📋 Ejemplos de Imágenes de Feriados</h3>
+            <div class="image-preview">
+                <h4>Combate del 2 de Mayo</h4>
+                <p>Ruta: /images/Feriados/combate2demayo.png</p>
+                <p>Tipo: Cívico</p>
+            </div>
+            <div class="image-preview">
+                <h4>Día de la Fuerza Aérea del Perú</h4>
+                <p>Ruta: /images/Feriados/Fuerzaarea.png</p>
+                <p>Tipo: Cívico</p>
+            </div>
+            <div class="image-preview">
+                <h4>Fiestas Patrias (28 y 29 de julio)</h4>
+                <p>Ruta: /images/Feriados/fiestaspatrias.png</p>
+                <p>Tipo: Cívico</p>
+            </div>
+            <div class="image-preview">
+                <h4>Navidad</h4>
+                <p>Ruta: /images/Feriados/navidad.jpg</p>
+                <p>Tipo: Religioso</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testModalImages() {
+            alert('🧪 Para probar las imágenes en modales:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega al calendario del estudiante\n' +
+                  '3. Haz clic en cualquier feriado\n' +
+                  '4. Verifica que la imagen se vea completa\n' +
+                  '5. Verifica que aparezca la fecha y tipo sobre la imagen');
+        }
+
+        function showImageExamples() {
+            const examples = document.getElementById('image-examples');
+            if (examples.style.display === 'none') {
+                examples.style.display = 'block';
+            } else {
+                examples.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

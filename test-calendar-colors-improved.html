@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario con Colores Mejorados - Prueba</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .description {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 40px;
+        }
+        
+        .calendar-header {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            padding: 16px 12px;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 12px;
+            border-bottom: 3px solid #3b82f6;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        
+        .calendar-day {
+            min-height: 120px;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .day-number {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .day-event {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Estados del calendario */
+        .day-available {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-color: #22c55e;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .day-available .day-number {
+            color: #059669;
+            text-shadow: 0 1px 2px rgba(5, 150, 105, 0.2);
+        }
+        
+        .day-blocked {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-color: #9ca3af;
+            box-shadow: 0 4px 12px rgba(156, 163, 175, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .day-blocked .day-number {
+            color: #374151;
+            text-shadow: 0 1px 2px rgba(55, 65, 81, 0.2);
+        }
+        
+        .day-holiday {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-color: #ef4444;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .day-holiday .day-number {
+            color: #dc2626;
+            text-shadow: 0 1px 2px rgba(220, 38, 38, 0.2);
+        }
+        
+        .day-weekend {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-color: #64748b;
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .day-weekend .day-number {
+            color: #64748b;
+            text-shadow: 0 1px 2px rgba(100, 116, 139, 0.2);
+        }
+        
+        .day-today {
+            background: transparent;
+            border-color: #3b82f6;
+            border-width: 3px;
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .day-today .day-number {
+            color: #1e40af;
+            text-shadow: 0 1px 2px rgba(30, 64, 175, 0.2);
+        }
+        
+        .day-past {
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+            border-color: #e5e7eb;
+            opacity: 0.8;
+            box-shadow: 0 2px 8px rgba(229, 231, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .day-past .day-number {
+            color: #6b7280;
+            text-shadow: 0 1px 2px rgba(107, 114, 128, 0.2);
+        }
+        
+        .day-beyond-limit {
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+            border-color: #e5e7eb;
+            opacity: 0.8;
+            box-shadow: 0 2px 8px rgba(229, 231, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .day-beyond-limit .day-number {
+            color: #9ca3af;
+            text-shadow: 0 1px 2px rgba(156, 163, 175, 0.2);
+        }
+        
+        /* Eventos del calendario */
+        .event-available {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            border-color: #065F46;
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .event-blocked {
+            background: linear-gradient(135deg, #4B5563 0%, #374151 100%);
+            border-color: #1F2937;
+            box-shadow: 0 6px 20px rgba(75, 85, 99, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .event-holiday {
+            background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+            border-color: #991B1B;
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        
+        .event-weekend {
+            background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+            border-color: #0F172A;
+            box-shadow: 0 4px 12px rgba(31, 41, 55, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .event-group-session {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            border-color: #1E40AF;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .event-derivation {
+            background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+            border-color: #5B21B6;
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .legend {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .legend h3 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        
+        .legend-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .legend-color {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .legend-text h4 {
+            margin: 0 0 4px 0;
+            color: #1e293b;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .legend-text p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 1px solid #3b82f6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+        
+        .info-box h4 {
+            color: #1e40af;
+            margin: 0 0 12px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .info-box p {
+            color: #1e40af;
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Calendario con Colores Mejorados</h1>
+        <p class="description">
+            Demostración de los nuevos estilos del calendario con colores más brillantes, 
+            bordes más visibles y gradientes mejorados para una mejor experiencia visual.
+        </p>
+        
+        <!-- Calendario de ejemplo -->
+        <div class="calendar-grid">
+            <!-- Headers -->
+            <div class="calendar-header">Lun</div>
+            <div class="calendar-header">Mar</div>
+            <div class="calendar-header">Mié</div>
+            <div class="calendar-header">Jue</div>
+            <div class="calendar-header">Vie</div>
+            <div class="calendar-header">Sáb</div>
+            <div class="calendar-header">Dom</div>
+            
+            <!-- Días del calendario -->
+            <div class="calendar-day day-past">
+                <div class="day-number">15</div>
+                <div class="day-event event-blocked">Cita ocupada</div>
+            </div>
+            
+            <div class="calendar-day day-available">
+                <div class="day-number">16</div>
+                <div class="day-event event-available">Disponible</div>
+            </div>
+            
+            <div class="calendar-day day-holiday">
+                <div class="day-number">17</div>
+                <div class="day-event event-holiday">🎉 Feriado</div>
+            </div>
+            
+            <div class="calendar-day day-today">
+                <div class="day-number">18</div>
+                <div class="day-event event-group-session">Sesión grupal</div>
+            </div>
+            
+            <div class="calendar-day day-available">
+                <div class="day-number">19</div>
+                <div class="day-event event-derivation">Derivación</div>
+            </div>
+            
+            <div class="calendar-day day-weekend">
+                <div class="day-number">20</div>
+                <div class="day-event event-weekend">Fin de semana</div>
+            </div>
+            
+            <div class="calendar-day day-weekend">
+                <div class="day-number">21</div>
+                <div class="day-event event-weekend">Fin de semana</div>
+            </div>
+            
+            <div class="calendar-day day-available">
+                <div class="day-number">22</div>
+                <div class="day-event event-available">Disponible</div>
+            </div>
+            
+            <div class="calendar-day day-blocked">
+                <div class="day-number">23</div>
+                <div class="day-event event-blocked">Bloqueado</div>
+            </div>
+            
+            <div class="calendar-day day-available">
+                <div class="day-number">24</div>
+                <div class="day-event event-available">Disponible</div>
+            </div>
+            
+            <div class="calendar-day day-available">
+                <div class="day-number">25</div>
+                <div class="day-event event-available">Disponible</div>
+            </div>
+            
+            <div class="calendar-day day-available">
+                <div class="day-number">26</div>
+                <div class="day-event event-available">Disponible</div>
+            </div>
+            
+            <div class="calendar-day day-available">
+                <div class="day-number">27</div>
+                <div class="day-event event-available">Disponible</div>
+            </div>
+            
+            <div class="calendar-day day-available">
+                <div class="day-number">28</div>
+                <div class="day-event event-available">Disponible</div>
+            </div>
+            
+            <div class="calendar-day day-beyond-limit">
+                <div class="day-number">29</div>
+                <div class="day-event event-beyond-limit">Fuera de límite</div>
+            </div>
+            
+            <div class="calendar-day day-beyond-limit">
+                <div class="day-number">30</div>
+                <div class="day-event event-beyond-limit">Fuera de límite</div>
+            </div>
+        </div>
+        
+        <!-- Leyenda -->
+        <div class="legend">
+            <h3>📋 Leyenda del Calendario</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); border-color: #065F46;"></div>
+                    <div class="legend-text">
+                        <h4>Disponible</h4>
+                        <p>Puedes agendar cita</p>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #4B5563 0%, #374151 100%); border-color: #1F2937;"></div>
+                    <div class="legend-text">
+                        <h4>Bloqueado</h4>
+                        <p>Día no disponible</p>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%); border-color: #991B1B;"></div>
+                    <div class="legend-text">
+                        <h4>Feriado</h4>
+                        <p>Feriado nacional</p>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #1F2937 0%, #111827 100%); border-color: #0F172A;"></div>
+                    <div class="legend-text">
+                        <h4>Fin de semana</h4>
+                        <p>No se atiende</p>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); border-color: #1E40AF;"></div>
+                    <div class="legend-text">
+                        <h4>Sesión grupal</h4>
+                        <p>Actividad grupal</p>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%); border-color: #5B21B6;"></div>
+                    <div class="legend-text">
+                        <h4>Derivación</h4>
+                        <p>Derivación médica</p>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: transparent; border-color: #3B82F6; border-width: 3px;"></div>
+                    <div class="legend-text">
+                        <h4>Hoy</h4>
+                        <p>Día actual</p>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%); border-color: #4B5563;"></div>
+                    <div class="legend-text">
+                        <h4>Días pasados</h4>
+                        <p>Ya no disponibles</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h4>✨ Mejoras Implementadas</h4>
+                <p>
+                    <strong>Colores más brillantes:</strong> Gradientes modernos para mejor visibilidad<br>
+                    <strong>Bordes más visibles:</strong> Bordes más gruesos (2-3px) con colores contrastantes<br>
+                    <strong>Sombras mejoradas:</strong> Sombras externas más pronunciadas y sombras internas sutiles<br>
+                    <strong>Efectos hover:</strong> Animaciones suaves al pasar el mouse<br>
+                    <strong>Tipografía mejorada:</strong> Texto más legible con sombras sutiles
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

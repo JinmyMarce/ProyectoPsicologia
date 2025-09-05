@@ -152,14 +152,14 @@ export function NotificationCenter() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className="w-5 h-5 text-gray-700" />;
       case 'warning':
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-500" />;
+        return <AlertCircle className="w-5 h-5 text-gray-600" />;
       case 'appointment':
-        return <Bell className="w-5 h-5 text-blue-500" />;
+        return <Bell className="w-5 h-5 text-gray-800" />;
       case 'reminder':
-        return <Bell className="w-5 h-5 text-yellow-500" />;
+        return <Bell className="w-5 h-5 text-gray-500" />;
       default:
         return <Info className="w-5 h-5 text-gray-500" />;
     }
@@ -200,7 +200,7 @@ export function NotificationCenter() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-[#8e161a]" />
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-600" />
           <p className="text-gray-600">Cargando notificaciones...</p>
         </div>
       </div>
@@ -209,25 +209,28 @@ export function NotificationCenter() {
 
   return (
     <div className="space-y-6">
-      <PageHeader 
-        title="Centro de Notificaciones"
-        subtitle={undefined}
-      >
-        <div className="flex items-center justify-between">
-          {/* Eliminado el título institucional */}
-          <span></span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="ml-4"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Actualizar
-          </Button>
+      {/* Título Principal */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Centro de Notificaciones
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
         </div>
-      </PageHeader>
+      </div>
+
+      {/* Botón de actualizar */}
+      <div className="flex justify-end mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          Actualizar
+        </Button>
+      </div>
 
       {/* Alerts */}
       {error && (
@@ -245,7 +248,7 @@ export function NotificationCenter() {
             <div className="text-sm text-gray-600">Total</div>
           </Card>
           <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{unreadCount}</div>
+            <div className="text-2xl font-bold text-gray-700">{unreadCount}</div>
             <div className="text-sm text-gray-600">No leídas</div>
           </Card>
           <Card className="p-4 text-center">

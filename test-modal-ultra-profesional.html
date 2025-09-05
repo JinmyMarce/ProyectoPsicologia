@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal Ultra Profesional - Feriados</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        .test-section {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #4299e1;
+        }
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .modal-preview {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            border: 1px solid #e2e8f0;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 50%);
+        }
+        .modal-content {
+            padding: 20px;
+        }
+        .holiday-image {
+            width: 224px;
+            height: 224px;
+            object-fit: cover;
+            border-radius: 32px;
+            border: 4px solid #fecaca;
+            margin: 0 auto 20px;
+            display: block;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .feature-card h4 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .feature-card p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+        .improvement-list {
+            background: #f0f9ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .improvement-list h3 {
+            color: #0369a1;
+            margin-bottom: 15px;
+        }
+        .improvement-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        .improvement-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0f2fe;
+            color: #0c4a6e;
+        }
+        .improvement-list li:before {
+            content: '✅ ';
+            margin-right: 10px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+        .comparison-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge.old {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge.new {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Modal Ultra Profesional - Feriados</h1>
+        
+        <div class="test-section">
+            <h3>🚀 Nuevo Diseño Implementado</h3>
+            <p>El modal de feriados ha sido completamente rediseñado con un enfoque ultra profesional y moderno.</p>
+        </div>
+
+        <div class="modal-preview">
+            <div class="modal-header">
+                <div style="position: relative; z-index: 1;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;">
+                        <div style="display: flex; align-items: center; gap: 32px;">
+                            <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.15); border-radius: 24px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(12px); box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+                                <span style="font-size: 40px;">⭐</span>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 36px; font-weight: 900; margin: 0 0 8px 0;">🎉 Feriado Nacional</h3>
+                                <p style="font-size: 20px; margin: 0; opacity: 0.9;">Día festivo oficial del Perú</p>
+                            </div>
+                        </div>
+                        <button style="width: 56px; height: 56px; background: rgba(255,255,255,0.15); border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 24px;">✕</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-content">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <img src="/images/Feriados/fiestapatrias.png" alt="Fiestas Patrias" class="holiday-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjI0IiBoZWlnaHQ9IjIyNCIgdmlld0JveD0iMCAwIDIyNCAyMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMjQiIGhlaWdodD0iMjI0IiBmaWxsPSIjRkY2QjZCQyIvPgo8dGV4dCB4PSIxMTIiIHk9IjExMiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPvCfkY88L3RleHQ+Cjwvc3ZnPgo='">
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h4 style="font-size: 48px; font-weight: 900; color: #1f2937; margin-bottom: 24px;">Fiestas Patrias</h4>
+                    <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 0%, #e0e7ff 100%); padding: 32px; border-radius: 32px; border: 2px solid #3b82f6; box-shadow: 0 25px 50px rgba(0,0,0,0.15);">
+                        <p style="margin: 0; font-weight: 800; color: #1e40af; font-size: 24px;">Lunes, 28 de Julio de 2025</p>
+                    </div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 0%, #dbeafe 100%); padding: 32px; border-radius: 32px; border-left: 4px solid #10b981; box-shadow: 0 25px 50px rgba(0,0,0,0.15); margin-bottom: 30px;">
+                    <div style="display: flex; align-items: flex-start; gap: 24px;">
+                        <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+                            <span style="font-size: 24px;">ℹ️</span>
+                        </div>
+                        <div style="flex: 1;">
+                            <h5 style="font-weight: 900; color: #065f46; font-size: 24px; margin-bottom: 16px;">📖 Descripción Histórica</h5>
+                            <p style="color: #047857; font-size: 20px; line-height: 1.6; font-weight: 500;">
+                                Fechas más importantes del país: el 28 se conmemora la Independencia proclamada en 1821, con desfiles y eventos. El 29 se dedica a las Fuerzas Armadas y la Policía Nacional, reafirmando su compromiso con la nación.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 30px;">
+                    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 0%, #f0fdf4 100%); padding: 24px; border-radius: 24px; border: 2px solid #22c55e; box-shadow: 0 25px 50px rgba(0,0,0,0.15);">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+                                <span style="font-size: 24px;">⭐</span>
+                            </div>
+                            <div>
+                                <h6 style="font-weight: 900; color: #166534; font-size: 18px;">🏛️ Tipo de Feriado</h6>
+                                <p style="color: #15803d; font-size: 16px; font-weight: 600;">Nacional</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 0%, #faf5ff 100%); padding: 24px; border-radius: 24px; border: 2px solid #a855f7; box-shadow: 0 25px 50px rgba(0,0,0,0.15);">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+                                <span style="font-size: 24px;">📍</span>
+                            </div>
+                            <div>
+                                <h6 style="font-weight: 900; color: #7c2d12; font-size: 18px;">📍 Alcance</h6>
+                                <p style="color: #9a3412; font-size: 16px; font-weight: 600;">Todo el Perú</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 0%, #fffbeb 100%); padding: 32px; border-radius: 32px; border-left: 4px solid #f59e0b; box-shadow: 0 25px 50px rgba(0,0,0,0.15); margin-bottom: 30px;">
+                    <div style="display: flex; align-items: flex-start; gap: 24px;">
+                        <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+                            <span style="font-size: 28px;">⚠️</span>
+                        </div>
+                        <div style="flex: 1;">
+                            <h6 style="font-weight: 900; color: #92400e; font-size: 24px; margin-bottom: 16px;">⚠️ Información Importante</h6>
+                            <p style="color: #a16207; font-size: 20px; line-height: 1.6; font-weight: 500;">
+                                En este día festivo <strong style="color: #92400e; font-weight: 900;">no se atiende</strong> en el servicio de psicología. Las citas programadas para feriados serán reprogramadas automáticamente.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 0%, #f8fafc 100%); padding: 40px; border-top: 2px solid #e2e8f0; border-radius: 0 0 20px 20px;">
+                    <button style="width: 100%; background: linear-gradient(135deg, #ef4444 0%, #dc2626 0%, #b91c1c 100%); color: white; font-weight: 900; padding: 24px 40px; border-radius: 24px; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+                        ✅ Entendido
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>🎨 Diseño Visual</h4>
+                <p>Interfaz completamente rediseñada con gradientes modernos, sombras profundas y efectos visuales avanzados.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📱 Responsividad</h4>
+                <p>Modal optimizado para todos los dispositivos con espaciado y tipografía adaptativa.</p>
+            </div>
+            <div class="feature-card">
+                <h4>⚡ Animaciones</h4>
+                <p>Transiciones suaves y efectos hover que mejoran la experiencia del usuario.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🎯 Accesibilidad</h4>
+                <p>Mejor contraste, tipografía legible y estructura semántica clara.</p>
+            </div>
+        </div>
+
+        <div class="improvement-list">
+            <h3>🚀 Mejoras Implementadas</h3>
+            <ul>
+                <li>Header más grande y elegante con patrón de fondo sofisticado</li>
+                <li>Imagen del feriado aumentada de 192x192 a 224x224 píxeles</li>
+                <li>Tipografía mejorada con pesos font-black para títulos principales</li>
+                <li>Espaciado aumentado de 8 a 12 unidades para mejor respiración</li>
+                <li>Sombras más profundas (shadow-2xl y shadow-3xl)</li>
+                <li>Bordes más redondeados (rounded-4xl para elementos principales)</li>
+                <li>Efectos hover mejorados con scale-105 y transiciones de 500ms</li>
+                <li>Backdrop blur mejorado para elementos superpuestos</li>
+                <li>Gradientes más sutiles y profesionales</li>
+                <li>Botón de cierre más grande y accesible</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Comparación: Antes vs Después</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspecto</th>
+                        <th><span class="badge old">Antes</span></th>
+                        <th><span class="badge new">Después</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ancho máximo</td>
+                        <td>max-w-2xl (672px)</td>
+                        <td>max-w-4xl (896px)</td>
+                    </tr>
+                    <tr>
+                        <td>Padding del contenido</td>
+                        <td>p-8 (32px)</td>
+                        <td>p-12 (48px)</td>
+                    </tr>
+                    <tr>
+                        <td>Espaciado entre elementos</td>
+                        <td>space-y-8 (32px)</td>
+                        <td>space-y-12 (48px)</td>
+                    </tr>
+                    <tr>
+                        <td>Tamaño de imagen</td>
+                        <td>w-48 h-48 (192px)</td>
+                        <td>w-56 h-56 (224px)</td>
+                    </tr>
+                    <tr>
+                        <td>Tipografía principal</td>
+                        <td>text-4xl font-bold</td>
+                        <td>text-5xl font-black</td>
+                    </tr>
+                    <tr>
+                        <td>Bordes redondeados</td>
+                        <td>rounded-3xl</td>
+                        <td>rounded-4xl</td>
+                    </tr>
+                    <tr>
+                        <td>Sombras</td>
+                        <td>shadow-lg</td>
+                        <td>shadow-2xl</td>
+                    </tr>
+                    <tr>
+                        <td>Transiciones</td>
+                        <td>duration-300</td>
+                        <td>duration-500</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Beneficios del Nuevo Diseño</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                <div style="background: #f0fdf4; padding: 20px; border-radius: 15px; border-left: 4px solid #22c55e;">
+                    <h4 style="color: #166534; margin: 0 0 10px 0;">👁️ Mejor Legibilidad</h4>
+                    <p style="color: #15803d; margin: 0; font-size: 14px;">Tipografía más grande y contrastes mejorados para una lectura más cómoda.</p>
+                </div>
+                <div style="background: #fef3c7; padding: 20px; border-radius: 15px; border-left: 4px solid #f59e0b;">
+                    <h4 style="color: #92400e; margin: 0 0 10px 0;">🎨 Estética Premium</h4>
+                    <p style="color: #a16207; margin: 0; font-size: 14px;">Diseño que transmite profesionalismo y calidad superior.</p>
+                </div>
+                <div style="background: #dbeafe; padding: 20px; border-radius: 15px; border-left: 4px solid #3b82f6;">
+                    <h4 style="color: #1e40af; margin: 0 0 10px 0;">📱 Experiencia Mejorada</h4>
+                    <p style="color: #1d4ed8; margin: 0; font-size: 14px;">Interacciones más fluidas y navegación intuitiva.</p>
+                </div>
+                <div style="background: #f3e8ff; padding: 20px; border-radius: 15px; border-left: 4px solid #a855f7;">
+                    <h4 style="color: #7c2d12; margin: 0 0 10px 0;">⚡ Rendimiento</h4>
+                    <p style="color: #9a3412; margin: 0; font-size: 14px;">Animaciones optimizadas y transiciones suaves.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+

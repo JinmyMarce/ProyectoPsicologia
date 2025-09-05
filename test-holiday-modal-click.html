@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Modal de Feriados - Clic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .calendar-simulation {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+            max-width: 800px;
+        }
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 0.9em;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .calendar-day:hover {
+            background-color: #f0f0f0;
+        }
+        .holiday-event {
+            background: #f59e0b;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin: 2px 0;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .holiday-event:hover {
+            background: #d97706;
+        }
+        .modal-simulation {
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            overflow: hidden;
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+        }
+        .modal-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .modal-content {
+            padding: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Prueba Modal de Feriados - Clic</h1>
+        
+        <div class="test-section">
+            <h3>✅ Funcionalidad Implementada</h3>
+            <div class="status success">
+                <strong>✅ Modal al hacer clic:</strong>
+                <ul>
+                    <li>Al hacer clic en cualquier feriado del calendario se abre un modal</li>
+                    <li>El modal muestra la imagen del feriado como fondo</li>
+                    <li>El modal muestra el nombre del feriado sobre la imagen</li>
+                    <li>El modal muestra descripción detallada e historia</li>
+                    <li>El modal muestra el tipo de feriado (Cívico/Religioso/Sector Público)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📅 Simulación del Calendario</h3>
+            <div class="calendar-simulation">
+                <div style="grid-column: 1 / -1; background: #007bff; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 1.2em;">Agosto 2025</div>
+                <div style="background: #6c757d; color: white; padding: 8px; text-align: center; font-size: 0.9em; font-weight: bold;">Dom</div>
+                <div style="background: #6c757d; color: white; padding: 8px; text-align: center; font-size: 0.9em; font-weight: bold;">Lun</div>
+                <div style="background: #6c757d; color: white; padding: 8px; text-align: center; font-size: 0.9em; font-weight: bold;">Mar</div>
+                <div style="background: #6c757d; color: white; padding: 8px; text-align: center; font-size: 0.9em; font-weight: bold;">Mié</div>
+                <div style="background: #6c757d; color: white; padding: 8px; text-align: center; font-size: 0.9em; font-weight: bold;">Jue</div>
+                <div style="background: #6c757d; color: white; padding: 8px; text-align: center; font-size: 0.9em; font-weight: bold;">Vie</div>
+                <div style="background: #6c757d; color: white; padding: 8px; text-align: center; font-size: 0.9em; font-weight: bold;">Sáb</div>
+                
+                <!-- Días vacíos -->
+                <div class="calendar-day">27</div>
+                <div class="calendar-day">28</div>
+                <div class="calendar-day">29</div>
+                <div class="calendar-day">30</div>
+                <div class="calendar-day">31</div>
+                <div class="calendar-day">1</div>
+                <div class="calendar-day">2</div>
+                
+                <!-- Semana 1 -->
+                <div class="calendar-day">3</div>
+                <div class="calendar-day">4</div>
+                <div class="calendar-day">5</div>
+                <div class="calendar-day" style="background-color: #f59e0b; color: white;">
+                    <div style="font-weight: bold;">6</div>
+                    <div class="holiday-event" onclick="showModal('Batalla de Junín')">🎉 Batalla de Junín</div>
+                </div>
+                <div class="calendar-day">7</div>
+                <div class="calendar-day">8</div>
+                <div class="calendar-day">9</div>
+                
+                <!-- Semana 2 -->
+                <div class="calendar-day">10</div>
+                <div class="calendar-day">11</div>
+                <div class="calendar-day">12</div>
+                <div class="calendar-day">13</div>
+                <div class="calendar-day">14</div>
+                <div class="calendar-day">15</div>
+                <div class="calendar-day">16</div>
+                
+                <!-- Semana 3 -->
+                <div class="calendar-day">17</div>
+                <div class="calendar-day">18</div>
+                <div class="calendar-day">19</div>
+                <div class="calendar-day">20</div>
+                <div class="calendar-day">21</div>
+                <div class="calendar-day">22</div>
+                <div class="calendar-day">23</div>
+                
+                <!-- Semana 4 -->
+                <div class="calendar-day">24</div>
+                <div class="calendar-day">25</div>
+                <div class="calendar-day">26</div>
+                <div class="calendar-day">27</div>
+                <div class="calendar-day">28</div>
+                <div class="calendar-day">29</div>
+                <div class="calendar-day" style="background-color: #f59e0b; color: white;">
+                    <div style="font-weight: bold;">30</div>
+                    <div class="holiday-event" onclick="showModal('Santa Rosa de Lima')">🎉 Santa Rosa de Lima</div>
+                </div>
+                
+                <!-- Semana 5 -->
+                <div class="calendar-day">31</div>
+                <div class="calendar-day">1</div>
+                <div class="calendar-day">2</div>
+                <div class="calendar-day">3</div>
+                <div class="calendar-day">4</div>
+                <div class="calendar-day">5</div>
+                <div class="calendar-day">6</div>
+            </div>
+            <p style="text-align: center; margin-top: 10px; font-style: italic; color: #666;">
+                💡 Haz clic en los feriados naranjas para ver el modal
+            </p>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega al calendario del estudiante</li>
+                    <li>Ve al mes de agosto 2025</li>
+                </ul>
+            </div>
+            <div class="status warning">
+                <strong>2. Haz clic en un feriado:</strong>
+                <ul>
+                    <li>Haz clic en "🎉 Batalla de Junín" (6 de agosto)</li>
+                    <li>Haz clic en "🎉 Santa Rosa de Lima" (30 de agosto)</li>
+                    <li>Debe abrirse un modal con imagen de fondo</li>
+                </ul>
+            </div>
+            <div class="status warning">
+                <strong>3. Verifica el modal:</strong>
+                <ul>
+                    <li>Aparece una imagen de fondo del feriado</li>
+                    <li>El título está sobre la imagen</li>
+                    <li>Muestra descripción e historia</li>
+                    <li>Incluye tipo de feriado</li>
+                    <li>El botón de cierre funciona</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Si el modal no se abre:</h3>
+            <div class="status error">
+                <strong>❌ Posibles problemas:</strong>
+                <ul>
+                    <li>El evento de clic no está funcionando: Verificar `handleSelectEvent`</li>
+                    <li>El modal no se muestra: Verificar `showHolidayModal` y `selectedHoliday`</li>
+                    <li>Las imágenes no cargan: Verificar rutas en `getHolidayImage`</li>
+                    <li>Los feriados no aparecen: Verificar que el backend esté funcionando</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de prueba -->
+    <div id="test-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+        <div class="modal-simulation">
+            <div id="modal-image" class="modal-image"></div>
+            <div class="modal-content">
+                <h2 id="modal-title" style="margin: 0 0 20px 0; color: #1f2937; font-size: 24px;"></h2>
+                <div id="modal-type" style="margin-bottom: 20px; padding: 12px; background-color: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;"></div>
+                <div id="modal-description" style="margin-bottom: 20px;"></div>
+                <div style="display: flex; justify-content: center;">
+                    <button onclick="closeModal()" style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const holidayDetails = {
+            'Batalla de Junín': {
+                image: '/images/Feriados/batalla de junin.png',
+                type: 'Cívico',
+                description: 'Conmemora esta importante victoria independentista lograda en 1824.',
+                longDescription: 'La Batalla de Junín se libró el 6 de agosto de 1824 en la Pampa de Junín, a más de 4,000 metros sobre el nivel del mar. Fue una de las batallas más importantes de la guerra de independencia del Perú, donde las fuerzas patriotas al mando del general Simón Bolívar derrotaron al ejército realista español. Esta victoria fue fundamental para consolidar la independencia del Perú y América del Sur.'
+            },
+            'Santa Rosa de Lima': {
+                image: '/images/Feriados/santa rosa de lima.png',
+                type: 'Religioso',
+                description: 'Homenaje a la primera santa de América, nacida en Lima en el siglo XVII.',
+                longDescription: 'Santa Rosa de Lima, nacida como Isabel Flores de Oliva en 1586, fue la primera santa canonizada del continente americano. Es considerada la patrona de Perú, América y Filipinas. Su vida estuvo marcada por la devoción religiosa, la caridad hacia los pobres y enfermos, y la penitencia. Su santuario en Lima es uno de los lugares de peregrinación más importantes del país.'
+            }
+        };
+
+        function showModal(holidayName) {
+            const modal = document.getElementById('test-modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalTitle = document.getElementById('modal-title');
+            const modalType = document.getElementById('modal-type');
+            const modalDescription = document.getElementById('modal-description');
+
+            const holiday = holidayDetails[holidayName];
+            if (holiday) {
+                modalImage.style.backgroundImage = `url(${holiday.image})`;
+                modalTitle.textContent = `🎉 ${holidayName}`;
+                modalType.innerHTML = `<strong>🏛️ Tipo:</strong> ${holiday.type}`;
+                modalDescription.innerHTML = `
+                    <h3 style="margin: 0 0 12px 0; font-size: 18px; color: #1f2937; font-weight: 600;">📖 Descripción</h3>
+                    <p style="margin: 0 0 20px 0; font-size: 15px; color: #4b5563; line-height: 1.6;">${holiday.description}</p>
+                    <h3 style="margin: 0 0 12px 0; font-size: 18px; color: #1f2937; font-weight: 600;">📚 Historia y Significado</h3>
+                    <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.7;">${holiday.longDescription}</p>
+                `;
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('test-modal').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.getElementById('test-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Calendario - Agosto Corregido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+        }
+        .calendar-header {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #dee2e6;
+        }
+        .calendar-day {
+            padding: 15px 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .current-month {
+            background-color: white;
+            color: #333;
+        }
+        .other-month {
+            background-color: #f8f9fa;
+            color: #999;
+        }
+        .today {
+            background-color: rgba(30, 64, 175, 0.25);
+            border: 2px solid #1e40af;
+            font-weight: bold;
+        }
+        .weekend {
+            background-color: rgba(156, 163, 175, 0.1);
+        }
+        .day-number {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .day-info {
+            font-size: 10px;
+            color: #666;
+        }
+        .month-selector {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .month-selector button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .month-selector button:hover {
+            background-color: #0056b3;
+        }
+        .month-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 0 20px;
+        }
+        .description {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        .debug-info {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #ccc;
+        }
+        .problem-month {
+            background-color: #f8d7da;
+            border: 2px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>📅 Test Calendario - Agosto Corregido</h1>
+        
+        <div class="description">
+            <strong>🔍 Problema Identificado:</strong><br>
+            • El mes de agosto tiene un problema con los días que no corresponden<br>
+            • Necesitamos revisar la lógica de cálculo de semanas<br>
+            • Agosto 2025 comienza en viernes (5) y termina en domingo (0)
+        </div>
+
+        <div class="month-selector">
+            <button onclick="previousMonth()">← Mes Anterior</button>
+            <span class="month-display" id="currentMonth">Agosto 2025</span>
+            <button onclick="nextMonth()">Mes Siguiente →</button>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- Los días se generarán dinámicamente -->
+        </div>
+
+        <div class="debug-info" id="debugInfo">
+            <!-- Información de debug -->
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: white; border-color: #333;"></div>
+                <span>Mes Actual</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f8f9fa; border-color: #999;"></div>
+                <span>Otro Mes</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: rgba(30, 64, 175, 0.25); border-color: #1e40af;"></div>
+                <span>Hoy</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: rgba(156, 163, 175, 0.1); border-color: #9ca3af;"></div>
+                <span>Fin de Semana</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f8d7da; border-color: #dc3545;"></div>
+                <span>Problema Detectado</span>
+            </div>
+        </div>
+
+        <div class="description">
+            <strong>🔧 Lógica para Agosto 2025:</strong><br>
+            • <strong>1 de Agosto:</strong> Viernes (5) - Necesita 4 días del mes anterior<br>
+            • <strong>31 de Agosto:</strong> Domingo (0) - No necesita días del mes siguiente<br>
+            • <strong>Total días:</strong> 31 días<br>
+            • <strong>Semanas completas:</strong> 5 semanas (35 días en total)
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date(2025, 7, 1); // Agosto 2025 (mes 7)
+
+        function updateCalendar() {
+            const monthNames = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            
+            document.getElementById('currentMonth').textContent = 
+                `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+
+            const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            
+            // Debug info
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML = `
+                <strong>🔍 Debug Info:</strong><br>
+                • Mes: ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}<br>
+                • Primer día: ${start.toDateString()} (${start.getDay()})<br>
+                • Último día: ${end.toDateString()} (${end.getDay()})<br>
+                • Días en el mes: ${end.getDate()}<br>
+                • Primer día de la semana: ${start.getDay() === 0 ? 'Domingo' : start.getDay() === 1 ? 'Lunes' : start.getDay() === 2 ? 'Martes' : start.getDay() === 3 ? 'Miércoles' : start.getDay() === 4 ? 'Jueves' : start.getDay() === 5 ? 'Viernes' : 'Sábado'}<br>
+                • Último día de la semana: ${end.getDay() === 0 ? 'Domingo' : end.getDay() === 1 ? 'Lunes' : end.getDay() === 2 ? 'Martes' : end.getDay() === 3 ? 'Miércoles' : end.getDay() === 4 ? 'Jueves' : end.getDay() === 5 ? 'Viernes' : 'Sábado'}
+            `;
+            
+            // Calcular días del mes anterior necesarios
+            let firstDayOfWeek = start.getDay();
+            let daysFromPreviousMonth = 0;
+            
+            if (firstDayOfWeek === 0) { // Domingo
+                daysFromPreviousMonth = 6;
+            } else {
+                daysFromPreviousMonth = firstDayOfWeek - 1;
+            }
+            
+            const startDate = new Date(start);
+            startDate.setDate(startDate.getDate() - daysFromPreviousMonth);
+            
+            // Calcular días del mes siguiente necesarios
+            const lastDayOfWeek = end.getDay();
+            const daysFromNextMonth = lastDayOfWeek === 0 ? 0 : 7 - lastDayOfWeek;
+            const endDate = new Date(end);
+            endDate.setDate(endDate.getDate() + daysFromNextMonth);
+            
+            // Debug info adicional
+            debugInfo.innerHTML += `<br>
+                <strong>📊 Cálculos:</strong><br>
+                • Días del mes anterior necesarios: ${daysFromPreviousMonth}<br>
+                • Días del mes siguiente necesarios: ${daysFromNextMonth}<br>
+                • Fecha de inicio del calendario: ${startDate.toDateString()}<br>
+                • Fecha de fin del calendario: ${endDate.toDateString()}<br>
+                • Total de días en el calendario: ${Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1}
+            `;
+            
+            // Generar días del calendario
+            const days = [];
+            const currentDate = new Date(startDate);
+            
+            while (currentDate <= endDate) {
+                days.push(new Date(currentDate));
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            // Generar HTML del calendario
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+            
+            // Headers de días
+            const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+            weekdays.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = day;
+                calendarGrid.appendChild(header);
+            });
+            
+            // Días del calendario
+            days.forEach((day, index) => {
+                const dayElement = document.createElement('div');
+                const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+                const isToday = day.toDateString() === new Date().toDateString();
+                const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+                
+                dayElement.className = 'calendar-day';
+                if (isCurrentMonth) {
+                    dayElement.classList.add('current-month');
+                } else {
+                    dayElement.classList.add('other-month');
+                }
+                if (isToday) {
+                    dayElement.classList.add('today');
+                }
+                if (isWeekend) {
+                    dayElement.classList.add('weekend');
+                }
+                
+                // Marcar días problemáticos
+                if (!isCurrentMonth && day.getDate() > 20) {
+                    dayElement.classList.add('problem-month');
+                }
+                
+                dayElement.innerHTML = `
+                    <div class="day-number">${day.getDate()}</div>
+                    <div class="day-info">${isCurrentMonth ? 'Mes actual' : 'Otro mes'}</div>
+                    <div class="day-info">${day.toDateString()}</div>
+                `;
+                
+                calendarGrid.appendChild(dayElement);
+            });
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updateCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updateCalendar();
+        }
+
+        // Inicializar calendario
+        updateCalendar();
+    </script>
+</body>
+</html>
+
+
+
+
+
+

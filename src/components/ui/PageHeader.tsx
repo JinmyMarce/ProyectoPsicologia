@@ -7,30 +7,32 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({ title, subtitle, children }: PageHeaderProps) {
+  // Si el título está vacío, no mostrar el header
+  if (!title || title.trim() === '') {
+    return null;
+  }
+
   return (
-    <div className="py-6 px-8 mb-6 shadow-sm" style={{
-      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #ffffff 100%)',
-      borderBottom: '2px solid rgba(142, 22, 26, 0.2)',
-      boxShadow: '0 2px 8px rgba(142, 22, 26, 0.1)'
-    }}>
-      <h1 className="text-3xl font-bold mb-2" style={{
-        background: 'linear-gradient(135deg, #8e161a 0%, #a52a2a 100%)',
+    <div className="py-12 px-12 mb-10 shadow-2xl bg-gradient-to-r from-[#ffffff] via-[#f8fafc] to-[#f1f5f9] border-b-2 border-[#6b1013]/30 rounded-b-3xl">
+      <h1 className="text-5xl font-bold mb-6 text-[#1e293b]" style={{
+        letterSpacing: '1px',
+        textShadow: '0 6px 12px rgba(30, 41, 59, 0.2)',
+        background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
-        textShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        backgroundClip: 'text'
       }}>
         {title}
       </h1>
       {subtitle && (
-        <p className="text-lg" style={{
-          color: '#475569',
-          textShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+        <p className="text-2xl text-[#475569] font-medium" style={{
+          textShadow: '0 3px 6px rgba(30, 41, 59, 0.1)',
+          letterSpacing: '0.3px'
         }}>
           {subtitle}
         </p>
       )}
-      {children && <div className="mt-4">{children}</div>}
+      {children && <div className="mt-6">{children}</div>}
     </div>
   );
 } 

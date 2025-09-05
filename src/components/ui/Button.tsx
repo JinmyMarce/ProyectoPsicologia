@@ -22,75 +22,84 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    'inline-flex items-center justify-center rounded-md font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed tracking-wide transform hover:scale-105 active:scale-95';
 
   const variants = {
-    primary: 'text-white shadow-lg hover:shadow-xl transition-all duration-200 border',
-    secondary: 'text-white shadow-lg hover:shadow-xl transition-all duration-200 border',
+    primary: 'text-white shadow-lg hover:shadow-xl transition-all duration-200 border-2',
+    secondary: 'text-white shadow-lg hover:shadow-xl transition-all duration-200 border-2',
     outline: 'bg-transparent border-2 shadow-md hover:shadow-lg transition-all duration-200',
     ghost: 'bg-transparent border border-transparent transition-all duration-200',
-    danger: 'text-white shadow-lg hover:shadow-xl transition-all duration-200 border',
+    danger: 'text-white shadow-lg hover:shadow-xl transition-all duration-200 border-2',
   };
 
   const getVariantStyles = (variant: string) => {
     switch (variant) {
       case 'primary':
         return {
-          background: 'linear-gradient(135deg, #8e161a 0%, #a52a2a 50%, #8e161a 100%)',
-          borderColor: 'rgba(211, 183, 160, 0.3)',
-          boxShadow: '0 4px 15px rgba(142, 22, 26, 0.3)',
-          hoverBackground: 'linear-gradient(135deg, #a52a2a 0%, #b91c1c 50%, #a52a2a 100%)',
-          hoverBoxShadow: '0 6px 20px rgba(142, 22, 26, 0.4)',
-          focusRing: 'rgba(142, 22, 26, 0.5)'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
+          borderColor: 'rgba(30, 41, 59, 0.2)',
+          color: '#1e293b',
+          boxShadow: '0 8px 32px rgba(255, 255, 255, 0.4), 0 4px 16px rgba(30, 41, 59, 0.2)',
+          hoverBackground: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
+          hoverBoxShadow: '0 12px 40px rgba(255, 255, 255, 0.5), 0 6px 20px rgba(30, 41, 59, 0.3)',
+          focusRing: 'rgba(30, 41, 59, 0.4)',
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
         };
       case 'secondary':
         return {
-          background: 'linear-gradient(135deg, #1e2a37 0%, #334155 50%, #1e2a37 100%)',
-          borderColor: 'rgba(211, 183, 160, 0.3)',
-          boxShadow: '0 4px 15px rgba(30, 42, 55, 0.3)',
-          hoverBackground: 'linear-gradient(135deg, #334155 0%, #475569 50%, #334155 100%)',
-          hoverBoxShadow: '0 6px 20px rgba(30, 42, 55, 0.4)',
-          focusRing: 'rgba(30, 42, 55, 0.5)'
+          background: 'linear-gradient(135deg, #6b1013 0%, #8e161a 50%, #b91c1c 100%)',
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          color: '#ffffff',
+          boxShadow: '0 8px 32px rgba(107, 16, 19, 0.4), 0 4px 16px rgba(142, 22, 26, 0.3)',
+          hoverBackground: 'linear-gradient(135deg, #8e161a 0%, #b91c1c 50%, #dc2626 100%)',
+          hoverBoxShadow: '0 12px 40px rgba(107, 16, 19, 0.5), 0 6px 20px rgba(142, 22, 26, 0.4)',
+          focusRing: 'rgba(107, 16, 19, 0.6)',
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
         };
       case 'outline':
         return {
-          background: 'transparent',
-          borderColor: '#8e161a',
-          color: '#8e161a',
-          boxShadow: '0 2px 8px rgba(142, 22, 26, 0.2)',
-          hoverBackground: 'linear-gradient(135deg, #8e161a 0%, #a52a2a 100%)',
-          hoverColor: 'white',
-          hoverBoxShadow: '0 4px 15px rgba(142, 22, 26, 0.3)',
-          focusRing: 'rgba(142, 22, 26, 0.5)'
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderColor: 'rgba(30, 41, 59, 0.3)',
+          color: '#1e293b',
+          boxShadow: '0 4px 16px rgba(255, 255, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+          hoverBackground: 'linear-gradient(135deg, rgba(30, 41, 59, 0.1) 0%, rgba(51, 65, 85, 0.1) 100%)',
+          hoverColor: '#1e293b',
+          hoverBoxShadow: '0 8px 24px rgba(255, 255, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+          focusRing: 'rgba(30, 41, 59, 0.4)',
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
         };
       case 'ghost':
         return {
-          background: 'transparent',
-          borderColor: 'transparent',
-          color: '#8e161a',
-          boxShadow: 'none',
-          hoverBackground: 'rgba(142, 22, 26, 0.1)',
-          hoverBorderColor: 'rgba(142, 22, 26, 0.3)',
-          hoverBoxShadow: '0 2px 8px rgba(142, 22, 26, 0.2)',
-          focusRing: 'rgba(142, 22, 26, 0.3)'
+          background: 'rgba(255, 255, 255, 0.8)',
+          borderColor: 'rgba(30, 41, 59, 0.1)',
+          color: '#1e293b',
+          boxShadow: '0 2px 8px rgba(255, 255, 255, 0.2)',
+          hoverBackground: 'rgba(30, 41, 59, 0.1)',
+          hoverBorderColor: 'rgba(30, 41, 59, 0.2)',
+          hoverBoxShadow: '0 4px 16px rgba(255, 255, 255, 0.3)',
+          focusRing: 'rgba(30, 41, 59, 0.3)',
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
         };
       case 'danger':
         return {
           background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #dc2626 100%)',
-          borderColor: 'rgba(220, 38, 38, 0.3)',
-          boxShadow: '0 4px 15px rgba(220, 38, 38, 0.3)',
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 32px rgba(220, 38, 38, 0.4), 0 4px 16px rgba(239, 68, 68, 0.3)',
           hoverBackground: 'linear-gradient(135deg, #ef4444 0%, #f87171 50%, #ef4444 100%)',
-          hoverBoxShadow: '0 6px 20px rgba(220, 38, 38, 0.4)',
-          focusRing: 'rgba(220, 38, 38, 0.5)'
+          hoverBoxShadow: '0 12px 40px rgba(220, 38, 38, 0.5), 0 6px 20px rgba(239, 68, 68, 0.4)',
+          focusRing: 'rgba(220, 38, 38, 0.6)',
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
         };
       default:
         return {
-          background: 'linear-gradient(135deg, #8e161a 0%, #a52a2a 50%, #8e161a 100%)',
-          borderColor: 'rgba(211, 183, 160, 0.3)',
-          boxShadow: '0 4px 15px rgba(142, 22, 26, 0.3)',
-          hoverBackground: 'linear-gradient(135deg, #a52a2a 0%, #b91c1c 50%, #a52a2a 100%)',
-          hoverBoxShadow: '0 6px 20px rgba(142, 22, 26, 0.4)',
-          focusRing: 'rgba(142, 22, 26, 0.5)'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
+          borderColor: 'rgba(30, 41, 59, 0.2)',
+          color: '#1e293b',
+          boxShadow: '0 8px 32px rgba(255, 255, 255, 0.4), 0 4px 16px rgba(30, 41, 59, 0.2)',
+          hoverBackground: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
+          hoverBoxShadow: '0 12px 40px rgba(255, 255, 255, 0.5), 0 6px 20px rgba(30, 41, 59, 0.3)',
+          focusRing: 'rgba(30, 41, 59, 0.4)',
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
         };
     }
   };
@@ -103,9 +112,9 @@ export function Button({
         base,
         variants[variant],
         {
-          'px-3 py-1.5 text-sm': size === 'sm',
-          'px-4 py-2 text-sm': size === 'md',
-          'px-6 py-3 text-base': size === 'lg',
+          'px-6 py-2.5 text-sm': size === 'sm',
+          'px-8 py-3 text-sm': size === 'md',
+          'px-10 py-4 text-base': size === 'lg',
         },
         className
       )}
@@ -114,6 +123,7 @@ export function Button({
         borderColor: styles.borderColor,
         color: styles.color || 'white',
         boxShadow: styles.boxShadow,
+        textShadow: styles.textShadow,
         ...(variant === 'outline' && { color: styles.color }),
         ...(variant === 'ghost' && { color: styles.color }),
       }}

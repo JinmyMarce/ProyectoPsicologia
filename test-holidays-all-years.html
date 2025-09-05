@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación de Feriados en Todos los Años</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .year-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .year-card:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .year-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .holiday-count {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .test-button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #d97706;
+        }
+        .api-test {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .api-result {
+            font-family: monospace;
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Verificación de Feriados en Todos los Años (2025-2050)</h1>
+        
+        <div class="test-section">
+            <h3>✅ Cambios Implementados</h3>
+            <div class="status success">
+                <strong>✅ Modificaciones realizadas:</strong>
+                <ul>
+                    <li><strong>Frontend:</strong> Eliminado filtro restrictivo de año 2025</li>
+                    <li><strong>API:</strong> Ahora carga feriados del año actual del calendario</li>
+                    <li><strong>Base de datos:</strong> 418 feriados generados (2025-2050)</li>
+                    <li><strong>Navegación:</strong> Los feriados se muestran al cambiar de año</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testAllYears()">📅 Probar Todos los Años</button>
+                <button class="test-button" onclick="testSpecificYear()">🎯 Probar Año Específico</button>
+                <button class="test-button" onclick="clearResults()">🧹 Limpiar Resultados</button>
+            </div>
+        </div>
+
+        <div class="year-grid" id="year-grid">
+            <!-- Los años se cargarán dinámicamente -->
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega al calendario del estudiante</li>
+                    <li>Usa los botones de navegación para cambiar de año</li>
+                    <li>Verifica que los feriados aparezcan en cada año</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Años específicos para probar:</strong>
+                <ul>
+                    <li>🎊 <strong>2025:</strong> 18 feriados (incluye días compensables)</li>
+                    <li>🎉 <strong>2026:</strong> 16 feriados</li>
+                    <li>🎄 <strong>2030:</strong> 16 feriados</li>
+                    <li>🏛️ <strong>2040:</strong> 16 feriados</li>
+                    <li>⚔️ <strong>2050:</strong> 16 feriados</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="api-test" id="api-test" style="display: none;">
+            <h3>🔍 Resultado de Prueba de API</h3>
+            <div id="api-result" class="api-result"></div>
+        </div>
+    </div>
+
+    <script>
+        const years = [];
+        for (let year = 2025; year <= 2050; year++) {
+            years.push(year);
+        }
+
+        let testResults = {};
+
+        function createYearCard(year) {
+            const card = document.createElement('div');
+            card.className = 'year-card';
+            card.onclick = () => testSpecificYearAPI(year);
+            
+            const yearNumber = document.createElement('div');
+            yearNumber.className = 'year-number';
+            yearNumber.textContent = year;
+            
+            const holidayCount = document.createElement('div');
+            holidayCount.className = 'holiday-count';
+            holidayCount.textContent = 'Cargando...';
+            holidayCount.id = `count-${year}`;
+            
+            card.appendChild(yearNumber);
+            card.appendChild(holidayCount);
+            
+            return card;
+        }
+
+        function testAllYears() {
+            const grid = document.getElementById('year-grid');
+            grid.innerHTML = '';
+            
+            years.forEach(year => {
+                const card = createYearCard(year);
+                grid.appendChild(card);
+                testSpecificYearAPI(year);
+            });
+        }
+
+        async function testSpecificYearAPI(year) {
+            try {
+                const response = await fetch(`http://localhost:8000/api/holidays?year=${year}`);
+                const result = await response.json();
+                
+                const countElement = document.getElementById(`count-${year}`);
+                if (countElement) {
+                    if (result.success) {
+                        const count = result.data.length;
+                        countElement.textContent = `${count} feriados`;
+                        countElement.style.color = count > 0 ? '#28a745' : '#dc3545';
+                        
+                        testResults[year] = {
+                            success: true,
+                            count: count,
+                            data: result.data
+                        };
+                    } else {
+                        countElement.textContent = 'Error';
+                        countElement.style.color = '#dc3545';
+                        testResults[year] = {
+                            success: false,
+                            error: result.message
+                        };
+                    }
+                }
+            } catch (error) {
+                const countElement = document.getElementById(`count-${year}`);
+                if (countElement) {
+                    countElement.textContent = 'Error de conexión';
+                    countElement.style.color = '#dc3545';
+                }
+                testResults[year] = {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        function testSpecificYear() {
+            const year = prompt('Ingresa el año a probar (2025-2050):');
+            if (year && years.includes(parseInt(year))) {
+                const apiTest = document.getElementById('api-test');
+                const apiResult = document.getElementById('api-result');
+                
+                apiTest.style.display = 'block';
+                apiResult.textContent = `Probando año ${year}...`;
+                
+                testSpecificYearAPI(parseInt(year)).then(() => {
+                    const result = testResults[parseInt(year)];
+                    if (result && result.success) {
+                        apiResult.textContent = `✅ Año ${year}: ${result.count} feriados encontrados\n\n${JSON.stringify(result.data, null, 2)}`;
+                    } else {
+                        apiResult.textContent = `❌ Error en año ${year}: ${result?.error || 'Error desconocido'}`;
+                    }
+                });
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('year-grid').innerHTML = '';
+            document.getElementById('api-test').style.display = 'none';
+            testResults = {};
+        }
+
+        // Inicializar
+        testAllYears();
+    </script>
+</body>
+</html>

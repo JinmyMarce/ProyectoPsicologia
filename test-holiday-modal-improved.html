@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Modal de Feriados Mejorado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .fix-box {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #28a745;
+            margin: 20px 0;
+        }
+        .fix-box h2 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .modal-simulation {
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            overflow: hidden;
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+        }
+        .modal-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .modal-content {
+            padding: 24px;
+        }
+        .holiday-button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .holiday-button:hover {
+            background: #d97706;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 Modal de Feriados Mejorado</h1>
+        
+        <div class="fix-box">
+            <h2>✅ Modal Mejorado Implementado</h2>
+            <p>El modal ahora incluye:</p>
+            <ul>
+                <li>🖼️ Imagen representativa del feriado</li>
+                <li>📖 Descripción detallada</li>
+                <li>📚 Historia y significado</li>
+                <li>🎨 Diseño moderno y atractivo</li>
+                <li>📱 Responsive y accesible</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Funcionalidades del Modal</h3>
+            <div class="code-block">
+// Información detallada de feriados peruanos
+const holidayDetails = {
+  'Batalla de Junín': {
+    image: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=300&fit=crop',
+    description: 'Conmemoración de la victoria patriota...',
+    longDescription: 'La Batalla de Junín se libró el 6 de agosto de 1824...'
+  },
+  'Santa Rosa de Lima': {
+    image: 'https://images.unsplash.com/photo-1542810634-71277d95dcbb?w=400&h=300&fit=crop',
+    description: 'Celebración en honor a Santa Rosa de Lima...',
+    longDescription: 'Santa Rosa de Lima, nacida como Isabel Flores...'
+  }
+  // ... más feriados
+};
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📅 Simulación del Modal</h3>
+            <div id="modal-simulation">
+                <p>Haz clic en un feriado para ver el modal:</p>
+                <button class="holiday-button" onclick="showModal('Batalla de Junín')">
+                    🎉 Batalla de Junín (6 de agosto)
+                </button>
+                <button class="holiday-button" onclick="showModal('Santa Rosa de Lima')">
+                    🎉 Santa Rosa de Lima (30 de agosto)
+                </button>
+                <button class="holiday-button" onclick="showModal('Año Nuevo')">
+                    🎉 Año Nuevo (1 de enero)
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Características del Modal</h3>
+            <div id="modal-features">
+                <div class="status success">
+                    <strong>✅ Imagen de fondo:</strong> Cada feriado tiene una imagen representativa
+                </div>
+                <div class="status success">
+                    <strong>✅ Título destacado:</strong> Nombre del feriado sobre la imagen
+                </div>
+                <div class="status success">
+                    <strong>✅ Fecha completa:</strong> Formato largo en español
+                </div>
+                <div class="status success">
+                    <strong>✅ Descripción corta:</strong> Resumen del feriado
+                </div>
+                <div class="status success">
+                    <strong>✅ Historia detallada:</strong> Información completa del significado
+                </div>
+                <div class="status success">
+                    <strong>✅ Tipo de feriado:</strong> Nacional o Regional
+                </div>
+                <div class="status success">
+                    <strong>✅ Advertencia:</strong> No se pueden agendar citas
+                </div>
+                <div class="status success">
+                    <strong>✅ Botón de cierre:</strong> Con efectos hover
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Instrucciones para Verificar</h3>
+            <div id="instructions">
+                <div class="status warning">
+                    <strong>1. Ve a tu aplicación:</strong>
+                    <ul>
+                        <li>URL: http://localhost:5173/</li>
+                        <li>Navega al calendario del estudiante</li>
+                        <li>Ve al mes de agosto 2025</li>
+                    </ul>
+                </div>
+                <div class="status warning">
+                    <strong>2. Haz clic en un feriado:</strong>
+                    <ul>
+                        <li>Haz clic en "🎉 Batalla de Junín" (6 de agosto)</li>
+                        <li>Haz clic en "🎉 Santa Rosa de Lima" (30 de agosto)</li>
+                    </ul>
+                </div>
+                <div class="status warning">
+                    <strong>3. Verifica el modal:</strong>
+                    <ul>
+                        <li>Aparece una imagen de fondo</li>
+                        <li>El título está sobre la imagen</li>
+                        <li>Muestra descripción e historia</li>
+                        <li>Incluye advertencia sobre citas</li>
+                        <li>El botón de cierre funciona</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de prueba -->
+    <div id="test-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+        <div class="modal-simulation">
+            <div id="modal-image" class="modal-image"></div>
+            <div class="modal-content">
+                <h2 id="modal-title" style="margin: 0 0 20px 0; color: #1f2937; font-size: 24px;"></h2>
+                <div id="modal-date" style="margin-bottom: 20px; padding: 12px; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+                <div id="modal-description" style="margin-bottom: 20px;"></div>
+                <div id="modal-history" style="margin-bottom: 20px;"></div>
+                <div style="padding: 16px; background-color: #fef2f2; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 20px;">
+                    <p style="margin: 0; font-size: 14px; color: #dc2626; font-weight: 600;">
+                        ⚠️ <strong>Importante:</strong> No se pueden agendar citas en días feriados
+                    </p>
+                </div>
+                <div style="display: flex; justify-content: center;">
+                    <button onclick="closeModal()" class="holiday-button">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Información detallada de feriados peruanos
+        const holidayDetails = {
+            'Año Nuevo': {
+                image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+                description: 'Celebración del inicio del nuevo año. Es un día de reflexión, nuevos propósitos y reuniones familiares. En Perú se celebra con fuegos artificiales, cenas especiales y tradiciones como comer 12 uvas a medianoche.',
+                longDescription: 'El Año Nuevo es una de las celebraciones más importantes del calendario peruano. Las familias se reúnen para compartir una cena especial, que tradicionalmente incluye pavo, lechón o pollo. A medianoche, se acostumbra comer 12 uvas mientras se piden deseos para cada mes del año. Los fuegos artificiales iluminan el cielo de las principales ciudades del país.'
+            },
+            'Batalla de Junín': {
+                image: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=300&fit=crop',
+                description: 'Conmemoración de la victoria patriota en la Batalla de Junín durante la guerra de independencia del Perú. Esta batalla fue crucial para la liberación del país.',
+                longDescription: 'La Batalla de Junín se libró el 6 de agosto de 1824 en la Pampa de Junín, a más de 4,000 metros sobre el nivel del mar. Fue una de las batallas más importantes de la guerra de independencia del Perú, donde las fuerzas patriotas al mando del general Simón Bolívar derrotaron al ejército realista español. Esta victoria fue fundamental para consolidar la independencia del Perú y América del Sur.'
+            },
+            'Santa Rosa de Lima': {
+                image: 'https://images.unsplash.com/photo-1542810634-71277d95dcbb?w=400&h=300&fit=crop',
+                description: 'Celebración en honor a Santa Rosa de Lima, patrona de Perú, América y Filipinas. Es una festividad religiosa importante en el país.',
+                longDescription: 'Santa Rosa de Lima, nacida como Isabel Flores de Oliva en 1586, fue la primera santa canonizada del continente americano. Es considerada la patrona de Perú, América y Filipinas. Su vida estuvo marcada por la devoción religiosa, la caridad hacia los pobres y enfermos, y la penitencia. Su santuario en Lima es uno de los lugares de peregrinación más importantes del país.'
+            }
+        };
+
+        function showModal(holidayName) {
+            const modal = document.getElementById('test-modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDate = document.getElementById('modal-date');
+            const modalDescription = document.getElementById('modal-description');
+            const modalHistory = document.getElementById('modal-history');
+
+            const holiday = holidayDetails[holidayName];
+            if (holiday) {
+                modalImage.style.backgroundImage = `url(${holiday.image})`;
+                modalTitle.textContent = `🎉 ${holidayName}`;
+                modalDate.innerHTML = `<strong>📅 Fecha:</strong> ${getHolidayDate(holidayName)}`;
+                modalDescription.innerHTML = `
+                    <h3 style="margin: 0 0 12px 0; font-size: 18px; color: #1f2937; font-weight: 600;">📖 Descripción</h3>
+                    <p style="margin: 0; font-size: 15px; color: #4b5563; line-height: 1.6;">${holiday.description}</p>
+                `;
+                modalHistory.innerHTML = `
+                    <h3 style="margin: 0 0 12px 0; font-size: 18px; color: #1f2937; font-weight: 600;">📚 Historia y Significado</h3>
+                    <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.7;">${holiday.longDescription}</p>
+                `;
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('test-modal').style.display = 'none';
+        }
+
+        function getHolidayDate(holidayName) {
+            const dates = {
+                'Año Nuevo': '1 de enero de 2025 (Miércoles)',
+                'Batalla de Junín': '6 de agosto de 2025 (Miércoles)',
+                'Santa Rosa de Lima': '30 de agosto de 2025 (Sábado)'
+            };
+            return dates[holidayName] || 'Fecha no disponible';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.getElementById('test-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

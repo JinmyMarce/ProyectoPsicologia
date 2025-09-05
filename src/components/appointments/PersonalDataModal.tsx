@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { User, X, ArrowRight, ArrowLeft } from 'lucide-react';
-import { Button } from '../ui/Button';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { User, X, ArrowRight, ArrowLeft, AlertCircle, GraduationCap, PhoneCall, UserCheck, CalendarCheck, Clock3, Shield, Star, CheckSquare } from 'lucide-react';
 
 interface PersonalData {
   dni: string;
@@ -107,100 +105,85 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
     }
   };
 
-  // Función para obtener semestres incluyendo el actual del paciente (para modificación)
-  const getSemestersForEdit = () => {
-    const currentSemesters = getAvailableSemesters();
-    const currentSemesterValue = formData.semester;
-    
-    // Si el semestre actual del paciente no está en las opciones, agregarlo
-    if (currentSemesterValue && !currentSemesters.find(s => s.value === currentSemesterValue)) {
-      const semesterLabels = {
-        '1': '1er Semestre',
-        '2': '2do Semestre', 
-        '3': '3er Semestre',
-        '4': '4to Semestre',
-        '5': '5to Semestre',
-        '6': '6to Semestre'
-      };
-      
-      const newOption = { 
-        value: currentSemesterValue, 
-        label: semesterLabels[currentSemesterValue as keyof typeof semesterLabels] || `${currentSemesterValue}° Semestre` 
-      };
-      
-      // Agregar la nueva opción y ordenar por valor numérico
-      const allOptions = [...currentSemesters, newOption];
-      return allOptions.sort((a, b) => parseInt(a.value) - parseInt(b.value));
-    }
-    
-    return currentSemesters;
-  };
-
-  const handleInputChange = (field: keyof PersonalData, value: string) => {
-    // Validación especial para DNI y teléfono - solo números
-    if (field === 'dni' || field === 'phone') {
-      const numericValue = value.replace(/\D/g, '');
-      setFormData(prev => ({ ...prev, [field]: numericValue }));
-    } else {
-      setFormData(prev => ({ ...prev, [field]: value }));
-    }
-    
-    // Limpiar error del campo
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  const validateForm = (): boolean => {
+  const validateForm = () => {
     const newErrors: Partial<PersonalData> = {};
 
-    if (!formData.dni.trim()) newErrors.dni = 'El DNI es obligatorio';
-    if (!formData.fullName.trim()) newErrors.fullName = 'El nombre completo es obligatorio';
-    if (!formData.birthDate.trim()) newErrors.birthDate = 'La fecha de nacimiento es obligatoria';
-    else {
-      const birth = new Date(formData.birthDate);
-      const today = new Date();
-      const age = today.getFullYear() - birth.getFullYear() - (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate()) ? 1 : 0);
-      if (age < 15) newErrors.birthDate = 'Debes tener al menos 15 años';
-    }
-    if (!formData.gender.trim()) newErrors.gender = 'El género es obligatorio';
-    if (!formData.address.trim()) newErrors.address = 'La dirección es obligatoria';
-    if (!formData.studyProgram.trim()) newErrors.studyProgram = 'El programa de estudios es obligatorio';
-    if (!formData.semester.trim()) newErrors.semester = 'El semestre es obligatorio';
-    if (!formData.phone.trim()) newErrors.phone = 'El teléfono es obligatorio';
-    if (!formData.email.trim()) newErrors.email = 'El email es obligatorio';
-
-    // Validaciones específicas
-    if (formData.dni && formData.dni.length !== 8) {
-      newErrors.dni = 'El DNI debe tener exactamente 8 dígitos';
-    }
-
-    if (formData.dni && !/^\d+$/.test(formData.dni)) {
+    if (!formData.dni.trim()) {
+      newErrors.dni = 'El DNI es requerido';
+    } else if (formData.dni.length !== 8) {
+      newErrors.dni = 'El DNI debe tener 8 dígitos';
+    } else if (!/^\d{8}$/.test(formData.dni)) {
       newErrors.dni = 'El DNI debe contener solo números';
+    } else if (formData.dni.length !== 8) {
+      newErrors.dni = 'El DNI debe tener 8 dígitos';
     }
 
-    if (formData.phone && !formData.phone.match(/^\d{9}$/)) {
-      newErrors.phone = 'El teléfono debe tener exactamente 9 dígitos';
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'El nombre completo es requerido';
     }
 
-    if (formData.email && !formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      newErrors.email = 'El email no tiene un formato válido';
-    } else if (formData.email && !formData.email.endsWith('@istta.edu.pe')) {
-      newErrors.email = 'El email debe ser institucional (@istta.edu.pe)';
+    if (!formData.birthDate) {
+      newErrors.birthDate = 'La fecha de nacimiento es requerida';
+    }
+
+    if (!formData.gender) {
+      newErrors.gender = 'El género es requerido';
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = 'La dirección es requerida';
+    }
+
+    if (!formData.studyProgram) {
+      newErrors.studyProgram = 'El programa de estudios es requerido';
+    }
+
+    if (!formData.semester) {
+      newErrors.semester = 'El semestre es requerido';
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'El teléfono es requerido';
+    } else if (formData.phone.length !== 9) {
+      newErrors.phone = 'El teléfono debe tener 9 dígitos';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'El email es requerido';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'El email no es válido';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = async () => {
-    if (validateForm()) {
-      // Agregar el prefijo +51 al teléfono antes de enviar
-      const dataToSend = {
-        ...formData,
-        phone: `+51${formData.phone}`
-      };
-      onContinue(dataToSend);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      // Simular validación con el backend
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      onContinue(formData);
+    } catch (error) {
+      console.error('Error al procesar datos personales:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof PersonalData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Limpiar error del campo cuando el usuario empiece a escribir
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -214,274 +197,401 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
     });
   };
 
-  useEffect(() => {
-    // Si el DNI tiene 8 dígitos, buscar datos previos del estudiante
-    if (formData.dni.length === 8) {
-      axios.get(`/api/patients/search/dni/${formData.dni}`)
-        .then(res => {
-          if (res.data && res.data.success && res.data.data) {
-            const data = res.data.data;
-            setFormData(prev => ({
-              ...prev,
-              fullName: prev.fullName || userData?.fullName || data.name || '',
-              birthDate: data.birthDate || prev.birthDate,
-              gender: data.gender || prev.gender,
-              address: data.address || prev.address,
-              studyProgram: data.career || prev.studyProgram,
-              semester: data.semester ? String(data.semester) : prev.semester,
-              phone: data.phone || prev.phone,
-              email: prev.email || userData?.email || data.email || '',
-              // Si hay datos de contacto de emergencia y clínicos, autocompletar
-              emergencyContactName: data.emergency_contact_name || '',
-              emergencyContactRelationship: data.emergency_contact_relationship || '',
-              emergencyContactPhone: data.emergency_contact_phone || '',
-              medicalHistory: data.medical_history || '',
-              currentMedications: data.current_medications || '',
-              allergies: data.allergies || ''
-            }));
-          }
-        })
-        .catch(() => {/* No autocompletar si no hay datos */});
-    }
-  }, [formData.dni, userData]);
+  if (!isOpen) return null;
 
-  // Si isOpen es false, renderizar solo el contenido (para uso en MultiStepPatientRegistrationModal)
-  const content = (
-    <div className="space-y-4">
-      {/* Fila 1: Nombre completo y Email */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre completo <span className="text-red-500">*</span>
-            {disableNameAndEmail && <span className="text-xs text-gray-500 ml-2">(No editable)</span>}
-          </label>
-          <input
-            type="text"
-            value={formData.fullName}
-            onChange={(e) => handleInputChange('fullName', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.fullName ? 'border-red-500' : 'border-gray-300'} ${disableNameAndEmail ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-            placeholder="Nombre completo"
-            disabled={disableNameAndEmail}
-          />
-          {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email <span className="text-red-500">*</span>
-            {disableNameAndEmail && <span className="text-xs text-gray-500 ml-2">(No editable)</span>}
-          </label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'} ${disableNameAndEmail ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-            placeholder="estudiante@istta.edu.pe"
-            disabled={disableNameAndEmail}
-          />
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-        </div>
-      </div>
-
-      {/* Fila 2: DNI, Género y Teléfono */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            DNI <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.dni}
-            onChange={(e) => handleInputChange('dni', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.dni ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="12345678"
-            maxLength={8}
-          />
-          {errors.dni && <p className="text-red-500 text-xs mt-1">{errors.dni}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Género <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={formData.gender}
-            onChange={(e) => handleInputChange('gender', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.gender ? 'border-red-500' : 'border-gray-300'}`}
-          >
-            <option value="">Seleccionar género</option>
-            <option value="masculino">Masculino</option>
-            <option value="femenino">Femenino</option>
-            <option value="otro">Otro</option>
-          </select>
-          {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Teléfono del paciente <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <span className="text-gray-500 text-sm">+51</span>
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
+      <div className="bg-gradient-to-br from-white via-gray-50 to-slate-50 rounded-lg shadow-2xl max-w-xl w-full mx-3 max-h-[85vh] overflow-y-auto border border-gray-200" style={{
+        boxShadow: `
+          0 32px 64px rgba(0, 0, 0, 0.12), 
+          0 16px 32px rgba(0, 0, 0, 0.08),
+          0 8px 16px rgba(0, 0, 0, 0.04),
+          inset 0 1px 0 rgba(255, 255, 255, 0.9)
+        `
+      }}>
+        <div className="p-3">
+          {/* Header Compacto */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 flex items-center justify-center shadow-md border border-slate-600">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+                <div className="absolute -inset-0.5 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg blur opacity-20 -z-10"></div>
+              </div>
+              <div>
+                <h2 className="text-base font-black text-gray-900 tracking-tight">
+                  Datos Personales
+                </h2>
+                <p className="text-slate-600 text-xs font-medium">
+                  Completa tu información
+                </p>
+              </div>
             </div>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
-              className={`w-full pl-12 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="987654321"
-              maxLength={9}
-            />
+            <button
+              onClick={onClose}
+              className="w-7 h-7 rounded-lg bg-white hover:bg-red-50 flex items-center justify-center transition-all duration-300 shadow-sm border border-gray-200 hover:border-red-300 hover:shadow-md"
+            >
+              <X className="w-3.5 h-3.5 text-gray-600 hover:text-red-600" />
+            </button>
           </div>
-          {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
-        </div>
-      </div>
 
-      {/* Fila 3: Fecha de nacimiento y Dirección */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Fecha de nacimiento <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <input
-              type="date"
-              value={formData.birthDate}
-              onChange={(e) => handleInputChange('birthDate', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.birthDate ? 'border-red-500' : 'border-gray-300'}`}
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+          {/* Información de la cita - Compacto */}
+          <div className="mb-3">
+            <div className="bg-gradient-to-r from-slate-50 via-gray-50 to-slate-100 rounded-lg p-2.5 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-32">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
+                    <CalendarCheck className="w-3 h-3 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-gray-900">
+                      Fecha de Cita
+                    </h3>
+                    <p className="text-gray-700 capitalize font-semibold text-xs">
+                      {formatDate(selectedDate)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 flex items-center justify-center shadow-sm border border-gray-500">
+                    <Clock3 className="w-3 h-3 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-gray-900">
+                      Horario
+                    </h3>
+                    <p className="text-gray-700 font-semibold text-xs">
+                      {selectedTime}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          {errors.birthDate && <p className="text-red-500 text-xs mt-1">{errors.birthDate}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Dirección <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.address}
-            onChange={(e) => handleInputChange('address', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="Ciudad, Distrito, Dirección específica"
-          />
-          {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
-        </div>
-      </div>
 
-      {/* Fila 4: Programa de estudios y Semestre */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Programa de estudios <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={formData.studyProgram}
-            onChange={(e) => handleInputChange('studyProgram', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.studyProgram ? 'border-red-500' : 'border-gray-300'}`}
-          >
-            <option value="">Seleccionar programa</option>
-            <option value="Administración de Servicios de Hostelería y Restaurantes">Administración de Servicios de Hostelería y Restaurantes</option>
-            <option value="Contabilidad">Contabilidad</option>
-            <option value="Desarrollo de Sistemas de Información">Desarrollo de Sistemas de Información</option>
-            <option value="Electricidad Industrial">Electricidad Industrial</option>
-            <option value="Electrónica Industrial">Electrónica Industrial</option>
-            <option value="Enfermería Técnica">Enfermería Técnica</option>
-            <option value="Guía Oficial de Turismo">Guía Oficial de Turismo</option>
-            <option value="Laboratorio Clínico y Anatomía Patológica">Laboratorio Clínico y Anatomía Patológica</option>
-            <option value="Mecánica Automotriz">Mecánica Automotriz</option>
-            <option value="Mecánica de Producción Industrial">Mecánica de Producción Industrial</option>
-          </select>
-          {errors.studyProgram && <p className="text-red-500 text-xs mt-1">{errors.studyProgram}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Semestre <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={formData.semester}
-            onChange={(e) => handleInputChange('semester', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.semester ? 'border-red-500' : 'border-gray-300'}`}
-          >
-            <option value="">Seleccionar semestre</option>
-            {getSemestersForEdit().map((semester) => (
-              <option key={semester.value} value={semester.value}>
-                {semester.label}
-              </option>
-            ))}
-          </select>
-          {errors.semester && <p className="text-red-500 text-xs mt-1">{errors.semester}</p>}
-        </div>
-      </div>
+          {/* Formulario */}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Información Personal - Compacto */}
+            <div className="bg-gradient-to-br from-white to-slate-50 rounded-lg p-2.5 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
+                  <UserCheck className="w-2.5 h-2.5 text-white" />
+                </div>
+                <h3 className="text-xs font-black text-gray-900 tracking-tight">
+                  Información Personal
+                </h3>
+              </div>
+              
+              <div className="space-y-2">
+                {/* Fila 1: Nombre Completo */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Nombre Completo *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.fullName}
+                    onChange={(e) => handleInputChange('fullName', e.target.value)}
+                    disabled={disableNameAndEmail}
+                    className={`w-full px-3 py-2 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 text-sm ${
+                      errors.fullName 
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-100' 
+                        : 'border-slate-200 focus:border-slate-500 focus:ring-slate-100'
+                    } ${disableNameAndEmail ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    placeholder="Juan Pérez García"
+                  />
+                  {errors.fullName && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {errors.fullName}
+                    </p>
+                  )}
+                </div>
 
-      {/* Botones de navegación */}
-      <div className="flex justify-between pt-6">
-        <button
-          onClick={onBack}
-          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
-        >
-          ← Atrás
-        </button>
-        <button
-          onClick={handleContinue}
-          disabled={loading}
-          className="px-6 py-2 bg-[#8e161a] text-white rounded-lg hover:bg-[#6d1115] transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Procesando...' : 'Continuar →'}
-        </button>
+                {/* Fila 2: DNI, Fecha de Nacimiento y Género */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {/* DNI */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      DNI *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.dni}
+                      onChange={(e) => handleInputChange('dni', e.target.value.replace(/\D/g, ''))}
+                      className={`w-full px-3 py-2 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 text-sm ${
+                        errors.dni 
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-100' 
+                          : 'border-gray-200 focus:border-gray-500 focus:ring-gray-100'
+                      }`}
+                      placeholder="12345678"
+                      maxLength={8}
+                    />
+                    {errors.dni && (
+                      <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {errors.dni}
+                    </p>
+                  )}
+                </div>
+
+                {/* Fecha de Nacimiento */}
+                <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Fecha de Nacimiento *
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.birthDate}
+                    onChange={(e) => handleInputChange('birthDate', e.target.value)}
+                      className={`w-full px-3 py-2 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 text-sm ${
+                      errors.birthDate 
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-100' 
+                          : 'border-slate-200 focus:border-slate-500 focus:ring-slate-100'
+                    }`}
+                  />
+                  {errors.birthDate && (
+                      <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                      {errors.birthDate}
+                    </p>
+                  )}
+                </div>
+
+                {/* Género */}
+                <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Género *
+                  </label>
+                  <select
+                    value={formData.gender}
+                    onChange={(e) => handleInputChange('gender', e.target.value)}
+                      className={`w-full px-3 py-2 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 text-sm ${
+                      errors.gender 
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-100' 
+                          : 'border-gray-200 focus:border-gray-500 focus:ring-gray-100'
+                    }`}
+                  >
+                      <option value="">Selecciona</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="femenino">Femenino</option>
+                      <option value="otro">Otro</option>
+                  </select>
+                  {errors.gender && (
+                      <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                      {errors.gender}
+                    </p>
+                  )}
+                  </div>
+                </div>
+
+                {/* Fila 3: Dirección */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Dirección *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    className={`w-full px-3 py-2 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 text-sm ${
+                      errors.address 
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-100' 
+                        : 'border-slate-200 focus:border-slate-500 focus:ring-slate-100'
+                    }`}
+                    placeholder="Av. Principal 123, Distrito, Ciudad"
+                  />
+                  {errors.address && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {errors.address}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Información Académica - Compacto */}
+            <div className="bg-gradient-to-br from-white to-slate-50 rounded-lg p-2.5 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
+                  <GraduationCap className="w-2.5 h-2.5 text-white" />
+                </div>
+                <h3 className="text-xs font-black text-gray-900 tracking-tight">
+                  Información Académica
+                </h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Programa de Estudios - Más ancho */}
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Programa de Estudios *
+                  </label>
+                  <select
+                    value={formData.studyProgram}
+                    onChange={(e) => handleInputChange('studyProgram', e.target.value)}
+                    className={`w-full px-3 py-2 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 text-sm ${
+                      errors.studyProgram 
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-100' 
+                        : 'border-slate-200 focus:border-slate-500 focus:ring-slate-100'
+                    }`}
+                  >
+                    <option value="">Selecciona</option>
+                    <option value="Administración de Servicios de Hostelería y Restaurantes">Administración de Servicios de Hostelería y Restaurantes</option>
+                    <option value="Contabilidad">Contabilidad</option>
+                    <option value="Desarrollo de Sistemas de Información">Desarrollo de Sistemas de Información</option>
+                    <option value="Electricidad Industrial">Electricidad Industrial</option>
+                    <option value="Electrónica Industrial">Electrónica Industrial</option>
+                    <option value="Enfermería Técnica">Enfermería Técnica</option>
+                    <option value="Guía Oficial de Turismo">Guía Oficial de Turismo</option>
+                    <option value="Laboratorio Clínico y Anatomía Patológica">Laboratorio Clínico y Anatomía Patológica</option>
+                    <option value="Mecánica Automotriz">Mecánica Automotriz</option>
+                    <option value="Mecánica de Producción Industrial">Mecánica de Producción Industrial</option>
+                  </select>
+                  {errors.studyProgram && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {errors.studyProgram}
+                    </p>
+                  )}
+                </div>
+
+                {/* Semestre - Más pequeño */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Semestre Actual *
+                  </label>
+                  <select
+                    value={formData.semester}
+                    onChange={(e) => handleInputChange('semester', e.target.value)}
+                    className={`w-full px-3 py-2 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 text-sm ${
+                      errors.semester 
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-100' 
+                        : 'border-gray-200 focus:border-gray-500 focus:ring-gray-100'
+                    }`}
+                  >
+                    <option value="">Selecciona</option>
+                    {getAvailableSemesters().map(semester => (
+                      <option key={semester.value} value={semester.value}>
+                        {semester.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.semester && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {errors.semester}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Información de Contacto - Compacto */}
+            <div className="bg-gradient-to-br from-white to-slate-50 rounded-lg p-2.5 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
+                  <PhoneCall className="w-2.5 h-2.5 text-white" />
+                </div>
+                <h3 className="text-xs font-black text-gray-900 tracking-tight">
+                  Información de Contacto
+                </h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Teléfono */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Teléfono *
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">
+                      +51
+                    </span>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange('phone', e.target.value.replace(/\D/g, ''))}
+                      className={`w-full pl-12 pr-3 py-2 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 text-sm ${
+                        errors.phone 
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-100' 
+                          : 'border-slate-200 focus:border-slate-500 focus:ring-slate-100'
+                      }`}
+                      placeholder="912345678"
+                      maxLength={9}
+                    />
+                  </div>
+                  {errors.phone && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {errors.phone}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    disabled={disableNameAndEmail}
+                    className={`w-full px-3 py-2 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 text-sm ${
+                      errors.email 
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-100' 
+                        : 'border-gray-200 focus:border-gray-500 focus:ring-gray-100'
+                    } ${disableNameAndEmail ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    placeholder="juan.perez@email.com"
+                  />
+                  {errors.email && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {errors.email}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+
+            {/* Botones de acción - Compactos */}
+            <div className="flex justify-between items-center pt-3 border-t border-slate-200">
+              <button
+                type="button"
+                onClick={onBack}
+                className="px-3 py-1.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-300 font-semibold text-xs flex items-center gap-1.5 shadow-sm hover:shadow-md"
+              >
+                <ArrowLeft className="w-3 h-3" />
+                Atrás
+              </button>
+              
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-3 py-1.5 bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900 text-white rounded-lg hover:from-slate-800 hover:to-slate-900 transition-all duration-300 font-semibold text-xs flex items-center gap-1.5 shadow-lg transform hover:scale-105 hover:shadow-xl"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    Continuar
+                    <ArrowRight className="w-3 h-3" />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
-
-  // Si isOpen es true, renderizar el modal completo
-  if (isOpen) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-          <div className="p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <User className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Información General</h2>
-                  <p className="text-sm text-gray-600">Paso 2 de 4</p>
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Resumen de selección solo para estudiantes (cuando hay fecha y hora) */}
-            {(selectedDate && selectedTime) && (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Fecha seleccionada:</span>
-                  <span className="font-semibold">{formatDate(selectedDate)}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm mt-1">
-                  <span className="text-gray-600">Horario seleccionado:</span>
-                  <span className="font-semibold">{selectedTime}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Contenido del formulario */}
-            {content}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Si isOpen es false, retornar solo el contenido
-  return content;
 }; 

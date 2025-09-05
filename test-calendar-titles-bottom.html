@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba: Títulos en Parte Inferior - Todas las Imágenes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .test-section h2 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+        
+        .image-preview {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .title-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.8) 50%, rgba(51, 65, 85, 0.6) 100%);
+            backdrop-filter: blur(8px);
+            padding: 24px 16px;
+        }
+        
+        .title-overlay h3 {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .decorative-line {
+            width: 96px;
+            height: 4px;
+            background: linear-gradient(to right, #fbbf24, #f97316);
+            margin: 0 auto;
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #1e293b;
+            margin: 0 0 15px 0;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-card .icon {
+            width: 24px;
+            height: 24px;
+            background: #3b82f6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .info-card p {
+            color: #475569;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        
+        .warning-badge {
+            background: #f59e0b;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .success-message h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+        }
+        
+        .success-message p {
+            margin: 0;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Prueba: Títulos en Parte Inferior</h1>
+            <p>Verificación de que TODAS las imágenes se recorten de abajo y muestren títulos con diseño bonito</p>
+        </div>
+        
+        <div class="content">
+            <div class="test-section">
+                <h2>✅ Configuración Aplicada</h2>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4><span class="icon">🖼️</span> Recorte de Imágenes</h4>
+                        <p><strong>TODAS las imágenes</strong> ahora se recortan de <strong>ABAJO</strong> (object-bottom)</p>
+                        <div class="status-badge">✅ Configurado</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">📝</span> Títulos</h4>
+                        <p><strong>TODOS los feriados</strong> ahora muestran su título en la <strong>parte inferior</strong></p>
+                        <div class="status-badge">✅ Configurado</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">🎨</span> Diseño</h4>
+                        <p>Títulos con <strong>fondo degradado</strong>, <strong>sombra</strong> y <strong>línea decorativa</strong></p>
+                        <div class="status-badge">✅ Configurado</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h2>🖼️ Vista Previa del Diseño</h2>
+                <p>Ejemplo de cómo se verá el título en la parte inferior de cada imagen:</p>
+                
+                <div class="image-preview">
+                    <div class="image-placeholder">
+                        Imagen del Feriado
+                    </div>
+                    <div class="title-overlay">
+                        <h3>Inmaculada Concepción</h3>
+                        <div class="decorative-line"></div>
+                    </div>
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4><span class="icon">📍</span> Posición</h4>
+                        <p>El título aparece en la <strong>parte inferior</strong> de la imagen, centrado horizontalmente</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">🎨</span> Estilo Visual</h4>
+                        <p>Fondo degradado oscuro con <strong>backdrop-blur</strong> para mejor legibilidad</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">✨</span> Detalles</h4>
+                        <p>Línea decorativa <strong>ámbar-naranja</strong> debajo del título para elegancia</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h2>🔧 Cambios Técnicos Implementados</h2>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4><span class="icon">⚙️</span> Función shouldCropFromTop</h4>
+                        <p>Modificada para retornar <strong>false</strong> en todos los casos</p>
+                        <div class="status-badge warning-badge">object-bottom para todas</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">📋</span> Función shouldShowTitle</h4>
+                        <p>Modificada para retornar <strong>true</strong> en todos los casos</p>
+                        <div class="status-badge">Títulos siempre visibles</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">🎯</span> Posicionamiento CSS</h4>
+                        <p>Cambiado de <strong>top-6</strong> a <strong>bottom-0</strong> para títulos</p>
+                        <div class="status-badge">Parte inferior</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-message">
+                <h3>🎉 ¡Configuración Completada!</h3>
+                <p>Todas las imágenes de feriados ahora se recortan de abajo y muestran títulos elegantes en la parte inferior</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+

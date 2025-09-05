@@ -59,10 +59,10 @@ export const UserProfile: React.FC = () => {
 
   const getRoleColor = (role: string) => {
     const colors = {
-      student: 'bg-blue-100 text-blue-800',
-      psychologist: 'bg-purple-100 text-purple-800',
-      admin: 'bg-orange-100 text-orange-800',
-      super_admin: 'bg-red-100 text-red-800'
+      student: 'bg-gray-100 text-gray-800',
+      psychologist: 'bg-gray-100 text-gray-700',
+      admin: 'bg-gray-100 text-gray-600',
+      super_admin: 'bg-gray-100 text-gray-500'
     };
     return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -208,15 +208,20 @@ export const UserProfile: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b-2 border-[#8e161a] pb-4 mb-4">
-        <div>
-          <h1 className="text-3xl font-bold text-[#8e161a] tracking-tight">Mi cuenta</h1>
+      {/* Título Principal */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Mi Perfil de Usuario
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
         </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-base text-gray-700 font-semibold">Rol:</span>
-          <span className={`px-3 py-1 text-sm font-bold rounded-full border border-[#8e161a] bg-white text-[#8e161a]`}>{getRoleLabel(user?.role || '')}</span>
-        </div>
+      </div>
+
+      {/* Información del rol */}
+      <div className="flex items-center justify-center space-x-2 mb-4">
+        <span className="text-base text-gray-700 font-semibold">Rol:</span>
+        <span className={`px-3 py-1 text-sm font-bold rounded-full border border-gray-600 bg-gray-100 text-gray-800`}>{getRoleLabel(user?.role || '')}</span>
       </div>
       {/* Botón para registrar nuevo admin */}
       {user?.role === 'admin' && (

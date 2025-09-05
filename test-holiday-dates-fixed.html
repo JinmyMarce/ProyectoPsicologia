@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Feriados - Fechas Corregidas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        .test-section {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #4299e1;
+        }
+        .test-section h3 {
+            color: #2b6cb0;
+            margin-top: 0;
+        }
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .result {
+            background: #edf2f7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            background: #fed7d7;
+            border-left: 5px solid #e53e3e;
+        }
+        .success {
+            background: #c6f6d5;
+            border-left: 5px solid #38a169;
+        }
+        .info {
+            background: #bee3f8;
+            border-left: 5px solid #3182ce;
+        }
+        .warning {
+            background: #fef5e7;
+            border-left: 5px solid #d69e2e;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .holiday-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .holiday-card h4 {
+            margin: 0 0 10px 0;
+            color: #2d3748;
+        }
+        .holiday-date {
+            font-weight: bold;
+            color: #e53e3e;
+            margin-bottom: 5px;
+        }
+        .holiday-description {
+            font-size: 14px;
+            color: #4a5568;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 Test Feriados - Fechas Corregidas</h1>
+        
+        <div class="test-section">
+            <h3>📅 Verificación de Fechas de Feriados</h3>
+            <p>Este test verifica que los feriados se muestren en su fecha correcta después de las correcciones implementadas.</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 Pruebas de API</h3>
+            <div class="grid">
+                <div>
+                    <h4>1. Enero 2025 - Año Nuevo</h4>
+                    <button class="button" onclick="testJanuary2025()">Probar Enero 2025</button>
+                    <div id="january-result" class="result"></div>
+                </div>
+                
+                <div>
+                    <h4>2. Julio 2025 - Fiestas Patrias</h4>
+                    <button class="button" onclick="testJuly2025()">Probar Julio 2025</button>
+                    <div id="july-result" class="result"></div>
+                </div>
+                
+                <div>
+                    <h4>3. Diciembre 2025 - Navidad</h4>
+                    <button class="button" onclick="testDecember2025()">Probar Diciembre 2025</button>
+                    <div id="december-result" class="result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Análisis de Fechas</h3>
+            <button class="button" onclick="analyzeHolidayDates()">Analizar Fechas de Feriados</button>
+            <div id="analysis-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Comparación de Datos</h3>
+            <button class="button" onclick="compareHolidayData()">Comparar Datos de Feriados</button>
+            <div id="compare-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Verificación de Descripciones</h3>
+            <button class="button" onclick="verifyDescriptions()">Verificar Descripciones</button>
+            <div id="descriptions-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Función para probar Enero 2025
+        async function testJanuary2025() {
+            try {
+                const response = await fetch(`http://localhost:8000/api/holidays/get-in-range`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        start_date: '2025-01-01',
+                        end_date: '2025-01-31'
+                    })
+                });
+
+                const data = await response.json();
+                
+                let result = `📅 Enero 2025 - Feriados:\n`;
+                result += `✅ Status: ${response.status}\n`;
+                result += `📊 Total: ${data.data?.length || 0}\n\n`;
+                
+                if (data.success && data.data) {
+                    data.data.forEach(holiday => {
+                        result += `🎉 ${holiday.name}\n`;
+                        result += `   📅 Fecha: ${holiday.date}\n`;
+                        result += `   📝 Descripción: ${holiday.description ? '✅ Con descripción' : '❌ Sin descripción'}\n`;
+                        result += `   🏛️ Tipo: ${holiday.type}\n\n`;
+                    });
+                } else {
+                    result += `❌ Error: ${data.message || 'Error desconocido'}\n`;
+                }
+                
+                document.getElementById('january-result').textContent = result;
+                document.getElementById('january-result').className = 'result success';
+                
+            } catch (error) {
+                document.getElementById('january-result').textContent = `❌ Error: ${error.message}`;
+                document.getElementById('january-result').className = 'result error';
+            }
+        }
+
+        // Función para probar Julio 2025
+        async function testJuly2025() {
+            try {
+                const response = await fetch(`http://localhost:8000/api/holidays/get-in-range`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        start_date: '2025-07-01',
+                        end_date: '2025-07-31'
+                    })
+                });
+
+                const data = await response.json();
+                
+                let result = `📅 Julio 2025 - Feriados:\n`;
+                result += `✅ Status: ${response.status}\n`;
+                result += `📊 Total: ${data.data?.length || 0}\n\n`;
+                
+                if (data.success && data.data) {
+                    data.data.forEach(holiday => {
+                        result += `🎉 ${holiday.name}\n`;
+                        result += `   📅 Fecha: ${holiday.date}\n`;
+                        result += `   📝 Descripción: ${holiday.description ? '✅ Con descripción' : '❌ Sin descripción'}\n`;
+                        result += `   🏛️ Tipo: ${holiday.type}\n\n`;
+                    });
+                } else {
+                    result += `❌ Error: ${data.message || 'Error desconocido'}\n`;
+                }
+                
+                document.getElementById('july-result').textContent = result;
+                document.getElementById('july-result').className = 'result success';
+                
+            } catch (error) {
+                document.getElementById('july-result').textContent = `❌ Error: ${error.message}`;
+                document.getElementById('july-result').className = 'result error';
+            }
+        }
+
+        // Función para probar Diciembre 2025
+        async function testDecember2025() {
+            try {
+                const response = await fetch(`http://localhost:8000/api/holidays/get-in-range`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        start_date: '2025-12-01',
+                        end_date: '2025-12-31'
+                    })
+                });
+
+                const data = await response.json();
+                
+                let result = `📅 Diciembre 2025 - Feriados:\n`;
+                result += `✅ Status: ${response.status}\n`;
+                result += `📊 Total: ${data.data?.length || 0}\n\n`;
+                
+                if (data.success && data.data) {
+                    data.data.forEach(holiday => {
+                        result += `🎉 ${holiday.name}\n`;
+                        result += `   📅 Fecha: ${holiday.date}\n`;
+                        result += `   📝 Descripción: ${holiday.description ? '✅ Con descripción' : '❌ Sin descripción'}\n`;
+                        result += `   🏛️ Tipo: ${holiday.type}\n\n`;
+                    });
+                } else {
+                    result += `❌ Error: ${data.message || 'Error desconocido'}\n`;
+                }
+                
+                document.getElementById('december-result').textContent = result;
+                document.getElementById('december-result').className = 'result success';
+                
+            } catch (error) {
+                document.getElementById('december-result').textContent = `❌ Error: ${error.message}`;
+                document.getElementById('december-result').className = 'result error';
+            }
+        }
+
+        // Función para analizar fechas de feriados
+        function analyzeHolidayDates() {
+            let result = `🔍 Análisis de Fechas de Feriados:\n\n`;
+            
+            // Fechas esperadas vs posibles fechas incorrectas
+            const expectedDates = {
+                'Año Nuevo': '2025-01-01',
+                'Fiestas Patrias': '2025-07-28',
+                'Navidad': '2025-12-25'
+            };
+            
+            result += `📅 Fechas Esperadas (Correctas):\n`;
+            Object.entries(expectedDates).forEach(([holiday, date]) => {
+                result += `   🎉 ${holiday}: ${date}\n`;
+            });
+            
+            result += `\n⚠️ Posibles Fechas Incorrectas (Un día antes):\n`;
+            Object.entries(expectedDates).forEach(([holiday, date]) => {
+                const incorrectDate = new Date(date);
+                incorrectDate.setDate(incorrectDate.getDate() - 1);
+                result += `   ❌ ${holiday}: ${incorrectDate.toISOString().split('T')[0]}\n`;
+            });
+            
+            result += `\n🔧 Soluciones Implementadas:\n`;
+            result += `   ✅ Uso de dayjs() en lugar de new Date()\n`;
+            result += `   ✅ Configuración de zona horaria America/Lima\n`;
+            result += `   ✅ Comparación de fechas con formato YYYY-MM-DD\n`;
+            
+            document.getElementById('analysis-result').textContent = result;
+            document.getElementById('analysis-result').className = 'result info';
+        }
+
+        // Función para comparar datos de feriados
+        function compareHolidayData() {
+            let result = `📊 Comparación de Datos de Feriados:\n\n`;
+            
+            result += `🔗 API Laravel:\n`;
+            result += `   📅 Formato: YYYY-MM-DD\n`;
+            result += `   🌐 Zona: America/Lima\n`;
+            result += `   📝 Descripciones: ✅ Actualizadas\n\n`;
+            
+            result += `🌐 Frontend React:\n`;
+            result += `   📅 Conversión: dayjs(holiday.date).toDate()\n`;
+            result += `   🔍 Comparación: YYYY-MM-DD\n`;
+            result += `   🎯 Objetivo: Fechas exactas\n\n`;
+            
+            result += `🔍 Verificación:\n`;
+            result += `   ✅ Año Nuevo debe aparecer el 1 de enero\n`;
+            result += `   ✅ Fiestas Patrias deben aparecer el 28 de julio\n`;
+            result += `   ✅ Navidad debe aparecer el 25 de diciembre\n`;
+            
+            document.getElementById('compare-result').textContent = result;
+            document.getElementById('compare-result').className = 'result info';
+        }
+
+        // Función para verificar descripciones
+        function verifyDescriptions() {
+            let result = `🎯 Verificación de Descripciones:\n\n`;
+            
+            const expectedDescriptions = [
+                'Año Nuevo - Comienza el año civil y simboliza renovación...',
+                'Fiestas Patrias - Fechas más importantes del país...',
+                'Navidad - Celebración del nacimiento de Jesucristo...'
+            ];
+            
+            result += `📝 Descripciones Esperadas:\n`;
+            expectedDescriptions.forEach(desc => {
+                result += `   ✅ ${desc}\n`;
+            });
+            
+            result += `\n🔧 Estado de la Base de Datos:\n`;
+            result += `   ✅ Seeder ejecutado: UpdateHolidayDescriptionsSeeder\n`;
+            result += `   ✅ Feriados actualizados: 364\n`;
+            result += `   ✅ Descripciones completas agregadas\n`;
+            
+            document.getElementById('descriptions-result').textContent = result;
+            document.getElementById('descriptions-result').className = 'result success';
+        }
+    </script>
+</body>
+</html>

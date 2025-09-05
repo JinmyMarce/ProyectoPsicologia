@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Función createLocalDate - Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .test-result.correct {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .test-result.incorrect {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Prueba Función createLocalDate - Simple</h1>
+        
+        <div class="test-result">
+            <h3>📋 Función createLocalDate (VERSIÓN SIMPLE)</h3>
+            <div id="function-test">
+                <p>Probando función simple...</p>
+            </div>
+        </div>
+
+        <div class="test-result">
+            <h3>🎉 Feriados de Agosto 2025</h3>
+            <div id="august-test">
+                <p>Verificando feriados de agosto...</p>
+            </div>
+        </div>
+
+        <div class="test-result">
+            <h3>📊 Estado Final</h3>
+            <div id="final-status">
+                <p>Verificando estado final...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FUNCIÓN SIMPLE createLocalDate (igual que en BaseCalendar.tsx)
+        function createLocalDate(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            
+            // SOLUCIÓN SIMPLE: Crear fecha directamente sin complicaciones
+            // Usar el constructor de Date con los parámetros correctos
+            const date = new Date(year, month - 1, day);
+            
+            return date;
+        }
+
+        // Función para formatear fecha
+        function formatDate(date) {
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                weekday: 'long'
+            });
+        }
+
+        // Probar función simple
+        function testSimpleFunction() {
+            const container = document.getElementById('function-test');
+            const testDates = [
+                { input: '2025-08-06', expected: 6, name: 'Batalla de Junín' },
+                { input: '2025-08-30', expected: 30, name: 'Santa Rosa de Lima' },
+                { input: '2025-01-01', expected: 1, name: 'Año Nuevo' },
+                { input: '2025-12-25', expected: 25, name: 'Navidad' }
+            ];
+            
+            let html = '<h4>Pruebas de la función createLocalDate:</h4>';
+            let allCorrect = true;
+            
+            testDates.forEach(test => {
+                const date = createLocalDate(test.input);
+                const actualDay = date.getDate();
+                const isCorrect = actualDay === test.expected;
+                
+                if (!isCorrect) allCorrect = false;
+                
+                html += `
+                    <div class="test-result ${isCorrect ? 'correct' : 'incorrect'}">
+                        <div><strong>Feriado:</strong> ${test.name}</div>
+                        <div><strong>Entrada:</strong> ${test.input}</div>
+                        <div><strong>Día extraído:</strong> ${actualDay}</div>
+                        <div><strong>Día esperado:</strong> ${test.expected}</div>
+                        <div><strong>Fecha formateada:</strong> ${formatDate(date)}</div>
+                        <div><strong>Resultado:</strong> ${isCorrect ? '✅ Correcto' : '❌ Incorrecto'}</div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div class="status ${allCorrect ? 'success' : 'error'}">
+                    <strong>Estado de la función:</strong> ${allCorrect ? '✅ TODAS LAS FECHAS CORRECTAS' : '❌ HAY FECHAS INCORRECTAS'}
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            return allCorrect;
+        }
+
+        // Verificar feriados de agosto desde la API
+        async function testAugustHolidays() {
+            const container = document.getElementById('august-test');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const augustHolidays = data.data.filter(h => h.date.startsWith('2025-08'));
+                    
+                    let html = '<h4>Feriados de Agosto 2025 desde la API:</h4>';
+                    let allCorrect = true;
+                    
+                    augustHolidays.forEach(holiday => {
+                        const date = createLocalDate(holiday.date);
+                        const expectedDay = parseInt(holiday.date.split('-')[2]);
+                        const actualDay = date.getDate();
+                        const isCorrect = actualDay === expectedDay;
+                        
+                        if (!isCorrect) allCorrect = false;
+                        
+                        html += `
+                            <div class="test-result ${isCorrect ? 'correct' : 'incorrect'}">
+                                <div><strong>Feriado:</strong> ${holiday.name}</div>
+                                <div><strong>Fecha API:</strong> ${holiday.date}</div>
+                                <div><strong>Día extraído:</strong> ${actualDay}</div>
+                                <div><strong>Día esperado:</strong> ${expectedDay}</div>
+                                <div><strong>Fecha formateada:</strong> ${formatDate(date)}</div>
+                                <div><strong>Resultado:</strong> ${isCorrect ? '✅ Correcto' : '❌ Incorrecto'}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                        <div class="status ${allCorrect ? 'success' : 'error'}">
+                            <strong>Estado de agosto:</strong> ${allCorrect ? '✅ TODOS LOS FERIADOS CORRECTOS' : '❌ HAY FERIADOS INCORRECTOS'}
+                        </div>
+                    `;
+                    
+                    container.innerHTML = html;
+                    return allCorrect;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+                return false;
+            }
+        }
+
+        // Mostrar estado final
+        async function showFinalStatus() {
+            const container = document.getElementById('final-status');
+            
+            const functionCorrect = testSimpleFunction();
+            const augustCorrect = await testAugustHolidays();
+            
+            let html = `
+                <h4>Estado Final:</h4>
+                <div class="status ${functionCorrect && augustCorrect ? 'success' : 'error'}">
+                    <p><strong>Función createLocalDate:</strong> ${functionCorrect ? '✅ Correcta' : '❌ Incorrecta'}</p>
+                    <p><strong>Feriados de agosto:</strong> ${augustCorrect ? '✅ Correctos' : '❌ Incorrectos'}</p>
+                    <p><strong>Estado general:</strong> ${functionCorrect && augustCorrect ? '✅ FUNCIÓN FUNCIONA CORRECTAMENTE' : '❌ PROBLEMA PERSISTE'}</p>
+                </div>
+                
+                <div class="test-result correct">
+                    <div><strong>✅ Resultado esperado:</strong></div>
+                    <div>• 6 de agosto: Batalla de Junín</div>
+                    <div>• 30 de agosto: Santa Rosa de Lima</div>
+                    <div>• Fechas exactas sin desplazamiento</div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Ejecutar pruebas
+        showFinalStatus();
+        
+        // Recargar cada 10 segundos
+        setInterval(showFinalStatus, 10000);
+    </script>
+</body>
+</html>

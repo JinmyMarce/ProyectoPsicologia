@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, X, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
-import { Button } from '../ui/Button';
+import { Heart, X, ArrowLeft, CheckCircle } from 'lucide-react';
 
 interface MedicalInfo {
   medicalHistory: string;
@@ -174,75 +173,136 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
 
       {/* Información adicional */}
               {isEditingMode ? (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start space-x-2">
-              <div className="text-blue-600 mt-0.5">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <div className="rounded-xl p-4" style={{
+            background: `
+              linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%),
+              radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%)
+            `,
+            border: '2px solid rgba(59, 130, 246, 0.2)',
+            boxShadow: `
+              inset 0 2px 4px rgba(255, 255, 255, 0.3),
+              inset 0 -2px 4px rgba(0, 0, 0, 0.05),
+              0 4px 12px rgba(59, 130, 246, 0.1)
+            `,
+            backdropFilter: 'blur(10px)'
+          }}>
+            <div className="flex items-start space-x-3">
+              <div className="mt-0.5 p-2 rounded-lg" style={{
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.8) 100%)',
+                boxShadow: '0 4px 8px rgba(59, 130, 246, 0.3)'
+              }}>
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="text-sm text-blue-800">
-                <p className="font-medium">Modificar datos del paciente</p>
-                <p className="mt-1">Revisa y actualiza la información médica del paciente.</p>
+                <p className="font-medium text-base" style={{
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                  letterSpacing: '0.2px'
+                }}>Modificar datos del paciente</p>
+                <p className="mt-1 font-medium" style={{
+                  letterSpacing: '0.1px'
+                }}>Revisa y actualiza la información médica del paciente.</p>
               </div>
             </div>
           </div>
         ) : selectedDate && selectedTime ? (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start space-x-2">
-              <div className="text-blue-600 mt-0.5">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <div className="rounded-xl p-4" style={{
+            background: `
+              linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%),
+              radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 50%)
+            `,
+            border: '2px solid rgba(16, 185, 129, 0.2)',
+            boxShadow: `
+              inset 0 2px 4px rgba(255, 255, 255, 0.3),
+              inset 0 -2px 4px rgba(0, 0, 0, 0.05),
+              0 4px 12px rgba(16, 185, 129, 0.1)
+            `,
+            backdropFilter: 'blur(10px)'
+          }}>
+            <div className="flex items-start space-x-3">
+              <div className="mt-0.5 p-2 rounded-lg" style={{
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.8) 100%)',
+                boxShadow: '0 4px 8px rgba(16, 185, 129, 0.3)'
+              }}>
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div className="text-sm text-blue-800">
-                <p className="font-medium">¡Casi listo!</p>
-                <p className="mt-1">Revisa toda la información antes de confirmar tu cita.</p>
+              <div className="text-sm text-green-800">
+                <p className="font-medium text-base" style={{
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                  letterSpacing: '0.2px'
+                }}>¡Casi listo!</p>
+                <p className="mt-1 font-medium" style={{
+                  letterSpacing: '0.1px'
+                }}>Revisa toda la información antes de confirmar tu cita psicológica.</p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start space-x-2">
-              <div className="text-blue-600 mt-0.5">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <div className="rounded-xl p-4" style={{
+            background: `
+              linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%),
+              radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%)
+            `,
+            border: '2px solid rgba(59, 130, 246, 0.2)',
+            boxShadow: `
+              inset 0 2px 4px rgba(255, 255, 255, 0.3),
+              inset 0 -2px 4px rgba(0, 0, 0, 0.05),
+              0 4px 12px rgba(59, 130, 246, 0.1)
+            `,
+            backdropFilter: 'blur(10px)'
+          }}>
+            <div className="flex items-start space-x-3">
+              <div className="mt-0.5 p-2 rounded-lg" style={{
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.8) 100%)',
+                boxShadow: '0 4px 8px rgba(59, 130, 246, 0.3)'
+              }}>
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="text-sm text-blue-800">
-                <p className="font-medium">¡Último paso!</p>
-                <p className="mt-1">Revisa toda la información antes de crear el nuevo paciente.</p>
+                <p className="font-medium text-base" style={{
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                  letterSpacing: '0.2px'
+                }}>¡Último paso!</p>
+                <p className="mt-1 font-medium" style={{
+                  letterSpacing: '0.1px'
+                }}>Revisa toda la información antes de crear el nuevo paciente.</p>
               </div>
             </div>
           </div>
         )}
 
-      {/* Botones de navegación */}
+      {/* Botones de navegación - Elegantes */}
       <div className="flex justify-between pt-6">
         <button
           onClick={onBack}
-          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
+          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-sm hover:shadow-md"
         >
-          ← Atrás
+          <ArrowLeft className="w-4 h-4" />
+          <span>Atrás</span>
         </button>
         <button
           onClick={handleContinue}
-          className="px-6 py-2 bg-[#8e161a] text-white rounded-lg hover:bg-[#6d1115] transition-colors duration-200 font-medium flex items-center"
+          className="px-6 py-3 bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white rounded-xl hover:from-black hover:to-gray-800 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg transform hover:scale-105 hover:shadow-xl"
         >
           {isEditingMode ? (
             <>
-              Modificar Datos
-              <CheckCircle className="w-4 h-4 ml-2" />
+              <span>Modificar Datos</span>
+              <CheckCircle className="w-4 h-4" />
             </>
           ) : selectedDate && selectedTime ? (
             <>
-              Confirmar Cita
-              <CheckCircle className="w-4 h-4 ml-2" />
+              <span>Confirmar Cita</span>
+              <CheckCircle className="w-4 h-4" />
             </>
           ) : (
             <>
-              Crear Paciente
-              <CheckCircle className="w-4 h-4 ml-2" />
+              <span>Crear Paciente</span>
+              <CheckCircle className="w-4 h-4" />
             </>
           )}
         </button>
@@ -253,43 +313,58 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
   // Si isOpen es true, renderizar el modal completo
   if (isOpen) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-          <div className="p-6">
-            {/* Header */}
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto border border-gray-100" style={{
+          boxShadow: `
+            0 32px 64px rgba(0, 0, 0, 0.12), 
+            0 16px 32px rgba(0, 0, 0, 0.08),
+            0 8px 16px rgba(0, 0, 0, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8)
+          `,
+          background: 'linear-gradient(145deg, #ffffff 0%, #fafbfc 100%)'
+        }}>
+          <div className="p-5">
+            {/* Header Elegante */}
             <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <Heart className="w-6 h-6 text-blue-600" />
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center shadow-xl border border-gray-700">
+                    <Heart className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="absolute -inset-1 bg-gradient-to-br from-gray-900 to-black rounded-2xl blur opacity-20 -z-10"></div>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Información Médica</h2>
-                  <p className="text-sm text-gray-600">Paso 4 de 4</p>
+                  <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+                    Información Médica
+                  </h2>
+                  <p className="text-sm text-gray-600 font-medium">
+                    Paso 4 de 4 - Datos clínicos
+                  </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="w-11 h-11 rounded-xl bg-white hover:bg-gray-50 flex items-center justify-center transition-all duration-300 shadow-lg border border-gray-200 hover:border-gray-300 hover:shadow-xl"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 text-gray-600" />
               </button>
             </div>
 
-            {/* Resumen de selección solo para estudiantes (cuando hay fecha y hora) */}
+            {/* Resumen de selección solo para estudiantes (cuando hay fecha y hora) - Elegante */}
             {(selectedDate && selectedTime) && (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-4 mb-5 border border-gray-200 shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Fecha:</span>
-                    <span className="font-semibold">{formatDate(selectedDate)}</span>
+                    <span className="text-gray-600 font-semibold">Fecha:</span>
+                    <span className="font-bold text-gray-800">{formatDate(selectedDate)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Horario:</span>
-                    <span className="font-semibold">{selectedTime}</span>
+                    <span className="text-gray-600 font-semibold">Horario:</span>
+                    <span className="font-bold text-gray-800">{selectedTime}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Paciente:</span>
-                    <span className="font-semibold">{personalData?.fullName || 'N/A'}</span>
+                    <span className="text-gray-600 font-semibold">Paciente:</span>
+                    <span className="font-bold text-gray-800">{personalData?.fullName || 'N/A'}</span>
                   </div>
                 </div>
               </div>

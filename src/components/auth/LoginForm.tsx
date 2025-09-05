@@ -421,15 +421,15 @@ export function LoginForm() {
       }}>
         {/* Puntos de acento del sistema de psicología */}
         <div className="absolute top-1 left-1 w-1 h-1 rounded-full opacity-80" style={{ 
-          background: 'rgba(142, 22, 26, 0.9)',
+          background: '#ffffff',
           animation: 'starSparkle 3s ease-in-out infinite' 
         }}></div>
         <div className="absolute top-2 right-1 w-0.5 h-0.5 rounded-full opacity-70" style={{ 
-          background: 'rgba(44, 62, 80, 0.9)',
+          background: '#ffffff',
           animation: 'starSparkle 3.5s ease-in-out infinite 0.5s' 
         }}></div>
         <div className="absolute bottom-1 left-2 w-0.5 h-0.5 rounded-full opacity-75" style={{ 
-          background: 'rgba(25, 42, 61, 0.8)',
+          background: '#ffffff',
           animation: 'starSparkle 4s ease-in-out infinite 1s' 
         }}></div>
       </div>
@@ -563,15 +563,9 @@ export function LoginForm() {
             className={`w-full max-w-sm sm:max-w-md lg:max-w-lg rounded-3xl sm:rounded-[2rem] transition-all duration-700 ${isAnimated ? 'transform scale-100 translate-y-0' : 'transform scale-95 translate-y-4'}`}
             style={{
               animation: isAnimated ? 'formSlideIn 1s ease-out forwards' : 'none',
-              background: 'rgba(255, 255, 255, 0.65)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.5)',
-              boxShadow: `
-                0 25px 50px -12px rgba(0, 0, 0, 0.25),
-                0 8px 32px -8px rgba(142, 22, 26, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6),
-                0 0 0 1px rgba(255, 255, 255, 0.25)
-              `
+              background: '#ffffff',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
             }}
           >
             <Card padding="sm" className="p-3 sm:p-4 lg:p-5 bg-transparent border-0 shadow-none">
@@ -691,7 +685,7 @@ export function LoginForm() {
                           <div className="flex justify-center">
           <Button
             type="submit"
-                    className="w-3/4 bg-gradient-to-r from-[#8e161a] via-[#a52a2a] to-[#d3b7a0] text-white font-bold py-2.5 rounded-xl shadow-lg hover:shadow-xl hover:from-[#6d1115] hover:via-[#8b1a1a] hover:to-[#b89a8a] transition-all duration-300 text-sm transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-3/4 bg-gradient-to-r from-[#1a0a0a] via-[#2d0f0f] to-[#1e1b4b] text-white font-bold py-2.5 rounded-xl shadow-lg hover:shadow-xl hover:from-[#0f0505] hover:via-[#1a0a0a] hover:to-[#15123a] transition-all duration-300 text-sm transform hover:scale-[1.02] active:scale-[0.98]"
             size="lg"
             loading={loading}
           >
@@ -719,17 +713,18 @@ export function LoginForm() {
           <Button
             type="button"
             variant="outline"
-                    className="w-3/4 border-2 border-gray-200 hover:border-[#8e161a] text-gray-700 hover:text-[#8e161a] font-semibold bg-white hover:bg-gray-50 transition-all duration-300 py-2.5 rounded-xl shadow-sm hover:shadow-md"
+                    className="w-3/4 border-2 border-gray-500 hover:border-[#7f1d1d] text-gray-900 hover:text-[#7f1d1d] font-semibold bg-white hover:bg-red-200 transition-all duration-300 py-2.5 rounded-xl shadow-sm hover:shadow-md"
             size="lg"
             onClick={handleGoogleLogin}
             loading={loading}
           >
-            <img
-              src="https://developers.google.com/identity/images/g-logo.png"
-              alt="Google"
-                      className="w-4 h-4 mr-3"
-            />
-                  Continuar con Google
+            <svg className="w-4 h-4 mr-3 pointer-events-none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+                   Google
           </Button>
                 </div>
         </div>
@@ -1055,16 +1050,16 @@ export function LoginForm() {
         
         @keyframes backgroundBreathing {
           0%, 0% { 
-            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, rgba(255, 255, 255, 0.02) 100%);
+            background: #ffffff;
           }
           25% { 
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, rgba(255, 255, 255, 0.01) 85%, rgba(255, 255, 255, 0.005) 100%);
+            background: #ffffff;
           }
           50% { 
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 40%, rgba(255, 255, 255, 0.01) 70%, rgba(255, 255, 255, 0.005) 90%, rgba(255, 255, 255, 0.003) 100%);
+            background: #ffffff;
           }
           75% { 
-            background: linear-gradient(135deg, #0f3460 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.01) 80%, rgba(255, 255, 255, 0.005) 100%);
+            background: #ffffff;
           }
         }
         

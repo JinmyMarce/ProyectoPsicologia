@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación - Encabezados por Temporada</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .test-button {
+            background: #1D9BF0;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #0B1F3A;
+        }
+        .header-preview {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header-cell {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+        .rainy-season {
+            background: #1e40af;
+            border-bottom: 3px solid #3b82f6;
+        }
+        .dry-season {
+            background: #f59e0b;
+            border-bottom: 3px solid #fbbf24;
+        }
+        .default-season {
+            background: #0B1F3A;
+            border-bottom: 3px solid #4b5563;
+        }
+        .color-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .color-item {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .color-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin: 0 auto 10px;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Verificación - Encabezados por Temporada</h1>
+        
+        <div class="test-section">
+            <h3>🔧 Cambios Realizados</h3>
+            <div class="status success">
+                <strong>✅ Actualizaciones aplicadas:</strong>
+                <ul>
+                    <li><strong>Encabezados Temporada de Lluvias:</strong> Azul (#1e40af) con línea azul (#3b82f6)</li>
+                    <li><strong>Encabezados Temporada Seca:</strong> Naranja (#f59e0b) con línea amarilla (#fbbf24)</li>
+                    <li><strong>Encabezados por defecto:</strong> Azul marino (#0B1F3A) con línea gris (#4b5563)</li>
+                    <li><strong>Texto:</strong> Siempre blanco y en negrita</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🌧️ Vista Previa - Temporada de Lluvias</h3>
+            <div class="header-preview">
+                <div class="header-cell rainy-season">Lun</div>
+                <div class="header-cell rainy-season">Mar</div>
+                <div class="header-cell rainy-season">Mié</div>
+                <div class="header-cell rainy-season">Jue</div>
+                <div class="header-cell rainy-season">Vie</div>
+                <div class="header-cell rainy-season">Sáb</div>
+                <div class="header-cell rainy-season">Dom</div>
+            </div>
+            <p><strong>Color:</strong> Azul (#1e40af) con línea azul (#3b82f6)</p>
+        </div>
+
+        <div class="test-section">
+            <h3>☀️ Vista Previa - Temporada Seca</h3>
+            <div class="header-preview">
+                <div class="header-cell dry-season">Lun</div>
+                <div class="header-cell dry-season">Mar</div>
+                <div class="header-cell dry-season">Mié</div>
+                <div class="header-cell dry-season">Jue</div>
+                <div class="header-cell dry-season">Vie</div>
+                <div class="header-cell dry-season">Sáb</div>
+                <div class="header-cell dry-season">Dom</div>
+            </div>
+            <p><strong>Color:</strong> Naranja (#f59e0b) con línea amarilla (#fbbf24)</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Colores de Encabezados por Temporada</h3>
+            <div class="color-preview">
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #1e40af; border-color: #3b82f6;"></div>
+                    <strong>Temporada de Lluvias</strong><br>
+                    <small>Fondo: Azul (#1e40af)<br>Línea: Azul (#3b82f6)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #f59e0b; border-color: #fbbf24;"></div>
+                    <strong>Temporada Seca</strong><br>
+                    <small>Fondo: Naranja (#f59e0b)<br>Línea: Amarilla (#fbbf24)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #0B1F3A; border-color: #4b5563;"></div>
+                    <strong>Por Defecto</strong><br>
+                    <small>Fondo: Azul marino (#0B1F3A)<br>Línea: Gris (#4b5563)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testRainySeason()">🌧️ Verificar Temporada Lluvias</button>
+                <button class="test-button" onclick="testDrySeason()">☀️ Verificar Temporada Seca</button>
+                <button class="test-button" onclick="testHeaderColors()">🎨 Verificar Colores</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega a /appointments (Calendario del estudiante)</li>
+                    <li>Observa los encabezados del calendario</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Aspectos específicos a verificar:</strong>
+                <ul>
+                    <li>🌧️ <strong>Temporada de Lluvias:</strong> Encabezados azules con línea azul</li>
+                    <li>☀️ <strong>Temporada Seca:</strong> Encabezados naranjas con línea amarilla</li>
+                    <li>📋 <strong>Texto:</strong> Siempre blanco y en negrita</li>
+                    <li>🎨 <strong>Colores:</strong> Cambian automáticamente según la temporada</li>
+                    <li>📏 <strong>Líneas:</strong> 3px de grosor con colores específicos</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Detalles Técnicos</h3>
+            <div class="status info">
+                <strong>Cambios realizados en modern-calendar.css:</strong>
+                <ul>
+                    <li><strong>Temporada de Lluvias:</strong> .rbc-header.epoca-lluvias</li>
+                    <li><strong>Temporada Seca:</strong> .rbc-header.epoca-seca</li>
+                    <li><strong>Por Defecto:</strong> .rbc-header (azul marino)</li>
+                    <li><strong>Líneas:</strong> border-bottom: 3px solid con colores específicos</li>
+                    <li><strong>Texto:</strong> Siempre blanco (#ffffff) y negrita (700)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Si No Ves los Cambios</h3>
+            <div class="status warning">
+                <strong>Sigue estos pasos:</strong>
+                <ul>
+                    <li><strong>1. Reinicia el servidor:</strong> npm run dev</li>
+                    <li><strong>2. Limpia el caché:</strong> Ctrl+F5 o Cmd+Shift+R</li>
+                    <li><strong>3. Verifica la consola:</strong> Busca errores de CSS</li>
+                    <li><strong>4. Verifica la ruta:</strong> Asegúrate de estar en /appointments</li>
+                    <li><strong>5. Cambia de mes:</strong> Los colores cambian según la temporada</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testRainySeason() {
+            alert('🌧️ Para verificar la temporada de lluvias:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega a /appointments\n' +
+                  '3. Cambia a un mes de temporada de lluvias (nov-dic-ene-feb-mar)\n' +
+                  '4. Verifica que los encabezados sean:\n' +
+                  '   - Fondo: Azul (#1e40af)\n' +
+                  '   - Línea inferior: Azul (#3b82f6)\n' +
+                  '   - Texto: Blanco y negrita\n' +
+                  '5. Si no cambian, reinicia el servidor');
+        }
+
+        function testDrySeason() {
+            alert('☀️ Para verificar la temporada seca:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega a /appointments\n' +
+                  '3. Cambia a un mes de temporada seca (abr-may-jun-jul-ago-sep-oct)\n' +
+                  '4. Verifica que los encabezados sean:\n' +
+                  '   - Fondo: Naranja (#f59e0b)\n' +
+                  '   - Línea inferior: Amarilla (#fbbf24)\n' +
+                  '   - Texto: Blanco y negrita\n' +
+                  '5. Si no cambian, reinicia el servidor');
+        }
+
+        function testHeaderColors() {
+            alert('🎨 Para verificar los colores de encabezados:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega a /appointments\n' +
+                  '3. Cambia entre diferentes meses\n' +
+                  '4. Verifica que los colores cambien:\n' +
+                  '   - Temporada de Lluvias: Azul con línea azul\n' +
+                  '   - Temporada Seca: Naranja con línea amarilla\n' +
+                  '   - Por defecto: Azul marino con línea gris\n' +
+                  '5. El texto siempre debe ser blanco y negrita');
+        }
+    </script>
+</body>
+</html>

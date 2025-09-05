@@ -7,11 +7,11 @@ export interface Holiday {
   date: string;
   formatted_date: string;
   formatted_date_full: string;
-  type: 'fijo' | 'movil';
+  type: string;
   description: string;
   is_national: boolean;
   is_regional: boolean;
-  region?: string;
+  region: string;
   year: number;
   is_today: boolean;
   is_past: boolean;
@@ -25,7 +25,7 @@ export interface HolidaysResponse {
   data: Holiday[];
   meta: {
     total: number;
-    year: number | string;
+    year: number;
     region: string;
   };
 }
@@ -71,18 +71,83 @@ export interface HolidayStatsResponse {
 }
 
 class HolidayService {
-  /**
-   * Obtener todos los feriados con filtros
-   */
-  async getHolidays(params?: {
-    year?: number;
-    region?: string;
-    type?: 'fijo' | 'movil';
-    start_date?: string;
-    end_date?: string;
-  }): Promise<HolidaysResponse> {
-    const response = await apiClient.get('/holidays', { params });
-    return response.data;
+  private baseUrl = 'http://localhost:8000/api';
+
+  async getHolidays(year?: number, region?: string): Promise<Holiday[]> {
+    try {
+      const params = new URLSearchParams();
+      if (year) params.append('year', year.toString());
+      if (region) params.append('region', region);
+
+      const response = await fetch(`${this.baseUrl}/holidays?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error(`Error al obtener feriados: ${response.status}`);
+      }
+
+      const data: HolidaysResponse = await response.json();
+      
+      if (data.success) {
+        return data.data;
+      } else {
+        throw new Error(data.message || 'Error al obtener feriados');
+      }
+    } catch (error) {
+      console.error('Error fetching holidays:', error);
+      return [];
+    }
+  }
+
+  async getHolidaysInRange(startDate: string, endDate: string): Promise<Holiday[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/holidays/get-in-range`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          start_date: startDate,
+          end_date: endDate
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al obtener feriados: ${response.status}`);
+      }
+
+      const data: HolidaysResponse = await response.json();
+      
+      if (data.success) {
+        return data.data;
+      } else {
+        throw new Error(data.message || 'Error al obtener feriados');
+      }
+    } catch (error) {
+      console.error('Error fetching holidays in range:', error);
+      return [];
+    }
+  }
+
+  async checkDate(date: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/holidays/check-date`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date })
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const data = await response.json();
+      return data.success && data.data.is_holiday;
+    } catch (error) {
+      console.error('Error checking holiday date:', error);
+      return false;
+    }
   }
 
   /**
@@ -104,18 +169,6 @@ class HolidayService {
       date,
       region
     });
-    return response.data;
-  }
-
-  /**
-   * Obtener feriados en un rango de fechas
-   */
-  async getHolidaysInRange(params: {
-    start_date: string;
-    end_date: string;
-    region?: string;
-  }): Promise<HolidaysResponse> {
-    const response = await apiClient.post('/holidays/get-in-range', params);
     return response.data;
   }
 
@@ -230,13 +283,9 @@ class HolidayService {
       const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
       
-      const response = await this.getHolidaysInRange({
-        start_date: startDate,
-        end_date: endDate,
-        region
-      });
+      const response = await this.getHolidaysInRange(startDate, endDate);
       
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error getting current month holidays:', error);
       return [];
@@ -251,13 +300,9 @@ class HolidayService {
       const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
       const endDate = new Date(year, month, 0).toISOString().split('T')[0];
       
-      const response = await this.getHolidaysInRange({
-        start_date: startDate,
-        end_date: endDate,
-        region
-      });
+      const response = await this.getHolidaysInRange(startDate, endDate);
       
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error getting holidays for month:', error);
       return [];
@@ -284,13 +329,9 @@ class HolidayService {
       const start = startDate.toISOString().split('T')[0];
       const end = endDate.toISOString().split('T')[0];
       
-      const response = await this.getHolidaysInRange({
-        start_date: start,
-        end_date: end,
-        region
-      });
+      const response = await this.getHolidaysInRange(start, end);
       
-      return response.data.map(holiday => {
+      return response.map(holiday => {
         const holidayDate = new Date(holiday.date);
         return {
           id: holiday.id,

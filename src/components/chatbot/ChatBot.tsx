@@ -409,13 +409,11 @@ export function ChatBot({ isVisible = false, onClose }: ChatBotProps) {
                 <span className="text-sm">🧠</span>
                 <span className="text-xs text-[#d3b7a0] font-semibold">Procesando...</span>
               </div>
-              <div className="bg-gradient-to-br from-[#2d0c0f] to-[#1a0507] border border-[#8e161a]/30 p-4 rounded-2xl shadow-xl backdrop-blur-sm" style={{
-                boxShadow: '0 8px 25px rgba(26, 5, 7, 0.4), inset 0 1px 0 rgba(211, 183, 160, 0.1)'
-              }}>
+              <div className="bg-gray-100 border border-gray-200 p-4 rounded-2xl shadow-md">
                 <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-[#d3b7a0] rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-[#d3b7a0] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-[#d3b7a0] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             </div>
@@ -425,9 +423,7 @@ export function ChatBot({ isVisible = false, onClose }: ChatBotProps) {
       </div>
 
       {/* Input de mensaje */}
-      <div className="p-4 bg-gradient-to-r from-[#1a0507] via-[#2d0c0f] to-[#1a0507] border-t border-[#8e161a]/30" style={{
-        boxShadow: 'inset 0 1px 0 rgba(211, 183, 160, 0.1)'
-      }}>
+      <div className="p-4 bg-gray-50 border-t border-gray-200">
         <div className="flex gap-2">
           <input
             type="text"
@@ -435,19 +431,13 @@ export function ChatBot({ isVisible = false, onClose }: ChatBotProps) {
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Escribe tu pregunta aquí..."
-            className="flex-1 p-3 bg-gradient-to-r from-[#2d0c0f] to-[#1a0507] border border-[#8e161a]/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#d3b7a0] focus:border-[#d3b7a0] text-sm text-[#f5f5f5] placeholder-[#d3b7a0]/60 shadow-inner backdrop-blur-sm"
-            style={{
-              boxShadow: 'inset 0 2px 4px rgba(26, 5, 7, 0.3)'
-            }}
+            className="flex-1 p-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-sm text-gray-800 placeholder-gray-500"
             disabled={isTyping}
           />
           <Button
             onClick={handleSendMessage}
             disabled={!inputText.trim() || isTyping}
-            className="px-4 py-3 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] text-white rounded-xl hover:from-[#6d1115] hover:to-[#b89a80] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-105 active:scale-95"
-            style={{
-              boxShadow: '0 4px 15px rgba(142, 22, 26, 0.3)'
-            }}
+            className="px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
           >
             <Send className="w-4 h-4" />
           </Button>
@@ -485,9 +475,9 @@ export function ChatBotToggle({ onClick }: { onClick: () => void }) {
   return createPortal(
     <button
       onClick={onClick}
-      className={`fixed bottom-4 right-4 w-14 h-14 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center z-[9999] ${isGlowing ? 'animate-pulse' : ''} hover:animate-none overflow-hidden`}
+      className={`fixed bottom-4 right-4 w-14 h-14 bg-gray-800 hover:bg-gray-700 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center z-[9999] ${isGlowing ? 'animate-pulse' : ''} hover:animate-none overflow-hidden`}
       style={{
-        boxShadow: '0 4px 12px rgba(142, 22, 26, 0.2)',
+        boxShadow: '0 4px 12px rgba(31, 41, 55, 0.2)',
         position: 'fixed' // Asegurar posición fija respecto al viewport
       }}
       title="🤖 Asistente Psicológico Inteligente - ¡Ahora con IA mejorada!"

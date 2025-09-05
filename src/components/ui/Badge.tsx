@@ -8,24 +8,26 @@ interface BadgeProps {
 }
 
 export function Badge({ children, variant = 'default', className }: BadgeProps) {
-  const baseClasses = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold transition-all duration-300';
+  const baseClasses = 'inline-flex items-center px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 tracking-wide transform hover:scale-105';
   
   const getVariantStyles = (variant: string) => {
     switch (variant) {
       case 'default':
       case 'primary':
         return {
-          background: 'linear-gradient(135deg, #8e161a 0%, #a52a2a 100%)',
-          color: 'white',
-          boxShadow: '0 2px 8px rgba(142, 22, 26, 0.3)',
-          textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
+          color: '#1e293b',
+          boxShadow: '0 4px 16px rgba(255, 255, 255, 0.4), 0 2px 8px rgba(30, 41, 59, 0.2)',
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+          border: '1px solid rgba(30, 41, 59, 0.2)'
         };
       case 'secondary':
         return {
-          background: 'linear-gradient(135deg, #1e2a37 0%, #334155 100%)',
+          background: 'linear-gradient(135deg, #6b1013 0%, #8e161a 50%, #1e293b 100%)',
           color: 'white',
-          boxShadow: '0 2px 8px rgba(30, 42, 55, 0.3)',
-          textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+          boxShadow: '0 4px 16px rgba(107, 16, 19, 0.4), 0 2px 8px rgba(30, 41, 59, 0.3)',
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
+          border: '1px solid rgba(255, 255, 255, 0.2)'
         };
       case 'success':
         return {
@@ -57,10 +59,11 @@ export function Badge({ children, variant = 'default', className }: BadgeProps) 
         };
       default:
         return {
-          background: 'linear-gradient(135deg, #8e161a 0%, #a52a2a 100%)',
-          color: 'white',
-          boxShadow: '0 2px 8px rgba(142, 22, 26, 0.3)',
-          textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
+          color: '#1e293b',
+          boxShadow: '0 4px 16px rgba(255, 255, 255, 0.4), 0 2px 8px rgba(30, 41, 59, 0.2)',
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+          border: '1px solid rgba(30, 41, 59, 0.2)'
         };
     }
   };

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Calendario - Colores Corregidos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .color-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .color-item {
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid;
+            text-align: center;
+        }
+        .color-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            border: 2px solid;
+        }
+        .available {
+            background-color: rgba(34, 197, 94, 0.25);
+            border-color: #22c55e;
+        }
+        .available .color-circle {
+            background-color: #22c55e;
+            border-color: #22c55e;
+        }
+        .occupied {
+            background-color: rgba(255, 193, 7, 0.25);
+            border-color: #f59e0b;
+        }
+        .occupied .color-circle {
+            background-color: #f59e0b;
+            border-color: #f59e0b;
+        }
+        .holiday {
+            background-color: rgba(220, 38, 38, 0.25);
+            border-color: #dc2626;
+        }
+        .holiday .color-circle {
+            background-color: #dc2626;
+            border-color: #dc2626;
+        }
+        .weekend {
+            background-color: rgba(156, 163, 175, 0.25);
+            border-color: #9ca3af;
+        }
+        .weekend .color-circle {
+            background-color: #9ca3af;
+            border-color: #9ca3af;
+        }
+        .today {
+            background-color: rgba(30, 64, 175, 0.25);
+            border-color: #1e40af;
+        }
+        .today .color-circle {
+            background-color: #1e40af;
+            border-color: #1e40af;
+        }
+        .blocked {
+            background-color: rgba(251, 146, 60, 0.25);
+            border-color: #fb923c;
+        }
+        .blocked .color-circle {
+            background-color: #fb923c;
+            border-color: #fb923c;
+        }
+        .unavailable {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-color: #e5e7eb;
+        }
+        .unavailable .color-circle {
+            background-color: white;
+            border-color: #9ca3af;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .description {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎨 Test de Colores del Calendario - Corregido</h1>
+        
+        <div class="description">
+            <strong>✅ Cambios Implementados:</strong><br>
+            • Colores corregidos con opacidad 0.25 para mejor visibilidad<br>
+            • Bordes de 2px con colores principales<br>
+            • Alertas reemplazadas por modales profesionales<br>
+            • Leyenda compacta y funcional
+        </div>
+
+        <div class="color-test">
+            <div class="color-item available">
+                <div class="color-circle"></div>
+                <strong>Disponible</strong><br>
+                <small>Verde cleste - Horarios libres</small>
+            </div>
+            
+            <div class="color-item occupied">
+                <div class="color-circle"></div>
+                <strong>Ocupado</strong><br>
+                <small>Amarillo - Sin horarios libres</small>
+            </div>
+            
+            <div class="color-item holiday">
+                <div class="color-circle"></div>
+                <strong>Feriado</strong><br>
+                <small>Rojo granate - No se atiende</small>
+            </div>
+            
+            <div class="color-item weekend">
+                <div class="color-circle"></div>
+                <strong>Fin de Semana</strong><br>
+                <small>Gris claro - No se atiende</small>
+            </div>
+            
+            <div class="color-item today">
+                <div class="color-circle"></div>
+                <strong>Hoy</strong><br>
+                <small>Azul marino oscuro - Día actual</small>
+            </div>
+            
+            <div class="color-item blocked">
+                <div class="color-circle"></div>
+                <strong>Bloqueado</strong><br>
+                <small>Anaranjado suave - Por psicólogo</small>
+            </div>
+            
+            <div class="color-item unavailable">
+                <div class="color-circle"></div>
+                <strong>No Disponible</strong><br>
+                <small>Blanco - Pasado o lejano</small>
+            </div>
+        </div>
+
+        <div class="description">
+            <strong>🔧 Características Técnicas:</strong><br>
+            • Fondos: rgba con opacidad 0.25 para suavidad<br>
+            • Bordes: 2px solid con colores principales<br>
+            • Hover: Transiciones suaves de 300ms<br>
+            • Responsive: Grid adaptativo para diferentes pantallas
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+
+

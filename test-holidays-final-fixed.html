@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Final - Problemas Solucionados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .test-button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #d97706;
+        }
+        .api-result {
+            font-family: monospace;
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Verificación Final - Problemas Solucionados</h1>
+        
+        <div class="test-section">
+            <h3>✅ Problemas Identificados y Solucionados</h3>
+            <div class="status success">
+                <strong>✅ Todos los problemas han sido corregidos:</strong>
+                <ul>
+                    <li><strong>2 de Mayo - API:</strong> ✅ Feriado no aparecía en la API porque tenía is_national = false</li>
+                    <li><strong>2 de Mayo - Base de datos:</strong> ✅ Corregido is_national = true para todos los años</li>
+                    <li><strong>2 de Mayo - Frontend:</strong> ✅ Ahora debe aparecer con color naranja y modal</li>
+                    <li><strong>Fuerza Aérea - Nombre:</strong> ✅ Corregido de "Fuerza Aérea del Perú" a "Día de la Fuerza Aérea del Perú"</li>
+                    <li><strong>Fuerza Aérea - Descripción:</strong> ✅ Expandida en el modal</li>
+                    <li><strong>Fiestas Patrias - Imágenes:</strong> ✅ Misma imagen fiestaspatrias.png para 28 y 29 de julio</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testMay2API()">⚔️ Probar 2 de Mayo API</button>
+                <button class="test-button" onclick="testForceAereaAPI()">✈️ Probar Fuerza Aérea API</button>
+                <button class="test-button" onclick="testAllHolidaysAPI()">📋 Probar Todos los Feriados</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega al calendario del estudiante</li>
+                    <li>Cambia a diferentes años (2025, 2026, 2030, etc.)</li>
+                    <li>Verifica los siguientes feriados específicos:</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Feriados específicos para verificar:</strong>
+                <ul>
+                    <li>⚔️ <strong>2 de Mayo:</strong> Ahora debe aparecer con color naranja, nombre "Combate del 2 de Mayo", modal con imagen combate2demayo.png</li>
+                    <li>✈️ <strong>23 de Julio - Fuerza Aérea:</strong> Modal con descripción expandida e imagen Fuerzaarea.png</li>
+                    <li>🏛️ <strong>28 de Julio - Independencia:</strong> Imagen fiestaspatrias.png</li>
+                    <li>🛡️ <strong>29 de Julio - Fuerzas Armadas:</strong> Misma imagen fiestaspatrias.png</li>
+                    <li>📅 <strong>Multi-año:</strong> Todos los feriados deben funcionar en cualquier año (2025-2050)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="api-test" id="api-test" style="display: none;">
+            <h3>🔍 Resultado de Prueba de API</h3>
+            <div id="api-result" class="api-result"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testMay2API() {
+            const apiTest = document.getElementById('api-test');
+            const apiResult = document.getElementById('api-result');
+            
+            apiTest.style.display = 'block';
+            apiResult.textContent = 'Probando feriado del 2 de mayo...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const may2Holiday = result.data.find(holiday => {
+                        const date = new Date(holiday.date);
+                        return date.getMonth() === 4 && date.getDate() === 2; // Mayo es mes 4 (0-indexed)
+                    });
+                    
+                    if (may2Holiday) {
+                        apiResult.textContent = `✅ Feriado del 2 de mayo encontrado en la API:\n\n` +
+                            `ID: ${may2Holiday.id}\n` +
+                            `Nombre: ${may2Holiday.name}\n` +
+                            `Fecha: ${may2Holiday.date}\n` +
+                            `Tipo: ${may2Holiday.type}\n` +
+                            `is_national: ${may2Holiday.is_national}\n` +
+                            `is_active: ${may2Holiday.is_active}\n\n` +
+                            `🎉 ¡El feriado ahora aparece en la API!`;
+                    } else {
+                        apiResult.textContent = `❌ Feriado del 2 de mayo NO encontrado en la API\n\n` +
+                            `Feriados disponibles:\n` +
+                            result.data.map(h => `- ${h.name} (${h.date})`).join('\n');
+                    }
+                } else {
+                    apiResult.textContent = `❌ Error en la API: ${result.message}`;
+                }
+            } catch (error) {
+                apiResult.textContent = `❌ Error de conexión: ${error.message}`;
+            }
+        }
+
+        async function testForceAereaAPI() {
+            const apiTest = document.getElementById('api-test');
+            const apiResult = document.getElementById('api-result');
+            
+            apiTest.style.display = 'block';
+            apiResult.textContent = 'Probando feriado de Fuerza Aérea...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const forceAereaHoliday = result.data.find(holiday => 
+                        holiday.name === 'Día de la Fuerza Aérea del Perú'
+                    );
+                    
+                    if (forceAereaHoliday) {
+                        apiResult.textContent = `✅ Feriado de Fuerza Aérea encontrado:\n\n` +
+                            `ID: ${forceAereaHoliday.id}\n` +
+                            `Nombre: ${forceAereaHoliday.name}\n` +
+                            `Fecha: ${forceAereaHoliday.date}\n` +
+                            `Tipo: ${forceAereaHoliday.type}\n\n` +
+                            `🎉 ¡El nombre está corregido!`;
+                    } else {
+                        apiResult.textContent = `❌ Feriado de Fuerza Aérea NO encontrado\n\n` +
+                            `Feriados disponibles:\n` +
+                            result.data.map(h => `- ${h.name} (${h.date})`).join('\n');
+                    }
+                } else {
+                    apiResult.textContent = `❌ Error en la API: ${result.message}`;
+                }
+            } catch (error) {
+                apiResult.textContent = `❌ Error de conexión: ${error.message}`;
+            }
+        }
+
+        async function testAllHolidaysAPI() {
+            const apiTest = document.getElementById('api-test');
+            const apiResult = document.getElementById('api-result');
+            
+            apiTest.style.display = 'block';
+            apiResult.textContent = 'Probando todos los feriados...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                const result = await response.json();
+                
+                if (result.success) {
+                    apiResult.textContent = `✅ Todos los feriados de 2025:\n\n` +
+                        `Total: ${result.data.length} feriados\n\n` +
+                        result.data.map(h => `- ${h.name} (${h.date})`).join('\n');
+                } else {
+                    apiResult.textContent = `❌ Error en la API: ${result.message}`;
+                }
+            } catch (error) {
+                apiResult.textContent = `❌ Error de conexión: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

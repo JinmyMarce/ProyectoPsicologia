@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Visualización Feriados 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .holiday-display {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #2196f3;
+        }
+        .holiday-display.national {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+        }
+        .holiday-display.compensable {
+            background: #f3e5f5;
+            border-left-color: #9c27b0;
+        }
+        .holiday-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #1976d2;
+        }
+        .holiday-date {
+            font-weight: bold;
+            color: #388e3c;
+        }
+        .holiday-type {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .calendar-simulation {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+            max-width: 800px;
+        }
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            font-size: 0.9em;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .calendar-day.holiday {
+            background: #fff3cd;
+            border-color: #ffc107;
+            font-weight: bold;
+        }
+        .calendar-day.weekend {
+            background: #e2e3e5;
+        }
+        .month-header {
+            grid-column: 1 / -1;
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .day-header {
+            background: #6c757d;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .official-list {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .official-list h3 {
+            color: #2e7d32;
+            margin-top: 0;
+        }
+        .official-list ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .official-list li {
+            margin: 5px 0;
+        }
+        .status-indicator {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Prueba de Visualización de Feriados 2025</h1>
+        
+        <div class="official-list">
+            <h3>📋 Lista Oficial de Feriados 2025 (Perú)</h3>
+            <ul>
+                <li><strong>1 de enero:</strong> Año Nuevo</li>
+                <li><strong>17 de abril:</strong> Jueves Santo</li>
+                <li><strong>18 de abril:</strong> Viernes Santo</li>
+                <li><strong>1 de mayo:</strong> Día del Trabajo</li>
+                <li><strong>7 de junio:</strong> Batalla de Arica y Día de la Bandera</li>
+                <li><strong>29 de junio:</strong> San Pedro y San Pablo</li>
+                <li><strong>23 de julio:</strong> Día de la Fuerza Aérea del Perú</li>
+                <li><strong>28 de julio:</strong> Día de la Independencia</li>
+                <li><strong>29 de julio:</strong> Día de las Fuerzas Armadas</li>
+                <li><strong>6 de agosto:</strong> Batalla de Junín</li>
+                <li><strong>30 de agosto:</strong> Santa Rosa de Lima</li>
+                <li><strong>8 de octubre:</strong> Combate de Angamos</li>
+                <li><strong>1 de noviembre:</strong> Día de Todos los Santos</li>
+                <li><strong>8 de diciembre:</strong> Inmaculada Concepción</li>
+                <li><strong>9 de diciembre:</strong> Batalla de Ayacucho</li>
+                <li><strong>25 de diciembre:</strong> Navidad</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Estado de la API</h3>
+            <div id="api-status">
+                <p>Verificando estado de la API...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📅 Feriados Cargados desde la API</h3>
+            <div id="holidays-loaded">
+                <p>Cargando feriados...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎉 Simulación de Calendario - Enero 2025</h3>
+            <div id="calendar-simulation">
+                <p>Generando simulación...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Verificación de Nombres y Fechas</h3>
+            <div id="verification-results">
+                <p>Verificando nombres y fechas...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para crear fecha local correctamente
+        function createLocalDate(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const date = new Date();
+            date.setFullYear(year);
+            date.setMonth(month - 1);
+            date.setDate(day);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        // Función para formatear fecha
+        function formatDate(date) {
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                weekday: 'long'
+            });
+        }
+
+        // Verificar estado de la API
+        async function checkApiStatus() {
+            const container = document.getElementById('api-status');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    container.innerHTML = `
+                        <div class="status-indicator status-success">
+                            ✅ API funcionando correctamente
+                            <br>Feriados encontrados: ${data.data.length}
+                        </div>
+                    `;
+                    return data.data;
+                } else {
+                    container.innerHTML = `
+                        <div class="status-indicator status-error">
+                            ❌ Error en la API: ${response.status}
+                        </div>
+                    `;
+                    return null;
+                }
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="status-indicator status-error">
+                        ❌ Error de conexión: ${error.message}
+                    </div>
+                `;
+                return null;
+            }
+        }
+
+        // Mostrar feriados cargados
+        function displayHolidays(holidays) {
+            const container = document.getElementById('holidays-loaded');
+            
+            if (!holidays || holidays.length === 0) {
+                container.innerHTML = '<p>No se encontraron feriados</p>';
+                return;
+            }
+
+            // Ordenar por fecha
+            holidays.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            let html = '';
+            holidays.forEach(holiday => {
+                const localDate = createLocalDate(holiday.date);
+                const isCompensable = holiday.name.includes('compensable');
+                const isNational = holiday.is_national;
+                
+                let className = 'holiday-display';
+                if (isCompensable) className += ' compensable';
+                else if (isNational) className += ' national';
+                
+                html += `
+                    <div class="${className}">
+                        <div class="holiday-name">🎉 ${holiday.name}</div>
+                        <div class="holiday-date">📅 ${formatDate(localDate)}</div>
+                        <div class="holiday-type">
+                            Tipo: ${holiday.type} | 
+                            Nacional: ${holiday.is_national ? 'Sí' : 'No'} | 
+                            ID: ${holiday.id}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Generar simulación de calendario
+        function generateCalendarSimulation(holidays) {
+            const container = document.getElementById('calendar-simulation');
+            const year = 2025;
+            const month = 0; // Enero (0-11)
+            
+            const firstDay = new Date(year, month, 1);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            // Crear mapa de feriados para fácil acceso
+            const holidaysMap = {};
+            holidays.forEach(holiday => {
+                const localDate = createLocalDate(holiday.date);
+                const dateString = localDate.toISOString().split('T')[0];
+                holidaysMap[dateString] = holiday;
+            });
+            
+            let html = `
+                <div class="month-header">Enero 2025</div>
+                <div class="day-header">Dom</div>
+                <div class="day-header">Lun</div>
+                <div class="day-header">Mar</div>
+                <div class="day-header">Mié</div>
+                <div class="day-header">Jue</div>
+                <div class="day-header">Vie</div>
+                <div class="day-header">Sáb</div>
+            `;
+            
+            for (let i = 0; i < 42; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + i);
+                
+                const dateString = currentDate.toISOString().split('T')[0];
+                const holiday = holidaysMap[dateString];
+                const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+                const isCurrentMonth = currentDate.getMonth() === month;
+                
+                let dayClass = 'calendar-day';
+                if (holiday) dayClass += ' holiday';
+                if (isWeekend) dayClass += ' weekend';
+                if (!isCurrentMonth) dayClass += ' other-month';
+                
+                html += `
+                    <div class="${dayClass}">
+                        <div>${currentDate.getDate()}</div>
+                        ${holiday ? `<div style="font-size: 0.7em; margin-top: 2px;">${holiday.name}</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Verificar nombres y fechas
+        function verifyNamesAndDates(holidays) {
+            const container = document.getElementById('verification-results');
+            
+            const officialHolidays = {
+                '2025-01-01': 'Año Nuevo',
+                '2025-04-17': 'Jueves Santo',
+                '2025-04-18': 'Viernes Santo',
+                '2025-05-01': 'Día del Trabajo',
+                '2025-06-07': 'Batalla de Arica y Día de la Bandera',
+                '2025-06-29': 'San Pedro y San Pablo',
+                '2025-07-23': 'Día de la Fuerza Aérea del Perú',
+                '2025-07-28': 'Día de la Independencia',
+                '2025-07-29': 'Día de las Fuerzas Armadas',
+                '2025-08-06': 'Batalla de Junín',
+                '2025-08-30': 'Santa Rosa de Lima',
+                '2025-10-08': 'Combate de Angamos',
+                '2025-11-01': 'Día de Todos los Santos',
+                '2025-12-08': 'Inmaculada Concepción',
+                '2025-12-09': 'Batalla de Ayacucho',
+                '2025-12-25': 'Navidad'
+            };
+            
+            let html = '<h4>Verificación de Feriados Oficiales:</h4>';
+            let correctCount = 0;
+            let totalCount = 0;
+            
+            holidays.forEach(holiday => {
+                const officialName = officialHolidays[holiday.date];
+                if (officialName) {
+                    totalCount++;
+                    const isCorrect = holiday.name === officialName;
+                    if (isCorrect) correctCount++;
+                    
+                    html += `
+                        <div class="holiday-display ${isCorrect ? 'national' : 'compensable'}">
+                            <div class="holiday-name">${holiday.name}</div>
+                            <div class="holiday-date">${holiday.date}</div>
+                            <div class="holiday-type">
+                                ${isCorrect ? '✅ Correcto' : '❌ Incorrecto'} | 
+                                Esperado: "${officialName}"
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += `
+                <div class="status-indicator ${correctCount === totalCount ? 'status-success' : 'status-warning'}">
+                    <strong>Resumen:</strong> ${correctCount}/${totalCount} feriados oficiales correctos
+                    ${correctCount === totalCount ? '🎉 ¡Todos los nombres están correctos!' : '⚠️ Hay nombres incorrectos'}
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Función principal
+        async function runTests() {
+            const holidays = await checkApiStatus();
+            
+            if (holidays) {
+                displayHolidays(holidays);
+                generateCalendarSimulation(holidays);
+                verifyNamesAndDates(holidays);
+            }
+        }
+
+        // Ejecutar pruebas
+        runTests();
+        
+        // Recargar cada 30 segundos
+        setInterval(runTests, 30000);
+    </script>
+</body>
+</html>

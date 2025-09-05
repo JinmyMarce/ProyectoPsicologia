@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba: Modal Compacto con Botones Colapsables</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .test-section h2 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+        
+        .modal-preview {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 20px 0;
+            max-width: 448px; /* max-w-md = 28rem = 448px */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .close-button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 384px; /* h-96 = 24rem = 384px */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+        
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .title-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.3) 0%, rgba(30, 41, 59, 0.2) 50%, rgba(51, 65, 85, 0.1) 100%);
+            backdrop-filter: blur(4px);
+            padding: 24px 16px;
+        }
+        
+        .title-overlay h3 {
+            color: white;
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .decorative-line {
+            width: 112px; /* w-28 = 7rem = 112px */
+            height: 4px;
+            background: linear-gradient(to right, rgba(251, 191, 36, 0.7), rgba(249, 115, 22, 0.7));
+            margin: 0 auto;
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .modal-content {
+            padding: 16px;
+            background: linear-gradient(to bottom, white, #f8fafc);
+        }
+        
+        .collapsible-button {
+            width: 100%;
+            background: linear-gradient(to right, #f8fafc, #f1f5f9);
+            border: 1px solid #e2e8f0;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+        
+        .collapsible-button:hover {
+            background: linear-gradient(to right, #f1f5f9, #e2e8f0);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .button-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .button-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .button-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+        
+        .icon-slate {
+            background: linear-gradient(to bottom right, #475569, #334155);
+        }
+        
+        .icon-amber {
+            background: linear-gradient(to bottom right, #f59e0b, #d97706);
+        }
+        
+        .button-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .text-slate {
+            color: #1e293b;
+        }
+        
+        .text-amber {
+            color: #92400e;
+        }
+        
+        .arrow {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.2s;
+            color: #64748b;
+        }
+        
+        .arrow.expanded {
+            transform: rotate(180deg);
+        }
+        
+        .collapsible-content {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin: 0 16px 12px 16px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        .content-slate {
+            color: #374151;
+        }
+        
+        .content-amber {
+            background: #fef3c7;
+            border-color: #fbbf24;
+            color: #92400e;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #1e293b;
+            margin: 0 0 15px 0;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-card .icon {
+            width: 24px;
+            height: 24px;
+            background: #3b82f6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .info-card p {
+            color: #475569;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .success-message h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+        }
+        
+        .success-message p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .comparison-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+        }
+        
+        .comparison-item h4 {
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        
+        .comparison-item .dimensions {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Modal Compacto con Botones</h1>
+            <p>Nueva configuración: Modal menos ancho con información colapsable en botones</p>
+        </div>
+        
+        <div class="content">
+            <div class="test-section">
+                <h2>🎯 Cambios Implementados</h2>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4><span class="icon">📏</span> Ancho del Modal</h4>
+                        <p>Cambiado de <strong>max-w-lg</strong> (32rem) a <strong>max-w-md</strong> (28rem)</p>
+                        <div class="status-badge">✅ -4rem menos ancho</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">🔘</span> Botones Colapsables</h4>
+                        <p>Descripción e Información ahora son <strong>botones interactivos</strong></p>
+                        <div class="status-badge">✅ Información oculta por defecto</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">🎨</span> Diseño Compacto</h4>
+                        <p>Padding reducido de <strong>p-6</strong> a <strong>p-4</strong> para mayor compacidad</p>
+                        <div class="status-badge">✅ Mejor aprovechamiento del espacio</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">⚡</span> Estados Interactivos</h4>
+                        <p>Flechas rotativas y <strong>transiciones suaves</strong> para mejor UX</p>
+                        <div class="status-badge">✅ Interacción intuitiva</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h2>🖼️ Vista Previa del Modal Compacto</h2>
+                <p>Simulación del nuevo modal más estrecho con botones colapsables:</p>
+                
+                <div class="modal-preview">
+                    <div class="modal-header">
+                        <div class="modal-title">Detalles del Feriado</div>
+                        <button class="close-button">×</button>
+                    </div>
+                    
+                    <div class="image-container">
+                        <div class="image-placeholder">
+                            Imagen del Feriado<br>
+                            (Ocupando todo el ancho)
+                        </div>
+                        <div class="title-overlay">
+                            <h3>Inmaculada Concepción</h3>
+                            <div class="decorative-line"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-content">
+                        <!-- Botón Descripción Histórica -->
+                        <button class="collapsible-button">
+                            <div class="button-content">
+                                <div class="button-left">
+                                    <div class="button-icon icon-slate">ℹ</div>
+                                    <span class="button-text text-slate">Descripción Histórica</span>
+                                </div>
+                                <div class="arrow">▼</div>
+                            </div>
+                        </button>
+                        
+                        <!-- Botón Información Importante -->
+                        <button class="collapsible-button">
+                            <div class="button-content">
+                                <div class="button-left">
+                                    <div class="button-icon icon-amber">⚠</div>
+                                    <span class="button-text text-amber">Información Importante</span>
+                                </div>
+                                <div class="arrow">▼</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="comparison">
+                    <div class="comparison-item">
+                        <h4>Antes</h4>
+                        <div class="dimensions">max-w-lg (32rem)</div>
+                        <p>Modal ancho, información siempre visible</p>
+                    </div>
+                    <div class="comparison-item">
+                        <h4>Ahora</h4>
+                        <div class="dimensions">max-w-md (28rem)</div>
+                        <p>Modal compacto, información en botones</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h2>🔧 Funcionalidades Técnicas</h2>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4><span class="icon">🎯</span> Estados del Modal</h4>
+                        <p><strong>showDescription:</strong> Controla visibilidad de descripción<br>
+                        <strong>showImportantInfo:</strong> Controla visibilidad de información<br>
+                        <strong>Auto-reset:</strong> Se resetean al cerrar modal</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">🎨</span> Estilos de Botones</h4>
+                        <p><strong>Hover effects:</strong> Cambios de color y sombra<br>
+                        <strong>Transiciones:</strong> 200ms para cambios suaves<br>
+                        <strong>Flechas:</strong> Rotación 180° al expandir</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">📱</span> Responsive Design</h4>
+                        <p><strong>Ancho:</strong> max-w-md (448px máximo)<br>
+                        <strong>Padding:</strong> p-4 (16px) para mayor compacidad<br>
+                        <strong>Espaciado:</strong> space-y-3 entre elementos</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-message">
+                <h3>🎉 ¡Modal Optimizado!</h3>
+                <p>El modal ahora es más compacto, elegante y funcional con información organizada en botones colapsables</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación - Nueva Paleta de Colores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .test-button {
+            background: #1D9BF0;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #0B1F3A;
+        }
+        .color-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .color-item {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .color-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin: 0 auto 10px;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Verificación - Nueva Paleta de Colores</h1>
+        
+        <div class="test-section">
+            <h3>🎨 Nueva Paleta de Colores Aplicada</h3>
+            <div class="status success">
+                <strong>✅ Colores actualizados en todos los calendarios:</strong>
+                <ul>
+                    <li><strong>Hoy:</strong> Azul (#1D9BF0) - Solo borde</li>
+                    <li><strong>Días pasados:</strong> Gris claro (#A0A8B5)</li>
+                    <li><strong>Fin de semana:</strong> Azul oscuro (#0B1F3A)</li>
+                    <li><strong>Feriado:</strong> Rojo (#F26D6D)</li>
+                    <li><strong>Bloqueados:</strong> Gris (#4B5563)</li>
+                    <li><strong>Más de 2 semanas:</strong> Verde oliva (#6B7D3A)</li>
+                    <li><strong>Disponibles:</strong> Verde azulado (#2AA198)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Colores Actualizados</h3>
+            <div class="color-preview">
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #1D9BF0; border-color: #1D9BF0;"></div>
+                    <strong>Hoy</strong><br>
+                    <small>Azul (#1D9BF0)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #A0A8B5; border-color: #A0A8B5;"></div>
+                    <strong>Días pasados</strong><br>
+                    <small>Gris claro (#A0A8B5)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #0B1F3A; border-color: #0B1F3A;"></div>
+                    <strong>Fin de semana</strong><br>
+                    <small>Azul oscuro (#0B1F3A)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #F26D6D; border-color: #F26D6D;"></div>
+                    <strong>Feriado</strong><br>
+                    <small>Rojo (#F26D6D)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #4B5563; border-color: #4B5563;"></div>
+                    <strong>Bloqueados</strong><br>
+                    <small>Gris (#4B5563)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #6B7D3A; border-color: #6B7D3A;"></div>
+                    <strong>Más de 2 semanas</strong><br>
+                    <small>Verde oliva (#6B7D3A)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #2AA198; border-color: #2AA198;"></div>
+                    <strong>Disponibles</strong><br>
+                    <small>Verde azulado (#2AA198)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testAllCalendars()">🎨 Verificar Todos los Calendarios</button>
+                <button class="test-button" onclick="testLegendColors()">📋 Verificar Leyenda</button>
+                <button class="test-button" onclick="testColorConsistency()">🔄 Verificar Consistencia</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega a todos los calendarios</li>
+                    <li>Observa los nuevos colores</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Aspectos a verificar en TODOS los calendarios:</strong>
+                <ul>
+                    <li>📅 <strong>Hoy:</strong> Solo borde azul (#1D9BF0), fondo transparente</li>
+                    <li>⚫ <strong>Días pasados:</strong> Gris claro (#A0A8B5)</li>
+                    <li>🌙 <strong>Fines de semana:</strong> Azul oscuro (#0B1F3A)</li>
+                    <li>🎉 <strong>Feriados:</strong> Rojo (#F26D6D)</li>
+                    <li>🔒 <strong>Bloqueados:</strong> Gris (#4B5563)</li>
+                    <li>⏰ <strong>Más de 2 semanas:</strong> Verde oliva (#6B7D3A)</li>
+                    <li>🟢 <strong>Disponibles:</strong> Verde azulado (#2AA198)</li>
+                    <li>📋 <strong>Leyenda:</strong> Los colores deben coincidir</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Calendarios a Verificar</h3>
+            <div class="status info">
+                <strong>Verifica estos calendarios específicos:</strong>
+                <ul>
+                    <li><strong>Calendario del Estudiante:</strong> AppointmentCalendar.tsx</li>
+                    <li><strong>Calendario del Psicólogo:</strong> PsychologistCalendar.tsx</li>
+                    <li><strong>Calendario del Tutor:</strong> TutorCalendar.tsx</li>
+                    <li><strong>Calendario Base:</strong> BaseCalendar.tsx</li>
+                    <li><strong>Leyenda:</strong> CalendarLegend.tsx</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Detalles Técnicos</h3>
+            <div class="status info">
+                <strong>Configuración técnica actualizada:</strong>
+                <ul>
+                    <li><strong>Hoy:</strong> backgroundColor: 'transparent', borderColor: '#1D9BF0'</li>
+                    <li><strong>Días pasados:</strong> backgroundColor: '#A0A8B5', borderColor: '#A0A8B5'</li>
+                    <li><strong>Fines de semana:</strong> backgroundColor: '#0B1F3A', borderColor: '#0B1F3A'</li>
+                    <li><strong>Feriados:</strong> backgroundColor: '#F26D6D', borderColor: '#F26D6D'</li>
+                    <li><strong>Bloqueados:</strong> backgroundColor: '#4B5563', borderColor: '#4B5563'</li>
+                    <li><strong>Más de 2 semanas:</strong> backgroundColor: '#6B7D3A', borderColor: '#6B7D3A'</li>
+                    <li><strong>Disponibles:</strong> backgroundColor: '#2AA198', borderColor: '#2AA198'</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Posibles Problemas</h3>
+            <div class="status warning">
+                <strong>Si los colores no se ven correctamente:</strong>
+                <ul>
+                    <li><strong>Reinicia el servidor:</strong> npm run dev</li>
+                    <li><strong>Limpia el caché:</strong> Ctrl+F5 o Cmd+Shift+R</li>
+                    <li><strong>Verifica la consola:</strong> Busca errores de JavaScript</li>
+                    <li><strong>Verifica los archivos:</strong> Asegúrate de que se guardaron los cambios</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testAllCalendars() {
+            alert('🎨 Para verificar todos los calendarios:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega a cada tipo de calendario:\n' +
+                  '   - Calendario del estudiante\n' +
+                  '   - Calendario del psicólogo\n' +
+                  '   - Calendario del tutor\n' +
+                  '3. Verifica que todos usen la nueva paleta de colores\n' +
+                  '4. Compara con los colores mostrados arriba');
+        }
+
+        function testLegendColors() {
+            alert('📋 Para verificar la leyenda:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Busca la leyenda de colores\n' +
+                  '3. Verifica que muestre los nuevos colores:\n' +
+                  '   - Hoy: Azul (#1D9BF0)\n' +
+                  '   - Días pasados: Gris claro (#A0A8B5)\n' +
+                  '   - Fin de semana: Azul oscuro (#0B1F3A)\n' +
+                  '   - Feriado: Rojo (#F26D6D)\n' +
+                  '   - Bloqueados: Gris (#4B5563)\n' +
+                  '   - Más de 2 semanas: Verde oliva (#6B7D3A)\n' +
+                  '   - Disponibles: Verde azulado (#2AA198)');
+        }
+
+        function testColorConsistency() {
+            alert('🔄 Para verificar la consistencia:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Compara los colores entre:\n' +
+                  '   - La leyenda\n' +
+                  '   - Los días del calendario\n' +
+                  '   - Los eventos del calendario\n' +
+                  '3. Verifica que sean consistentes\n' +
+                  '4. Si hay inconsistencias, reinicia el servidor');
+        }
+    </script>
+</body>
+</html>

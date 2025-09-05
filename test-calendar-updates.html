@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación - Cambios en el Calendario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .test-button {
+            background: #1D9BF0;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #0B1F3A;
+        }
+        .color-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .color-item {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .color-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin: 0 auto 10px;
+            border: 2px solid #333;
+        }
+        .header-preview {
+            background: #0B1F3A;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Verificación - Cambios en el Calendario</h1>
+        
+        <div class="test-section">
+            <h3>🔧 Cambios Realizados</h3>
+            <div class="status success">
+                <strong>✅ Actualizaciones aplicadas:</strong>
+                <ul>
+                    <li><strong>Encabezados:</strong> Azul marino oscuro (#0B1F3A) con letras blancas</li>
+                    <li><strong>Altura del calendario:</strong> Aumentada de 100px a 120px</li>
+                    <li><strong>Bordes:</strong> Bordes fuertes (3px) con fondos suaves</li>
+                    <li><strong>Números feriados:</strong> Rojo brillante (#FF0000)</li>
+                    <li><strong>Días con citas:</strong> Color anaranjado (#FFA500)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Vista Previa de Encabezados</h3>
+            <div class="header-preview">
+                Lun Mar Mié Jue Vie Sáb Dom
+            </div>
+            <p><strong>Color:</strong> Azul marino oscuro (#0B1F3A) con texto blanco</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Colores Actualizados del Calendario</h3>
+            <div class="color-preview">
+                <div class="color-item">
+                    <div class="color-box" style="background: rgba(29, 155, 240, 0.1); border: 3px solid #1D9BF0;"></div>
+                    <strong>Hoy</strong><br>
+                    <small>Fondo suave azul, borde fuerte</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: rgba(255, 255, 255, 0.8); border: 3px solid #e5e7eb;"></div>
+                    <strong>Días pasados</strong><br>
+                    <small>Fondo blanco suave, borde gris</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: rgba(11, 31, 58, 0.2); border: 3px solid #0B1F3A;"></div>
+                    <strong>Fin de semana</strong><br>
+                    <small>Fondo azul suave, borde fuerte</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: rgba(242, 109, 109, 0.2); border: 3px solid #F26D6D;"></div>
+                    <strong>Feriado</strong><br>
+                    <small>Fondo rojo suave, borde fuerte</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: rgba(75, 85, 99, 0.2); border: 3px solid #4B5563;"></div>
+                    <strong>Bloqueados</strong><br>
+                    <small>Fondo gris suave, borde fuerte</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: rgba(255, 165, 0, 0.2); border: 3px solid #FFA500;"></div>
+                    <strong>Con citas</strong><br>
+                    <small>Fondo naranja suave, borde fuerte</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: rgba(42, 161, 152, 0.2); border: 3px solid #2AA198;"></div>
+                    <strong>Disponibles</strong><br>
+                    <small>Fondo verde suave, borde fuerte</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testHeaders()">📋 Verificar Encabezados</button>
+                <button class="test-button" onclick="testCalendarHeight()">📏 Verificar Altura</button>
+                <button class="test-button" onclick="testHolidayNumbers()">🔴 Verificar Números Feriados</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega a /appointments (Calendario del estudiante)</li>
+                    <li>Observa los cambios en el calendario</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Aspectos específicos a verificar:</strong>
+                <ul>
+                    <li>📋 <strong>Encabezados:</strong> Azul marino oscuro (#0B1F3A) con letras blancas</li>
+                    <li>📏 <strong>Altura:</strong> Calendario más alto (120px mínimo)</li>
+                    <li>🎨 <strong>Bordes:</strong> Bordes fuertes (3px) con fondos suaves</li>
+                    <li>🔴 <strong>Números feriados:</strong> Rojo brillante (#FF0000)</li>
+                    <li>🟠 <strong>Días con citas:</strong> Naranja (#FFA500)</li>
+                    <li>📅 <strong>Colores generales:</strong> Fondos suaves con bordes fuertes</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Detalles Técnicos</h3>
+            <div class="status info">
+                <strong>Cambios realizados en modern-calendar.css:</strong>
+                <ul>
+                    <li><strong>Encabezados:</strong> Background: #0B1F3A, Color: #ffffff</li>
+                    <li><strong>Altura celdas:</strong> min-height: 120px (antes 100px)</li>
+                    <li><strong>Bordes:</strong> 3px solid con colores de leyenda</li>
+                    <li><strong>Fondos:</strong> rgba() con transparencia para suavidad</li>
+                    <li><strong>Números feriados:</strong> Color: #FF0000, font-weight: 700</li>
+                    <li><strong>Días con citas:</strong> Background: rgba(255, 165, 0, 0.2)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Si No Ves los Cambios</h3>
+            <div class="status warning">
+                <strong>Sigue estos pasos:</strong>
+                <ul>
+                    <li><strong>1. Reinicia el servidor:</strong> npm run dev</li>
+                    <li><strong>2. Limpia el caché:</strong> Ctrl+F5 o Cmd+Shift+R</li>
+                    <li><strong>3. Verifica la consola:</strong> Busca errores de CSS</li>
+                    <li><strong>4. Verifica la ruta:</strong> Asegúrate de estar en /appointments</li>
+                    <li><strong>5. Compara con la vista previa:</strong> Los colores deben coincidir</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testHeaders() {
+            alert('📋 Para verificar los encabezados:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega a /appointments\n' +
+                  '3. Verifica que los encabezados (Lun, Mar, Mié, etc.) sean:\n' +
+                  '   - Fondo: Azul marino oscuro (#0B1F3A)\n' +
+                  '   - Texto: Blanco\n' +
+                  '   - Fuente: Negrita (700)\n' +
+                  '4. Si no coinciden, reinicia el servidor');
+        }
+
+        function testCalendarHeight() {
+            alert('📏 Para verificar la altura del calendario:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega a /appointments\n' +
+                  '3. Verifica que las celdas del calendario sean más altas:\n' +
+                  '   - Altura mínima: 120px (antes 100px)\n' +
+                  '   - Más espacio para contenido\n' +
+                  '   - Mejor visualización\n' +
+                  '4. Si no es más alto, reinicia el servidor');
+        }
+
+        function testHolidayNumbers() {
+            alert('🔴 Para verificar los números de feriados:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega a /appointments\n' +
+                  '3. Busca días feriados (rojo)\n' +
+                  '4. Verifica que los números sean:\n' +
+                  '   - Color: Rojo brillante (#FF0000)\n' +
+                  '   - Fuente: Negrita (700)\n' +
+                  '   - Sombra de texto: Roja suave\n' +
+                  '5. Si no son rojos, reinicia el servidor');
+        }
+    </script>
+</body>
+</html>

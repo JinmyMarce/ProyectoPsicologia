@@ -38,61 +38,25 @@ export function LoadingScreen({
     <div className="min-h-screen flex flex-col relative overflow-hidden" style={{
       background: `
         linear-gradient(135deg, 
-          #0a0f14 0%, 
-          #0f1419 15%, 
-          #1a2332 30%, 
-          #1a0f14 45%, 
-          #0a0f14 60%, 
-          #1a2332 75%, 
-          #1a0f14 85%, 
-          #0a0f14 92%, 
-          #0f1419 100%
+          #0f1419 0%, 
+          #1a1f29 12%, 
+          #2c1d1d 25%, 
+          #1e2a37 38%, 
+          #3d1f1f 50%, 
+          #2c3e50 62%, 
+          #4a2020 75%, 
+          #34495e 88%, 
+          #8e161a 100%
         ),
-        radial-gradient(ellipse at 20% 20%, rgba(26, 15, 20, 0.6) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(26, 35, 50, 0.4) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(15, 20, 25, 0.3) 0%, transparent 70%),
-        radial-gradient(ellipse at 10% 90%, rgba(26, 15, 20, 0.4) 0%, transparent 60%),
-        radial-gradient(ellipse at 90% 10%, rgba(26, 35, 50, 0.3) 0%, transparent 60%),
-        radial-gradient(ellipse at 50% 5%, rgba(15, 20, 25, 0.2) 0%, transparent 80%),
-        radial-gradient(ellipse at 5% 50%, rgba(26, 15, 20, 0.2) 0%, transparent 80%)
-      `
+        radial-gradient(ellipse at 20% 20%, rgba(142, 22, 26, 0.35) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 80%, rgba(44, 62, 80, 0.25) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 5%, rgba(25, 42, 61, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse at 10% 90%, rgba(142, 22, 26, 0.15) 0%, transparent 50%),
+        linear-gradient(45deg, rgba(44, 62, 80, 0.08) 0%, rgba(142, 22, 26, 0.06) 50%, rgba(25, 42, 61, 0.04) 100%)
+      `,
+      backgroundSize: '500% 500%, 60% 60%, 55% 55%, 75% 75%, 65% 65%, 250% 250%',
+      animation: 'professionalGradient 25s ease-in-out infinite'
     }}>
-      {/* Efectos de fondo mejorados */}
-      <div className="absolute inset-0" style={{ 
-        background: 'linear-gradient(135deg, rgba(26, 15, 20, 0.3) 0%, rgba(26, 35, 50, 0.2) 50%, rgba(26, 15, 20, 0.3) 100%)'
-      }}></div>
-      
-      {/* Círculos decorativos con animación mejorada */}
-      <div className="absolute top-16 left-16 w-40 h-40 rounded-full blur-2xl" style={{
-        background: 'radial-gradient(circle, rgba(26, 15, 20, 0.4) 0%, transparent 70%)',
-        animation: 'float-slow 6s ease-in-out infinite'
-      }}></div>
-      <div className="absolute bottom-16 right-16 w-48 h-48 rounded-full blur-2xl" style={{
-        background: 'radial-gradient(circle, rgba(26, 35, 50, 0.4) 0%, transparent 70%)',
-        animation: 'float-slow 6s ease-in-out infinite 2s'
-      }}></div>
-      <div className="absolute top-1/2 left-1/3 w-32 h-32 rounded-full blur-xl" style={{
-        background: 'radial-gradient(circle, rgba(15, 20, 25, 0.3) 0%, transparent 70%)',
-        animation: 'float-slow 6s ease-in-out infinite 4s'
-      }}></div>
-      <div className="absolute top-1/3 right-1/4 w-24 h-24 rounded-full blur-lg" style={{
-        background: 'radial-gradient(circle, rgba(26, 35, 50, 0.3) 0%, transparent 70%)',
-        animation: 'float-slow 6s ease-in-out infinite 1s'
-      }}></div>
-      
-      {/* Nuevos elementos animados */}
-      <div className="absolute top-1/4 left-1/4 w-16 h-16 rounded-full blur-md" style={{
-        background: 'radial-gradient(circle, rgba(26, 15, 20, 0.5) 0%, transparent 70%)',
-        animation: 'pulse 3s ease-in-out infinite 0.5s'
-      }}></div>
-      <div className="absolute bottom-1/4 right-1/3 w-20 h-20 rounded-full blur-lg" style={{
-        background: 'radial-gradient(circle, rgba(26, 35, 50, 0.4) 0%, transparent 70%)',
-        animation: 'pulse 3s ease-in-out infinite 1.5s'
-      }}></div>
-      <div className="absolute top-3/4 left-1/2 w-12 h-12 rounded-full blur-sm" style={{
-        background: 'radial-gradient(circle, rgba(26, 15, 20, 0.6) 0%, transparent 70%)',
-        animation: 'bounce 2s ease-in-out infinite 1s'
-      }}></div>
       
       {/* Partículas flotantes mejoradas */}
       {showParticles && (
@@ -112,10 +76,9 @@ export function LoadingScreen({
       {/* Título institucional en la parte superior */}
       <div className="relative z-10 pt-8 pb-4">
         <div className="text-center">
-          <h1 className={`${titleSize[size]} font-black text-white mb-4 tracking-tight drop-shadow-lg professional-text loading-shimmer`} style={{
-            textShadow: '0 0 25px rgba(255, 255, 255, 0.9), 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 40px rgba(211, 183, 160, 0.4)',
+          <h1 className={`${titleSize[size]} font-black mb-4 tracking-tight professional-text loading-shimmer`} style={{
             fontFamily: 'Georgia, serif',
-            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #d3b7a0 50%, #f8fafc 75%, #ffffff 100%)',
+            background: 'linear-gradient(135deg, #1e293b 0%, #475569 50%, #6b1013 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
@@ -123,16 +86,14 @@ export function LoadingScreen({
             {title}
           </h1>
           <div className="relative">
-            <p className={`${subtitleSize[size]} font-bold tracking-wide loading-shimmer`} style={{
-              color: '#d3b7a0',
-              textShadow: '0 0 20px rgba(211, 183, 160, 0.9), 0 2px 5px rgba(0, 0, 0, 0.8)',
+            <p className={`${subtitleSize[size]} font-bold tracking-wide loading-shimmer text-white`} style={{
               fontFamily: 'Georgia, serif'
             }}>
               {subtitle}
             </p>
             <div className="mt-3 mx-auto w-32 h-1 rounded-full" style={{
-              background: 'linear-gradient(90deg, transparent 0%, #d3b7a0 50%, transparent 100%)',
-              boxShadow: '0 0 15px rgba(211, 183, 160, 0.8)'
+              background: 'linear-gradient(90deg, transparent 0%, #8e161a 50%, transparent 100%)',
+              boxShadow: '0 0 10px rgba(142, 22, 26, 0.2)'
             }}></div>
           </div>
         </div>
@@ -143,22 +104,21 @@ export function LoadingScreen({
         {/* Logo principal con luna y efectos mejorados */}
         <div className="relative mb-6">
           {/* Efecto de brillo detrás del logo */}
-          <div className="absolute inset-0 rounded-full blur-3xl opacity-30 scale-150" style={{
-            background: 'linear-gradient(135deg, #1a0f14 0%, #1a2332 50%, #0a0f14 100%)',
+          <div className="absolute inset-0 rounded-full blur-3xl opacity-20 scale-150" style={{
+            background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%)',
             animation: 'pulse 4s ease-in-out infinite'
           }}></div>
           
           {/* Luna contenedora mejorada */}
           <div className={`${logoSize[size]} mx-auto relative z-10 rounded-full shadow-2xl transition-all duration-700`} style={{
             boxShadow: `
-              0 0 40px rgba(26, 15, 20, 0.6), 
-              inset 0 0 30px rgba(26, 15, 20, 0.4), 
-              0 0 60px rgba(26, 15, 20, 0.5),
-              0 0 0 2px rgba(26, 15, 20, 0.3),
-              0 0 0 3px rgba(15, 20, 25, 0.2)
+              0 0 30px rgba(142, 22, 26, 0.2), 
+              inset 0 0 20px rgba(142, 22, 26, 0.1), 
+              0 0 40px rgba(142, 22, 26, 0.15),
+              0 0 0 1px rgba(142, 22, 26, 0.1)
             `,
             background: `
-              radial-gradient(circle at 30% 30%, #ffffff 0%, #f8fafc 10%, #e2e8f0 20%, #cbd5e1 30%, #94a3b8 40%, #64748b 50%, #475569 60%, #334155 70%, #1e293b 80%, #0f172a 90%, #020617 100%)
+              radial-gradient(circle at 30% 30%, #ffffff 0%, #f8fafc 20%, #e2e8f0 40%, #cbd5e1 60%, #94a3b8 80%, #64748b 100%)
             `,
             animation: 'float 4s ease-in-out infinite, pulse 6s ease-in-out infinite'
           }}>
@@ -185,7 +145,7 @@ export function LoadingScreen({
                 }}
               />
               {/* Fallback con símbolo psi */}
-              <div className={`${size === 'lg' ? 'w-44 h-44' : size === 'md' ? 'w-36 h-36' : 'w-24 h-24'} bg-gradient-to-tr from-[#1a0f14] via-[#1a2332] to-[#0a0f14] rounded-full flex items-center justify-center hidden shadow-2xl transition-all duration-700`} style={{
+              <div className={`${size === 'lg' ? 'w-44 h-44' : size === 'md' ? 'w-36 h-36' : 'w-24 h-24'} bg-gradient-to-tr from-gray-100 via-gray-200 to-gray-300 rounded-full flex items-center justify-center hidden shadow-2xl transition-all duration-700`} style={{
                 animation: 'rotate 8s linear infinite, bounce 3s ease-in-out infinite'
               }}>
                 <span 
@@ -236,7 +196,6 @@ export function LoadingScreen({
         {/* Solo "Cargando sistema..." en el centro */}
         <div className="text-center">
           <p className="text-white font-bold text-lg tracking-wide mb-4" style={{
-            textShadow: '0 0 15px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.6)',
             animation: 'glow-text 2s ease-in-out infinite'
           }}>
             Cargando sistema...
@@ -268,12 +227,12 @@ export function LoadingScreen({
         {/* Barra de progreso con animación */}
         <div className="relative mb-4">
           <div className="w-48 h-1.5 rounded-full mx-auto overflow-hidden shadow-inner" style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            border: '1px solid rgba(255, 255, 255, 0.3)'
+            backgroundColor: 'rgba(142, 22, 26, 0.1)',
+            border: '1px solid rgba(142, 22, 26, 0.2)'
           }}>
             <div className="h-full rounded-full" style={{
-              background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%)',
-              boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)',
+              background: 'linear-gradient(135deg, #8e161a 0%, #b91c1c 50%, #d3b7a0 100%)',
+              boxShadow: '0 0 8px rgba(142, 22, 26, 0.3)',
               animation: 'loading-progress 3s ease-in-out infinite'
             }}></div>
           </div>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación de Corrección de Fechas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .fix-box {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #28a745;
+            margin: 20px 0;
+        }
+        .fix-box h2 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Verificación de Corrección de Fechas</h1>
+        
+        <div class="fix-box">
+            <h2>✅ Función createLocalDate Corregida</h2>
+            <p>Se ha simplificado la función para evitar problemas de zona horaria.</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Código Corregido</h3>
+            <div class="code-block">
+// Función para crear fecha local correctamente - SOLUCIÓN FINAL
+const createLocalDate = (dateString: string) => {
+  // Crear fecha directamente sin complicaciones de zona horaria
+  const [year, month, day] = dateString.split('-').map(Number);
+  
+  // Crear fecha local directamente
+  const date = new Date(year, month - 1, day);
+  
+  // Asegurar que la fecha sea local (sin zona horaria)
+  date.setHours(0, 0, 0, 0);
+  
+  return date;
+};
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📅 Prueba de Feriados de Agosto 2025</h3>
+            <div id="holiday-test">
+                <p>Probando fechas...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Resultado Esperado</h3>
+            <div id="expected-result">
+                <p>Generando resultado esperado...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Instrucciones para Verificar</h3>
+            <div id="instructions">
+                <p>Generando instrucciones...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función createLocalDate corregida
+        function createLocalDate(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        // Feriados de agosto 2025
+        const augustHolidays = [
+            { id: 24, name: "Batalla de Junín", date: "2025-08-06" },
+            { id: 25, name: "Santa Rosa de Lima", date: "2025-08-30" }
+        ];
+
+        // Probar fechas
+        function testHolidays() {
+            const container = document.getElementById('holiday-test');
+            
+            let html = '<h4>Prueba de fechas de feriados:</h4>';
+            
+            augustHolidays.forEach(holiday => {
+                const originalDate = holiday.date;
+                const processedDate = createLocalDate(holiday.date);
+                const expectedDate = new Date(2025, 7, parseInt(originalDate.split('-')[2]));
+                expectedDate.setHours(0, 0, 0, 0);
+                
+                const isCorrect = processedDate.toDateString() === expectedDate.toDateString();
+                const dayOfWeek = processedDate.toLocaleDateString('es-ES', { weekday: 'long' });
+                
+                html += `
+                    <div class="status ${isCorrect ? 'success' : 'error'}">
+                        <strong>${holiday.name}:</strong><br>
+                        Fecha original: ${originalDate}<br>
+                        Fecha procesada: ${processedDate.toDateString()} (${dayOfWeek})<br>
+                        Fecha esperada: ${expectedDate.toDateString()}<br>
+                        Estado: ${isCorrect ? '✅ Correcto' : '❌ Incorrecto'}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Resultado esperado
+        function showExpectedResult() {
+            const container = document.getElementById('expected-result');
+            
+            let html = `
+                <h4>En tu calendario deberías ver:</h4>
+                <div class="status success">
+                    <strong>6 de agosto (Miércoles):</strong> Batalla de Junín - Color naranja (#f59e0b)
+                </div>
+                <div class="status success">
+                    <strong>30 de agosto (Sábado):</strong> Santa Rosa de Lima - Color naranja (#f59e0b)
+                </div>
+                <div class="status warning">
+                    <strong>Importante:</strong> Los feriados deben aparecer en las fechas correctas, no un día antes.
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Instrucciones
+        function showInstructions() {
+            const container = document.getElementById('instructions');
+            
+            let html = `
+                <h4>Pasos para verificar:</h4>
+                <div class="status warning">
+                    <strong>1. Limpia la caché del navegador:</strong>
+                    <ul>
+                        <li>Chrome: Ctrl+Shift+Delete → Todo el tiempo → Caché → Borrar datos</li>
+                        <li>Firefox: Ctrl+Shift+Delete → Todo → Caché → Limpiar ahora</li>
+                        <li>Edge: Ctrl+Shift+Delete → Todo el tiempo → Caché → Borrar</li>
+                    </ul>
+                </div>
+                <div class="status warning">
+                    <strong>2. Ve a tu aplicación:</strong>
+                    <ul>
+                        <li>URL: http://localhost:5173/</li>
+                        <li>Navega al calendario del estudiante</li>
+                        <li>Ve al mes de agosto 2025</li>
+                    </ul>
+                </div>
+                <div class="status warning">
+                    <strong>3. Verifica:</strong>
+                    <ul>
+                        <li>El 6 de agosto debe mostrar "Batalla de Junín"</li>
+                        <li>El 30 de agosto debe mostrar "Santa Rosa de Lima"</li>
+                        <li>Ambos deben tener color naranja</li>
+                        <li>No deben aparecer un día antes</li>
+                    </ul>
+                </div>
+                <div class="status error">
+                    <strong>4. Si aún no funciona:</strong>
+                    <ul>
+                        <li>Reinicia el servidor: Ctrl+C → npm run dev</li>
+                        <li>Verifica que el archivo BaseCalendar.tsx tenga el código corregido</li>
+                        <li>Revisa la consola del navegador (F12) para errores</li>
+                    </ul>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Ejecutar todas las pruebas
+        function runAllTests() {
+            testHolidays();
+            showExpectedResult();
+            showInstructions();
+        }
+
+        // Ejecutar pruebas
+        runAllTests();
+        
+        // Recargar cada 5 segundos
+        setInterval(runAllTests, 5000);
+    </script>
+</body>
+</html>

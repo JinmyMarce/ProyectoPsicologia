@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Calendar, X, ArrowRight } from 'lucide-react';
+import { Clock, Calendar, X, ArrowRight, CheckCircle, AlertCircle, Star, Shield } from 'lucide-react';
 import { getAvailableSlots } from '../../services/appointments';
-import { Button } from '../ui/Button';
-import { Card } from '../ui/Card';
+import '../../styles/appointment-modal.css';
 
 interface TimeSlot {
   id: number;
@@ -41,7 +40,28 @@ export const TimeSelectionModal: React.FC<TimeSelectionModalProps> = ({
       setLoading(true);
       setError('');
       const slots = await getAvailableSlots(psychologistId, selectedDate);
-      setAvailableSlots(Array.isArray(slots) ? slots : []);
+      
+      // Filtrar horarios si es para hoy mismo
+      let filteredSlots = Array.isArray(slots) ? slots : [];
+      
+      // Verificar si la fecha seleccionada es hoy
+      const today = new Date().toISOString().split('T')[0];
+      if (selectedDate === today) {
+        const currentTime = new Date();
+        const minimumTime = new Date(currentTime.getTime() + 60 * 60 * 1000); // 60 minutos después
+        
+        filteredSlots = slots.filter((slot: TimeSlot) => {
+          const [hours, minutes] = slot.time.split(':').map(Number);
+          const slotTime = new Date();
+          slotTime.setHours(hours, minutes, 0, 0);
+          
+          return slotTime >= minimumTime;
+        });
+        
+        console.log(`🕐 Horarios filtrados para hoy: ${filteredSlots.length} disponibles después de las ${minimumTime.getHours()}:${minimumTime.getMinutes().toString().padStart(2, '0')}`);
+      }
+      
+      setAvailableSlots(filteredSlots);
     } catch (error) {
       console.error('Error cargando horarios:', error);
       setError('Error al cargar los horarios disponibles');
@@ -79,136 +99,217 @@ export const TimeSelectionModal: React.FC<TimeSelectionModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto" style={{
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
+      <div className="bg-gradient-to-br from-white via-gray-50 to-slate-50 rounded-lg shadow-2xl max-w-xl w-full mx-3 max-h-[85vh] overflow-y-auto border border-gray-200" style={{
         boxShadow: `
-          0 25px 80px rgba(0, 0, 0, 0.4), 
-          0 15px 40px rgba(142, 22, 26, 0.3),
-          0 5px 15px rgba(0, 0, 0, 0.2),
-          inset 0 1px 0 rgba(255, 255, 255, 0.2)
+          0 32px 64px rgba(0, 0, 0, 0.12), 
+          0 16px 32px rgba(0, 0, 0, 0.08),
+          0 8px 16px rgba(0, 0, 0, 0.04),
+          inset 0 1px 0 rgba(255, 255, 255, 0.9)
         `
       }}>
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg" style={{
-                background: 'linear-gradient(135deg, #8e161a 0%, #a52a2a 100%)'
-              }}>
-                <Clock className="w-6 h-6 text-white" />
+        <div className="p-3">
+          {/* Header Compacto */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 flex items-center justify-center shadow-md border border-slate-600">
+                  <Clock className="w-4 h-4 text-white" />
+                </div>
+                <div className="absolute -inset-0.5 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg blur opacity-20 -z-10"></div>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Seleccionar Horario</h2>
-                <p className="text-sm text-gray-600">Paso 1 de 4</p>
+                <h2 className="text-base font-black text-gray-900 tracking-tight">
+                  Selecciona tu Horario
+                </h2>
+                <p className="text-slate-600 text-xs font-medium">
+                  Elige el momento perfecto para tu consulta
+                </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-[#8e161a] transition-colors duration-300"
+              className="w-7 h-7 rounded-lg bg-white hover:bg-red-50 flex items-center justify-center transition-all duration-300 shadow-sm border border-gray-200 hover:border-red-300 hover:shadow-md"
             >
-              <X className="w-6 h-6" />
+              <X className="w-3.5 h-3.5 text-gray-600 hover:text-red-600" />
             </button>
           </div>
 
-          {/* Fecha seleccionada */}
-          <div className="rounded-lg p-4 mb-6" style={{
-            background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-            border: '1px solid rgba(142, 22, 26, 0.2)'
-          }}>
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-5 h-5 text-[#8e161a]" />
-              <span className="font-semibold text-[#8e161a]">
-                {formatDate(selectedDate)}
-              </span>
+          {/* Información de la fecha seleccionada - Compacto */}
+          <div className="mb-3">
+            <div className="bg-gradient-to-r from-slate-50 via-gray-50 to-slate-100 rounded-lg p-2.5 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
+                  <Calendar className="w-3 h-3 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-gray-900">
+                    Fecha Seleccionada
+                  </h3>
+                  <p className="text-gray-700 capitalize font-semibold text-xs">
+                    {formatDate(selectedDate)}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Error */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <p className="text-red-800 text-sm">{error}</p>
+          {/* Estado de carga - Compacto */}
+          {loading && (
+            <div className="text-center py-8">
+              <div className="relative mb-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-slate-700 mx-auto" style={{
+                  boxShadow: '0 8px 16px rgba(51, 65, 85, 0.2)'
+                }}></div>
+              </div>
+              <h3 className="text-lg font-black text-slate-900 mb-2 tracking-tight">Cargando horarios disponibles...</h3>
+              <p className="text-slate-600 text-sm font-medium">Buscando los mejores horarios para ti</p>
             </div>
           )}
 
-          {/* Horarios disponibles */}
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#8e161a' }}></div>
-              <span className="ml-3 text-gray-600">Cargando horarios...</span>
+          {/* Error - Compacto */}
+          {error && (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mx-auto mb-4 shadow-lg border-2 border-red-400">
+                <AlertCircle className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 mb-2 tracking-tight">Error al cargar horarios</h3>
+              <p className="text-slate-600 mb-4 text-sm font-medium">{error}</p>
+              <button
+                onClick={loadAvailableSlots}
+                className="px-4 py-2 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-lg hover:from-slate-800 hover:to-slate-900 transition-all duration-300 font-semibold text-sm shadow-lg"
+              >
+                Reintentar
+              </button>
             </div>
-          ) : (
-            <div className="space-y-4">
-              <h3 className="font-semibold text-gray-900 mb-4">Horarios disponibles:</h3>
-              
-              {/* Información sobre horarios */}
-              <div className="rounded-lg p-3 mb-4" style={{
-                background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
-                border: '1px solid rgba(142, 22, 26, 0.2)'
-              }}>
-                <div className="flex items-start space-x-2">
-                  <div className="mt-0.5 text-[#8e161a]">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
+          )}
+
+          {/* Horarios disponibles - Compacto */}
+          {!loading && !error && availableSlots.length > 0 && (
+            <div className="mb-3">
+              <div className="bg-gradient-to-br from-white to-slate-50 rounded-lg p-2.5 border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
+                    <CheckCircle className="w-2.5 h-2.5 text-white" />
                   </div>
-                  <div className="text-sm text-[#8e161a]">
-                    <p className="font-medium">Horarios de atención:</p>
-                    <p className="mt-1">Lunes a Viernes de 8:00 AM a 2:00 PM. Cada sesión dura 45 minutos.</p>
-                  </div>
+                  <h3 className="text-xs font-black text-gray-900 tracking-tight">
+                    Horarios Disponibles
+                  </h3>
+                  <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-xs font-bold border border-gray-200">
+                    {availableSlots.length} opciones
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-4 gap-3">
+                  {availableSlots.map((slot) => (
+                    <button
+                      key={slot.id}
+                      onClick={() => handleTimeSelect(slot.time)}
+                      className={`
+                        p-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-center relative border-2 group
+                        ${selectedTime === slot.time
+                          ? 'bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 text-white shadow-lg scale-105 border-slate-600'
+                          : 'bg-white hover:bg-slate-50 text-gray-700 hover:text-gray-800 shadow-sm hover:shadow-md border-slate-200 hover:border-slate-300'
+                        }
+                      `}
+                    >
+                      <div className="relative z-10">
+                        <div className="text-sm font-bold mb-0.5">
+                          {slot.time}
+                        </div>
+                        <div className="text-xs font-medium opacity-80">
+                          {selectedTime === slot.time ? 'Seleccionado' : 'Disponible'}
+                        </div>
+                        
+                        {/* Icono de check para el seleccionado */}
+                        {selectedTime === slot.time && (
+                          <div className="absolute top-1 right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-md">
+                            <CheckCircle className="w-2.5 h-2.5 text-slate-900" />
+                          </div>
+                        )}
+                        
+                        {/* Efecto de brillo sutil */}
+                        {selectedTime === slot.time && (
+                          <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/10 to-transparent"></div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
-              
-              {availableSlots.length === 0 ? (
-                <div className="text-center py-8">
-                  <Clock className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-600">No hay horarios disponibles para esta fecha</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {availableSlots
-                    .filter(slot => slot.available)
-                    .map(slot => (
-                      <button
-                        key={slot.id}
-                        onClick={() => handleTimeSelect(slot.time)}
-                        className={`p-4 rounded-lg border-2 transition-all duration-300 ${
-                          selectedTime === slot.time
-                            ? 'border-[#8e161a] bg-[#8e161a]/10 text-[#8e161a]'
-                            : 'border-gray-200 hover:border-[#8e161a]/50 hover:bg-[#8e161a]/5'
-                        }`}
-                      >
-                        <div className="text-center">
-                          <div className="text-lg font-bold">{slot.time}</div>
-                          <div className="text-sm text-gray-600">45 min</div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {slot.time === '08:00' ? 'Primera cita' : 
-                             slot.time === '13:15' ? 'Última cita' : 'Cita regular'}
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                </div>
-              )}
             </div>
           )}
 
-          {/* Botones */}
-          <div className="flex justify-between mt-8">
-            <Button
-              variant="outline"
+          {/* Sin horarios disponibles - Compacto */}
+          {!loading && !error && availableSlots.length === 0 && (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center mx-auto mb-4 shadow-lg border-2 border-amber-400">
+                <Clock className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 mb-2 tracking-tight">No hay horarios disponibles</h3>
+              <p className="text-slate-600 mb-4 text-sm font-medium">
+                Lo sentimos, no hay horarios disponibles para esta fecha. 
+                Por favor, selecciona otra fecha.
+              </p>
+            </div>
+          )}
+
+          {/* Información adicional - Compacto */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+            <div className="flex items-center gap-2 p-2.5 bg-gradient-to-br from-white to-slate-50 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
+                <Clock className="w-3 h-3 text-white" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-800 text-xs">Duración: 50 min</h4>
+                <p className="text-gray-600 text-xs">Sesión completa</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 p-2.5 bg-gradient-to-br from-white to-slate-50 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
+                <Shield className="w-3 h-3 text-white" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-800 text-xs">Confidencial</h4>
+                <p className="text-gray-600 text-xs">Datos protegidos</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 p-2.5 bg-gradient-to-br from-white to-slate-50 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
+                <Star className="w-3 h-3 text-white" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-800 text-xs">Gratuito</h4>
+                <p className="text-gray-600 text-xs">Sin costo</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Botones de acción - Compactos */}
+          <div className="flex justify-between items-center pt-3 border-t border-slate-200">
+            <button
               onClick={onClose}
-              className="flex-1 mr-2"
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-300 font-semibold text-xs flex items-center gap-1.5 shadow-sm hover:shadow-md"
             >
               Cancelar
-            </Button>
-            <Button
+            </button>
+            
+            <button
               onClick={handleContinue}
-              disabled={!selectedTime || loading}
-              className="flex-1 ml-2"
+              disabled={!selectedTime}
+              className={`
+                px-3 py-1.5 rounded-lg font-semibold text-xs transition-all duration-300 flex items-center gap-1.5 shadow-lg
+                ${selectedTime
+                  ? 'bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900 text-white hover:from-slate-800 hover:to-slate-900 transform hover:scale-105 hover:shadow-xl'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }
+              `}
             >
               Continuar
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+              <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
         </div>
       </div>

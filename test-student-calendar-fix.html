@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación - Calendario del Estudiante Corregido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .test-button {
+            background: #1D9BF0;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #0B1F3A;
+        }
+        .color-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .color-item {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .color-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin: 0 auto 10px;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Verificación - Calendario del Estudiante Corregido</h1>
+        
+        <div class="test-section">
+            <h3>🔧 Cambios Realizados</h3>
+            <div class="status success">
+                <strong>✅ Problema identificado y corregido:</strong>
+                <ul>
+                    <li><strong>Problema:</strong> AppointmentCalendar.tsx tenía su propia función getDayProps que sobrescribía los colores</li>
+                    <li><strong>Solución:</strong> Eliminada la función getDayProps personalizada</li>
+                    <li><strong>Resultado:</strong> Ahora usa los colores exactos del BaseCalendar.tsx</li>
+                    <li><strong>Leyenda:</strong> Los colores ahora coinciden perfectamente</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Colores que Debes Ver en el Calendario del Estudiante</h3>
+            <div class="color-preview">
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #1D9BF0; border-color: #1D9BF0;"></div>
+                    <strong>Hoy</strong><br>
+                    <small>Azul (#1D9BF0) - Solo borde</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #A0A8B5; border-color: #A0A8B5;"></div>
+                    <strong>Días pasados</strong><br>
+                    <small>Gris claro (#A0A8B5)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #0B1F3A; border-color: #0B1F3A;"></div>
+                    <strong>Fin de semana</strong><br>
+                    <small>Azul oscuro (#0B1F3A)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #F26D6D; border-color: #F26D6D;"></div>
+                    <strong>Feriado</strong><br>
+                    <small>Rojo (#F26D6D)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #4B5563; border-color: #4B5563;"></div>
+                    <strong>Bloqueados</strong><br>
+                    <small>Gris (#4B5563)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #ffffff; border-color: #e5e7eb;"></div>
+                    <strong>Más de 2 semanas</strong><br>
+                    <small>Blanco (#ffffff)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #2AA198; border-color: #2AA198;"></div>
+                    <strong>Disponibles</strong><br>
+                    <small>Verde azulado (#2AA198)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testStudentCalendar()">🎓 Verificar Calendario del Estudiante</button>
+                <button class="test-button" onclick="testLegendColors()">📋 Verificar Leyenda</button>
+                <button class="test-button" onclick="testColorConsistency()">🔄 Verificar Consistencia</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega a /appointments (Calendario del estudiante)</li>
+                    <li>Observa los colores del calendario</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Aspectos específicos a verificar:</strong>
+                <ul>
+                    <li>📅 <strong>Hoy:</strong> Solo borde azul (#1D9BF0), fondo transparente</li>
+                    <li>⚫ <strong>Días pasados:</strong> Gris claro (#A0A8B5)</li>
+                    <li>🌙 <strong>Fines de semana:</strong> Azul oscuro (#0B1F3A)</li>
+                    <li>🎉 <strong>Feriados:</strong> Rojo (#F26D6D)</li>
+                    <li>🔒 <strong>Bloqueados:</strong> Gris (#4B5563)</li>
+                    <li>⏰ <strong>Más de 2 semanas:</strong> Blanco (#ffffff)</li>
+                    <li>🟢 <strong>Disponibles:</strong> Verde azulado (#2AA198)</li>
+                    <li>📋 <strong>Leyenda:</strong> Los colores deben coincidir exactamente</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Detalles Técnicos de la Corrección</h3>
+            <div class="status info">
+                <strong>Cambios realizados en AppointmentCalendar.tsx:</strong>
+                <ul>
+                    <li><strong>Eliminada:</strong> Función getDayProps personalizada</li>
+                    <li><strong>Removido:</strong> dayPropGetter={getDayProps} del BaseCalendar</li>
+                    <li><strong>Resultado:</strong> Ahora usa getDayStyle del BaseCalendar.tsx</li>
+                    <li><strong>Colores:</strong> Aplicados automáticamente desde BaseCalendar</li>
+                    <li><strong>Consistencia:</strong> Mismos colores en todos los calendarios</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Si Aún No Ves los Cambios</h3>
+            <div class="status warning">
+                <strong>Sigue estos pasos:</strong>
+                <ul>
+                    <li><strong>1. Reinicia el servidor:</strong> npm run dev</li>
+                    <li><strong>2. Limpia el caché:</strong> Ctrl+F5 o Cmd+Shift+R</li>
+                    <li><strong>3. Verifica la consola:</strong> Busca errores de JavaScript</li>
+                    <li><strong>4. Verifica la ruta:</strong> Asegúrate de estar en /appointments</li>
+                    <li><strong>5. Compara con la leyenda:</strong> Los colores deben coincidir</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testStudentCalendar() {
+            alert('🎓 Para verificar el calendario del estudiante:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega a /appointments\n' +
+                  '3. Verifica que los colores coincidan con la leyenda:\n' +
+                  '   - Hoy: Solo borde azul (#1D9BF0)\n' +
+                  '   - Días pasados: Gris claro (#A0A8B5)\n' +
+                  '   - Fines de semana: Azul oscuro (#0B1F3A)\n' +
+                  '   - Feriados: Rojo (#F26D6D)\n' +
+                  '   - Bloqueados: Gris (#4B5563)\n' +
+                  '   - Más de 2 semanas: Blanco (#ffffff)\n' +
+                  '   - Disponibles: Verde azulado (#2AA198)\n' +
+                  '4. Si no coinciden, reinicia el servidor');
+        }
+
+        function testLegendColors() {
+            alert('📋 Para verificar la leyenda:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Busca la leyenda de colores\n' +
+                  '3. Verifica que muestre los colores correctos:\n' +
+                  '   - Hoy: Azul (#1D9BF0)\n' +
+                  '   - Días pasados: Gris claro (#A0A8B5)\n' +
+                  '   - Fin de semana: Azul oscuro (#0B1F3A)\n' +
+                  '   - Feriado: Rojo (#F26D6D)\n' +
+                  '   - Bloqueados: Gris (#4B5563)\n' +
+                  '   - Más de 2 semanas: Blanco (#ffffff)\n' +
+                  '   - Disponibles: Verde azulado (#2AA198)');
+        }
+
+        function testColorConsistency() {
+            alert('🔄 Para verificar la consistencia:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Compara los colores entre:\n' +
+                  '   - La leyenda\n' +
+                  '   - Los días del calendario del estudiante\n' +
+                  '   - Los eventos del calendario\n' +
+                  '3. Verifica que sean exactamente iguales\n' +
+                  '4. Si hay diferencias, reinicia el servidor');
+        }
+    </script>
+</body>
+</html>

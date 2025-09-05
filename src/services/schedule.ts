@@ -122,13 +122,20 @@ export const getBlockedDatesForCalendar = async (
     
     const blockedSchedules = await getBlockedSchedules(psychologistId, startDate, endDate);
     
+    // Verificar que blockedSchedules sea un array antes de usar filter
+    if (!Array.isArray(blockedSchedules)) {
+      console.warn('blockedSchedules is not an array:', blockedSchedules);
+      return [];
+    }
+    
     // Retornar solo las fechas que están completamente bloqueadas
     return blockedSchedules
-      .filter(schedule => schedule.isFullDayBlocked)
+      .filter(schedule => schedule && schedule.isFullDayBlocked)
       .map(schedule => schedule.date);
   } catch (error) {
     console.error('Error fetching blocked dates for calendar:', error);
-    throw error;
+    // Retornar array vacío en caso de error para evitar que el calendario falle
+    return [];
   }
 };
 

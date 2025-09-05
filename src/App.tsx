@@ -16,7 +16,7 @@ import { GroupSessionManagement } from './components/tutor/GroupSessionManagemen
 import { UserProfile } from './components/profile/UserProfile';
 import AppointmentsPage from './components/appointments';
 import { AppointmentBooking } from './components/appointments/AppointmentBooking';
-import { AppointmentCalendar } from './components/appointments/AppointmentCalendar';
+import { UnifiedCalendar } from './components/ui/UnifiedCalendar';
 import { AppointmentHistory } from './components/appointments/AppointmentHistory';
 import { UserManagement } from './components/admin/UserManagement';
 import { UserManagement as SuperAdminUserManagement } from './components/super-admin/UserManagement';
@@ -28,7 +28,7 @@ import { PatientRegistration } from './components/patients/PatientRegistration';
 import PatientList from './components/patients/PatientList';
 import { SessionList } from './components/sessions/SessionList';
 import { StudentAppointmentHistory } from './components/students/StudentAppointmentHistory';
-import { PsychologistCalendar } from './components/psychologist/PsychologistCalendar';
+import { UnifiedCalendar as PsychologistCalendar } from './components/ui/UnifiedCalendar';
 import { SessionHistory } from './components/psychologist/SessionHistory';
 import { RescheduleAppointment } from './components/students/RescheduleAppointment';
 import MessagePanel from './components/messages/MessagePanel';
@@ -77,7 +77,16 @@ function AppContent() {
       return;
     }
     setCurrentPage(page);
-    navigate(`/${page}`);
+    
+    // Manejar casos especiales de navegación
+    switch (page) {
+      case 'reschedule':
+        navigate('/appointments/reschedule');
+        break;
+      default:
+        navigate(`/${page}`);
+    }
+    
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
@@ -204,7 +213,7 @@ function AppContent() {
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     <Route path="/dashboard" element={<StudentDashboard onPageChange={handlePageChange} />} />
                     <Route path="/appointments" element={<AppointmentBooking />} />
-                    <Route path="/appointments/calendar" element={<AppointmentCalendar />} />
+                    <Route path="/appointments/calendar" element={<UnifiedCalendar />} />
                     <Route path="/appointments/history" element={<StudentAppointmentHistory />} />
                     <Route path="/appointments/reschedule" element={<RescheduleAppointment />} />
                     <Route path="/notifications" element={<NotificationCenter />} />

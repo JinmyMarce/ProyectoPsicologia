@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppointmentCalendar } from './AppointmentCalendar';
+import { UnifiedCalendar } from '../ui/UnifiedCalendar';
 import { AppointmentHistory } from './AppointmentHistory';
 import { AppointmentBooking } from './AppointmentBooking';
 import { Button } from '../ui/Button';
@@ -14,7 +14,7 @@ export default function AppointmentsPage() {
         <Button variant={show === 'history' ? 'primary' : 'outline'} onClick={() => setShow('history')}>Historial de Citas</Button>
         <Button variant={show === 'booking' ? 'primary' : 'outline'} onClick={() => setShow('booking')}>Agendar Cita</Button>
       </div>
-      {show === 'calendar' && <AppointmentCalendar />}
+      {show === 'calendar' && <UnifiedCalendar userType="student" />}
       {show === 'history' && <AppointmentHistory />}
       {show === 'booking' && <AppointmentBooking />}
     </div>

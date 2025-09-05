@@ -101,7 +101,7 @@ export function ReportsAnalytics() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-600" />
           <p className="text-gray-600">Cargando análisis...</p>
         </div>
       </div>
@@ -119,9 +119,14 @@ export function ReportsAnalytics() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header alineado a la izquierda */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#8e161a] mb-1 text-left">Reportes y Análisis del Sistema</h1>
+      {/* Título Principal */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Reportes y Análisis del Sistema
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
+        </div>
       </div>
 
       {/* Botón para descargar PDF profesional único */}

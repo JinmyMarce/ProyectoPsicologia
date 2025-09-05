@@ -15,7 +15,7 @@ return new class extends Migration
             // Campos específicos para tutores
             $table->string('classroom')->nullable()->comment('Aula o salón asignado al tutor');
             $table->string('study_program')->nullable()->comment('Programa de estudios del tutor');
-            $table->string('semester')->nullable()->comment('Semestre que enseña el tutor');
+            // $table->string('semester')->nullable()->comment('Semestre que enseña el tutor'); // Ya se agrega en otra migración
             $table->string('course')->nullable()->comment('Curso o materia que enseña el tutor');
             $table->integer('total_students')->nullable()->default(0)->comment('Total de estudiantes a cargo del tutor');
             $table->integer('active_derivations')->nullable()->default(0)->comment('Derivaciones activas del tutor');
@@ -31,7 +31,7 @@ return new class extends Migration
             $table->dropColumn([
                 'classroom',
                 'study_program',
-                'semester', 
+                // 'semester', // Ya se maneja en otra migración
                 'course',
                 'total_students',
                 'active_derivations'

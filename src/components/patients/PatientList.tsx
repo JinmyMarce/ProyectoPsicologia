@@ -166,9 +166,14 @@ const PatientList: React.FC<PatientListProps> = ({ onRegisterClick }) => {
     <div className="min-h-screen bg-white p-1">
       <div className="max-w-full mx-auto">
         <div className="px-0 pb-2">
-          {/* Título y botón actualizar */}
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-4xl font-bold text-[#8e161a] flex-1">Gestión de Pacientes</h1>
+          {/* Título Principal */}
+          <div className="text-center mb-6">
+            <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+              <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+                Gestión de Pacientes del Sistema
+              </h1>
+              <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
+            </div>
           </div>
 
           {/* Mensajes de error y éxito */}

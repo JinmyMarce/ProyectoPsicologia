@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Simple - Feriados 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .holiday-list {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .holiday-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .holiday-item:last-child {
+            border-bottom: none;
+        }
+        .august-holidays {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificación Simple - Feriados 2025</h1>
+        
+        <div class="status" id="api-status">
+            Verificando API...
+        </div>
+        
+        <div class="holiday-list" id="holiday-list">
+            <h3>Feriados de 2025:</h3>
+            <div id="holidays-content">
+                Cargando...
+            </div>
+        </div>
+        
+        <div class="august-holidays" id="august-holidays">
+            <h3>🎯 Feriados de Agosto 2025 (Específicos):</h3>
+            <div id="august-content">
+                Verificando...
+            </div>
+        </div>
+        
+        <div class="status" id="summary">
+            <h3>📊 Resumen:</h3>
+            <div id="summary-content">
+                Generando resumen...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkHolidays() {
+            const apiStatus = document.getElementById('api-status');
+            const holidaysContent = document.getElementById('holidays-content');
+            const augustContent = document.getElementById('august-content');
+            const summaryContent = document.getElementById('summary-content');
+            
+            try {
+                // Verificar API
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    apiStatus.className = 'status success';
+                    apiStatus.innerHTML = `✅ API funcionando - ${data.data.length} feriados encontrados`;
+                    
+                    // Mostrar todos los feriados
+                    let holidaysHtml = '';
+                    data.data.forEach(holiday => {
+                        holidaysHtml += `
+                            <div class="holiday-item">
+                                <strong>${holiday.name}</strong> - ${holiday.date}
+                            </div>
+                        `;
+                    });
+                    holidaysContent.innerHTML = holidaysHtml;
+                    
+                    // Mostrar feriados de agosto específicamente
+                    const augustHolidays = data.data.filter(h => h.date.startsWith('2025-08'));
+                    let augustHtml = '';
+                    if (augustHolidays.length > 0) {
+                        augustHolidays.forEach(holiday => {
+                            augustHtml += `
+                                <div class="holiday-item">
+                                    <strong>${holiday.name}</strong> - ${holiday.date}
+                                </div>
+                            `;
+                        });
+                    } else {
+                        augustHtml = '<p>❌ No se encontraron feriados de agosto</p>';
+                    }
+                    augustContent.innerHTML = augustHtml;
+                    
+                    // Resumen
+                    const totalHolidays = data.data.length;
+                    const augustCount = augustHolidays.length;
+                    const expectedAugust = 2; // Batalla de Junín y Santa Rosa de Lima
+                    
+                    summaryContent.innerHTML = `
+                        <p><strong>Total de feriados 2025:</strong> ${totalHolidays}</p>
+                        <p><strong>Feriados de agosto:</strong> ${augustCount} (esperados: ${expectedAugust})</p>
+                        <p><strong>Estado:</strong> ${augustCount === expectedAugust ? '✅ Correcto' : '❌ Incorrecto'}</p>
+                        <p><strong>Feriados esperados en agosto:</strong></p>
+                        <ul>
+                            <li>6 de agosto: Batalla de Junín</li>
+                            <li>30 de agosto: Santa Rosa de Lima</li>
+                        </ul>
+                    `;
+                    
+                } else {
+                    throw new Error(data.message || 'Error en la respuesta');
+                }
+                
+            } catch (error) {
+                apiStatus.className = 'status error';
+                apiStatus.innerHTML = `❌ Error: ${error.message}`;
+                holidaysContent.innerHTML = '<p>Error al cargar feriados</p>';
+                augustContent.innerHTML = '<p>Error al cargar feriados</p>';
+                summaryContent.innerHTML = '<p>Error al generar resumen</p>';
+            }
+        }
+        
+        // Ejecutar verificación
+        checkHolidays();
+        
+        // Recargar cada 10 segundos
+        setInterval(checkHolidays, 10000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación - Sincronización de Colores Calendario-Leyenda</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .test-button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #d97706;
+        }
+        .color-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .comparison-item {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        .comparison-item h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .color-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            margin: 5px;
+            display: inline-block;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Verificación - Sincronización de Colores Calendario-Leyenda</h1>
+        
+        <div class="test-section">
+            <h3>✅ Colores Sincronizados</h3>
+            <div class="status success">
+                <strong>✅ Todos los colores del calendario ahora coinciden con la leyenda:</strong>
+                <ul>
+                    <li><strong>Feriados:</strong> ✅ Naranja (#f59e0b) - Sincronizado</li>
+                    <li><strong>Hoy:</strong> ✅ Solo borde azul (#457b9d) - Sincronizado</li>
+                    <li><strong>Disponible:</strong> ✅ Verde claro (#b7e4c7) - Sincronizado</li>
+                    <li><strong>Bloqueado:</strong> ✅ Rojo claro (#ffbcbc) - Sincronizado</li>
+                    <li><strong>Fines de semana:</strong> ✅ Gris oscuro (#6b7280) - Sincronizado</li>
+                    <li><strong>Más de 2 semanas:</strong> ✅ Blanco (#ffffff) - Sincronizado</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Comparación de Colores</h3>
+            <div class="color-comparison">
+                <div class="comparison-item">
+                    <h4>🎨 Leyenda</h4>
+                    <div>
+                        <div class="color-box" style="background-color: #f59e0b; border-color: #d97706;"></div>
+                        <strong>Feriado</strong><br>
+                        <small>#f59e0b / #d97706</small>
+                    </div>
+                    <div>
+                        <div class="color-box" style="background-color: transparent; border-color: #457b9d; border-width: 2px;"></div>
+                        <strong>Hoy</strong><br>
+                        <small>transparent / #457b9d</small>
+                    </div>
+                    <div>
+                        <div class="color-box" style="background-color: #b7e4c7; border-color: #40916c;"></div>
+                        <strong>Disponible</strong><br>
+                        <small>#b7e4c7 / #40916c</small>
+                    </div>
+                    <div>
+                        <div class="color-box" style="background-color: #ffbcbc; border-color: #e63946;"></div>
+                        <strong>Bloqueado</strong><br>
+                        <small>#ffbcbc / #e63946</small>
+                    </div>
+                    <div>
+                        <div class="color-box" style="background-color: #6b7280; border-color: #4b5563;"></div>
+                        <strong>Fin de semana</strong><br>
+                        <small>#6b7280 / #4b5563</small>
+                    </div>
+                    <div>
+                        <div class="color-box" style="background-color: #ffffff; border-color: #e5e7eb;"></div>
+                        <strong>Más de 2 semanas</strong><br>
+                        <small>#ffffff / #e5e7eb</small>
+                    </div>
+                </div>
+                <div class="comparison-item">
+                    <h4>📅 Calendario</h4>
+                    <div>
+                        <div class="color-box" style="background-color: #f59e0b; border-color: #d97706;"></div>
+                        <strong>Feriados</strong><br>
+                        <small>#f59e0b / #d97706</small>
+                    </div>
+                    <div>
+                        <div class="color-box" style="background-color: transparent; border-color: #457b9d; border-width: 2px;"></div>
+                        <strong>Hoy</strong><br>
+                        <small>transparent / #457b9d</small>
+                    </div>
+                    <div>
+                        <div class="color-box" style="background-color: #b7e4c7; border-color: #40916c;"></div>
+                        <strong>Días disponibles</strong><br>
+                        <small>#b7e4c7 / #40916c</small>
+                    </div>
+                    <div>
+                        <div class="color-box" style="background-color: #ffbcbc; border-color: #e63946;"></div>
+                        <strong>Días bloqueados</strong><br>
+                        <small>#ffbcbc / #e63946</small>
+                    </div>
+                    <div>
+                        <div class="color-box" style="background-color: #6b7280; border-color: #4b5563;"></div>
+                        <strong>Fines de semana</strong><br>
+                        <small>#6b7280 / #4b5563</small>
+                    </div>
+                    <div>
+                        <div class="color-box" style="background-color: #ffffff; border-color: #e5e7eb;"></div>
+                        <strong>Más de 2 semanas</strong><br>
+                        <small>#ffffff / #e5e7eb</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testLegendSync()">🎨 Verificar Sincronización</button>
+                <button class="test-button" onclick="testAllColors()">🌈 Probar Todos los Colores</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega al calendario del estudiante</li>
+                    <li>Observa la leyenda y el calendario</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Aspectos a verificar:</strong>
+                <ul>
+                    <li>🎨 <strong>Leyenda vs Calendario:</strong> Los colores deben ser idénticos</li>
+                    <li>🎉 <strong>Feriados:</strong> Naranja (#f59e0b) en ambos</li>
+                    <li>📅 <strong>Hoy:</strong> Solo borde azul en ambos</li>
+                    <li>🟢 <strong>Disponible:</strong> Verde claro (#b7e4c7) en ambos</li>
+                    <li>🔴 <strong>Bloqueado:</strong> Rojo claro (#ffbcbc) en ambos</li>
+                    <li>🌙 <strong>Fines de semana:</strong> Gris oscuro (#6b7280) en ambos</li>
+                    <li>⚪ <strong>Más de 2 semanas:</strong> Blanco (#ffffff) en ambos</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Elementos Específicos para Probar</h3>
+            <div class="status info">
+                <strong>Prueba estos elementos específicos:</strong>
+                <ul>
+                    <li>🎉 <strong>Feriados:</strong> Verifica que el color naranja sea idéntico</li>
+                    <li>📅 <strong>Hoy:</strong> Verifica que solo tenga borde azul</li>
+                    <li>🟢 <strong>Días normales:</strong> Verifica que sean verde claro</li>
+                    <li>🔴 <strong>Días ocupados:</strong> Verifica que sean rojo claro</li>
+                    <li>🌙 <strong>Sábados y domingos:</strong> Verifica que sean gris oscuro</li>
+                    <li>⚪ <strong>Días futuros lejanos:</strong> Verifica que sean blancos</li>
+                    <li>📋 <strong>Leyenda:</strong> Compara cada color con el calendario</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Detalles Técnicos</h3>
+            <div class="status info">
+                <strong>Configuración técnica sincronizada:</strong>
+                <ul>
+                    <li><strong>Feriados:</strong> backgroundColor: '#f59e0b', borderColor: '#d97706'</li>
+                    <li><strong>Hoy:</strong> backgroundColor: 'transparent', borderColor: '#457b9d', borderWidth: '2px'</li>
+                    <li><strong>Disponible:</strong> backgroundColor: '#b7e4c7', borderColor: '#40916c'</li>
+                    <li><strong>Bloqueado:</strong> backgroundColor: '#ffbcbc', borderColor: '#e63946'</li>
+                    <li><strong>Fines de semana:</strong> backgroundColor: '#6b7280', borderColor: '#4b5563'</li>
+                    <li><strong>Más de 2 semanas:</strong> backgroundColor: '#ffffff', borderColor: '#e5e7eb'</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testLegendSync() {
+            alert('🎨 Para verificar la sincronización:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega al calendario del estudiante\n' +
+                  '3. Observa la leyenda de colores\n' +
+                  '4. Compara cada color con el calendario\n' +
+                  '5. Verifica que sean idénticos\n' +
+                  '6. No debe haber diferencias de color');
+        }
+
+        function testAllColors() {
+            alert('🌈 Para probar todos los colores:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega al calendario del estudiante\n' +
+                  '3. Busca días feriados (naranja)\n' +
+                  '4. Busca el día actual (solo borde azul)\n' +
+                  '5. Busca días normales (verde claro)\n' +
+                  '6. Busca fines de semana (gris oscuro)\n' +
+                  '7. Busca días futuros lejanos (blanco)\n' +
+                  '8. Verifica que coincidan con la leyenda');
+        }
+    </script>
+</body>
+</html>

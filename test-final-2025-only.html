@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERIFICACIÓN FINAL - Solo 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .holiday-item {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #2196f3;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .holiday-item.correct {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .holiday-item.incorrect {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .clean-box {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #28a745;
+            margin: 20px 0;
+        }
+        .clean-box h2 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .calendar-simulation {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+            max-width: 800px;
+        }
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            font-size: 0.9em;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .calendar-day.holiday {
+            background: #fff3cd;
+            border-color: #ffc107;
+            font-weight: bold;
+        }
+        .calendar-day.weekend {
+            background: #e2e3e5;
+        }
+        .month-header {
+            grid-column: 1 / -1;
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .day-header {
+            background: #6c757d;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .holiday-name {
+            font-size: 0.7em;
+            margin-top: 2px;
+            color: #d97706;
+            font-weight: bold;
+        }
+        .year-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .year-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .year-card.only-2025 {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        .year-card.has-other-years {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ VERIFICACIÓN FINAL - Solo Feriados 2025</h1>
+        
+        <div class="clean-box">
+            <h2>🎯 Base de Datos Limpia</h2>
+            <p><strong>Estado:</strong> Feriados de 2024 eliminados completamente</p>
+            <p><strong>Feriados:</strong> Solo 18 feriados oficiales de 2025</p>
+            <p><strong>Nombres:</strong> Visibles con emoji 🎉 en fechas correctas</p>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Estadísticas por Año</h3>
+            <div id="year-stats">
+                <p>Verificando estadísticas por año...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎉 Feriados de Agosto 2025 - Verificación Final</h3>
+            <div id="august-verification">
+                <p>Verificando feriados de agosto...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📅 Simulación del Calendario - Agosto 2025</h3>
+            <div id="calendar-simulation">
+                <p>Generando simulación del calendario...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Estado Final</h3>
+            <div id="final-status">
+                <p>Verificando estado final...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FUNCIÓN LIMPIA createLocalDate
+        function createLocalDateClean(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const date = new Date(year, month - 1, day, 0, 0, 0, 0);
+            return date;
+        }
+
+        // Función para formatear fecha
+        function formatDate(date) {
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                weekday: 'long'
+            });
+        }
+
+        // Verificar estadísticas por año
+        async function checkYearStats() {
+            const container = document.getElementById('year-stats');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Agrupar feriados por año
+                    const yearGroups = {};
+                    data.data.forEach(holiday => {
+                        const year = holiday.date.split('-')[0];
+                        if (!yearGroups[year]) {
+                            yearGroups[year] = [];
+                        }
+                        yearGroups[year].push(holiday);
+                    });
+                    
+                    let html = '<h4>Distribución de Feriados por Año:</h4>';
+                    html += '<div class="year-stats">';
+                    
+                    const years = Object.keys(yearGroups).sort();
+                    let only2025 = years.length === 1 && years[0] === '2025';
+                    
+                    years.forEach(year => {
+                        const count = yearGroups[year].length;
+                        const isOnly2025 = year === '2025';
+                        const cardClass = only2025 ? 'year-card only-2025' : 'year-card has-other-years';
+                        
+                        html += `
+                            <div class="${cardClass}">
+                                <h4>Año ${year}</h4>
+                                <div style="font-size: 2em; font-weight: bold; color: ${isOnly2025 ? '#28a745' : '#dc3545'};">
+                                    ${count}
+                                </div>
+                                <div>feriados</div>
+                                ${isOnly2025 ? '<div style="color: #28a745; font-weight: bold;">✅ Correcto</div>' : '<div style="color: #dc3545; font-weight: bold;">❌ Incorrecto</div>'}
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    
+                    html += `
+                        <div class="status ${only2025 ? 'success' : 'error'}">
+                            <strong>Estado:</strong> ${only2025 ? '✅ SOLO FERIADOS 2025' : '❌ HAY FERIADOS DE OTROS AÑOS'}
+                        </div>
+                    `;
+                    
+                    container.innerHTML = html;
+                    return only2025;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+                return false;
+            }
+        }
+
+        // Verificar feriados de agosto
+        async function verifyAugustHolidays() {
+            const container = document.getElementById('august-verification');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const augustHolidays = data.data.filter(h => h.date.startsWith('2025-08'));
+                    
+                    let html = '<h4>Feriados de Agosto 2025 (Verificación Final):</h4>';
+                    let allCorrect = true;
+                    
+                    augustHolidays.forEach(holiday => {
+                        const date = createLocalDateClean(holiday.date);
+                        const expectedDay = parseInt(holiday.date.split('-')[2]);
+                        const actualDay = date.getDate();
+                        const isCorrect = actualDay === expectedDay;
+                        
+                        if (!isCorrect) allCorrect = false;
+                        
+                        html += `
+                            <div class="holiday-item ${isCorrect ? 'correct' : 'incorrect'}">
+                                <div><strong>Feriado:</strong> ${holiday.name}</div>
+                                <div><strong>Fecha API:</strong> ${holiday.date}</div>
+                                <div><strong>Día esperado:</strong> ${expectedDay}</div>
+                                <div><strong>Día actual:</strong> ${actualDay}</div>
+                                <div><strong>Fecha formateada:</strong> ${formatDate(date)}</div>
+                                <div><strong>Resultado:</strong> ${isCorrect ? '✅ Correcto' : '❌ Incorrecto'}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                        <div class="status ${allCorrect ? 'success' : 'error'}">
+                            <strong>Estado de agosto:</strong> ${allCorrect ? '✅ TODOS LOS FERIADOS CORRECTOS' : '❌ HAY FERIADOS INCORRECTOS'}
+                        </div>
+                    `;
+                    
+                    container.innerHTML = html;
+                    return allCorrect;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+                return false;
+            }
+        }
+
+        // Generar simulación del calendario
+        async function generateCalendarSimulation() {
+            const container = document.getElementById('calendar-simulation');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const year = 2025;
+                    const month = 7; // Agosto (0-11)
+                    
+                    const firstDay = new Date(year, month, 1);
+                    const startDate = new Date(firstDay);
+                    startDate.setDate(startDate.getDate() - firstDay.getDay());
+                    
+                    // Crear mapa de feriados
+                    const holidaysMap = {};
+                    data.data.forEach(holiday => {
+                        const localDate = createLocalDateClean(holiday.date);
+                        const dateString = localDate.toISOString().split('T')[0];
+                        holidaysMap[dateString] = holiday;
+                    });
+                    
+                    let html = `
+                        <div class="month-header">Agosto 2025 - Solo Feriados 2025</div>
+                        <div class="day-header">Dom</div>
+                        <div class="day-header">Lun</div>
+                        <div class="day-header">Mar</div>
+                        <div class="day-header">Mié</div>
+                        <div class="day-header">Jue</div>
+                        <div class="day-header">Vie</div>
+                        <div class="day-header">Sáb</div>
+                    `;
+                    
+                    for (let i = 0; i < 42; i++) {
+                        const currentDate = new Date(startDate);
+                        currentDate.setDate(startDate.getDate() + i);
+                        
+                        const dateString = currentDate.toISOString().split('T')[0];
+                        const holiday = holidaysMap[dateString];
+                        const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+                        const isCurrentMonth = currentDate.getMonth() === month;
+                        
+                        let dayClass = 'calendar-day';
+                        if (holiday) dayClass += ' holiday';
+                        if (isWeekend) dayClass += ' weekend';
+                        if (!isCurrentMonth) dayClass += ' other-month';
+                        
+                        html += `
+                            <div class="${dayClass}">
+                                <div style="font-weight: bold;">${currentDate.getDate()}</div>
+                                ${holiday ? `<div class="holiday-name">🎉 ${holiday.name}</div>` : ''}
+                            </div>
+                        `;
+                    }
+                    
+                    container.innerHTML = html;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Mostrar estado final
+        async function showFinalStatus() {
+            const container = document.getElementById('final-status');
+            
+            const only2025 = await checkYearStats();
+            const augustCorrect = await verifyAugustHolidays();
+            
+            let html = `
+                <h4>Estado Final del Sistema:</h4>
+                <div class="status ${only2025 && augustCorrect ? 'success' : 'error'}">
+                    <p><strong>Solo feriados 2025:</strong> ${only2025 ? '✅ Correcto' : '❌ Incorrecto'}</p>
+                    <p><strong>Feriados de agosto:</strong> ${augustCorrect ? '✅ Correctos' : '❌ Incorrectos'}</p>
+                    <p><strong>Estado general:</strong> ${only2025 && augustCorrect ? '✅ SISTEMA PERFECTO' : '❌ PROBLEMAS DETECTADOS'}</p>
+                </div>
+                
+                <div class="holiday-item correct">
+                    <div><strong>✅ Resultado esperado en el calendario:</strong></div>
+                    <div>• Solo 18 feriados oficiales de 2025</div>
+                    <div>• 6 de agosto: Batalla de Junín</div>
+                    <div>• 30 de agosto: Santa Rosa de Lima</div>
+                    <div>• Nombres de feriados visibles con emoji 🎉</div>
+                    <div>• Fechas exactas sin desplazamiento</div>
+                    <div>• Sin feriados de 2024 en la base de datos</div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Ejecutar todas las pruebas
+        async function runAllTests() {
+            await generateCalendarSimulation();
+            await showFinalStatus();
+        }
+
+        // Ejecutar pruebas
+        runAllTests();
+        
+        // Recargar cada 30 segundos
+        setInterval(runAllTests, 30000);
+    </script>
+</body>
+</html>

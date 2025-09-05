@@ -38,6 +38,9 @@ class HolidayCalculatorService
         // Feriados regionales
         $holidays = array_merge($holidays, $this->getRegionalHolidays($year));
         
+        // Días no laborables adicionales
+        $holidays = array_merge($holidays, $this->getAdditionalNonWorkingDays($year));
+        
         return $holidays;
     }
 
@@ -50,8 +53,8 @@ class HolidayCalculatorService
             [
                 'name' => 'Año Nuevo',
                 'date' => "$year-01-01",
-                'type' => 'fijo',
-                'description' => 'Celebración del primer día del año',
+                'type' => 'Cívico',
+                'description' => 'Marca el inicio del año calendario y es un día de descanso nacional.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -61,8 +64,8 @@ class HolidayCalculatorService
             [
                 'name' => 'Día del Trabajador',
                 'date' => "$year-05-01",
-                'type' => 'fijo',
-                'description' => 'Día Internacional del Trabajo',
+                'type' => 'Cívico',
+                'description' => 'Celebración internacional en honor a los trabajadores y sus derechos laborales.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -70,10 +73,32 @@ class HolidayCalculatorService
                 'is_active' => true
             ],
             [
-                'name' => 'Día de San Pedro y San Pablo',
+                'name' => 'Día de la Bandera',
+                'date' => "$year-06-07",
+                'type' => 'Cívico',
+                'description' => 'Conmemora la heroica defensa de Arica en 1880. En las instituciones educativas y públicas se realizan ceremonias de homenaje.',
+                'is_national' => true,
+                'is_regional' => false,
+                'region' => null,
+                'year' => $year,
+                'is_active' => true
+            ],
+            [
+                'name' => 'San Pedro y San Pablo',
                 'date' => "$year-06-29",
-                'type' => 'fijo',
-                'description' => 'Festividad religiosa católica',
+                'type' => 'Religioso',
+                'description' => 'Festividad religiosa que celebra a estos dos apóstoles importantes del cristianismo.',
+                'is_national' => true,
+                'is_regional' => false,
+                'region' => null,
+                'year' => $year,
+                'is_active' => true
+            ],
+            [
+                'name' => 'Fuerza Aérea del Perú',
+                'date' => "$year-07-23",
+                'type' => 'Cívico',
+                'description' => 'Homenaje a las Fuerzas Armadas y en especial al emblemático piloto José Abelardo Quiñones.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -83,8 +108,8 @@ class HolidayCalculatorService
             [
                 'name' => 'Día de la Independencia',
                 'date' => "$year-07-28",
-                'type' => 'fijo',
-                'description' => 'Proclamación de la independencia del Perú',
+                'type' => 'Cívico',
+                'description' => 'Proclamación de la independencia del Perú en 1821. Cada 28 de julio, el presidente brinda un mensaje al Congreso.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -94,8 +119,19 @@ class HolidayCalculatorService
             [
                 'name' => 'Día de las Fuerzas Armadas',
                 'date' => "$year-07-29",
-                'type' => 'fijo',
+                'type' => 'Cívico',
                 'description' => 'Día en honor a las Fuerzas Armadas del Perú',
+                'is_national' => true,
+                'is_regional' => false,
+                'region' => null,
+                'year' => $year,
+                'is_active' => true
+            ],
+            [
+                'name' => 'Batalla de Junín',
+                'date' => "$year-08-06",
+                'type' => 'Cívico',
+                'description' => 'Conmemora esta importante victoria independentista lograda en 1824.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -105,8 +141,8 @@ class HolidayCalculatorService
             [
                 'name' => 'Santa Rosa de Lima',
                 'date' => "$year-08-30",
-                'type' => 'fijo',
-                'description' => 'Día de la patrona de Lima y del Perú',
+                'type' => 'Religioso',
+                'description' => 'Homenaje a la primera santa de América, nacida en Lima en el siglo XVII.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -116,8 +152,8 @@ class HolidayCalculatorService
             [
                 'name' => 'Combate de Angamos',
                 'date' => "$year-10-08",
-                'type' => 'fijo',
-                'description' => 'Conmemoración del heroísmo de Miguel Grau',
+                'type' => 'Cívico',
+                'description' => 'Recuerda la pérdida del monitor Huáscar y el coraje del almirante Miguel Grau durante la Guerra del Pacífico.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -127,8 +163,8 @@ class HolidayCalculatorService
             [
                 'name' => 'Todos los Santos',
                 'date' => "$year-11-01",
-                'type' => 'fijo',
-                'description' => 'Día de Todos los Santos',
+                'type' => 'Religioso',
+                'description' => 'Día en que se honra a los seres queridos fallecidos.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -138,8 +174,19 @@ class HolidayCalculatorService
             [
                 'name' => 'Inmaculada Concepción',
                 'date' => "$year-12-08",
-                'type' => 'fijo',
-                'description' => 'Festividad católica de la Inmaculada Concepción',
+                'type' => 'Religioso',
+                'description' => 'Conmemoración del dogma católico de la concepción sin pecado de la Virgen María.',
+                'is_national' => true,
+                'is_regional' => false,
+                'region' => null,
+                'year' => $year,
+                'is_active' => true
+            ],
+            [
+                'name' => 'Batalla de Ayacucho',
+                'date' => "$year-12-09",
+                'type' => 'Cívico',
+                'description' => 'Recuerda la batalla de 1824 que selló la independencia sudamericana del dominio colonial.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -149,8 +196,19 @@ class HolidayCalculatorService
             [
                 'name' => 'Navidad',
                 'date' => "$year-12-25",
-                'type' => 'fijo',
-                'description' => 'Celebración del nacimiento de Jesucristo',
+                'type' => 'Religioso',
+                'description' => 'Celebración del nacimiento de Jesucristo.',
+                'is_national' => true,
+                'is_regional' => false,
+                'region' => null,
+                'year' => $year,
+                'is_active' => true
+            ],
+            [
+                'name' => 'Combate del 2 de Mayo',
+                'date' => "$year-05-02",
+                'type' => 'Cívico',
+                'description' => 'Conmemoración del Combate del 2 de Mayo de 1866, donde las fuerzas peruanas y aliadas defendieron el Callao contra la escuadra española.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -177,8 +235,8 @@ class HolidayCalculatorService
             [
                 'name' => 'Jueves Santo',
                 'date' => $holyThursday->format('Y-m-d'),
-                'type' => 'movil',
-                'description' => 'Conmemoración de la Última Cena de Jesucristo',
+                'type' => 'Religioso',
+                'description' => 'Conmemora la Última Cena de Jesús con sus apóstoles.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -188,8 +246,8 @@ class HolidayCalculatorService
             [
                 'name' => 'Viernes Santo',
                 'date' => $goodFriday->format('Y-m-d'),
-                'type' => 'movil',
-                'description' => 'Conmemoración de la crucifixión de Jesucristo',
+                'type' => 'Religioso',
+                'description' => 'Recuerda la crucifixión y muerte de Jesús.',
                 'is_national' => true,
                 'is_regional' => false,
                 'region' => null,
@@ -200,83 +258,64 @@ class HolidayCalculatorService
     }
 
     /**
+     * Obtener días no laborables adicionales (sector público, compensables)
+     */
+    private function getAdditionalNonWorkingDays(int $year): array
+    {
+        $additionalDays = [];
+        
+        // Para 2025 específicamente
+        if ($year === 2025) {
+            $additionalDays[] = [
+                'name' => 'Día del Sector Público',
+                'date' => "$year-05-02",
+                'type' => 'Sector Público',
+                'description' => 'Día no laborable para el sector público. Los trabajadores del sector público tienen este día libre.',
+                'is_national' => false,
+                'is_regional' => false,
+                'region' => null,
+                'year' => $year,
+                'is_active' => true
+            ];
+            
+            $additionalDays[] = [
+                'name' => 'Día del Sector Público',
+                'date' => "$year-12-26",
+                'type' => 'Sector Público',
+                'description' => 'Día no laborable para el sector público. Los trabajadores del sector público tienen este día libre.',
+                'is_national' => false,
+                'is_regional' => false,
+                'region' => null,
+                'year' => $year,
+                'is_active' => true
+            ];
+        }
+        
+        // Para 2026
+        if ($year === 2026) {
+            $additionalDays[] = [
+                'name' => 'Día del Sector Público',
+                'date' => "$year-01-02",
+                'type' => 'Sector Público',
+                'description' => 'Día no laborable para el sector público. Los trabajadores del sector público tienen este día libre.',
+                'is_national' => false,
+                'is_regional' => false,
+                'region' => null,
+                'year' => $year,
+                'is_active' => true
+            ];
+        }
+        
+        return $additionalDays;
+    }
+
+    /**
      * Obtener feriados regionales
+     * NOTA: Por ahora solo incluimos feriados nacionales oficiales
      */
     private function getRegionalHolidays(int $year): array
     {
-        return [
-            // Lima
-            [
-                'name' => 'Señor de los Milagros',
-                'date' => "$year-10-18",
-                'type' => 'fijo',
-                'description' => 'Procesión del Señor de los Milagros en Lima',
-                'is_national' => false,
-                'is_regional' => true,
-                'region' => 'Lima',
-                'year' => $year,
-                'is_active' => true
-            ],
-            [
-                'name' => 'San Martín de Porres',
-                'date' => "$year-11-03",
-                'type' => 'fijo',
-                'description' => 'Santo patrón de la justicia social en Lima',
-                'is_national' => false,
-                'is_regional' => true,
-                'region' => 'Lima',
-                'year' => $year,
-                'is_active' => true
-            ],
-            // Cusco
-            [
-                'name' => 'Inti Raymi',
-                'date' => "$year-06-24",
-                'type' => 'fijo',
-                'description' => 'Fiesta del Sol en Cusco',
-                'is_national' => false,
-                'is_regional' => true,
-                'region' => 'Cusco',
-                'year' => $year,
-                'is_active' => true
-            ],
-            // Arequipa
-            [
-                'name' => 'Aniversario de Arequipa',
-                'date' => "$year-08-15",
-                'type' => 'fijo',
-                'description' => 'Aniversario de la fundación de Arequipa',
-                'is_national' => false,
-                'is_regional' => true,
-                'region' => 'Arequipa',
-                'year' => $year,
-                'is_active' => true
-            ],
-            // Piura
-            [
-                'name' => 'San Miguel Arcángel',
-                'date' => "$year-09-29",
-                'type' => 'fijo',
-                'description' => 'Santo patrón de Piura',
-                'is_national' => false,
-                'is_regional' => true,
-                'region' => 'Piura',
-                'year' => $year,
-                'is_active' => true
-            ],
-            // Ica
-            [
-                'name' => 'Señor de Luren',
-                'date' => "$year-10-17",
-                'type' => 'fijo',
-                'description' => 'Patrón de Ica',
-                'is_national' => false,
-                'is_regional' => true,
-                'region' => 'Ica',
-                'year' => $year,
-                'is_active' => true
-            ]
-        ];
+        return []; // No incluimos feriados regionales por ahora
     }
 
     /**
@@ -434,6 +473,17 @@ class HolidayCalculatorService
         return count($this->getWorkingDaysInRange($startDate, $endDate, $region));
     }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

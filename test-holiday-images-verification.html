@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación de Imágenes de Feriados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .image-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            background: #f8f9fa;
+        }
+        .image-preview {
+            width: 100%;
+            height: 120px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+        }
+        .image-status {
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .status-success {
+            color: #28a745;
+        }
+        .status-error {
+            color: #dc3545;
+        }
+        .modal-test {
+            margin: 20px 0;
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .test-button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #d97706;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificación de Imágenes de Feriados</h1>
+        
+        <div class="test-section">
+            <h3>📁 Verificación de Archivos</h3>
+            <div class="status warning">
+                <strong>📂 Ruta de imágenes:</strong> <code>/public/images/Feriados/</code>
+                <br>
+                <strong>🔍 Verificando que existan las siguientes imágenes:</strong>
+            </div>
+        </div>
+
+        <div class="image-grid" id="image-grid">
+            <!-- Las imágenes se cargarán dinámicamente -->
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Prueba del Modal</h3>
+            <div class="modal-test">
+                <h4>Prueba el modal con diferentes feriados:</h4>
+                <button class="test-button" onclick="testModal('Batalla de Junín')">🎉 Batalla de Junín</button>
+                <button class="test-button" onclick="testModal('Año Nuevo')">🎊 Año Nuevo</button>
+                <button class="test-button" onclick="testModal('Navidad')">🎄 Navidad</button>
+                <button class="test-button" onclick="testModal('Día de la Independencia')">🇵🇪 Independencia</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Problemas Identificados</h3>
+            <div class="status error">
+                <strong>❌ Problemas reportados:</strong>
+                <ul>
+                    <li>Al cerrar el modal se abre otra cosa (modal de citas)</li>
+                    <li>No muestra las imágenes en el modal</li>
+                    <li>Las imágenes existen pero no se cargan</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Soluciones Implementadas</h3>
+            <div class="status success">
+                <strong>✅ Correcciones aplicadas:</strong>
+                <ul>
+                    <li>Se agregó <code>e.preventDefault()</code> y <code>e.stopPropagation()</code> al botón de cierre</li>
+                    <li>Se agregó <code>setSelectedHoliday(null)</code> al cerrar el modal</li>
+                    <li>Se agregó manejo de errores para imágenes con <code>onError</code></li>
+                    <li>Se agregó click en overlay para cerrar el modal</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de prueba -->
+    <div id="test-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 16px; max-width: 600px; width: 90%; overflow: hidden;">
+            <div id="modal-image" style="height: 200px; background-size: cover; background-position: center; position: relative;">
+                <div style="position: absolute; top: 16px; right: 16px; background: rgba(0, 0, 0, 0.5); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="closeTestModal()">
+                    <span style="color: white; font-size: 18px;">×</span>
+                </div>
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)); padding: 20px; color: white;">
+                    <h2 id="modal-title" style="margin: 0; font-size: 28px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);"></h2>
+                </div>
+            </div>
+            <div style="padding: 24px;">
+                <div id="modal-type" style="margin-bottom: 20px; padding: 12px; background-color: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;"></div>
+                <div id="modal-description" style="margin-bottom: 20px;"></div>
+                <button onclick="closeTestModal()" style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const holidayDetails = {
+            'Año Nuevo': {
+                image: '/images/Feriados/Año nuevo.png',
+                type: 'Cívico',
+                description: 'Marca el inicio del año calendario y es un día de descanso nacional.',
+                longDescription: 'El Año Nuevo es una de las celebraciones más importantes del calendario peruano.'
+            },
+            'Batalla de Junín': {
+                image: '/images/Feriados/batalla de junin.png',
+                type: 'Cívico',
+                description: 'Conmemora esta importante victoria independentista lograda en 1824.',
+                longDescription: 'La Batalla de Junín se libró el 6 de agosto de 1824 en la Pampa de Junín.'
+            },
+            'Día de la Independencia': {
+                image: '/images/Feriados/fiestas patrias.png',
+                type: 'Cívico',
+                description: 'Proclamación de la independencia del Perú en 1821.',
+                longDescription: 'El 28 de julio de 1821, el general José de San Martín proclamó la independencia del Perú.'
+            },
+            'Navidad': {
+                image: '/images/Feriados/navidad.jpg',
+                type: 'Religioso',
+                description: 'Celebración del nacimiento de Jesucristo.',
+                longDescription: 'La Navidad en Perú es una celebración llena de tradiciones y costumbres.'
+            }
+        };
+
+        const imagesToTest = [
+            'Año nuevo.png',
+            'batalla de junin.png',
+            'fiestas patrias.png',
+            'navidad.jpg',
+            'Jueves santo.png',
+            'jueves santo1.png',
+            'Dia de trabajor.png',
+            'Dia la bandera y batalal de arica.png',
+            'san pedro y pablo.png',
+            'Fuerza area.png',
+            'santa rosa de lima.png',
+            'batalla de angamos.png',
+            'dia de todos lso santos.png',
+            'imaculada concencion.png',
+            'batalla de ayacucho.png',
+            'combate 2 de mayo.png'
+        ];
+
+        function loadImageTest() {
+            const grid = document.getElementById('image-grid');
+            
+            imagesToTest.forEach(imageName => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                
+                const preview = document.createElement('div');
+                preview.className = 'image-preview';
+                preview.style.backgroundImage = `url(/images/Feriados/${imageName})`;
+                
+                const name = document.createElement('div');
+                name.textContent = imageName;
+                name.style.fontWeight = 'bold';
+                name.style.marginBottom = '5px';
+                
+                const status = document.createElement('div');
+                status.className = 'image-status';
+                status.textContent = 'Verificando...';
+                
+                card.appendChild(preview);
+                card.appendChild(name);
+                card.appendChild(status);
+                grid.appendChild(card);
+                
+                // Verificar si la imagen se carga correctamente
+                const img = new Image();
+                img.onload = function() {
+                    status.textContent = '✅ Cargada correctamente';
+                    status.className = 'image-status status-success';
+                };
+                img.onerror = function() {
+                    status.textContent = '❌ No encontrada';
+                    status.className = 'image-status status-error';
+                    preview.style.backgroundImage = 'url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlbiBubyBlbmNvbnRyYWRhPC90ZXh0Pjwvc3ZnPg==)';
+                };
+                img.src = `/images/Feriados/${imageName}`;
+            });
+        }
+
+        function testModal(holidayName) {
+            const modal = document.getElementById('test-modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalTitle = document.getElementById('modal-title');
+            const modalType = document.getElementById('modal-type');
+            const modalDescription = document.getElementById('modal-description');
+
+            const holiday = holidayDetails[holidayName];
+            if (holiday) {
+                modalImage.style.backgroundImage = `url(${holiday.image})`;
+                modalTitle.textContent = `🎉 ${holidayName}`;
+                modalType.innerHTML = `<strong>🏛️ Tipo:</strong> ${holiday.type}`;
+                modalDescription.innerHTML = `
+                    <h3 style="margin: 0 0 12px 0; font-size: 18px; color: #1f2937; font-weight: 600;">📖 Descripción</h3>
+                    <p style="margin: 0 0 20px 0; font-size: 15px; color: #4b5563; line-height: 1.6;">${holiday.description}</p>
+                    <h3 style="margin: 0 0 12px 0; font-size: 18px; color: #1f2937; font-weight: 600;">📚 Historia y Significado</h3>
+                    <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.7;">${holiday.longDescription}</p>
+                `;
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeTestModal() {
+            document.getElementById('test-modal').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.getElementById('test-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTestModal();
+            }
+        });
+
+        // Cargar las pruebas de imágenes cuando se carga la página
+        window.addEventListener('load', loadImageTest);
+    </script>
+</body>
+</html>

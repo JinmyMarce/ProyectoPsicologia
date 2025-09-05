@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Calendario Feriados 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .date-test {
+            background: #e8f5e8;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .date-test.correct {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .date-test.incorrect {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .calendar-preview {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin: 20px 0;
+        }
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+        }
+        .calendar-day.holiday {
+            background: #fff3cd;
+            border-color: #ffc107;
+            font-weight: bold;
+        }
+        .calendar-day.weekend {
+            background: #e2e3e5;
+        }
+        .month-header {
+            grid-column: 1 / -1;
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .day-header {
+            background: #6c757d;
+            color: white;
+            padding: 5px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        .official-list {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .official-list h3 {
+            color: #2e7d32;
+            margin-top: 0;
+        }
+        .official-list ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .official-list li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Prueba de Calendario - Feriados 2025</h1>
+        
+        <div class="official-list">
+            <h3>📋 Lista Oficial de Feriados 2025 (Perú)</h3>
+            <ul>
+                <li><strong>1 de enero:</strong> Año Nuevo</li>
+                <li><strong>17 de abril:</strong> Jueves Santo</li>
+                <li><strong>18 de abril:</strong> Viernes Santo</li>
+                <li><strong>1 de mayo:</strong> Día del Trabajo</li>
+                <li><strong>7 de junio:</strong> Batalla de Arica y Día de la Bandera</li>
+                <li><strong>29 de junio:</strong> San Pedro y San Pablo</li>
+                <li><strong>23 de julio:</strong> Día de la Fuerza Aérea del Perú</li>
+                <li><strong>28 de julio:</strong> Día de la Independencia</li>
+                <li><strong>29 de julio:</strong> Día de las Fuerzas Armadas</li>
+                <li><strong>6 de agosto:</strong> Batalla de Junín</li>
+                <li><strong>30 de agosto:</strong> Santa Rosa de Lima</li>
+                <li><strong>8 de octubre:</strong> Combate de Angamos</li>
+                <li><strong>1 de noviembre:</strong> Día de Todos los Santos</li>
+                <li><strong>8 de diciembre:</strong> Inmaculada Concepción</li>
+                <li><strong>9 de diciembre:</strong> Batalla de Ayacucho</li>
+                <li><strong>25 de diciembre:</strong> Navidad</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Prueba de Creación de Fechas</h3>
+            <div id="date-tests">
+                <p>Probando creación de fechas...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📅 Vista Previa del Calendario - Enero 2025</h3>
+            <div id="calendar-preview">
+                <p>Generando vista previa...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Resultados de la API</h3>
+            <div id="api-results">
+                <p>Cargando datos de la API...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para crear fecha local correctamente
+        function createLocalDate(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            return new Date(year, month - 1, day); // month - 1 porque los meses van de 0-11
+        }
+
+        // Función para formatear fecha
+        function formatDate(date) {
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                weekday: 'long'
+            });
+        }
+
+        // Pruebas de creación de fechas
+        function testDateCreation() {
+            const testDates = [
+                '2025-01-01', // Año Nuevo
+                '2025-05-01', // Día del Trabajo
+                '2025-07-28', // Independencia
+                '2025-12-25'  // Navidad
+            ];
+
+            const container = document.getElementById('date-tests');
+            let html = '';
+
+            testDates.forEach(dateString => {
+                const localDate = createLocalDate(dateString);
+                const isoDate = new Date(dateString + 'T00:00:00');
+                
+                html += `
+                    <div class="date-test ${localDate.getDate() === parseInt(dateString.split('-')[2]) ? 'correct' : 'incorrect'}">
+                        <strong>Fecha original:</strong> ${dateString}<br>
+                        <strong>Método Local:</strong> ${formatDate(localDate)} (día: ${localDate.getDate()})<br>
+                        <strong>Método ISO:</strong> ${formatDate(isoDate)} (día: ${isoDate.getDate()})<br>
+                        <strong>Resultado:</strong> ${localDate.getDate() === parseInt(dateString.split('-')[2]) ? '✅ Correcto' : '❌ Incorrecto'}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Generar vista previa del calendario
+        function generateCalendarPreview() {
+            const container = document.getElementById('calendar-preview');
+            const year = 2025;
+            const month = 0; // Enero (0-11)
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            let html = `
+                <div class="month-header">Enero 2025</div>
+                <div class="day-header">Dom</div>
+                <div class="day-header">Lun</div>
+                <div class="day-header">Mar</div>
+                <div class="day-header">Mié</div>
+                <div class="day-header">Jue</div>
+                <div class="day-header">Vie</div>
+                <div class="day-header">Sáb</div>
+            `;
+            
+            const holidays = {
+                '2025-01-01': 'Año Nuevo'
+            };
+            
+            for (let i = 0; i < 42; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + i);
+                
+                const dateString = currentDate.toISOString().split('T')[0];
+                const isHoliday = holidays[dateString];
+                const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+                const isCurrentMonth = currentDate.getMonth() === month;
+                
+                let dayClass = 'calendar-day';
+                if (isHoliday) dayClass += ' holiday';
+                if (isWeekend) dayClass += ' weekend';
+                if (!isCurrentMonth) dayClass += ' other-month';
+                
+                html += `
+                    <div class="${dayClass}">
+                        ${currentDate.getDate()}
+                        ${isHoliday ? '<br><small>' + isHoliday + '</small>' : ''}
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Cargar datos de la API
+        async function loadApiResults() {
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                const data = await response.json();
+                
+                const container = document.getElementById('api-results');
+                let html = '<h4>Feriados desde la API:</h4>';
+                
+                // Ordenar por fecha
+                data.data.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                data.data.forEach(holiday => {
+                    const localDate = createLocalDate(holiday.date);
+                    const originalDate = new Date(holiday.date);
+                    
+                    html += `
+                        <div class="date-test">
+                            <strong>${holiday.name}</strong><br>
+                            <strong>Fecha API:</strong> ${holiday.date}<br>
+                            <strong>Fecha Local:</strong> ${formatDate(localDate)}<br>
+                            <strong>Fecha Original:</strong> ${formatDate(originalDate)}<br>
+                            <strong>Diferencia:</strong> ${localDate.getDate() - originalDate.getDate()} días
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error cargando datos de la API:', error);
+                document.getElementById('api-results').innerHTML = 
+                    '<p style="color: red;">Error cargando datos de la API</p>';
+            }
+        }
+
+        // Ejecutar pruebas
+        testDateCreation();
+        generateCalendarPreview();
+        loadApiResults();
+        
+        // Recargar datos cada 10 segundos
+        setInterval(loadApiResults, 10000);
+    </script>
+</body>
+</html>

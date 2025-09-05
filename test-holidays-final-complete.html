@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Final Completa - Todos los Feriados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .holiday-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .holiday-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        .holiday-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .holiday-date {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .holiday-image {
+            font-size: 12px;
+            color: #007bff;
+            font-family: monospace;
+            margin-bottom: 5px;
+        }
+        .holiday-description {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.3;
+        }
+        .test-button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #d97706;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Verificación Final Completa - Todos los Feriados</h1>
+        
+        <div class="test-section">
+            <h3>✅ Problemas Solucionados</h3>
+            <div class="status success">
+                <strong>✅ Todos los problemas han sido corregidos:</strong>
+                <ul>
+                    <li><strong>2 de Mayo:</strong> ✅ Feriado agregado a todos los años (2025-2050)</li>
+                    <li><strong>2 de Mayo:</strong> ✅ Nombre corregido a "Combate del 2 de Mayo"</li>
+                    <li><strong>2 de Mayo:</strong> ✅ Descripción histórica completa agregada</li>
+                    <li><strong>Fuerza Aérea:</strong> ✅ Descripción expandida en el modal</li>
+                    <li><strong>Fiestas Patrias:</strong> ✅ Misma imagen fiestaspatrias.png para 28 y 29 de julio</li>
+                    <li><strong>Nombres:</strong> ✅ Corregidos para coincidir con la base de datos</li>
+                    <li><strong>Duplicaciones:</strong> ✅ Eliminadas entradas duplicadas</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="showAllHolidays()">📋 Mostrar Todos los Feriados</button>
+                <button class="test-button" onclick="showSpecificHolidays()">🎯 Mostrar Feriados Específicos</button>
+            </div>
+        </div>
+
+        <div class="holiday-grid" id="holiday-grid">
+            <!-- Los feriados se cargarán dinámicamente -->
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega al calendario del estudiante</li>
+                    <li>Cambia a diferentes años (2025, 2026, 2030, etc.)</li>
+                    <li>Verifica los siguientes feriados específicos:</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Feriados específicos para verificar:</strong>
+                <ul>
+                    <li>⚔️ <strong>2 de Mayo:</strong> Debe aparecer con color naranja, nombre "Combate del 2 de Mayo", modal con imagen combate2demayo.png</li>
+                    <li>✈️ <strong>23 de Julio - Fuerza Aérea:</strong> Modal con descripción expandida e imagen Fuerzaarea.png</li>
+                    <li>🏛️ <strong>28 de Julio - Independencia:</strong> Imagen fiestaspatrias.png</li>
+                    <li>🛡️ <strong>29 de Julio - Fuerzas Armadas:</strong> Misma imagen fiestaspatrias.png</li>
+                    <li>📅 <strong>Multi-año:</strong> Todos los feriados deben funcionar en cualquier año (2025-2050)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const allHolidays = [
+            {
+                name: 'Año Nuevo',
+                date: '2025-01-01',
+                image: '/images/Feriados/Añonuevo.png',
+                description: 'Marca el inicio del año calendario y es un día de descanso nacional.'
+            },
+            {
+                name: 'Día del Trabajo',
+                date: '2025-05-01',
+                image: '/images/Feriados/Diadetrabajor.png',
+                description: 'Celebración internacional en honor a los trabajadores y sus derechos laborales.'
+            },
+            {
+                name: 'Combate del 2 de Mayo',
+                date: '2025-05-02',
+                image: '/images/Feriados/combate2demayo.png',
+                description: 'Conmemoración del Combate del 2 de Mayo de 1866, donde las fuerzas peruanas y aliadas defendieron el Callao contra la escuadra española.'
+            },
+            {
+                name: 'Batalla de Arica y Día de la Bandera',
+                date: '2025-06-07',
+                image: '/images/Feriados/banderabatallaarica.png',
+                description: 'Conmemora la heroica defensa de Arica en 1880. En las instituciones educativas y públicas se realizan ceremonias de homenaje.'
+            },
+            {
+                name: 'Día de la Fuerza Aérea del Perú',
+                date: '2025-07-23',
+                image: '/images/Feriados/Fuerzaarea.png',
+                description: 'Homenaje a las Fuerzas Armadas y en especial al emblemático piloto José Abelardo Quiñones.'
+            },
+            {
+                name: 'Día de la Independencia',
+                date: '2025-07-28',
+                image: '/images/Feriados/fiestaspatrias.png',
+                description: 'Proclamación de la independencia del Perú en 1821. Cada 28 de julio, el presidente brinda un mensaje al Congreso.'
+            },
+            {
+                name: 'Día de las Fuerzas Armadas',
+                date: '2025-07-29',
+                image: '/images/Feriados/fiestaspatrias.png',
+                description: 'Día dedicado al homenaje a las Fuerzas Armadas y a la Policía Nacional del Perú.'
+            },
+            {
+                name: 'Combate de Angamos',
+                date: '2025-10-08',
+                image: '/images/Feriados/batallaangamos.png',
+                description: 'Recuerda la pérdida del monitor Huáscar y el coraje del almirante Miguel Grau durante la Guerra del Pacífico.'
+            },
+            {
+                name: 'Día de Todos los Santos',
+                date: '2025-11-01',
+                image: '/images/Feriados/diadetodoslossantos.png',
+                description: 'Día en que se honra a los seres queridos fallecidos.'
+            },
+            {
+                name: 'Navidad',
+                date: '2025-12-25',
+                image: '/images/Feriados/navidad.jpg',
+                description: 'Celebración del nacimiento de Jesucristo.'
+            }
+        ];
+
+        const specificHolidays = [
+            {
+                name: 'Combate del 2 de Mayo',
+                date: '2025-05-02',
+                image: '/images/Feriados/combate2demayo.png',
+                description: 'Conmemoración del Combate del 2 de Mayo de 1866, donde las fuerzas peruanas y aliadas defendieron el Callao contra la escuadra española.'
+            },
+            {
+                name: 'Día de la Fuerza Aérea del Perú',
+                date: '2025-07-23',
+                image: '/images/Feriados/Fuerzaarea.png',
+                description: 'Homenaje a las Fuerzas Armadas y en especial al emblemático piloto José Abelardo Quiñones.'
+            },
+            {
+                name: 'Día de la Independencia',
+                date: '2025-07-28',
+                image: '/images/Feriados/fiestaspatrias.png',
+                description: 'Proclamación de la independencia del Perú en 1821. Cada 28 de julio, el presidente brinda un mensaje al Congreso.'
+            },
+            {
+                name: 'Día de las Fuerzas Armadas',
+                date: '2025-07-29',
+                image: '/images/Feriados/fiestaspatrias.png',
+                description: 'Día dedicado al homenaje a las Fuerzas Armadas y a la Policía Nacional del Perú.'
+            }
+        ];
+
+        function createHolidayCard(holiday) {
+            const card = document.createElement('div');
+            card.className = 'holiday-card';
+            
+            const name = document.createElement('div');
+            name.className = 'holiday-name';
+            name.textContent = holiday.name;
+            
+            const date = document.createElement('div');
+            date.className = 'holiday-date';
+            date.textContent = `📅 ${holiday.date}`;
+            
+            const image = document.createElement('div');
+            image.className = 'holiday-image';
+            image.textContent = `🖼️ ${holiday.image}`;
+            
+            const description = document.createElement('div');
+            description.className = 'holiday-description';
+            description.textContent = holiday.description;
+            
+            card.appendChild(name);
+            card.appendChild(date);
+            card.appendChild(image);
+            card.appendChild(description);
+            
+            return card;
+        }
+
+        function showAllHolidays() {
+            const grid = document.getElementById('holiday-grid');
+            grid.innerHTML = '';
+            
+            allHolidays.forEach(holiday => {
+                const card = createHolidayCard(holiday);
+                grid.appendChild(card);
+            });
+        }
+
+        function showSpecificHolidays() {
+            const grid = document.getElementById('holiday-grid');
+            grid.innerHTML = '';
+            
+            specificHolidays.forEach(holiday => {
+                const card = createHolidayCard(holiday);
+                grid.appendChild(card);
+            });
+        }
+
+        // Inicializar con feriados específicos
+        showSpecificHolidays();
+    </script>
+</body>
+</html>

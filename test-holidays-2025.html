@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Feriados 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .holiday {
+            background: #e3f2fd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #2196f3;
+        }
+        .holiday.national {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+        }
+        .holiday.compensable {
+            background: #f3e5f5;
+            border-left-color: #9c27b0;
+        }
+        .date {
+            font-weight: bold;
+            color: #1976d2;
+        }
+        .name {
+            font-weight: bold;
+        }
+        .type {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .official-list {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .official-list h3 {
+            color: #2e7d32;
+            margin-top: 0;
+        }
+        .official-list ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .official-list li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 Verificación de Feriados 2025</h1>
+        
+        <div class="official-list">
+            <h3>📋 Lista Oficial de Feriados 2025 (Perú)</h3>
+            <ul>
+                <li><strong>1 de enero:</strong> Año Nuevo</li>
+                <li><strong>17 de abril:</strong> Jueves Santo</li>
+                <li><strong>18 de abril:</strong> Viernes Santo</li>
+                <li><strong>1 de mayo:</strong> Día del Trabajo</li>
+                <li><strong>7 de junio:</strong> Batalla de Arica y Día de la Bandera</li>
+                <li><strong>29 de junio:</strong> San Pedro y San Pablo</li>
+                <li><strong>23 de julio:</strong> Día de la Fuerza Aérea del Perú</li>
+                <li><strong>28 de julio:</strong> Día de la Independencia</li>
+                <li><strong>29 de julio:</strong> Día de las Fuerzas Armadas</li>
+                <li><strong>6 de agosto:</strong> Batalla de Junín</li>
+                <li><strong>30 de agosto:</strong> Santa Rosa de Lima</li>
+                <li><strong>8 de octubre:</strong> Combate de Angamos</li>
+                <li><strong>1 de noviembre:</strong> Día de Todos los Santos</li>
+                <li><strong>8 de diciembre:</strong> Inmaculada Concepción</li>
+                <li><strong>9 de diciembre:</strong> Batalla de Ayacucho</li>
+                <li><strong>25 de diciembre:</strong> Navidad</li>
+            </ul>
+            <p><strong>Días no laborables adicionales:</strong></p>
+            <ul>
+                <li><strong>2 de mayo:</strong> Día no laborable (compensable)</li>
+                <li><strong>26 de diciembre:</strong> Día no laborable (compensable)</li>
+            </ul>
+        </div>
+
+        <h2>🔍 Feriados desde la API</h2>
+        <div id="holidays-container">
+            <p>Cargando feriados...</p>
+        </div>
+
+        <h2>📊 Comparación</h2>
+        <div id="comparison">
+            <p>Comparando fechas...</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadHolidays() {
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                const holidays = await response.json();
+                
+                const container = document.getElementById('holidays-container');
+                container.innerHTML = '';
+                
+                // Ordenar por fecha
+                holidays.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                holidays.forEach(holiday => {
+                    const div = document.createElement('div');
+                    div.className = `holiday ${holiday.is_national ? 'national' : ''} ${holiday.name.includes('compensable') ? 'compensable' : ''}`;
+                    
+                    const date = new Date(holiday.date);
+                    const formattedDate = date.toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    });
+                    
+                    div.innerHTML = `
+                        <div class="date">${formattedDate}</div>
+                        <div class="name">${holiday.name}</div>
+                        <div class="type">Tipo: ${holiday.type} | Nacional: ${holiday.is_national ? 'Sí' : 'No'}</div>
+                    `;
+                    
+                    container.appendChild(div);
+                });
+                
+                // Comparar con la lista oficial
+                compareWithOfficial(holidays);
+                
+            } catch (error) {
+                console.error('Error cargando feriados:', error);
+                document.getElementById('holidays-container').innerHTML = 
+                    '<p style="color: red;">Error cargando feriados desde la API</p>';
+            }
+        }
+
+        function compareWithOfficial(holidays) {
+            const officialDates = {
+                '2025-01-01': 'Año Nuevo',
+                '2025-04-17': 'Jueves Santo',
+                '2025-04-18': 'Viernes Santo',
+                '2025-05-01': 'Día del Trabajo',
+                '2025-05-02': 'Día no laborable (compensable)',
+                '2025-06-07': 'Batalla de Arica y Día de la Bandera',
+                '2025-06-29': 'San Pedro y San Pablo',
+                '2025-07-23': 'Día de la Fuerza Aérea del Perú',
+                '2025-07-28': 'Día de la Independencia',
+                '2025-07-29': 'Día de las Fuerzas Armadas',
+                '2025-08-06': 'Batalla de Junín',
+                '2025-08-30': 'Santa Rosa de Lima',
+                '2025-10-08': 'Combate de Angamos',
+                '2025-11-01': 'Día de Todos los Santos',
+                '2025-12-08': 'Inmaculada Concepción',
+                '2025-12-09': 'Batalla de Ayacucho',
+                '2025-12-25': 'Navidad',
+                '2025-12-26': 'Día no laborable (compensable)'
+            };
+            
+            const comparison = document.getElementById('comparison');
+            let html = '<h3>✅ Verificación de Fechas</h3>';
+            
+            let correctCount = 0;
+            let totalCount = 0;
+            
+            holidays.forEach(holiday => {
+                totalCount++;
+                const officialName = officialDates[holiday.date];
+                
+                if (officialName) {
+                    if (holiday.name === officialName) {
+                        html += `<p style="color: green;">✅ ${holiday.date}: ${holiday.name}</p>`;
+                        correctCount++;
+                    } else {
+                        html += `<p style="color: orange;">⚠️ ${holiday.date}: "${holiday.name}" (esperado: "${officialName}")</p>`;
+                    }
+                } else {
+                    html += `<p style="color: blue;">ℹ️ ${holiday.date}: ${holiday.name} (feriado regional/adicional)</p>`;
+                }
+            });
+            
+            html += `<p><strong>Resultado:</strong> ${correctCount}/${totalCount} fechas correctas</p>`;
+            
+            if (correctCount === Object.keys(officialDates).length) {
+                html += '<p style="color: green; font-weight: bold;">🎉 ¡Todos los feriados oficiales están correctos!</p>';
+            } else {
+                html += '<p style="color: red; font-weight: bold;">❌ Hay diferencias con la lista oficial</p>';
+            }
+            
+            comparison.innerHTML = html;
+        }
+
+        // Cargar feriados al cargar la página
+        loadHolidays();
+        
+        // Recargar cada 5 segundos para verificar cambios
+        setInterval(loadHolidays, 5000);
+    </script>
+</body>
+</html>

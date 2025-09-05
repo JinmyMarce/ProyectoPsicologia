@@ -73,8 +73,14 @@ export function AdminStats() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#8e161a] mb-1 text-left">Estadísticas del Sistema</h1>
+      {/* Título Principal */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Estadísticas del Sistema
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
+        </div>
       </div>
       <div className="flex justify-end mb-6">
         <Button

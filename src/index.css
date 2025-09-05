@@ -1,6 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Forzar color azul marino para el "Hoy" - Sobrescribir cualquier borde morado */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today * {
+  border-color: #1e40af !important;
+  border: 2px solid #1e40af !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today[style*="border-color: #8b5cf6"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today[style*="border-color:#8b5cf6"] {
+  border-color: #1e40af !important;
+  border: 2px solid #1e40af !important;
+}
+
+/* Importar estilos del calendario */
+@import './styles/calendar.css';
+
+
+
+
+
 body, html {
   font-family: 'Georgia, Times, serif', serif !important;
 }

@@ -1,0 +1,709 @@
+/* ===== ESTILOS DEL CALENDARIO UNIFICADO - DISEÑO PROFESIONAL MODERNO ===== */
+
+.unified-calendar {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.unified-calendar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #8e161a, #b91c1c, #dc2626, #8e161a);
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* ===== HEADER PREMIUM DEL CALENDARIO ===== */
+.premium-header {
+  background: linear-gradient(135deg, #8e161a 0%, #b91c1c 50%, #dc2626 100%);
+  color: white;
+  padding: 3rem;
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 40px rgba(142, 22, 26, 0.3);
+  margin-bottom: 2rem;
+}
+
+.premium-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+.premium-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  animation: pulse 6s ease-in-out infinite;
+}
+
+
+
+/* ===== NAVEGACIÓN PREMIUM DEL MES ===== */
+.premium-navigation {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.premium-navigation::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #8e161a, #b91c1c, #dc2626, #8e161a);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite reverse;
+}
+
+.premium-nav-btn {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1rem 2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.premium-nav-btn:hover {
+  transform: scale(1.05);
+  border-color: #8e161a;
+  box-shadow: 0 12px 30px rgba(142, 22, 26, 0.2);
+}
+
+/* ===== CALENDARIO PREMIUM ===== */
+.premium-calendar {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.premium-calendar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #8e161a, #b91c1c, #dc2626, #8e161a);
+  background-size: 400% 400%;
+  animation: gradientShift 18s ease infinite;
+}
+
+/* ===== DÍAS DEL CALENDARIO PREMIUM ===== */
+.premium-day {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 3px solid #e2e8f0;
+  border-radius: 20px;
+  min-height: 140px;
+  padding: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.premium-day::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(142, 22, 26, 0.05) 50%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.premium-day:hover::before {
+  opacity: 1;
+  animation: shimmer 1.5s ease-in-out;
+}
+
+.premium-day:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(142, 22, 26, 0.15);
+  border-color: #8e161a;
+}
+
+/* Estados especiales de los días */
+.premium-day.other-month {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #9ca3af;
+  opacity: 0.7;
+}
+
+.premium-day.today {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  color: white;
+  border-color: #1e40af;
+  transform: scale(1.05);
+  box-shadow: 0 15px 35px rgba(30, 64, 175, 0.3);
+}
+
+.premium-day.today::after {
+  content: '✨';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 1.2rem;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.premium-day.holiday {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border-color: #f59e0b;
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
+.premium-day.appointment {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-color: #10b981;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.premium-day.available {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: #3b82f6;
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.premium-day.blocked {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border-color: #ef4444;
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+}
+
+.premium-day.weekend {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border-color: #8b5cf6;
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+}
+
+.premium-day.past {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  border-color: #6b7280;
+  opacity: 0.8;
+}
+
+.premium-day.selected {
+  background: linear-gradient(135deg, #8e161a 0%, #b91c1c 100%);
+  color: white;
+  border-color: #8e161a;
+  transform: scale(1.08);
+  box-shadow: 0 20px 40px rgba(142, 22, 26, 0.4);
+}
+
+/* ===== LEYENDA PREMIUM ===== */
+.premium-legend {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.premium-legend::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #8e161a, #b91c1c, #dc2626, #8e161a);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+}
+
+.premium-legend .grid > div {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 2px solid transparent;
+}
+
+.premium-legend .grid > div:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  border-color: #8e161a;
+}
+
+/* ===== EFECTOS CSS AVANZADOS ===== */
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.sparkle {
+  position: relative;
+}
+
+.sparkle::after {
+  content: '✨';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.hover-lift {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-6px);
+}
+
+.glass-effect {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.animated-gradient {
+  background: linear-gradient(45deg, #8e161a, #b91c1c, #dc2626, #8e161a);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.rotate-on-hover:hover {
+  animation: rotate 0.8s ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn 0.8s ease-out;
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.zoom-on-hover:hover {
+  transform: scale(1.05);
+}
+
+.dynamic-shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.4s ease;
+}
+
+.dynamic-shadow:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+.glow-border {
+  border: 2px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(45deg, #8e161a, #b91c1c) border-box;
+}
+
+.animated-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(142, 22, 26, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.animated-border:hover::before {
+  left: 100%;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #8e161a, #b91c1c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.floating-icon {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* ===== ANIMACIONES AVANZADAS ===== */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.3) rotate(180deg); opacity: 0.8; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 25px rgba(142, 22, 26, 0.3); }
+  50% { box-shadow: 0 0 50px rgba(142, 22, 26, 0.6); }
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  0% { transform: translateX(-100%); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+/* ===== DISEÑO RESPONSIVO MEJORADO ===== */
+@media (max-width: 1024px) {
+  .premium-day {
+    min-height: 120px;
+    padding: 1.2rem;
+  }
+  
+  .premium-header {
+    padding: 2.5rem;
+  }
+  
+
+  
+  .unified-calendar {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .premium-day {
+    min-height: 100px;
+    padding: 1rem;
+  }
+  
+  .premium-header {
+    padding: 2rem;
+  }
+  
+
+  
+  .premium-navigation {
+    padding: 1.5rem;
+  }
+  
+  .premium-calendar {
+    padding: 1.5rem;
+  }
+  
+  .premium-legend {
+    padding: 1.5rem;
+  }
+  
+  .unified-calendar {
+    border-radius: 20px;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .premium-day {
+    min-height: 80px;
+    padding: 0.8rem;
+  }
+  
+  .premium-header .text-3xl {
+    font-size: 1.8rem;
+  }
+  
+  .premium-header .text-lg {
+    font-size: 1.1rem;
+  }
+  
+  .premium-navigation .text-3xl {
+    font-size: 1.8rem;
+  }
+  
+  .premium-navigation .text-lg {
+    font-size: 1.1rem;
+  }
+  
+  .unified-calendar {
+    border-radius: 16px;
+    padding: 0.8rem;
+  }
+}
+
+/* ===== EFECTOS DE TRANSICIÓN SUAVES ===== */
+* {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== SCROLLBAR PERSONALIZADO PREMIUM ===== */
+.premium-calendar::-webkit-scrollbar,
+.premium-toolbar::-webkit-scrollbar,
+.premium-legend::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.premium-calendar::-webkit-scrollbar-track,
+.premium-toolbar::-webkit-scrollbar-track,
+.premium-legend::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+.premium-calendar::-webkit-scrollbar-thumb,
+.premium-toolbar::-webkit-scrollbar-thumb,
+.premium-legend::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #8e161a, #b91c1c);
+  border-radius: 8px;
+  border: 2px solid #f1f5f9;
+}
+
+.premium-calendar::-webkit-scrollbar-thumb:hover,
+.premium-toolbar::-webkit-scrollbar-thumb:hover,
+.premium-legend::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+}
+
+/* ===== ESTADOS DE FOCO Y ACTIVO MEJORADOS ===== */
+.premium-btn:focus,
+.premium-nav-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(142, 22, 26, 0.3);
+}
+
+.premium-btn:active,
+.premium-nav-btn:active {
+  transform: scale(0.98);
+}
+
+/* ===== EFECTO DE CARGA PREMIUM ===== */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* ===== UTILIDADES DE PROFUNDIDAD MEJORADAS ===== */
+.depth-1 { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+.depth-2 { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); }
+.depth-3 { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); }
+.depth-4 { box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18); }
+.depth-5 { box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2); }
+
+/* ===== EFECTOS ESPECIALES PARA FERIADOS ===== */
+.holiday-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.holiday-effect::before {
+  content: '🎉';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 1rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+/* ===== EFECTOS PARA CITAS ===== */
+.appointment-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.appointment-effect::before {
+  content: '📅';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 1rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ===== EFECTOS PARA DÍAS DISPONIBLES ===== */
+.available-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.available-effect::before {
+  content: '✅';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 1rem;
+  animation: wiggle 2s ease-in-out infinite;
+}
+
+@keyframes wiggle {
+  0%, 7% { transform: rotateZ(0); }
+  15% { transform: rotateZ(-15deg); }
+  20% { transform: rotateZ(10deg); }
+  25% { transform: rotateZ(-10deg); }
+  30% { transform: rotateZ(6deg); }
+  35% { transform: rotateZ(-4deg); }
+  40%, 100% { transform: rotateZ(0); }
+}
+
+/* Estilos para el calendario profesional */
+.calendar-day-professional {
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  border-radius: 6px;
+  background: white;
+  position: relative;
+}
+
+.calendar-day-professional:hover {
+  background: #f9fafb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-day-professional.other-month {
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+.calendar-day-professional.today {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.calendar-day-professional.available {
+  background: #f0fdf4;
+  border-color: #22c55e;
+}
+
+.calendar-day-professional.blocked {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+.calendar-day-professional.holiday {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+.calendar-day-professional.weekend {
+  background: #f8fafc;
+  border-color: #64748b;
+}
+
+.calendar-day-professional.appointment {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.calendar-day-professional.past {
+  background: #f1f5f9;
+  border-color: #6b7280;
+  opacity: 0.6;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .calendar-day-professional {
+    min-height: 50px;
+    font-size: 0.875rem;
+  }
+  
+  .calendar-day-professional .p-2 {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .calendar-day-professional {
+    min-height: 45px;
+    font-size: 0.75rem;
+  }
+  
+  .calendar-day-professional .p-2 {
+    padding: 0.375rem;
+  }
+}
+
+

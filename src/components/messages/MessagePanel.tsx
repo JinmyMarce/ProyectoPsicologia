@@ -114,15 +114,15 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'urgent':
-        return 'text-red-600';
+        return 'text-gray-800';
       case 'high':
-        return 'text-orange-600';
+        return 'text-gray-700';
       case 'normal':
-        return 'text-blue-600';
-      case 'low':
         return 'text-gray-600';
+      case 'low':
+        return 'text-gray-500';
       default:
-        return 'text-blue-600';
+        return 'text-gray-600';
     }
   };
 
@@ -148,12 +148,12 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center space-x-3">
-            <Mail className="w-6 h-6 text-blue-600" />
+            <Mail className="w-6 h-6 text-gray-600" />
             <h2 className="text-xl font-semibold">Mensajes</h2>
             {stats && (
               <div className="flex items-center space-x-4 text-sm text-gray-600">
                 <span>Total: {stats.total}</span>
-                <span className="text-red-600">No leídos: {stats.unread}</span>
+                <span className="text-gray-700">No leídos: {stats.unread}</span>
               </div>
             )}
           </div>
@@ -171,7 +171,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
             onClick={() => setActiveTab('inbox')}
             className={`flex-1 py-3 px-4 text-center font-medium ${
               activeTab === 'inbox'
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'text-gray-800 border-b-2 border-gray-800'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -181,7 +181,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
             onClick={() => setActiveTab('sent')}
             className={`flex-1 py-3 px-4 text-center font-medium ${
               activeTab === 'sent'
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'text-gray-800 border-b-2 border-gray-800'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -199,13 +199,13 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                 placeholder="Buscar mensajes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               />
             </div>
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
             >
               <option value="all">Todos</option>
               <option value="unread">No leídos</option>
@@ -214,7 +214,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                          {activeTab === 'inbox' && stats && stats.unread > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                                 className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 flex items-center space-x-2"
               >
                 <Eye className="w-4 h-4" />
                 <span>Marcar todos como leídos</span>
@@ -239,14 +239,14 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                   <div
                     key={message.id}
                     onClick={() => setSelectedMessage(message)}
-                    className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                      selectedMessage?.id === message.id ? 'bg-blue-50 border-r-2 border-blue-600' : ''
-                    } ${!message.read && activeTab === 'inbox' ? 'bg-blue-50' : ''}`}
+                                         className={`p-4 cursor-pointer hover:bg-gray-50 ${
+                       selectedMessage?.id === message.id ? 'bg-gray-50 border-r-2 border-gray-600' : ''
+                     } ${!message.read && activeTab === 'inbox' ? 'bg-gray-50' : ''}`}
                   >
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-blue-600">
+                                                 <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                           <span className="text-sm font-medium text-gray-600">
                             {message.sender?.name?.charAt(0) || message.recipient?.name?.charAt(0) || '?'}
                           </span>
                         </div>
@@ -304,7 +304,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                       {activeTab === 'inbox' && !selectedMessage.read && (
                         <button
                           onClick={() => handleMarkAsRead(selectedMessage.id)}
-                          className="p-2 text-gray-500 hover:text-blue-600"
+                                                     className="p-2 text-gray-500 hover:text-gray-600"
                           title="Marcar como leído"
                         >
                           <Eye className="w-4 h-4" />
@@ -312,7 +312,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                       )}
                       <button
                         onClick={() => handleDeleteMessage(selectedMessage.id)}
-                        className="p-2 text-gray-500 hover:text-red-600"
+                                                 className="p-2 text-gray-500 hover:text-gray-600"
                         title="Eliminar mensaje"
                       >
                         <Trash2 className="w-4 h-4" />

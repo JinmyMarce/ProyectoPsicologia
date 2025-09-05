@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { 
   Calendar, 
-  Clock, 
-  X, 
   CheckCircle, 
   AlertCircle,
   Loader2,
@@ -56,7 +54,7 @@ export function ScheduleManager() {
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
   const [blockedDays, setBlockedDays] = useState<BlockedDay[]>([]);
-  const [blockedSchedules, setBlockedSchedules] = useState<BlockedSchedule[]>([]);
+  const [, setBlockedSchedules] = useState<BlockedSchedule[]>([]);
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [blockingType, setBlockingType] = useState<'day' | 'blocks'>('day');
   const [selectedDate, setSelectedDate] = useState('');
@@ -190,12 +188,13 @@ export function ScheduleManager() {
     setShowBlockModal(true);
   };
 
-  const handleBlockMultiple = (date: string, blockIds: string[]) => {
-    setSelectedDate(date);
-    setSelectedBlocks(blockIds);
-    setBlockingType('blocks');
-    setShowBlockModal(true);
-  };
+  // Función para bloquear múltiples horarios (no utilizada actualmente)
+  // const handleBlockMultiple = (date: string, blockIds: string[]) => {
+  //   setSelectedDate(date);
+  //   setSelectedBlocks(blockIds);
+  //   setBlockingType('blocks');
+  //   setShowBlockModal(true);
+  // };
 
   const handleConfirmBlock = async () => {
     if (!blockReason.trim()) {
@@ -369,31 +368,41 @@ export function ScheduleManager() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">📅 Gestión de Horarios</h1>
-            <p className="text-gray-600 mt-1">Configura tu disponibilidad semanal</p>
+        {/* Header Elegante */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center shadow-xl border border-gray-700">
+                <Calendar className="w-8 h-8 text-white" />
+              </div>
+              <div className="absolute -inset-1 bg-gradient-to-br from-gray-900 to-black rounded-2xl blur opacity-20 -z-10"></div>
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-gray-900 tracking-tight">Gestión de Horarios</h1>
+              <p className="text-gray-600 mt-1 font-medium">Configura tu disponibilidad semanal</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-600">
-              Semana: {getWeekRange()}
+            <div className="bg-white rounded-xl px-4 py-2 shadow-sm border border-gray-200">
+              <div className="text-sm font-semibold text-gray-700">
+                Semana: {getWeekRange()}
+              </div>
             </div>
             <Button
               onClick={handleSaveSchedule}
               disabled={saving}
-              className="bg-[#8e161a] hover:bg-[#7a1417] text-white"
+              className="bg-gradient-to-r from-gray-900 via-gray-800 to-black hover:from-black hover:to-gray-800 text-white px-6 py-3 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300"
             >
               {saving ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
                   Guardando...
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className="w-5 h-5 mr-2" />
                   Guardar Cambios
                 </>
               )}
@@ -401,32 +410,50 @@ export function ScheduleManager() {
           </div>
         </div>
 
-        {/* Alerts */}
+        {/* Alerts Elegantes */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-            <AlertCircle className="w-5 h-5 mr-2" />
-            {error}
+          <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-700 px-6 py-4 rounded-xl flex items-center shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-3">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <div className="font-semibold">Error</div>
+              <div className="text-sm">{error}</div>
+            </div>
           </div>
         )}
         
         {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center">
-            <CheckCircle className="w-5 h-5 mr-2" />
-            {success}
+          <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 text-green-700 px-6 py-4 rounded-xl flex items-center shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <div className="font-semibold">Éxito</div>
+              <div className="text-sm">{success}</div>
+            </div>
           </div>
         )}
 
-        {/* Calendario Semanal */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-              <Calendar className="w-6 h-6 mr-3 text-[#8e161a]" />
-              Vista Semanal (Lunes - Viernes)
-            </h2>
-            <div className="text-sm text-gray-600">
-              Horario: 8:00 AM - 2:00 PM | Sesiones de 45 minutos
-            </div>
+        {/* Calendario Semanal Elegante */}
+        <div className="p-8 shadow-xl border border-gray-200 rounded-xl" style={{
+          background: 'linear-gradient(145deg, #ffffff 0%, #fafbfc 100%)'
+        }}>
+          <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center shadow-lg">
+                <Calendar className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+                  Vista Semanal (Lunes - Viernes)
+                </h2>
+                <p className="text-gray-600 font-medium">
+                  Horario: 8:00 AM - 2:00 PM | Sesiones de 45 minutos
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -434,8 +461,9 @@ export function ScheduleManager() {
                   newDate.setDate(newDate.getDate() - 7);
                   setSelectedWeek(newDate);
                 }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-300 font-semibold"
               >
-                Semana Anterior
+                ← Semana Anterior
               </Button>
               <Button
                 variant="outline"
@@ -444,32 +472,35 @@ export function ScheduleManager() {
                   newDate.setDate(newDate.getDate() + 7);
                   setSelectedWeek(newDate);
                 }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-300 font-semibold"
               >
-                Siguiente Semana
+                Siguiente Semana →
               </Button>
             </div>
           </div>
 
-          {/* Leyenda */}
-          <div className="flex items-center gap-6 mb-6 p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-white border border-gray-200 rounded"></div>
-              <span className="text-sm text-gray-600">Sesión disponible</span>
+          {/* Leyenda Elegante */}
+          <div className="flex items-center gap-8 mb-8 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-white border-2 border-gray-200 rounded-lg shadow-sm"></div>
+              <span className="text-sm font-semibold text-gray-700">Sesión disponible</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded flex items-center justify-center">
-                <User className="w-3 h-3 text-blue-600" />
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-blue-100 border-2 border-blue-300 rounded-lg flex items-center justify-center shadow-sm">
+                <User className="w-4 h-4 text-blue-600" />
               </div>
-              <span className="text-sm text-gray-600">Sesión con cita</span>
+              <span className="text-sm font-semibold text-gray-700">Sesión con cita</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-200 border border-gray-400 rounded flex items-center justify-center">
-                <Ban className="w-3 h-3 text-gray-600" />
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-gray-200 border-2 border-gray-400 rounded-lg flex items-center justify-center shadow-sm">
+                <Ban className="w-4 h-4 text-gray-600" />
               </div>
-              <span className="text-sm text-gray-600">Sesión inhabilitada</span>
+              <span className="text-sm font-semibold text-gray-700">Sesión inhabilitada</span>
             </div>
-            <div className="text-xs text-gray-500">
-              ⏱️ Cada bloque = 45 minutos
+            <div className="ml-auto">
+              <div className="text-xs font-medium text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200">
+                ⏱️ Cada bloque = 45 minutos
+              </div>
             </div>
           </div>
 
@@ -524,7 +555,7 @@ export function ScheduleManager() {
               </div>
             ))}
           </div>
-        </Card>
+        </div>
 
         {/* Resumen de Cambios */}
         {blockedDays.length > 0 && (

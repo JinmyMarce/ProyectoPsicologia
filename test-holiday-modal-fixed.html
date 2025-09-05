@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal de Feriados - Corregido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .calendar-simulation {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .calendar-header {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .time-slot {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            min-height: 60px;
+            cursor: pointer;
+        }
+        .time-slot:hover {
+            background-color: #f8f9fa;
+        }
+        .time-label {
+            width: 100px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-right: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: #495057;
+        }
+        .event-area {
+            flex: 1;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .holiday-event {
+            background: #f59e0b;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 2px;
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+        .holiday-event:hover {
+            background: #d97706;
+        }
+        .modal-simulation {
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            overflow: hidden;
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+        }
+        .modal-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .modal-content {
+            padding: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Modal de Feriados - Corregido</h1>
+        
+        <div class="test-section">
+            <h3>🔧 Problema Solucionado</h3>
+            <div class="status success">
+                <strong>✅ Corrección implementada:</strong>
+                <ul>
+                    <li>El problema era que `handleSelectSlot` interceptaba los clics</li>
+                    <li>Ahora `handleSelectSlot` también abre el modal en lugar de mostrar alert</li>
+                    <li>Funciona tanto en vista de mes como en vista de agenda/día</li>
+                    <li>Ya no aparece el mensaje "No se pueden agendar citas en días feriados"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📅 Simulación del Calendario</h3>
+            <div class="calendar-simulation">
+                <div class="calendar-header">
+                    AGOSTO 2025 - Vista Agenda/Día
+                </div>
+                
+                <div class="time-slot" onclick="showModal('Batalla de Junín')">
+                    <div class="time-label">12:00 AM</div>
+                    <div class="event-area">
+                        <div class="holiday-event">🎉 Batalla de Junín</div>
+                    </div>
+                </div>
+                
+                <div class="time-slot" onclick="showModal('Batalla de Junín')">
+                    <div class="time-label">1:00 AM</div>
+                    <div class="event-area">
+                        <div class="holiday-event">🎉 Batalla de Junín</div>
+                    </div>
+                </div>
+                
+                <div class="time-slot" onclick="showModal('Batalla de Junín')">
+                    <div class="time-label">2:00 AM</div>
+                    <div class="event-area">
+                        <div class="holiday-event">🎉 Batalla de Junín</div>
+                    </div>
+                </div>
+                
+                <div class="time-slot" onclick="showModal('Batalla de Junín')">
+                    <div class="time-label">3:00 AM</div>
+                    <div class="event-area">
+                        <div class="holiday-event">🎉 Batalla de Junín</div>
+                    </div>
+                </div>
+                
+                <div class="time-slot" onclick="showModal('Batalla de Junín')">
+                    <div class="time-label">4:00 AM</div>
+                    <div class="event-area">
+                        <div class="holiday-event">🎉 Batalla de Junín</div>
+                    </div>
+                </div>
+                
+                <div class="time-slot" onclick="showModal('Batalla de Junín')">
+                    <div class="time-label">5:00 AM</div>
+                    <div class="event-area">
+                        <div class="holiday-event">🎉 Batalla de Junín</div>
+                    </div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 10px; font-style: italic; color: #666;">
+                💡 Haz clic en cualquier parte de las filas naranjas para ver el modal
+            </p>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega al calendario del estudiante</li>
+                    <li>Cambia a vista de agenda/día</li>
+                    <li>Ve al 6 de agosto 2025</li>
+                </ul>
+            </div>
+            <div class="status warning">
+                <strong>2. Haz clic en el feriado:</strong>
+                <ul>
+                    <li>Haz clic en cualquier parte de la barra naranja "🎉 Batalla de Junín"</li>
+                    <li>Ya NO debe aparecer el mensaje de alert</li>
+                    <li>Debe abrirse el modal con imagen e información</li>
+                </ul>
+            </div>
+            <div class="status warning">
+                <strong>3. Verifica el modal:</strong>
+                <ul>
+                    <li>Aparece una imagen de fondo del feriado</li>
+                    <li>El título está sobre la imagen</li>
+                    <li>Muestra descripción e historia</li>
+                    <li>Incluye tipo de feriado</li>
+                    <li>El botón de cierre funciona</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Si aún no funciona:</h3>
+            <div class="status error">
+                <strong>❌ Posibles problemas:</strong>
+                <ul>
+                    <li>El código no se actualizó: Reinicia el servidor frontend</li>
+                    <li>Cache del navegador: Presiona Ctrl+F5 para refrescar</li>
+                    <li>Verifica la consola del navegador (F12) para errores</li>
+                    <li>Intenta cambiar a vista de mes y hacer clic</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de prueba -->
+    <div id="test-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+        <div class="modal-simulation">
+            <div id="modal-image" class="modal-image"></div>
+            <div class="modal-content">
+                <h2 id="modal-title" style="margin: 0 0 20px 0; color: #1f2937; font-size: 24px;"></h2>
+                <div id="modal-type" style="margin-bottom: 20px; padding: 12px; background-color: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;"></div>
+                <div id="modal-description" style="margin-bottom: 20px;"></div>
+                <div style="display: flex; justify-content: center;">
+                    <button onclick="closeModal()" style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const holidayDetails = {
+            'Batalla de Junín': {
+                image: '/images/Feriados/batalla de junin.png',
+                type: 'Cívico',
+                description: 'Conmemora esta importante victoria independentista lograda en 1824.',
+                longDescription: 'La Batalla de Junín se libró el 6 de agosto de 1824 en la Pampa de Junín, a más de 4,000 metros sobre el nivel del mar. Fue una de las batallas más importantes de la guerra de independencia del Perú, donde las fuerzas patriotas al mando del general Simón Bolívar derrotaron al ejército realista español. Esta victoria fue fundamental para consolidar la independencia del Perú y América del Sur.'
+            }
+        };
+
+        function showModal(holidayName) {
+            const modal = document.getElementById('test-modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalTitle = document.getElementById('modal-title');
+            const modalType = document.getElementById('modal-type');
+            const modalDescription = document.getElementById('modal-description');
+
+            const holiday = holidayDetails[holidayName];
+            if (holiday) {
+                modalImage.style.backgroundImage = `url(${holiday.image})`;
+                modalTitle.textContent = `🎉 ${holidayName}`;
+                modalType.innerHTML = `<strong>🏛️ Tipo:</strong> ${holiday.type}`;
+                modalDescription.innerHTML = `
+                    <h3 style="margin: 0 0 12px 0; font-size: 18px; color: #1f2937; font-weight: 600;">📖 Descripción</h3>
+                    <p style="margin: 0 0 20px 0; font-size: 15px; color: #4b5563; line-height: 1.6;">${holiday.description}</p>
+                    <h3 style="margin: 0 0 12px 0; font-size: 18px; color: #1f2937; font-weight: 600;">📚 Historia y Significado</h3>
+                    <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.7;">${holiday.longDescription}</p>
+                `;
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('test-modal').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.getElementById('test-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

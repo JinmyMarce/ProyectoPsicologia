@@ -31,6 +31,7 @@ interface ContactData {
   // Datos personales
   dni: string;
   fullName: string;
+  age: string;
   gender: string;
   address: string;
   studyProgram: string;
@@ -74,7 +75,7 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
   const [contactData, setContactData] = useState<ContactData>({
     dni: '',
     fullName: user?.name || '',
-
+    age: '',
     gender: '',
     address: '',
     phone: '',
@@ -104,7 +105,7 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
     setContactData({
       dni: '',
       fullName: user?.name || '',
- 
+      age: '',
       gender: '',
       address: '',
       phone: '',
@@ -132,9 +133,8 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
     // Validaciones
     if (!selectedTime) return;
     if (isFirstAppointment && !reason.trim()) return;
-
     if (!contactData.fullName.trim()) return;
-
+    if (!contactData.age.trim()) return;
     if (!contactData.gender.trim()) return;
     if (!contactData.address.trim()) return;
     if (!contactData.studyProgram.trim()) return;
@@ -162,26 +162,21 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
   };
 
   const validatePhone = (phone: string) => {
-    // Validar formato +51 + 9 dígitos
     const phoneRegex = /^\+51[0-9]{9}$/;
     return phoneRegex.test(phone);
   };
 
   const formatPhone = (phone: string) => {
-    // Remover todo excepto números
     const numbers = phone.replace(/\D/g, '');
     
-    // Si empieza con 51, agregar +
     if (numbers.startsWith('51') && numbers.length === 11) {
       return `+${numbers}`;
     }
     
-    // Si empieza con 9 y tiene 9 dígitos, agregar +51
     if (numbers.startsWith('9') && numbers.length === 9) {
       return `+51${numbers}`;
     }
     
-    // Si tiene 9 dígitos y no empieza con 9, agregar +519
     if (numbers.length === 9) {
       return `+519${numbers}`;
     }
@@ -194,17 +189,15 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
     return dniRegex.test(dni);
   };
 
-  
-  
-  
+  const validateAge = (age: string) => {
+    const ageNum = parseInt(age);
+    return ageNum >= 1 && ageNum <= 120;
   };
 
-  // Función para determinar las opciones de semestre según la fecha actual
   const getSemesterOptions = () => {
     const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1; // getMonth() retorna 0-11
+    const currentMonth = currentDate.getMonth() + 1;
     
-    // Marzo (3) hasta Agosto (8): 1, 3, 5 semestre
     if (currentMonth >= 3 && currentMonth <= 8) {
       return [
         { value: '1', label: '1er Semestre' },
@@ -212,7 +205,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         { value: '5', label: '5to Semestre' }
       ];
     } else {
-      // Septiembre (9) hasta Febrero (2): 2, 4, 6 semestre
       return [
         { value: '2', label: '2do Semestre' },
         { value: '4', label: '4to Semestre' },
@@ -227,8 +219,8 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
            contactData.dni.trim() &&
            validateDNI(contactData.dni) &&
            contactData.fullName.trim() &&
-
-
+           contactData.age.trim() &&
+           validateAge(contactData.age) &&
            contactData.gender.trim() &&
            contactData.address.trim() &&
            contactData.studyProgram.trim() &&
@@ -259,7 +251,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
 
   const renderStep1 = () => (
     <div className="space-y-6">
-      {/* Selección de hora */}
       <div>
         <div className="font-bold mb-3 flex items-center">
           <CheckCircle className="w-5 h-5 mr-2 text-[#8e161a]" />
@@ -291,7 +282,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         )}
       </div>
 
-      {/* Motivo de la cita (solo para primera cita) */}
       {isFirstAppointment && (
         <div>
           <div className="font-bold mb-2 flex items-center">
@@ -302,7 +292,7 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
             className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all"
             value={reason}
             onChange={e => setReason(e.target.value)}
-            placeholder="Describe brevemente el motivo de tu consulta. Esto ayudará al psicólogo a prepararse mejor para tu sesión..."
+            placeholder="Describe brevemente el motivo de tu consulta..."
             rows={4}
             required
           />
@@ -316,7 +306,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
 
   const renderStep2 = () => (
     <div className="space-y-4">
-      {/* Datos personales */}
       <div>
         <div className="font-bold mb-2 flex items-center">
           <User className="w-5 h-5 mr-2 text-[#8e161a]" />
@@ -473,7 +462,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         </div>
       </div>
 
-      {/* Datos de contacto */}
       <div>
         <div className="font-bold mb-3 flex items-center">
           <Phone className="w-5 h-5 mr-2 text-[#8e161a]" />
@@ -523,7 +511,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
 
   const renderStep3 = () => (
     <div className="space-y-6">
-      {/* Contacto de emergencia */}
       <div>
         <div className="font-bold mb-3 flex items-center">
           <Users className="w-5 h-5 mr-2 text-[#8e161a]" />
@@ -603,7 +590,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         </div>
       </div>
 
-      {/* Información médica */}
       <div>
         <div className="font-bold mb-3 flex items-center">
           <FileText className="w-5 h-5 mr-2 text-[#8e161a]" />
@@ -652,7 +638,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         </div>
       </div>
 
-      {/* Políticas */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="font-bold mb-3 text-blue-900">
           Políticas y Términos
@@ -713,7 +698,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         </div>
       </div>
 
-      {/* Información importante */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <div className="font-bold mb-2 text-yellow-900">
           ⚠️ Información Importante
@@ -744,7 +728,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         </div>
       )}
 
-      {/* Indicador de pasos */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -790,12 +773,10 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         </div>
       </div>
 
-      {/* Contenido del paso actual */}
       {currentStep === 1 && renderStep1()}
       {currentStep === 2 && renderStep2()}
       {currentStep === 3 && renderStep3()}
 
-      {/* Botones de navegación */}
       <div className="flex justify-between gap-3 mt-6">
         <Button 
           variant="outline" 
@@ -828,7 +809,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         </div>
       </div>
 
-      {/* Modal de Política de Privacidad */}
       {showPolicies && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -857,7 +837,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         </div>
       )}
 
-      {/* Modal de Política de Cancelación */}
       {showCancellationPolicy && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -886,7 +865,6 @@ export const BookAppointmentModal: React.FC<BookAppointmentModalProps> = ({
         </div>
       )}
 
-      {/* Modal de Resumen de Cita */}
       {showSummary && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-8 max-w-4xl w-full max-h-[95vh] overflow-y-auto">

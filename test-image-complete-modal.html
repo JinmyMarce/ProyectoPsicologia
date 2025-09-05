@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba: Imagen Completa en Modal - Ancho Completo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .test-section h2 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+        
+        .modal-preview {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 20px 0;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .close-button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 384px; /* h-96 = 24rem = 384px */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+        
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .title-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.3) 0%, rgba(30, 41, 59, 0.2) 50%, rgba(51, 65, 85, 0.1) 100%);
+            backdrop-filter: blur(4px);
+            padding: 24px 16px;
+        }
+        
+        .title-overlay h3 {
+            color: white;
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .decorative-line {
+            width: 112px; /* w-28 = 7rem = 112px */
+            height: 4px;
+            background: linear-gradient(to right, rgba(251, 191, 36, 0.7), rgba(249, 115, 22, 0.7));
+            margin: 0 auto;
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #1e293b;
+            margin: 0 0 15px 0;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-card .icon {
+            width: 24px;
+            height: 24px;
+            background: #3b82f6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .info-card p {
+            color: #475569;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .success-message h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+        }
+        
+        .success-message p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .comparison-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+        }
+        
+        .comparison-item h4 {
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        
+        .comparison-item .dimensions {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖼️ Imagen Completa en Modal</h1>
+            <p>Nueva configuración: Imagen casi completa ocupando todo el ancho del modal</p>
+        </div>
+        
+        <div class="content">
+            <div class="test-section">
+                <h2>🎯 Cambios Implementados</h2>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4><span class="icon">📏</span> Altura de Imagen</h4>
+                        <p>Cambiada de <strong>h-64</strong> (256px) a <strong>h-96</strong> (384px)</p>
+                        <div class="status-badge">✅ +128px más altura</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">🖼️</span> Tipo de Recorte</h4>
+                        <p>Cambiado de <strong>object-cover</strong> a <strong>object-contain</strong></p>
+                        <div class="status-badge">✅ Imagen completa visible</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">🎨</span> Opacidad</h4>
+                        <p>Aumentada de <strong>opacity-90</strong> a <strong>opacity-100</strong></p>
+                        <div class="status-badge">✅ Máxima nitidez</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">🌈</span> Gradiente Fondo</h4>
+                        <p>Reducido a <strong>20%/10%/transparent</strong> para mejor visibilidad</p>
+                        <div class="status-badge">✅ Mínima interferencia</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h2>🖼️ Vista Previa del Modal</h2>
+                <p>Simulación de cómo se verá el modal con la nueva configuración:</p>
+                
+                <div class="modal-preview">
+                    <div class="modal-header">
+                        <div class="modal-title">Detalles del Feriado</div>
+                        <button class="close-button">×</button>
+                    </div>
+                    
+                    <div class="image-container">
+                        <div class="image-placeholder">
+                            Imagen del Feriado<br>
+                            (Ocupando todo el ancho)
+                        </div>
+                        <div class="title-overlay">
+                            <h3>Inmaculada Concepción</h3>
+                            <div class="decorative-line"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comparison">
+                    <div class="comparison-item">
+                        <h4>Antes</h4>
+                        <div class="dimensions">h-64 (256px)</div>
+                        <p>Imagen recortada, título prominente</p>
+                    </div>
+                    <div class="comparison-item">
+                        <h4>Ahora</h4>
+                        <div class="dimensions">h-96 (384px)</div>
+                        <p>Imagen casi completa, título sutil</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h2>🔧 Configuración Técnica</h2>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4><span class="icon">📐</span> Dimensiones</h4>
+                        <p><strong>Ancho:</strong> 100% del modal<br>
+                        <strong>Alto:</strong> h-96 (384px)<br>
+                        <strong>Recorte:</strong> object-contain</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">🎨</span> Estilo Visual</h4>
+                        <p><strong>Opacidad:</strong> 100%<br>
+                        <strong>Gradiente:</strong> Muy sutil (20%/10%)<br>
+                        <strong>Backdrop:</strong> blur-sm</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><span class="icon">📝</span> Título</h4>
+                        <p><strong>Posición:</strong> Parte inferior<br>
+                        <strong>Fondo:</strong> 30%/20%/10% transparente<br>
+                        <strong>Tamaño:</strong> text-3xl</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-message">
+                <h3>🎉 ¡Configuración Optimizada!</h3>
+                <p>La imagen ahora se ve casi completa, ocupa todo el ancho del modal y tiene un título elegante y sutil en la parte inferior</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+

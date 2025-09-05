@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación - Días Bloqueados por Psicólogo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #2196f3;
+        }
+        .test-button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #d97706;
+        }
+        .color-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .color-item {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .color-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin: 0 auto 10px;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Verificación - Días Bloqueados por Psicólogo</h1>
+        
+        <div class="test-section">
+            <h3>🔧 Función Actualizada</h3>
+            <div class="status success">
+                <strong>✅ Función getDayProps actualizada:</strong>
+                <ul>
+                    <li><strong>Nueva detección:</strong> isDateBlocked() para días bloqueados por psicólogo</li>
+                    <li><strong>Prioridad:</strong> Feriados > Días bloqueados > Hoy > Pasados > Fines de semana > Citas</li>
+                    <li><strong>Color:</strong> Rojo claro (#ffbcbc) para días bloqueados</li>
+                    <li><strong>Resultado:</strong> Días bloqueados ahora se muestran en rojo</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Colores Actualizados</h3>
+            <div class="color-preview">
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #f59e0b; border-color: #d97706;"></div>
+                    <strong>Feriados</strong><br>
+                    <small>Naranja (#f59e0b)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #ffbcbc; border-color: #e63946;"></div>
+                    <strong>Días Bloqueados</strong><br>
+                    <small>Rojo claro (#ffbcbc)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: transparent; border-color: #457b9d; border-width: 2px;"></div>
+                    <strong>Hoy</strong><br>
+                    <small>Solo borde azul</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #b7e4c7; border-color: #40916c;"></div>
+                    <strong>Días disponibles</strong><br>
+                    <small>Verde claro (#b7e4c7)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #ffbcbc; border-color: #e63946;"></div>
+                    <strong>Días con citas</strong><br>
+                    <small>Rojo claro (#ffbcbc)</small>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #6b7280; border-color: #4b5563;"></div>
+                    <strong>Fines de semana</strong><br>
+                    <small>Gris oscuro (#6b7280)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Pruebas de Verificación</h3>
+            <div style="text-align: center;">
+                <button class="test-button" onclick="testBlockedDays()">🔴 Verificar Días Bloqueados</button>
+                <button class="test-button" onclick="testColorPriority()">🎨 Verificar Prioridad</button>
+                <button class="test-button" onclick="testLegendColors()">📋 Verificar Leyenda</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Instrucciones de Verificación</h3>
+            <div class="status warning">
+                <strong>1. Ve a tu aplicación:</strong>
+                <ul>
+                    <li>URL: http://localhost:5173/</li>
+                    <li>Navega al calendario de citas del estudiante</li>
+                    <li>Observa los días bloqueados por el psicólogo</li>
+                </ul>
+            </div>
+            <div class="status info">
+                <strong>2. Aspectos a verificar:</strong>
+                <ul>
+                    <li>🎉 <strong>Feriados:</strong> Deben ser naranja (#f59e0b) - Prioridad máxima</li>
+                    <li>🔴 <strong>Días bloqueados:</strong> Deben ser rojo claro (#ffbcbc) - Segunda prioridad</li>
+                    <li>📅 <strong>Hoy:</strong> Solo debe tener borde azul (#457b9d)</li>
+                    <li>🟢 <strong>Días normales:</strong> Verde claro (#b7e4c7)</li>
+                    <li>🔴 <strong>Días con citas:</strong> Rojo claro (#ffbcbc)</li>
+                    <li>🌙 <strong>Fines de semana:</strong> Gris oscuro (#6b7280)</li>
+                    <li>📋 <strong>Leyenda:</strong> Los colores deben coincidir</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Prioridad de Colores</h3>
+            <div class="status info">
+                <strong>Orden de prioridad (de mayor a menor):</strong>
+                <ol>
+                    <li><strong>🎉 Feriados:</strong> Naranja (#f59e0b) - Siempre visible</li>
+                    <li><strong>🔴 Días bloqueados por psicólogo:</strong> Rojo claro (#ffbcbc) - Horas o todo el día</li>
+                    <li><strong>📅 Hoy:</strong> Solo borde azul (#457b9d)</li>
+                    <li><strong>⚫ Días pasados:</strong> Gris oscuro (#6b7280)</li>
+                    <li><strong>🌙 Fines de semana:</strong> Gris oscuro (#6b7280)</li>
+                    <li><strong>🔴 Días con citas:</strong> Rojo claro (#ffbcbc)</li>
+                    <li><strong>🟢 Días disponibles:</strong> Verde claro (#b7e4c7)</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Detalles Técnicos</h3>
+            <div class="status info">
+                <strong>Configuración técnica actualizada:</strong>
+                <ul>
+                    <li><strong>Feriados:</strong> backgroundColor: '#f59e0b', borderColor: '#d97706'</li>
+                    <li><strong>Días bloqueados:</strong> backgroundColor: '#ffbcbc', borderColor: '#e63946'</li>
+                    <li><strong>Hoy:</strong> backgroundColor: 'transparent', borderColor: '#457b9d'</li>
+                    <li><strong>Disponible:</strong> backgroundColor: '#b7e4c7', borderColor: '#40916c'</li>
+                    <li><strong>Con citas:</strong> backgroundColor: '#ffbcbc', borderColor: '#e63946'</li>
+                    <li><strong>Fines de semana:</strong> backgroundColor: '#6b7280', borderColor: '#4b5563'</li>
+                    <li><strong>Pasados:</strong> backgroundColor: '#6b7280', borderColor: '#4b5563'</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Cómo Crear Días Bloqueados</h3>
+            <div class="status warning">
+                <strong>Para probar días bloqueados:</strong>
+                <ul>
+                    <li>1. Ve al panel del psicólogo</li>
+                    <li>2. Usa el gestor de horarios</li>
+                    <li>3. Bloquea algunos días (horas específicas o todo el día)</li>
+                    <li>4. Ve al calendario del estudiante</li>
+                    <li>5. Verifica que los días bloqueados aparezcan en rojo</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testBlockedDays() {
+            alert('🔴 Para verificar los días bloqueados:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega al calendario de citas del estudiante\n' +
+                  '3. Busca días bloqueados por el psicólogo\n' +
+                  '4. Verifica que tengan color rojo claro (#ffbcbc)\n' +
+                  '5. Verifica que coincidan con la leyenda');
+        }
+
+        function testColorPriority() {
+            alert('🎨 Para verificar la prioridad de colores:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega al calendario de citas del estudiante\n' +
+                  '3. Busca un día que sea feriado Y esté bloqueado\n' +
+                  '4. Verifica que se muestre como feriado (naranja)\n' +
+                  '5. Los feriados tienen prioridad sobre días bloqueados');
+        }
+
+        function testLegendColors() {
+            alert('📋 Para verificar la leyenda:\n\n' +
+                  '1. Ve a http://localhost:5173/\n' +
+                  '2. Navega al calendario de citas del estudiante\n' +
+                  '3. Observa la leyenda de colores\n' +
+                  '4. Verifica que "Bloqueado" sea rojo claro (#ffbcbc)\n' +
+                  '5. Compara con los días bloqueados en el calendario');
+        }
+    </script>
+</body>
+</html>

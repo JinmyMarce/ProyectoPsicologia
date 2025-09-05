@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Calendario Estudiante - Cambios Aplicados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .fix-box {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #28a745;
+            margin: 20px 0;
+        }
+        .fix-box h2 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .instruction-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #2196f3;
+            margin: 20px 0;
+        }
+        .instruction-box h2 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificación Calendario Estudiante - Cambios Aplicados</h1>
+        
+        <div class="fix-box">
+            <h2>✅ Cambios Realizados</h2>
+            <p><strong>1. Función createLocalDate corregida:</strong> Solucionado el problema del día antes</p>
+            <p><strong>2. Colores de feriados corregidos:</strong> Naranja (#f59e0b) con texto blanco</p>
+            <p><strong>3. Filtro restrictivo eliminado:</strong> Los feriados ahora se muestran correctamente</p>
+        </div>
+
+        <div class="instruction-box">
+            <h2>📋 Instrucciones para Verificar</h2>
+            <p><strong>1. Reinicia el navegador</strong> o haz Ctrl+F5 para limpiar la caché</p>
+            <p><strong>2. Ve al calendario del estudiante</strong> en tu aplicación</p>
+            <p><strong>3. Verifica los siguientes puntos:</strong></p>
+            <ul>
+                <li>Los feriados aparecen en las fechas correctas (no un día antes)</li>
+                <li>Los feriados tienen color naranja (#f59e0b) con texto blanco</li>
+                <li>Los nombres de los feriados son visibles</li>
+                <li>Los colores coinciden con la leyenda</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Código Modificado</h3>
+            <div class="code-block">
+// Función createLocalDate corregida
+const createLocalDate = (dateString: string) => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const utcDate = new Date(Date.UTC(year, month - 1, day));
+  const localDate = new Date(utcDate.getUTCFullYear(), utcDate.getUTCMonth(), utcDate.getUTCDate());
+  return localDate;
+};
+
+// Colores de feriados corregidos
+if (isHoliday) {
+  return {
+    style: {
+      backgroundColor: '#f59e0b',  // Naranja
+      borderColor: '#d97706',       // Naranja oscuro
+      color: '#ffffff'              // Blanco
+    },
+    className: 'holiday'
+  };
+}
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📅 Feriados de Agosto 2025</h3>
+            <div id="holidays-list">
+                <div class="status success">
+                    <strong>6 de agosto:</strong> Batalla de Junín (Miércoles)
+                </div>
+                <div class="status success">
+                    <strong>30 de agosto:</strong> Santa Rosa de Lima (Sábado)
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 Colores Esperados</h3>
+            <div id="colors-expected">
+                <div class="status success">
+                    <strong>Feriados:</strong> Fondo naranja (#f59e0b), borde naranja oscuro (#d97706), texto blanco (#ffffff)
+                </div>
+                <div class="status success">
+                    <strong>Disponible:</strong> Fondo verde (#b7e4c7), borde verde oscuro (#40916c), texto verde oscuro (#065f46)
+                </div>
+                <div class="status success">
+                    <strong>Fin de semana:</strong> Fondo morado (#d4b9ff), borde morado oscuro (#8b5cf6), texto oscuro (#1e293b)
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Checklist de Verificación</h3>
+            <div id="checklist">
+                <div class="status warning">
+                    <input type="checkbox" id="check1"> <label for="check1">Los feriados aparecen en las fechas correctas (6 y 30 de agosto)</label>
+                </div>
+                <div class="status warning">
+                    <input type="checkbox" id="check2"> <label for="check2">Los feriados tienen color naranja con texto blanco</label>
+                </div>
+                <div class="status warning">
+                    <input type="checkbox" id="check3"> <label for="check3">Los nombres de los feriados son visibles</label>
+                </div>
+                <div class="status warning">
+                    <input type="checkbox" id="check4"> <label for="check4">Los colores coinciden con la leyenda</label>
+                </div>
+                <div class="status warning">
+                    <input type="checkbox" id="check5"> <label for="check5">No hay errores en la consola del navegador</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚨 Si los cambios no aparecen</h3>
+            <div id="troubleshooting">
+                <div class="status error">
+                    <strong>1. Limpia la caché del navegador:</strong>
+                    <ul>
+                        <li>Chrome: Ctrl+Shift+Delete → Caché de imágenes y archivos</li>
+                        <li>Firefox: Ctrl+Shift+Delete → Caché</li>
+                        <li>Edge: Ctrl+Shift+Delete → Datos de navegación</li>
+                    </ul>
+                </div>
+                <div class="status error">
+                    <strong>2. Reinicia el servidor de desarrollo:</strong>
+                    <div class="code-block">
+# Detén el servidor (Ctrl+C) y vuelve a iniciarlo:
+npm run dev
+                    </div>
+                </div>
+                <div class="status error">
+                    <strong>3. Verifica que el archivo BaseCalendar.tsx tenga los cambios:</strong>
+                    <div class="code-block">
+# Busca estas líneas en src/components/ui/BaseCalendar.tsx:
+const createLocalDate = (dateString: string) => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const utcDate = new Date(Date.UTC(year, month - 1, day));
+  const localDate = new Date(utcDate.getUTCFullYear(), utcDate.getUTCMonth(), utcDate.getUTCDate());
+  return localDate;
+};
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Estado Final</h3>
+            <div id="final-status">
+                <div class="status success">
+                    <strong>✅ Cambios aplicados correctamente si:</strong>
+                    <ul>
+                        <li>Los feriados aparecen en las fechas correctas</li>
+                        <li>Los colores son naranjas con texto blanco</li>
+                        <li>Los nombres de los feriados son visibles</li>
+                        <li>No hay errores en la consola</li>
+                    </ul>
+                </div>
+                <div class="status error">
+                    <strong>❌ Si aún hay problemas:</strong>
+                    <ul>
+                        <li>Revisa la consola del navegador (F12) para errores</li>
+                        <li>Verifica que el servidor esté ejecutándose</li>
+                        <li>Limpia completamente la caché del navegador</li>
+                        <li>Reinicia el servidor de desarrollo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para verificar si los cambios están aplicados
+        function checkChangesApplied() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            let allChecked = true;
+            
+            checkboxes.forEach(checkbox => {
+                if (!checkbox.checked) {
+                    allChecked = false;
+                }
+            });
+            
+            const finalStatus = document.getElementById('final-status');
+            if (allChecked) {
+                finalStatus.innerHTML = `
+                    <div class="status success">
+                        <strong>🎉 ¡ÉXITO! Todos los cambios están aplicados correctamente</strong>
+                        <p>El calendario del estudiante ahora muestra:</p>
+                        <ul>
+                            <li>✅ Feriados en las fechas correctas</li>
+                            <li>✅ Colores naranjas con texto blanco</li>
+                            <li>✅ Nombres de feriados visibles</li>
+                            <li>✅ Colores que coinciden con la leyenda</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+        
+        // Agregar event listeners a los checkboxes
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', checkChangesApplied);
+            });
+        });
+    </script>
+</body>
+</html>

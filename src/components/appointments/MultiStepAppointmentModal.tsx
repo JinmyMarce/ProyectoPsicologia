@@ -5,6 +5,7 @@ import { EmergencyContactModal } from './EmergencyContactModal';
 import { MedicalInfoModal } from './MedicalInfoModal';
 import { createAppointment } from '../../services/appointments';
 import { useAuth } from '../../contexts/AuthContext';
+import { CheckCircle, XCircle, Clock, User, Phone, FileText, Calendar, ArrowRight, ArrowLeft, Star, Shield, Heart, Award, Zap, Target, TrendingUp, BookOpen, Users, CheckSquare, AlertTriangle, Sparkles, Crown, Gem, Rocket, Lightning, Brain, Stethoscope, GraduationCap, MapPin, Mail, PhoneCall, UserCheck, CalendarCheck, Clock3, Award as AwardIcon, Zap as ZapIcon, Target as TargetIcon, TrendingUp as TrendingUpIcon, BookOpen as BookOpenIcon, Users as UsersIcon, CheckSquare as CheckSquareIcon, AlertTriangle as AlertTriangleIcon, Sparkles as SparklesIcon, Crown as CrownIcon, Gem as GemIcon, Rocket as RocketIcon, Lightning as LightningIcon, Brain as BrainIcon, Stethoscope as StethoscopeIcon, GraduationCap as GraduationCapIcon, MapPin as MapPinIcon, Mail as MailIcon, PhoneCall as PhoneCallIcon, UserCheck as UserCheckIcon, CalendarCheck as CalendarCheckIcon, Clock3 as Clock3Icon } from 'lucide-react';
 
 interface AppointmentData {
   psychologistId: number;
@@ -40,6 +41,57 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const steps = [
+    { 
+      id: 1, 
+      title: 'Selección de Horario', 
+      subtitle: 'Elige el horario ideal',
+      icon: Clock, 
+      description: 'Selecciona el horario que mejor se adapte a tu disponibilidad',
+      color: 'from-gray-700 to-gray-800',
+      bgColor: 'from-gray-50 to-gray-100',
+      gradient: 'linear-gradient(135deg, #374151 0%, #1f2937 100%)',
+      accentColor: '#374151',
+      features: ['Horarios flexibles', 'Confirmación inmediata', 'Recordatorios automáticos']
+    },
+    { 
+      id: 2, 
+      title: 'Datos Personales', 
+      subtitle: 'Información básica',
+      icon: User, 
+      description: 'Completa tu información personal para el registro',
+      color: 'from-gray-600 to-gray-700',
+      bgColor: 'from-gray-50 to-gray-100',
+      gradient: 'linear-gradient(135deg, #4b5563 0%, #374151 100%)',
+      accentColor: '#4b5563',
+      features: ['Datos seguros', 'Proceso rápido', 'Validación automática']
+    },
+    { 
+      id: 3, 
+      title: 'Contacto de Emergencia', 
+      subtitle: 'Seguridad y respaldo',
+      icon: Phone, 
+      description: 'Proporciona un contacto de emergencia para tu seguridad',
+      color: 'from-gray-500 to-gray-600',
+      bgColor: 'from-gray-50 to-gray-100',
+      gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+      accentColor: '#6b7280',
+      features: ['Contacto confiable', 'Información privada', 'Acceso rápido']
+    },
+    { 
+      id: 4, 
+      title: 'Información Médica', 
+      subtitle: 'Historial y motivo',
+      icon: FileText, 
+      description: 'Comparte información médica relevante para tu consulta',
+      color: 'from-gray-400 to-gray-500',
+      bgColor: 'from-gray-50 to-gray-100',
+      gradient: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+      accentColor: '#9ca3af',
+      features: ['Historial completo', 'Motivo de consulta', 'Medicamentos actuales']
+    }
+  ];
 
   const handleTimeSelected = (time: string) => {
     setAppointmentData(prev => ({ ...prev, time }));
@@ -145,6 +197,122 @@ const appointmentDataToSend = {
     onClose();
   };
 
+  const renderProgressBar = () => (
+    <div className="mb-8">
+      {/* Header del progreso - Estilo Formal */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-slate-50 to-gray-100 rounded-2xl border-2 border-slate-200 mb-6 shadow-lg">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center">
+            <span className="text-white text-sm font-bold">{currentStep}</span>
+          </div>
+          <span className="text-slate-700 font-bold text-base tracking-wide">
+            Paso {currentStep} de {steps.length} - {steps[currentStep - 1].title}
+          </span>
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center">
+            <span className="text-white text-sm font-bold">{steps.length}</span>
+          </div>
+        </div>
+        <h2 className="text-4xl font-black text-slate-900 mb-3 tracking-tight" style={{
+          textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          letterSpacing: '-0.5px'
+        }}>
+          {steps[currentStep - 1].subtitle}
+        </h2>
+        <p className="text-slate-600 text-xl max-w-3xl mx-auto font-medium leading-relaxed">
+          {steps[currentStep - 1].description}
+        </p>
+      </div>
+
+      {/* Barra de progreso formal */}
+      <div className="flex items-center justify-between mb-8">
+        {steps.map((step, index) => {
+          const isCompleted = currentStep > step.id;
+          const isCurrent = currentStep === step.id;
+          const Icon = step.icon;
+          
+          return (
+            <div key={step.id} className="flex items-center flex-1">
+              <div className="flex flex-col items-center relative">
+                {/* Círculo del paso - Estilo Formal */}
+                <div className={`
+                  w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 transform relative border-2
+                  ${isCompleted 
+                    ? 'bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-xl border-emerald-500' 
+                    : isCurrent 
+                      ? 'bg-gradient-to-br from-slate-700 to-slate-800 text-white shadow-xl border-slate-600 scale-105' 
+                      : 'bg-white text-slate-400 shadow-md border-slate-300'
+                  }
+                `} style={{
+                  boxShadow: isCurrent || isCompleted 
+                    ? `0 12px 24px ${isCompleted ? 'rgba(16, 185, 129, 0.3)' : 'rgba(51, 65, 85, 0.3)'}, 0 6px 12px rgba(0, 0, 0, 0.15)` 
+                    : '0 4px 8px rgba(0, 0, 0, 0.1)'
+                }}>
+                  {isCompleted ? (
+                    <CheckCircle className="w-8 h-8" />
+                  ) : (
+                    <Icon className="w-8 h-8" />
+                  )}
+                </div>
+                
+                {/* Información del paso */}
+                <div className="mt-3 text-center max-w-32">
+                  <p className={`text-sm font-bold ${isCurrent ? 'text-slate-800' : isCompleted ? 'text-emerald-700' : 'text-slate-500'}`}>
+                    {step.title}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1 hidden lg:block leading-tight">
+                    {step.description}
+                  </p>
+                </div>
+                
+                {/* Indicador de paso actual */}
+                {isCurrent && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                )}
+                
+                {/* Badge de completado */}
+                {isCompleted && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                    <CheckCircle className="w-3 h-3 text-white" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Línea conectora */}
+              {index < steps.length - 1 && (
+                <div className={`
+                  flex-1 h-1 mx-4 rounded-full transition-all duration-500 relative overflow-hidden
+                  ${isCompleted 
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' 
+                    : 'bg-slate-200'
+                  }
+                `} style={{
+                  boxShadow: isCompleted 
+                    ? '0 2px 4px rgba(16, 185, 129, 0.2)' 
+                    : '0 1px 2px rgba(0, 0, 0, 0.05)'
+                }}>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Características del paso actual - Estilo Formal */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {steps[currentStep - 1].features.map((feature, index) => (
+          <div key={index} className="flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-slate-200 transition-all duration-300 hover:border-slate-300 hover:shadow-md">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center shadow-md">
+              <CheckSquare className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-slate-700 font-semibold text-sm">{feature}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
@@ -215,30 +383,36 @@ const appointmentDataToSend = {
     }
   };
 
-  // Mostrar error si existe
+  // Mostrar error si existe - Estilo Formal
   if (error) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
-          <div className="p-6">
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 border-2 border-slate-200" style={{
+          boxShadow: `
+            0 25px 50px rgba(0, 0, 0, 0.25), 
+            0 12px 25px rgba(0, 0, 0, 0.15),
+            0 6px 12px rgba(0, 0, 0, 0.1)
+          `
+        }}>
+          <div className="p-8">
             <div className="text-center">
-              <div className="bg-red-100 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mx-auto mb-6 shadow-lg border-2 border-red-400">
+                <XCircle className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Error al agendar cita</h3>
-              <p className="text-gray-600 mb-6">{error}</p>
-              <div className="flex space-x-3">
+              <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tight">
+                Error al Agendar Cita
+              </h3>
+              <p className="text-slate-600 mb-8 leading-relaxed text-lg font-medium">{error}</p>
+              <div className="flex space-x-4">
                 <button
                   onClick={handleClose}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-6 py-3 border-2 border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition-all duration-300 font-semibold text-base"
                 >
                   Cerrar
                 </button>
                 <button
                   onClick={() => setError('')}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-xl hover:from-slate-800 hover:to-slate-900 transition-all duration-300 font-semibold text-base shadow-lg"
                 >
                   Reintentar
                 </button>
@@ -250,16 +424,42 @@ const appointmentDataToSend = {
     );
   }
 
-  // Mostrar loading si está procesando
+  // Mostrar loading si está procesando - Estilo Formal
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
-          <div className="p-6">
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 border-2 border-slate-200" style={{
+          boxShadow: `
+            0 25px 50px rgba(0, 0, 0, 0.25), 
+            0 12px 25px rgba(0, 0, 0, 0.15),
+            0 6px 12px rgba(0, 0, 0, 0.1)
+          `
+        }}>
+          <div className="p-8">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Agendando cita...</h3>
-              <p className="text-gray-600">Por favor espera mientras procesamos tu solicitud.</p>
+              <div className="relative mb-6">
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-slate-200 border-t-slate-700 mx-auto" style={{
+                  boxShadow: '0 8px 16px rgba(51, 65, 85, 0.2)'
+                }}></div>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tight">
+                Agendando Cita
+              </h3>
+              <p className="text-slate-600 leading-relaxed text-lg font-medium mb-8">
+                Procesando tu solicitud de manera segura...
+              </p>
+              
+              {/* Información adicional */}
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center justify-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                  <Shield className="w-5 h-5 text-slate-600" />
+                  <span className="text-slate-700 font-semibold text-sm">Datos protegidos y seguros</span>
+                </div>
+                <div className="flex items-center justify-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                  <CheckSquare className="w-5 h-5 text-slate-600" />
+                  <span className="text-slate-700 font-semibold text-sm">Proceso automatizado</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

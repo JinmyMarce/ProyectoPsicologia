@@ -93,10 +93,10 @@ export const SuperAdminDashboard: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const colors = {
-      pending: 'bg-mostaza/20 text-granate-800',
-      confirmed: 'bg-azul-marino-100 text-azul-marino-800',
-      completed: 'bg-verde-esmeralda/20 text-verde-oscuro',
-      cancelled: 'bg-granate-100 text-granate-800'
+      pending: 'bg-gray-100 text-gray-700',
+      confirmed: 'bg-gray-100 text-gray-800',
+      completed: 'bg-gray-100 text-gray-600',
+      cancelled: 'bg-gray-100 text-gray-500'
     };
 
     const labels = {
@@ -168,29 +168,15 @@ export const SuperAdminDashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto p-0 pt-1 space-y-6 font-serif" style={{fontFamily: 'Georgia, Times, serif'}}>
-      {/* Header */}
-      <PageHeader title={''}>
-        {showWelcome && (
-          <div className="mb-4 text-2xl font-semibold text-[#8e161a] text-center transition-opacity duration-1000" style={{fontFamily: 'Georgia, Times, serif', opacity: showWelcome ? 1 : 0}}>
-            ¡Bienvenido, {user?.name || 'Usuario'}!
-          </div>
-        )}
-        <div className="w-full flex flex-col items-center justify-center mt-1 mb-2">
-          <span
-            className="text-2xl font-extrabold text-white text-center px-6 py-2 rounded-xl shadow-lg"
-            style={{
-              fontFamily: 'Gasters, sans-serif',
-              letterSpacing: '0.04em',
-              background: 'linear-gradient(90deg, #8e161a 60%, #d3b7a0 100%)',
-              boxShadow: '0 2px 12px 0 rgba(142,22,26,0.10)',
-              border: '2px solid #8e161a',
-              textShadow: '0 2px 8px rgba(0,0,0,0.08)'
-            }}
-          >
-            Panel del Super Administrador
-          </span>
+      {/* Título Principal */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Panel del Super Administrador - Control Total del Sistema
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
         </div>
-      </PageHeader>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

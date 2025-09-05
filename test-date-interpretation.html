@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Interpretación de Fechas - Feriados 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .date-test {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #2196f3;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .date-test.correct {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .date-test.incorrect {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .problem-description {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Prueba Interpretación de Fechas - Feriados 2025</h1>
+        
+        <div class="problem-description">
+            <h3>🎯 Problema: Feriados aparecen un día antes</h3>
+            <p><strong>Problema:</strong> Los feriados en el calendario del estudiante aparecen un día antes de la fecha correcta.</p>
+            <p><strong>Ejemplo:</strong> Batalla de Junín (6 de agosto) aparece el 5 de agosto.</p>
+            <p><strong>Causa probable:</strong> Problema de zona horaria en la interpretación de fechas.</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Función createLocalDate (NUEVA)</h3>
+            <div id="new-function-test">
+                <p>Probando nueva función...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Función createLocalDate (ANTIGUA)</h3>
+            <div id="old-function-test">
+                <p>Probando función antigua...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎉 Feriados de Agosto 2025 - Comparación</h3>
+            <div id="august-comparison">
+                <p>Comparando fechas...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Resumen de Corrección</h3>
+            <div id="correction-summary">
+                <p>Generando resumen...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Nueva función createLocalDate (corregida)
+        function createLocalDateNew(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const date = new Date(year, month - 1, day, 0, 0, 0, 0);
+            return date;
+        }
+
+        // Función createLocalDate antigua (problemática)
+        function createLocalDateOld(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const date = new Date();
+            date.setFullYear(year);
+            date.setMonth(month - 1);
+            date.setDate(day);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        // Función para formatear fecha
+        function formatDate(date) {
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                weekday: 'long'
+            });
+        }
+
+        // Probar función nueva
+        function testNewFunction() {
+            const container = document.getElementById('new-function-test');
+            const testDates = ['2025-08-06', '2025-08-30', '2025-01-01'];
+            
+            let html = '<h4>Nueva función (corregida):</h4>';
+            testDates.forEach(dateString => {
+                const date = createLocalDateNew(dateString);
+                const isCorrect = date.getDate() === parseInt(dateString.split('-')[2]);
+                
+                html += `
+                    <div class="date-test ${isCorrect ? 'correct' : 'incorrect'}">
+                        <div><strong>Entrada:</strong> ${dateString}</div>
+                        <div><strong>Fecha creada:</strong> ${date.toISOString()}</div>
+                        <div><strong>Día extraído:</strong> ${date.getDate()}</div>
+                        <div><strong>Fecha formateada:</strong> ${formatDate(date)}</div>
+                        <div><strong>Resultado:</strong> ${isCorrect ? '✅ Correcto' : '❌ Incorrecto'}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Probar función antigua
+        function testOldFunction() {
+            const container = document.getElementById('old-function-test');
+            const testDates = ['2025-08-06', '2025-08-30', '2025-01-01'];
+            
+            let html = '<h4>Función antigua (problemática):</h4>';
+            testDates.forEach(dateString => {
+                const date = createLocalDateOld(dateString);
+                const isCorrect = date.getDate() === parseInt(dateString.split('-')[2]);
+                
+                html += `
+                    <div class="date-test ${isCorrect ? 'correct' : 'incorrect'}">
+                        <div><strong>Entrada:</strong> ${dateString}</div>
+                        <div><strong>Fecha creada:</strong> ${date.toISOString()}</div>
+                        <div><strong>Día extraído:</strong> ${date.getDate()}</div>
+                        <div><strong>Fecha formateada:</strong> ${formatDate(date)}</div>
+                        <div><strong>Resultado:</strong> ${isCorrect ? '✅ Correcto' : '❌ Incorrecto'}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Comparar feriados de agosto
+        async function compareAugustHolidays() {
+            const container = document.getElementById('august-comparison');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays?year=2025');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const augustHolidays = data.data.filter(h => h.date.startsWith('2025-08'));
+                    
+                    let html = '<h4>Feriados de Agosto 2025:</h4>';
+                    augustHolidays.forEach(holiday => {
+                        const dateOld = createLocalDateOld(holiday.date);
+                        const dateNew = createLocalDateNew(holiday.date);
+                        const expectedDay = parseInt(holiday.date.split('-')[2]);
+                        
+                        const oldCorrect = dateOld.getDate() === expectedDay;
+                        const newCorrect = dateNew.getDate() === expectedDay;
+                        
+                        html += `
+                            <div class="date-test ${newCorrect ? 'correct' : 'incorrect'}">
+                                <div><strong>Feriado:</strong> ${holiday.name}</div>
+                                <div><strong>Fecha API:</strong> ${holiday.date}</div>
+                                <div><strong>Día esperado:</strong> ${expectedDay}</div>
+                                <div><strong>Función antigua:</strong> ${dateOld.getDate()} ${oldCorrect ? '✅' : '❌'}</div>
+                                <div><strong>Función nueva:</strong> ${dateNew.getDate()} ${newCorrect ? '✅' : '❌'}</div>
+                                <div><strong>Fecha nueva formateada:</strong> ${formatDate(dateNew)}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Mostrar resumen de corrección
+        function showCorrectionSummary() {
+            const container = document.getElementById('correction-summary');
+            
+            const testDate = '2025-08-06';
+            const dateOld = createLocalDateOld(testDate);
+            const dateNew = createLocalDateNew(testDate);
+            const expectedDay = 6;
+            
+            const oldCorrect = dateOld.getDate() === expectedDay;
+            const newCorrect = dateNew.getDate() === expectedDay;
+            
+            let html = `
+                <h4>Resumen de la Corrección:</h4>
+                <div class="status ${newCorrect ? 'success' : 'warning'}">
+                    <p><strong>Problema:</strong> Función antigua causaba desplazamiento de fechas</p>
+                    <p><strong>Solución:</strong> Usar constructor directo de Date</p>
+                    <p><strong>Test con ${testDate}:</strong></p>
+                    <ul>
+                        <li>Función antigua: ${dateOld.getDate()} ${oldCorrect ? '✅' : '❌'}</li>
+                        <li>Función nueva: ${dateNew.getDate()} ${newCorrect ? '✅' : '❌'}</li>
+                        <li>Esperado: ${expectedDay}</li>
+                    </ul>
+                    <p><strong>Resultado:</strong> ${newCorrect ? '✅ Problema solucionado' : '⚠️ Problema persiste'}</p>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Ejecutar todas las pruebas
+        function runAllTests() {
+            testNewFunction();
+            testOldFunction();
+            compareAugustHolidays();
+            showCorrectionSummary();
+        }
+
+        // Ejecutar pruebas
+        runAllTests();
+        
+        // Recargar cada 30 segundos
+        setInterval(runAllTests, 30000);
+    </script>
+</body>
+</html>

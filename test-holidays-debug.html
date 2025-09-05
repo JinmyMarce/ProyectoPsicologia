@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Feriados</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .holiday { background: #fff3cd; padding: 10px; margin: 5px 0; border-radius: 5px; border-left: 4px solid #ffc107; }
+        .error { color: red; }
+        .success { color: green; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug de Feriados</h1>
+    
+    <div class="test-section">
+        <h3>1. Probar API de Feriados</h3>
+        <button onclick="testAPI()">Probar API</button>
+        <div id="api-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Probar Comparación de Fechas</h3>
+        <button onclick="testDateComparison()">Probar Comparaciones</button>
+        <div id="comparison-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Probar Fechas Específicas</h3>
+        <button onclick="testSpecificDates()">Probar Fechas Específicas</button>
+        <div id="specific-result"></div>
+    </div>
+
+    <script>
+        // Función para comparar fechas (igual que en el componente)
+        function isSameDay(date1, date2) {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            return d1.getFullYear() === d2.getFullYear() &&
+                   d1.getMonth() === d2.getMonth() &&
+                   d1.getDate() === d2.getDate();
+        }
+
+        // Función para verificar si una fecha es feriado
+        function checkIsHoliday(date, holidays) {
+            return holidays.some(holiday => {
+                const holidayDate = new Date(holiday.date + 'T00:00:00');
+                const compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                return isSameDay(compareDate, holidayDate);
+            });
+        }
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = 'Probando API...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/holidays/year/2025');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ API funcionando</div>
+                        <p>Feriados encontrados: ${data.data.length}</p>
+                        <div>
+                            ${data.data.map(holiday => `
+                                <div class="holiday">
+                                    <strong>${holiday.name}</strong> - ${holiday.date}
+                                    <br><small>${holiday.is_national ? 'Nacional' : 'Regional'}</small>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    
+                    // Guardar feriados para otras pruebas
+                    window.holidays = data.data;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error en API: ${JSON.stringify(data)}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        function testDateComparison() {
+            const resultDiv = document.getElementById('comparison-result');
+            
+            if (!window.holidays) {
+                resultDiv.innerHTML = '<div class="error">❌ Primero ejecuta la prueba de API</div>';
+                return;
+            }
+
+            const testDates = [
+                new Date('2025-08-15'), // Aniversario de Arequipa
+                new Date('2025-08-30'), // Santa Rosa de Lima
+                new Date('2025-09-29'), // San Miguel Arcángel
+                new Date('2025-10-08'), // Combate de Angamos
+                new Date('2025-12-25'), // Navidad
+                new Date('2025-08-16'), // No es feriado
+                new Date('2025-08-31'), // No es feriado
+            ];
+
+            let html = '<h4>Resultados de comparación:</h4>';
+            
+            testDates.forEach(date => {
+                const isHoliday = checkIsHoliday(date, window.holidays);
+                const status = isHoliday ? '✅ FERIADO' : '❌ No es feriado';
+                const color = isHoliday ? 'green' : 'red';
+                
+                html += `
+                    <div style="margin: 5px 0; padding: 5px; border-left: 3px solid ${color};">
+                        <strong>${date.toISOString().split('T')[0]}</strong>: ${status}
+                    </div>
+                `;
+            });
+            
+            resultDiv.innerHTML = html;
+        }
+
+        function testSpecificDates() {
+            const resultDiv = document.getElementById('specific-result');
+            
+            if (!window.holidays) {
+                resultDiv.innerHTML = '<div class="error">❌ Primero ejecuta la prueba de API</div>';
+                return;
+            }
+
+            const specificTests = [
+                { date: '2025-08-15', expected: 'Aniversario de Arequipa' },
+                { date: '2025-08-30', expected: 'Santa Rosa de Lima' },
+                { date: '2025-12-25', expected: 'Navidad' },
+                { date: '2025-08-16', expected: null },
+                { date: '2025-08-31', expected: null },
+            ];
+
+            let html = '<h4>Pruebas específicas:</h4>';
+            
+            specificTests.forEach(test => {
+                const date = new Date(test.date);
+                const isHoliday = checkIsHoliday(date, window.holidays);
+                const holiday = window.holidays.find(h => {
+                    const holidayDate = new Date(h.date + 'T00:00:00');
+                    const compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                    return isSameDay(compareDate, holidayDate);
+                });
+                
+                const actual = holiday ? holiday.name : null;
+                const passed = (actual === test.expected);
+                const status = passed ? '✅ PASÓ' : '❌ FALLÓ';
+                const color = passed ? 'green' : 'red';
+                
+                html += `
+                    <div style="margin: 5px 0; padding: 5px; border-left: 3px solid ${color};">
+                        <strong>${test.date}</strong>: ${status}<br>
+                        <small>Esperado: ${test.expected || 'null'} | Actual: ${actual || 'null'}</small>
+                    </div>
+                `;
+            });
+            
+            resultDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
+
+
+

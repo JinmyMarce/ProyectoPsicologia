@@ -1,0 +1,694 @@
+/* ===== CALENDARIO CORPORATIVO FORMAL Y ELEGANTE ===== */
+
+/* RESET COMPLETO - Eliminar todos los estilos por defecto */
+.rbc-calendar * {
+  box-sizing: border-box !important;
+}
+
+/* Estilos base mínimos para react-big-calendar */
+.rbc-calendar {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+  background: #ffffff !important;
+  border-radius: 10px !important;
+  box-shadow: 
+    0 3px 15px rgba(0, 0, 0, 0.06),
+    0 1px 6px rgba(0, 0, 0, 0.03) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  padding: 20px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+/* Estructura del calendario - DISEÑO FORMAL COMPACTO */
+.rbc-month-view {
+  display: flex !important;
+  flex-direction: column !important;
+  background: #ffffff !important;
+  border-radius: 6px !important;
+  border: none !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+
+.rbc-month-header {
+  display: flex !important;
+  flex-direction: row !important;
+  background: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.rbc-header {
+  flex: 1 !important;
+  padding: 12px 8px !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  font-size: 13px !important;
+  color: #374151 !important;
+  border-right: 1px solid #e5e7eb !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: none !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+  font-family: 'Inter', sans-serif !important;
+  position: relative !important;
+}
+
+.rbc-header:last-child {
+  border-right: none !important;
+}
+
+.rbc-month-row {
+  display: flex !important;
+  flex-direction: row !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  border: none !important;
+  min-height: 90px !important;
+  padding: 1px !important;
+  background: #ffffff !important;
+}
+
+.rbc-month-row:last-child {
+  border-bottom: none !important;
+}
+
+/* CELDAS DEL CALENDARIO - DISEÑO FORMAL COMPACTO */
+.rbc-day-bg {
+  flex: 1 !important;
+  min-height: 90px !important;
+  position: relative !important;
+  background: #ffffff !important;
+  border: 1px solid #f3f4f6 !important;
+  border-radius: 4px !important;
+  margin: 1px !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  overflow: visible !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  position: relative !important;
+}
+
+/* Hover effect sutil para celdas */
+.rbc-day-bg:hover {
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+  transform: none !important;
+}
+
+/* POSICIONAMIENTO PERFECTO DE LAS CELDAS DE FECHA - ARREGLADO */
+.rbc-date-cell {
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+  bottom: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  z-index: 20 !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* NÚMEROS DE DÍAS - VISIBILIDAD GARANTIZADA */
+.rbc-date-cell a {
+  text-decoration: none !important;
+  color: #374151 !important;
+  display: block !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 30px !important;
+  height: 30px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 4px !important;
+  margin: 0 !important;
+  position: relative !important;
+  z-index: 25 !important;
+  overflow: visible !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Inter', sans-serif !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: auto !important;
+  bottom: auto !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Hover effect para números de días */
+.rbc-date-cell a:hover {
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+  transform: none !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ESTILOS PRINCIPALES PARA LOS DÍAS DEL CALENDARIO - FORMAL COMPACTO */
+/* MÁXIMA ESPECIFICIDAD PARA SOBRESCRIBIR ESTILOS INLINE */
+
+/* Día actual - Azul corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today[style*="background"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today[style*="background-color"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today[style*="border"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today[style*="border-color"] {
+  background: rgba(30, 64, 175, 0.2) !important;
+  border: 2px solid #1e40af !important;
+  border-color: #1e40af !important;
+  box-shadow: none !important;
+  border-radius: 5px !important;
+  transform: none !important;
+  position: relative !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today .rbc-date-cell a,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today .rbc-date-cell a[style*="color"] {
+  color: #1e40af !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+  background: rgba(30, 64, 175, 0.1) !important;
+  border-color: #1e40af !important;
+}
+
+/* Estilos adicionales para forzar el color azul marino en el "Hoy" */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today[style*="border-color: #8b5cf6"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today[style*="border-color:#8b5cf6"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today[style*="border: 2px solid #8b5cf6"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.today[style*="border:2px solid #8b5cf6"] {
+  border: 2px solid #1e40af !important;
+  border-color: #1e40af !important;
+  background: rgba(30, 64, 175, 0.2) !important;
+}
+
+/* Días disponibles - Verde corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.available,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.available[style*="background"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.available[style*="background-color"] {
+  background: #f0fdf4 !important;
+  border: 1px solid #10b981 !important;
+  border-radius: 5px !important;
+  box-shadow: none !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.available .rbc-date-cell a,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.available .rbc-date-cell a[style*="color"] {
+  color: #047857 !important;
+  font-weight: 600 !important;
+  background: #dcfce7 !important;
+  border-color: #10b981 !important;
+}
+
+/* Días bloqueados - Gris corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.blocked,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.blocked[style*="background"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.blocked[style*="background-color"] {
+  background: #f8fafc !important;
+  border: 1px solid #94a3b8 !important;
+  border-radius: 5px !important;
+  box-shadow: none !important;
+  opacity: 0.8 !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.blocked .rbc-date-cell a,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.blocked .rbc-date-cell a[style*="color"] {
+  color: #64748b !important;
+  font-weight: 600 !important;
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+}
+
+/* Feriados - Rojo corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.holiday,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.holiday[style*="background"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.holiday[style*="background-color"] {
+  background: #fef2f2 !important;
+  border: 2px solid #ef4444 !important;
+  box-shadow: none !important;
+  border-radius: 5px !important;
+  cursor: pointer !important;
+  transform: none !important;
+  position: relative !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.holiday .rbc-date-cell a,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.holiday .rbc-date-cell a[style*="color"] {
+  color: #dc2626 !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+  background: #fee2e2 !important;
+  border-color: #ef4444 !important;
+}
+
+/* Fines de semana - Gris azulado corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.weekend,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.weekend[style*="background"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.weekend[style*="background-color"] {
+  background: #f1f5f9 !important;
+  border: 1px solid #64748b !important;
+  border-radius: 5px !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.weekend .rbc-date-cell a,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.weekend .rbc-date-cell a[style*="color"] {
+  color: #475569 !important;
+  font-weight: 600 !important;
+  background: #e2e8f0 !important;
+  border-color: #64748b !important;
+}
+
+/* Días pasados - Gris claro corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.past,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.past[style*="background"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.past[style*="background-color"] {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 5px !important;
+  opacity: 0.6 !important;
+  box-shadow: none !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.past .rbc-date-cell a,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.past .rbc-date-cell a[style*="color"] {
+  color: #94a3b8 !important;
+  font-weight: 500 !important;
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Días más allá del límite - Gris muy claro corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.beyond-limit,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.beyond-limit[style*="background"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.beyond-limit[style*="background-color"] {
+  background: #fafafa !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 5px !important;
+  opacity: 0.5 !important;
+  box-shadow: none !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.beyond-limit .rbc-date-cell a,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.beyond-limit .rbc-date-cell a[style*="color"] {
+  color: #9ca3af !important;
+  font-weight: 500 !important;
+  background: #f5f5f5 !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Horarios no disponibles - Naranja corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.unavailable,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.unavailable[style*="background"],
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.unavailable[style*="background-color"] {
+  background: #fffbeb !important;
+  border: 1px solid #f59e0b !important;
+  border-radius: 5px !important;
+  opacity: 0.8 !important;
+  box-shadow: none !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.unavailable .rbc-date-cell a,
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg.unavailable .rbc-date-cell a[style*="color"] {
+  color: #d97706 !important;
+  font-weight: 600 !important;
+  background: #fef3c7 !important;
+  border-color: #f59e0b !important;
+}
+
+/* Días fuera del rango */
+.rbc-off-range-bg {
+  background: #fafafa !important;
+}
+
+.rbc-off-range {
+  color: #9ca3af !important;
+}
+
+/* ESTILOS PARA EVENTOS DEL CALENDARIO - DISEÑO FORMAL COMPACTO */
+.rbc-event {
+  position: relative !important;
+  z-index: 10 !important;
+  margin: 1px !important;
+  padding: 3px 6px !important;
+  border-radius: 3px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  border: none !important;
+  color: #ffffff !important;
+  transition: all 0.2s ease !important;
+  background: #6b7280 !important;
+  box-shadow: none !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.rbc-event:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  opacity: 0.9 !important;
+}
+
+/* Eventos disponibles - Verde corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-event[data-type="available"],
+.rbc-calendar .rbc-month-view .rbc-event.event-available {
+  background: #10b981 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+/* Eventos bloqueados - Gris corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-event[data-type="blocked"],
+.rbc-calendar .rbc-month-view .rbc-event.event-blocked {
+  background: #64748b !important;
+  border-color: #64748b !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+/* Eventos de feriado - Rojo corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-event[data-type="holiday"],
+.rbc-calendar .rbc-month-view .rbc-event.event-holiday {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+  border-radius: 3px !important;
+  box-shadow: none !important;
+}
+
+/* Eventos de sesión grupal - Azul corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-event[data-type="group-session"],
+.rbc-calendar .rbc-month-view .rbc-event.event-group-session {
+  background: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+/* Eventos de derivación - Naranja corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-event[data-type="derivation"],
+.rbc-calendar .rbc-month-view .rbc-event.event-derivation {
+  background: #f59e0b !important;
+  border-color: #f59e0b !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+/* Eventos de horarios no disponibles - Naranja corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-event[data-type="unavailable"],
+.rbc-calendar .rbc-month-view .rbc-event.event-unavailable {
+  background: #f59e0b !important;
+  border-color: #f59e0b !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+/* Eventos pasados - Gris corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-event[data-type="past"],
+.rbc-calendar .rbc-month-view .rbc-event.event-past {
+  background: #9ca3af !important;
+  border-color: #9ca3af !important;
+  color: #ffffff !important;
+  font-weight: 400 !important;
+  box-shadow: none !important;
+}
+
+/* Eventos más allá del límite - Gris muy claro corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-event[data-type="beyond-limit"],
+.rbc-calendar .rbc-month-view .rbc-event.event-beyond-limit {
+  background: #d1d5db !important;
+  border-color: #d1d5db !important;
+  color: #6b7280 !important;
+  font-weight: 400 !important;
+  box-shadow: none !important;
+}
+
+/* Eventos de citas - Verde corporativo formal */
+.rbc-calendar .rbc-month-view .rbc-event[data-type="appointment"],
+.rbc-calendar .rbc-month-view .rbc-event.event-appointment {
+  background: #10b981 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+/* Toolbar del calendario - DISEÑO FORMAL COMPACTO */
+.rbc-toolbar {
+  background: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 16px !important;
+  margin-bottom: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.rbc-toolbar-label {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  text-transform: capitalize !important;
+  letter-spacing: -0.025em !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Botones del toolbar - DISEÑO FORMAL COMPACTO */
+.rbc-btn-group button {
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  color: #374151 !important;
+  font-weight: 500 !important;
+  padding: 6px 12px !important;
+  border-radius: 5px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.rbc-btn-group button:hover {
+  background: #f9fafb !important;
+  border-color: #9ca3af !important;
+  color: #111827 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.rbc-btn-group button.rbc-active {
+  background: #374151 !important;
+  border-color: #374151 !important;
+  color: white !important;
+  box-shadow: none !important;
+}
+
+/* Estilos adicionales para asegurar que los colores se apliquen */
+.rbc-calendar .rbc-month-view .rbc-day-bg {
+  border-radius: 5px !important;
+  margin: 1px !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Estilos por defecto para días sin clase específica */
+.rbc-calendar .rbc-month-view .rbc-day-bg:not(.today):not(.available):not(.blocked):not(.holiday):not(.weekend):not(.beyond-limit):not(.past):not(.unavailable) {
+  background: #ffffff !important;
+  border: 1px solid #f3f4f6 !important;
+  border-radius: 5px !important;
+  box-shadow: none !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-day-bg:not(.today):not(.available):not(.blocked):not(.holiday):not(.weekend):not(.beyond-limit):not(.past):not(.unavailable) .rbc-date-cell a {
+  color: #374151 !important;
+  font-weight: 600 !important;
+  background: #ffffff !important;
+  border-color: #e5e7eb !important;
+}
+
+/* ARREGLAR ALINEACIÓN DE NÚMEROS DE DÍAS - VISIBILIDAD GARANTIZADA */
+.rbc-date-cell {
+  text-align: left !important;
+  vertical-align: top !important;
+  overflow: visible !important;
+}
+
+.rbc-date-cell a {
+  display: block !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  line-height: 1.2 !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  text-overflow: unset !important;
+}
+
+/* ELIMINAR ESTILOS CONFLICTIVOS */
+.rbc-month-view .rbc-day-bg,
+.rbc-month-view .rbc-day,
+.rbc-month-view .rbc-date-cell {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.rbc-month-view .rbc-day-bg *,
+.rbc-month-view .rbc-day *,
+.rbc-month-view .rbc-date-cell * {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+/* SOBRESCRIBIR ESTILOS INLINE CON MÁXIMA ESPECIFICIDAD */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg[style*="background"] {
+  background: inherit !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg[style*="background-color"] {
+  background-color: inherit !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg[style*="border"] {
+  border: inherit !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg[style*="border-color"] {
+  border-color: inherit !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg[style*="color"] {
+  color: inherit !important;
+}
+
+/* SOBRESCRIBIR ESTILOS INLINE PARA NÚMEROS DE DÍAS */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg .rbc-date-cell a[style*="color"] {
+  color: inherit !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg .rbc-date-cell a[style*="background"] {
+  background: inherit !important;
+}
+
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg .rbc-date-cell a[style*="background-color"] {
+  background-color: inherit !important;
+}
+
+/* REGLAS ADICIONALES PARA GARANTIZAR VISIBILIDAD DE NÚMEROS */
+.rbc-date-cell a {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  text-shadow: none !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  transform: none !important;
+  clip: unset !important;
+  clip-path: unset !important;
+  overflow: visible !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  position: relative !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  max-width: 30px !important;
+  max-height: 30px !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  z-index: 9999 !important;
+}
+
+/* FORZAR VISIBILIDAD DE NÚMEROS DE DÍAS */
+.rbc-calendar .rbc-month-view .rbc-month-row .rbc-day-bg .rbc-date-cell a {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  clip: unset !important;
+  clip-path: unset !important;
+  transform: none !important;
+  position: relative !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  max-width: 30px !important;
+  max-height: 30px !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  z-index: 9999 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  text-shadow: none !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .rbc-calendar {
+    padding: 14px !important;
+    border-radius: 8px !important;
+  }
+  
+  .rbc-date-cell {
+    min-height: 80px !important;
+    padding: 6px !important;
+    font-size: 12px !important;
+  }
+  
+  .rbc-toolbar-label {
+    font-size: 16px !important;
+  }
+  
+  .rbc-event {
+    font-size: 10px !important;
+    padding: 2px 5px !important;
+    margin: 1px !important;
+  }
+}
+
