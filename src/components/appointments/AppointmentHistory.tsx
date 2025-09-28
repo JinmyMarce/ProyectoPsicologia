@@ -133,15 +133,15 @@ export function AppointmentHistory() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="warning">Pendiente</Badge>;
+        return <Badge className="bg-[#c2b280] text-[#1e2a37] font-medium">Pendiente</Badge>;
       case 'confirmed':
-        return <Badge variant="success">Confirmada</Badge>;
+        return <Badge className="bg-[#8e161a] text-white font-medium">Confirmada</Badge>;
       case 'completed':
-        return <Badge variant="info">Completada</Badge>;
+        return <Badge className="bg-[#1e2a37] text-white font-medium">Completada</Badge>;
       case 'cancelled':
-        return <Badge variant="danger">Cancelada</Badge>;
+        return <Badge className="bg-[#4a0e10] text-white font-medium">Cancelada</Badge>;
       default:
-        return <Badge variant="default">{status}</Badge>;
+        return <Badge className="bg-[#6d1115] text-white font-medium">{status}</Badge>;
     }
   };
 
@@ -217,27 +217,30 @@ export function AppointmentHistory() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader 
-        title="Historial de Citas"
-        subtitle="Registro Completo de Citas"
-      >
-        <div className="flex items-center justify-between">
-          <p className="text-base text-gray-500 font-medium text-center">
-            Instituto Túpac Amaru - Psicología Clínica
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="ml-4"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Actualizar
-          </Button>
+    <div className="space-y-6" style={{fontFamily: 'Inter, system-ui, sans-serif'}}>
+      {/* Título Principal - Mismo diseño que otras interfaces */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 content-card border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Historial de Citas
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
         </div>
-      </PageHeader>
+      </div>
+
+      {/* Botón de actualizar */}
+      <div className="flex justify-end mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="border-[#c2b280] text-[#1e2a37] hover:bg-[#c2b280] hover:text-white font-medium"
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          Actualizar
+        </Button>
+      </div>
 
       {/* Alerts */}
       {error && (
@@ -247,41 +250,44 @@ export function AppointmentHistory() {
         </div>
       )}
 
-      {/* Estadísticas */}
+      {/* Estadísticas mejoradas con colores del sistema */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-          <div className="text-sm text-gray-600">Total</div>
+        <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+          <div className="text-2xl font-bold text-[#6d1115]">{stats.total}</div>
+          <div className="text-sm text-[#1e2a37] font-medium">Total</div>
         </Card>
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
-          <div className="text-sm text-gray-600">Pendientes</div>
+        <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+          <div className="text-2xl font-bold text-[#c2b280]">{stats.pending}</div>
+          <div className="text-sm text-[#1e2a37] font-medium">Pendientes</div>
         </Card>
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">{stats.confirmed}</div>
-          <div className="text-sm text-gray-600">Confirmadas</div>
+        <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+          <div className="text-2xl font-bold text-[#8e161a]">{stats.confirmed}</div>
+          <div className="text-sm text-[#1e2a37] font-medium">Confirmadas</div>
         </Card>
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{stats.completed}</div>
-          <div className="text-sm text-gray-600">Completadas</div>
+        <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+          <div className="text-2xl font-bold text-[#1e2a37]">{stats.completed}</div>
+          <div className="text-sm text-[#1e2a37] font-medium">Completadas</div>
         </Card>
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-red-600">{stats.cancelled}</div>
-          <div className="text-sm text-gray-600">Canceladas</div>
+        <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+          <div className="text-2xl font-bold text-[#4a0e10]">{stats.cancelled}</div>
+          <div className="text-sm text-[#1e2a37] font-medium">Canceladas</div>
         </Card>
       </div>
 
-      {/* Filtros */}
-      <Card className="p-6">
+      {/* Filtros mejorados */}
+      <Card className="p-6 bg-white border border-gray-200 shadow-lg">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center">
-            <Filter className="w-5 h-5 mr-2 text-[#8e161a]" />
+          <h2 className="text-lg font-bold text-[#1e2a37] flex items-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-full flex items-center justify-center mr-3 shadow-md">
+              <Filter className="w-4 h-4 text-white" />
+            </div>
             Filtros y Búsqueda
           </h2>
           <Button
             variant="outline"
             onClick={exportToCSV}
             disabled={filteredAppointments.length === 0}
+            className="border-[#c2b280] text-[#1e2a37] hover:bg-[#c2b280] hover:text-white font-medium"
           >
             <Download className="w-4 h-4 mr-2" />
             Exportar CSV
@@ -289,24 +295,24 @@ export function AppointmentHistory() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Búsqueda */}
+          {/* Búsqueda mejorada */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#c2b280] w-4 h-4" />
             <input
               type="text"
               placeholder="Buscar por psicólogo, motivo o fecha..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8e161a]"
+              className="w-full pl-10 pr-4 py-2 border border-[#c2b280] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6d1115] focus:border-[#6d1115] text-[#1e2a37] font-medium"
             />
           </div>
 
-          {/* Filtro por estado */}
+          {/* Filtro por estado mejorado */}
           <div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8e161a]"
+              className="w-full px-4 py-2 border border-[#c2b280] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6d1115] focus:border-[#6d1115] text-[#1e2a37] font-medium"
             >
               <option value="all">Todos los estados</option>
               <option value="pending">Pendientes</option>
@@ -318,35 +324,40 @@ export function AppointmentHistory() {
         </div>
       </Card>
 
-      {/* Lista de citas */}
-      <Card className="p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-          <FileText className="w-5 h-5 mr-2 text-[#8e161a]" />
+      {/* Lista de citas mejorada */}
+      <Card className="p-6 bg-white border border-gray-200 shadow-lg">
+        <h2 className="text-lg font-bold text-[#1e2a37] mb-4 flex items-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-full flex items-center justify-center mr-3 shadow-md">
+            <FileText className="w-4 h-4 text-white" />
+          </div>
           Citas ({filteredAppointments.length})
         </h2>
 
         {sortedAppointments.length === 0 ? (
-          <div className="text-center py-8">
-            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-600">No se encontraron citas</p>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <FileText className="w-8 h-8 text-white" />
+            </div>
+            <p className="text-[#1e2a37] font-medium text-lg">No se encontraron citas</p>
+            <p className="text-[#c2b280] text-sm mt-1">Ajusta los filtros para ver más resultados</p>
           </div>
         ) : (
           <div className="space-y-4">
             {sortedAppointments.map((appointment) => (
               <div 
                 key={appointment.id}
-                className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-300 bg-white"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
-                      <User className="w-5 h-5 text-white" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-lg flex items-center justify-center shadow-md">
+                      <User className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">
+                      <h3 className="font-semibold text-[#1e2a37] text-lg">
                         Dr. {appointment.psychologist_name}
                       </h3>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                      <div className="flex items-center space-x-4 text-sm text-[#c2b280] mt-1 font-medium">
                         <span className="flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
                           {parseLocalDate(appointment.date).toLocaleDateString('es-ES', {
@@ -361,7 +372,7 @@ export function AppointmentHistory() {
                           {appointment.time}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-[#1e2a37] mt-1 font-medium">
                         Motivo: {appointment.reason}
                       </p>
                     </div>
@@ -370,18 +381,19 @@ export function AppointmentHistory() {
                     {getStatusBadge(appointment.status)}
                     <div className="flex space-x-1">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleViewAppointmentDetails(appointment)}
                         title="Ver detalles"
+                        className="text-[#1e2a37] hover:text-[#6d1115] hover:bg-[#c2b280]/20"
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
                       {(appointment.status === 'pending' || appointment.status === 'confirmed') && (
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          className="text-red-600 hover:bg-red-50"
+                          className="text-[#6d1115] hover:text-[#4a0e10] hover:bg-[#6d1115]/10"
                           onClick={() => handleCancelAppointment(appointment.id)}
                           disabled={cancellingAppointment === appointment.id}
                           title="Cancelar cita"

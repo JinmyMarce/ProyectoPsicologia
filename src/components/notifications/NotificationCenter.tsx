@@ -209,9 +209,9 @@ export function NotificationCenter() {
 
   return (
     <div className="space-y-6">
-      {/* Título Principal */}
+      {/* Título Principal - Mismo diseño que dashboard del estudiante */}
       <div className="text-center mb-6">
-        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+        <div className="inline-block px-20 py-4 content-card border border-gray-200 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
             Centro de Notificaciones
           </h1>
@@ -219,13 +219,14 @@ export function NotificationCenter() {
         </div>
       </div>
 
-      {/* Botón de actualizar */}
+      {/* Botón de actualizar mejorado */}
       <div className="flex justify-end mb-4">
         <Button
           variant="outline"
           size="sm"
           onClick={handleRefresh}
           disabled={refreshing}
+          className="border-[#c2b280] text-[#1e2a37] hover:bg-[#c2b280] hover:text-white font-medium"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           Actualizar
@@ -240,33 +241,35 @@ export function NotificationCenter() {
         </div>
       )}
 
-      {/* Estadísticas */}
+      {/* Estadísticas mejoradas con colores del sistema */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-gray-900">{stats.total || 0}</div>
-            <div className="text-sm text-gray-600">Total</div>
+          <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+            <div className="text-2xl font-bold text-[#6d1115]">{stats.total || 0}</div>
+            <div className="text-sm text-[#1e2a37] font-medium">Total</div>
           </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-gray-700">{unreadCount}</div>
-            <div className="text-sm text-gray-600">No leídas</div>
+          <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+            <div className="text-2xl font-bold text-[#8e161a]">{unreadCount}</div>
+            <div className="text-sm text-[#1e2a37] font-medium">No leídas</div>
           </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{stats.read || 0}</div>
-            <div className="text-sm text-gray-600">Leídas</div>
+          <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+            <div className="text-2xl font-bold text-[#c2b280]">{stats.read || 0}</div>
+            <div className="text-sm text-[#1e2a37] font-medium">Leídas</div>
           </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-600">{stats.by_type?.appointment || 0}</div>
-            <div className="text-sm text-gray-600">Citas</div>
+          <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+            <div className="text-2xl font-bold text-[#1e2a37]">{stats.by_type?.appointment || 0}</div>
+            <div className="text-sm text-[#1e2a37] font-medium">Citas</div>
           </Card>
         </div>
       )}
 
-      {/* Acciones */}
-      <Card className="p-6">
+      {/* Acciones mejoradas */}
+      <Card className="p-6 bg-white border border-gray-200 shadow-lg">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center">
-            <Bell className="w-5 h-5 mr-2 text-[#8e161a]" />
+          <h2 className="text-lg font-bold text-[#1e2a37] flex items-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-full flex items-center justify-center mr-3 shadow-md">
+              <Bell className="w-4 h-4 text-white" />
+            </div>
             Notificaciones ({notifications.length})
           </h2>
           <div className="flex space-x-2">
@@ -275,6 +278,7 @@ export function NotificationCenter() {
                 variant="outline"
                 size="sm"
                 onClick={handleMarkAllAsRead}
+                className="border-[#c2b280] text-[#1e2a37] hover:bg-[#c2b280] hover:text-white font-medium"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Marcar todas como leídas
@@ -285,7 +289,7 @@ export function NotificationCenter() {
                 variant="outline"
                 size="sm"
                 onClick={handleDeleteAllNotifications}
-                className="text-red-600 hover:bg-red-50"
+                className="border-[#6d1115] text-[#6d1115] hover:bg-[#6d1115] hover:text-white font-medium"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Eliminar todas
@@ -295,69 +299,80 @@ export function NotificationCenter() {
         </div>
 
         {notifications.length === 0 ? (
-          <div className="text-center py-8">
-            <Bell className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-600">No tienes notificaciones</p>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Bell className="w-8 h-8 text-white" />
+            </div>
+            <p className="text-[#1e2a37] font-medium text-lg">No tienes notificaciones</p>
+            <p className="text-[#c2b280] text-sm mt-1">Las notificaciones aparecerán aquí cuando las recibas</p>
           </div>
         ) : (
           <div className="space-y-3">
             {notifications.map((notification) => (
               <div 
                 key={notification.id}
-                className={`p-4 border rounded-lg transition-all duration-200 ${
+                className={`p-4 border rounded-lg transition-all duration-300 hover:shadow-md ${
                   notification.read_at 
-                    ? 'bg-gray-50 border-gray-200' 
-                    : 'bg-blue-50 border-blue-200 shadow-sm'
+                    ? 'bg-white border-gray-200' 
+                    : 'bg-gradient-to-r from-[#c2b280]/10 to-white border-[#c2b280]/30 shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3 flex-1">
                     <div className="mt-1">
-                      {getNotificationIcon(notification.type)}
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        notification.read_at 
+                          ? 'bg-gray-100' 
+                          : 'bg-gradient-to-br from-[#6d1115] to-[#4a0e10]'
+                      }`}>
+                        {getNotificationIcon(notification.type)}
+                      </div>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="font-semibold text-gray-900">{notification.title}</h3>
+                        <h3 className="font-semibold text-[#1e2a37]">{notification.title}</h3>
                         {!notification.read_at && (
-                          <Badge variant="warning" className="text-xs">
+                          <Badge className="text-xs bg-[#6d1115] text-white">
                             Nueva
                           </Badge>
                         )}
-                        <Badge variant="default" className="text-xs">
+                        <Badge className="text-xs bg-[#c2b280] text-[#1e2a37]">
                           {getNotificationTypeText(notification.type)}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-sm text-[#1e2a37] mb-2 font-medium">{notification.message}</p>
+                      <p className="text-xs text-[#c2b280] font-medium">
                         {formatDate(notification.created_at)}
                       </p>
                     </div>
                   </div>
                   <div className="flex space-x-1 ml-4">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={() => handleViewNotificationDetails(notification)}
                       title="Ver detalles"
+                      className="text-[#1e2a37] hover:text-[#6d1115] hover:bg-[#c2b280]/20"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
                     {!notification.read_at && (
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleMarkAsRead(notification.id)}
                         title="Marcar como leída"
+                        className="text-[#c2b280] hover:text-[#6d1115] hover:bg-[#c2b280]/20"
                       >
                         <CheckCircle className="w-4 h-4" />
                       </Button>
                     )}
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={() => handleDeleteNotification(notification.id)}
                       title="Eliminar"
-                      className="text-red-600 hover:bg-red-50"
+                      className="text-[#6d1115] hover:text-[#4a0e10] hover:bg-[#6d1115]/10"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

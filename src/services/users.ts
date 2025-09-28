@@ -2,14 +2,49 @@ import { apiClient } from './apiClient';
 import type { User } from '../types';
 
 export interface UpdateUserData {
+  // Información del Estudiante (tabla users)
   name?: string;
   email?: string;
   phone?: string;
   address?: string;
-  birth_date?: string;
-  student_id?: string;
+  birthdate?: string;
+  gender?: string;
+  dni?: string;
   career?: string;
   semester?: string;
+  specialization?: string;
+  
+  // Campos directos de emergencia y médicos (tabla users)
+  emergency_name?: string;
+  emergency_phone?: string;
+  emergency_relationship?: string;
+  allergies?: string;
+  current_medications?: string;
+  medical_conditions?: string;
+  
+  // Contacto de Emergencia (tabla emergency_contacts)
+  emergency_contact?: {
+    name?: string;
+    relationship?: string;
+    phone?: string;
+  };
+  
+  // Información Médica (tabla medical_infos)
+  medical_info?: {
+    medical_history?: string;
+    current_medications?: string;
+    allergies?: string;
+  };
+  
+  // Información adicional
+  nationality?: string;
+  marital_status?: string;
+  avatar?: string;
+  
+  // Campos de tutor (si aplica)
+  classroom?: string;
+  study_program?: string;
+  course?: string;
 }
 
 export interface ChangePasswordData {

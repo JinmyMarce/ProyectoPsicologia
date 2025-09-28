@@ -14,6 +14,7 @@ import { StudentManagement } from './components/tutor/StudentManagement';
 import { DerivationManagement } from './components/tutor/DerivationManagement';
 import { GroupSessionManagement } from './components/tutor/GroupSessionManagement';
 import { UserProfile } from './components/profile/UserProfile';
+import { StudentProfile } from './components/students/StudentProfile';
 import AppointmentsPage from './components/appointments';
 import { AppointmentBooking } from './components/appointments/AppointmentBooking';
 import { UnifiedCalendar } from './components/ui/UnifiedCalendar';
@@ -114,20 +115,22 @@ function AppContent() {
       
       {/* Contenedor unificado con sidebar y contenido */}
       <div className="flex w-full h-screen bg-gray-50">
-        {/* Sidebar */}
-        <Sidebar 
-          isOpen={sidebarOpen} 
-          onClose={() => setSidebarOpen(false)}
-          onPageChange={handlePageChange}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
+        {/* Sidebar - deshabilitada cuando hay mensaje de bienvenida */}
+        {!welcomeMessage && (
+          <Sidebar 
+            isOpen={sidebarOpen} 
+            onClose={() => setSidebarOpen(false)}
+            onPageChange={handlePageChange}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          />
+        )}
         
         {/* Área de contenido principal */}
         <div className="flex-1 flex flex-col relative bg-white">
-          {/* Header */}
+          {/* Header - deshabilitado cuando hay mensaje de bienvenida */}
           <Header 
-            onMenuClick={() => setSidebarOpen(true)} 
+            onMenuClick={welcomeMessage ? undefined : () => setSidebarOpen(true)} 
           />
           
           {/* Notificación de sincronización */}
@@ -150,8 +153,8 @@ function AppContent() {
             />
           )}
 
-          {/* Contenido principal */}
-          <main className="flex-1 p-8 overflow-y-auto bg-gray-50" style={{
+          {/* Contenido principal - deshabilitado cuando hay mensaje de bienvenida */}
+          <main className={`flex-1 p-8 overflow-y-auto bg-gray-50 ${welcomeMessage ? 'pointer-events-none opacity-50' : ''}`} style={{
             marginTop: '60px'
           }}>
             <div className="max-w-7xl mx-auto h-full">
@@ -217,7 +220,7 @@ function AppContent() {
                     <Route path="/appointments/history" element={<StudentAppointmentHistory />} />
                     <Route path="/appointments/reschedule" element={<RescheduleAppointment />} />
                     <Route path="/notifications" element={<NotificationCenter />} />
-                    <Route path="/profile" element={<UserProfile />} />
+                    <Route path="/profile" element={<StudentProfile />} />
                   </>
                 )}
 

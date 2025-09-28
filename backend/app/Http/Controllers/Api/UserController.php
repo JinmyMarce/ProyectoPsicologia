@@ -598,21 +598,59 @@ class UserController extends Controller
                 ], 401);
             }
 
+            // Cargar relaciones con emergency_contacts y medical_infos
+            $user->load(['emergencyContact', 'medicalInfo']);
+
             return response()->json([
                 'success' => true,
                 'data' => [
+                    // Información del Estudiante (tabla users)
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
+                    'dni' => $user->dni,
+                    'phone' => $user->phone,
+                    'birthdate' => $user->birthdate,
+                    'gender' => $user->gender,
+                    'address' => $user->address,
                     'career' => $user->career,
                     'semester' => $user->semester,
                     'student_id' => $user->student_id,
                     'specialization' => $user->specialization,
+                    'avatar' => $user->avatar,
                     'verified' => $user->verified,
                     'active' => $user->active,
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,
+                    
+                    // Campos directos de emergencia y médicos (si existen en tabla users)
+                    'emergency_name' => $user->emergency_name,
+                    'emergency_phone' => $user->emergency_phone,
+                    'emergency_relationship' => $user->emergency_relationship,
+                    'allergies' => $user->allergies,
+                    'current_medications' => $user->current_medications,
+                    'medical_conditions' => $user->medical_conditions,
+                    
+                    // Contacto de Emergencia (tabla emergency_contacts)
+                    'emergency_contact' => $user->emergencyContact ? [
+                        'id' => $user->emergencyContact->id,
+                        'name' => $user->emergencyContact->name,
+                        'relationship' => $user->emergencyContact->relationship,
+                        'phone' => $user->emergencyContact->phone,
+                        'created_at' => $user->emergencyContact->created_at,
+                        'updated_at' => $user->emergencyContact->updated_at,
+                    ] : null,
+                    
+                    // Información Médica (tabla medical_infos)
+                    'medical_info' => $user->medicalInfo ? [
+                        'id' => $user->medicalInfo->id,
+                        'medical_history' => $user->medicalInfo->medical_history,
+                        'current_medications' => $user->medicalInfo->current_medications,
+                        'allergies' => $user->medicalInfo->allergies,
+                        'created_at' => $user->medicalInfo->created_at,
+                        'updated_at' => $user->medicalInfo->updated_at,
+                    ] : null,
                 ]
             ]);
         } catch (\Exception $e) {
@@ -641,10 +679,36 @@ class UserController extends Controller
             }
 
             $validator = \Validator::make($request->all(), [
+                // Información del Estudiante (tabla users)
                 'name' => 'sometimes|required|string|max:255',
+                'dni' => 'sometimes|nullable|string|max:20',
+                'phone' => 'sometimes|nullable|string|max:20',
+                'birthdate' => 'sometimes|nullable|date',
+                'gender' => 'sometimes|nullable|in:masculino,femenino,otro',
+                'address' => 'sometimes|nullable|string|max:500',
                 'career' => 'sometimes|nullable|string|max:255',
                 'semester' => 'sometimes|nullable|integer|min:1|max:10',
                 'specialization' => 'sometimes|nullable|string|max:255',
+                
+                // Campos directos de emergencia y médicos (si existen en tabla users)
+                'emergency_name' => 'sometimes|nullable|string|max:255',
+                'emergency_phone' => 'sometimes|nullable|string|max:20',
+                'emergency_relationship' => 'sometimes|nullable|string|max:100',
+                'allergies' => 'sometimes|nullable|string|max:1000',
+                'current_medications' => 'sometimes|nullable|string|max:1000',
+                'medical_conditions' => 'sometimes|nullable|string|max:1000',
+                
+                // Contacto de Emergencia (tabla emergency_contacts)
+                'emergency_contact' => 'sometimes|array',
+                'emergency_contact.name' => 'sometimes|nullable|string|max:255',
+                'emergency_contact.relationship' => 'sometimes|nullable|string|max:100',
+                'emergency_contact.phone' => 'sometimes|nullable|string|max:20',
+                
+                // Información Médica (tabla medical_infos)
+                'medical_info' => 'sometimes|array',
+                'medical_info.medical_history' => 'sometimes|nullable|string|max:1000',
+                'medical_info.current_medications' => 'sometimes|nullable|string|max:1000',
+                'medical_info.allergies' => 'sometimes|nullable|string|max:1000',
             ]);
 
             if ($validator->fails()) {
@@ -655,24 +719,89 @@ class UserController extends Controller
                 ], 422);
             }
 
-            $user->update($request->only(['name', 'career', 'semester', 'specialization']));
+            // Actualizar información del estudiante (tabla users)
+            $userData = $request->only([
+                'name', 'dni', 'phone', 'birthdate', 'gender', 'address', 
+                'career', 'semester', 'specialization',
+                'emergency_name', 'emergency_phone', 'emergency_relationship',
+                'allergies', 'current_medications', 'medical_conditions'
+            ]);
+            $user->update($userData);
+
+            // Actualizar o crear contacto de emergencia (tabla emergency_contacts)
+            if ($request->has('emergency_contact')) {
+                $emergencyData = $request->input('emergency_contact');
+                if ($user->emergencyContact) {
+                    $user->emergencyContact->update($emergencyData);
+                } else {
+                    $user->emergencyContact()->create($emergencyData);
+                }
+            }
+
+            // Actualizar o crear información médica (tabla medical_infos)
+            if ($request->has('medical_info')) {
+                $medicalData = $request->input('medical_info');
+                if ($user->medicalInfo) {
+                    $user->medicalInfo->update($medicalData);
+                } else {
+                    $user->medicalInfo()->create($medicalData);
+                }
+            }
+
+            // Recargar relaciones para devolver datos actualizados
+            $user->load(['emergencyContact', 'medicalInfo']);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Perfil actualizado exitosamente',
                 'data' => [
+                    // Información del Estudiante (tabla users)
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
+                    'dni' => $user->dni,
+                    'phone' => $user->phone,
+                    'birthdate' => $user->birthdate,
+                    'gender' => $user->gender,
+                    'address' => $user->address,
                     'career' => $user->career,
                     'semester' => $user->semester,
                     'student_id' => $user->student_id,
                     'specialization' => $user->specialization,
+                    'avatar' => $user->avatar,
                     'verified' => $user->verified,
                     'active' => $user->active,
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,
+                    
+                    // Campos directos de emergencia y médicos (si existen en tabla users)
+                    'emergency_name' => $user->emergency_name,
+                    'emergency_phone' => $user->emergency_phone,
+                    'emergency_relationship' => $user->emergency_relationship,
+                    'allergies' => $user->allergies,
+                    'current_medications' => $user->current_medications,
+                    'medical_conditions' => $user->medical_conditions,
+                    
+                    // Contacto de Emergencia (tabla emergency_contacts)
+                    'emergency_contact' => $user->emergencyContact ? [
+                        'id' => $user->emergencyContact->id,
+                        'name' => $user->emergencyContact->name,
+                        'relationship' => $user->emergencyContact->relationship,
+                        'phone' => $user->emergencyContact->phone,
+                        'created_at' => $user->emergencyContact->created_at,
+                        'updated_at' => $user->emergencyContact->updated_at,
+                    ] : null,
+                    
+                    // Información Médica (tabla medical_infos)
+                    'medical_info' => $user->medicalInfo ? [
+                        'id' => $user->medicalInfo->id,
+                        'medical_history' => $user->medicalInfo->medical_history,
+                        'current_medications' => $user->medicalInfo->current_medications,
+                        'allergies' => $user->medicalInfo->allergies,
+                        'created_at' => $user->medicalInfo->created_at,
+                        'updated_at' => $user->medicalInfo->updated_at,
+                    ] : null,
                 ]
             ]);
         } catch (\Exception $e) {

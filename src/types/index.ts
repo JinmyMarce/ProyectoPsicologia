@@ -10,12 +10,54 @@ export interface User {
   updated_at: string;
   career?: string;
   semester?: string;
+  student_id?: string;
   dni?: string;
   phone?: string;
   birthdate?: string;
   gender?: string;
+  address?: string;
   google_avatar?: string;
   avatar?: string;
+  
+  // Campos directos de emergencia y médicos (tabla users)
+  emergency_name?: string;
+  emergency_phone?: string;
+  emergency_relationship?: string;
+  allergies?: string;
+  current_medications?: string;
+  medical_conditions?: string;
+  
+  // Relaciones con tablas separadas
+  emergency_contact?: {
+    id: string;
+    name: string;
+    relationship: string;
+    phone: string;
+    created_at: string;
+    updated_at: string;
+  };
+  
+  medical_info?: {
+    id: string;
+    medical_history: string;
+    current_medications: string;
+    allergies: string;
+    created_at: string;
+    updated_at: string;
+  };
+  
+  // Campos adicionales
+  nationality?: string;
+  marital_status?: string;
+  rating?: number;
+  total_appointments?: number;
+  
+  // Campos de tutor (si aplica)
+  classroom?: string;
+  study_program?: string;
+  course?: string;
+  total_students?: number;
+  active_derivations?: number;
 }
 
 export interface Appointment {

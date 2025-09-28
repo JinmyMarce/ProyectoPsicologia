@@ -131,88 +131,86 @@ export function StudentAppointmentHistory() {
   const rescheduledAppointments = appointments.filter(apt => apt.rescheduled_from || apt.rescheduled_to).length;
 
   return (
-    <div className="space-y-6">
-      <PageHeader 
-        title="Historial de Citas"
-        subtitle="Todas las citas que has tenido, incluyendo las reprogramadas"
-      >
-        <div className="flex items-center justify-between">
-          <p className="text-base text-gray-500 font-medium text-center">
-            Instituto Túpac Amaru - Psicología Clínica
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="ml-4"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Actualizar
-          </Button>
+    <div className="space-y-6" style={{fontFamily: 'Inter, system-ui, sans-serif'}}>
+      {/* Título Principal - Mismo diseño que otras interfaces */}
+      <div className="text-center mb-6">
+        <div className="inline-block px-20 py-4 content-card border border-gray-200 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+            Historial de Citas
+          </h1>
+          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
         </div>
-      </PageHeader>
+      </div>
 
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border border-[#8e161a]/20">
+      {/* Estadísticas con filtros integrados */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card className="p-4 content-card border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center shadow-lg">
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900">{totalAppointments}</p>
-              <p className="text-sm font-medium text-gray-600">Total de Citas</p>
+              <p className="text-2xl font-bold text-gray-800">{totalAppointments}</p>
+              <p className="text-sm font-semibold text-gray-600">Total de Citas</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border border-[#8e161a]/20">
+        <Card className="p-4 content-card border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center shadow-lg">
               <CheckCircle className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900">{completedAppointments}</p>
-              <p className="text-sm font-medium text-gray-600">Citas Completadas</p>
+              <p className="text-2xl font-bold text-gray-800">{completedAppointments}</p>
+              <p className="text-sm font-semibold text-gray-600">Citas Completadas</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 bg-gradient-to-r from-[#8e161a]/5 to-[#d3b7a0]/5 border border-[#8e161a]/20">
+        <Card className="p-4 content-card border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center shadow-lg">
               <ClockIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900">{rescheduledAppointments}</p>
-              <p className="text-sm font-medium text-gray-600">Citas Reprogramadas</p>
+              <p className="text-2xl font-bold text-gray-800">{rescheduledAppointments}</p>
+              <p className="text-sm font-semibold text-gray-600">Citas Reprogramadas</p>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Filtros */}
-      <Card className="p-6">
-        <div className="flex flex-wrap gap-2">
-          {[
-            { key: 'all', label: 'Todas' },
-            { key: 'completed', label: 'Completadas' },
-            { key: 'cancelled', label: 'Canceladas' },
-            { key: 'rescheduled', label: 'Reprogramadas' }
-          ].map(({ key, label }) => (
-            <Button
-              key={key}
-              variant={filter === key ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter(key as any)}
-              className="text-sm"
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
-      </Card>
+      {/* Filtros con botón de actualizar */}
+      <div className="flex flex-wrap gap-2 justify-center items-center mb-6">
+        {[
+          { key: 'all', label: 'Todas' },
+          { key: 'completed', label: 'Completadas' },
+          { key: 'cancelled', label: 'Canceladas' },
+          { key: 'rescheduled', label: 'Reprogramadas' }
+        ].map(({ key, label }) => (
+          <Button
+            key={key}
+            variant={filter === key ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFilter(key as any)}
+            className="text-sm"
+          >
+            {label}
+          </Button>
+        ))}
+        {/* Botón de actualizar junto a los filtros */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="text-sm ml-2"
+        >
+          <RefreshCw className={`w-4 h-4 mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+          Actualizar
+        </Button>
+      </div>
 
       {/* Lista de citas */}
       {loading ? (
@@ -230,7 +228,7 @@ export function StudentAppointmentHistory() {
           </div>
         </Card>
       ) : filteredAppointments.length === 0 ? (
-        <Card className="p-6">
+        <Card className="p-6 content-card border border-gray-200 shadow-md">
           <div className="text-center py-8">
             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 font-semibold">No hay citas en el historial</p>
@@ -240,7 +238,7 @@ export function StudentAppointmentHistory() {
       ) : (
         <div className="space-y-4">
           {filteredAppointments.map((appointment) => (
-            <Card key={appointment.id} className="p-6">
+            <Card key={appointment.id} className="p-6 content-card border border-gray-200 shadow-md">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">

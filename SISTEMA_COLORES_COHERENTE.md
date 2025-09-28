@@ -219,3 +219,8 @@ Para aplicar este sistema a nuevos componentes:
 
 
 
+
+
+
+
+
