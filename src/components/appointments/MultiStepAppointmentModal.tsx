@@ -5,7 +5,7 @@ import { EmergencyContactModal } from './EmergencyContactModal';
 import { MedicalInfoModal } from './MedicalInfoModal';
 import { createAppointment } from '../../services/appointments';
 import { useAuth } from '../../contexts/AuthContext';
-import { CheckCircle, XCircle, Clock, User, Phone, FileText, Calendar, ArrowRight, ArrowLeft, Star, Shield, Heart, Award, Zap, Target, TrendingUp, BookOpen, Users, CheckSquare, AlertTriangle, Sparkles, Crown, Gem, Rocket, Lightning, Brain, Stethoscope, GraduationCap, MapPin, Mail, PhoneCall, UserCheck, CalendarCheck, Clock3, Award as AwardIcon, Zap as ZapIcon, Target as TargetIcon, TrendingUp as TrendingUpIcon, BookOpen as BookOpenIcon, Users as UsersIcon, CheckSquare as CheckSquareIcon, AlertTriangle as AlertTriangleIcon, Sparkles as SparklesIcon, Crown as CrownIcon, Gem as GemIcon, Rocket as RocketIcon, Lightning as LightningIcon, Brain as BrainIcon, Stethoscope as StethoscopeIcon, GraduationCap as GraduationCapIcon, MapPin as MapPinIcon, Mail as MailIcon, PhoneCall as PhoneCallIcon, UserCheck as UserCheckIcon, CalendarCheck as CalendarCheckIcon, Clock3 as Clock3Icon } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, User, Phone, FileText, Shield, CheckSquare } from 'lucide-react';
 
 interface AppointmentData {
   psychologistId: number;
@@ -150,8 +150,6 @@ const appointmentDataToSend = {
   time: appointmentData.time!,
   status: 'pending',
   psychologist_id: psychologistId,
-  fecha: selectedDate,
-  hora: appointmentData.time!,
   motivo_consulta: medicalInfo.reason || '',
   duracion: 45,
   // Datos personales del paciente

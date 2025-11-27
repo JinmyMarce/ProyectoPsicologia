@@ -78,7 +78,7 @@ export function AppointmentBooking() {
         const currentDate = new Date();
         const month = currentDate.getMonth();
         const year = currentDate.getFullYear();
-        
+
         const blockedDatesStrings = await getBlockedDatesForCalendar(psychologist.id, month, year);
         const blockedDatesArray = blockedDatesStrings.map(dateString => new Date(dateString));
         setBlockedDates(blockedDatesArray);
@@ -177,22 +177,22 @@ export function AppointmentBooking() {
     try {
       setLoadingData(true);
       setError('');
-      
+
       // Cargar psicólogo y citas del usuario en paralelo
       const [psychologistData, appointmentsData] = await Promise.all([
         loadPsychologist(),
         loadUserAppointments()
       ]);
-      
+
       // Verificar si es la primera cita
       setIsFirstAppointment(appointmentsData.length === 0);
-      
+
       // Obtener las 3 citas más recientes
       const recent = appointmentsData
         .sort((a, b) => parseLocalDateTime(b.created_at, b.time).getTime() - parseLocalDateTime(a.created_at, a.time).getTime())
         .slice(0, 3);
       setRecentAppointments(recent);
-      
+
     } catch (error) {
       console.error('Error cargando datos iniciales:', error);
       setError('Error al cargar los datos iniciales');
@@ -234,7 +234,7 @@ export function AppointmentBooking() {
     setSuccess('Cita agendada exitosamente');
     setModalOpen(false);
     setModalDate('');
-    
+
     // Recargar datos para actualizar la lista de citas recientes
     loadInitialData();
   };
@@ -292,295 +292,162 @@ export function AppointmentBooking() {
     );
   }
 
-  if (!psychologist) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="bg-white rounded-2xl shadow-xl p-8 text-center border border-gray-200">
-            <div className="bg-gradient-to-br from-gray-100 to-gray-200 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center" style={{
-              boxShadow: '0 20px 40px rgba(31, 41, 55, 0.2)',
-              border: '4px solid rgba(31, 41, 55, 0.1)'
-            }}>
-              <AlertCircle className="w-12 h-12 text-gray-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">No hay psicólogo disponible</h3>
-            <p className="text-lg text-gray-600 mb-6">Por favor, intenta más tarde.</p>
-            <button
-              onClick={loadInitialData}
-              className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-all duration-300 font-semibold text-base"
-              style={{
-                boxShadow: '0 12px 24px rgba(31, 41, 55, 0.3)'
-              }}
-            >
-              Reintentar
-            </button>
-          </div>
-        </div>
-      </div>
+        </div >
+
+    {/* Calendario directo sin Card wrapper */ }
+    < UnifiedCalendar
+  onDateSelect = {(selectedDate) => {
+    const today = new Date();
+    const dayOfWeek = selectedDate.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isPast = selectedDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    // Calcular límite de 2 semanas
+    const twoWeeksFromNow = new Date(today);
+    twoWeeksFromNow.setDate(today.getDate() + 14);
+    const isBeyondLimit = selectedDate > twoWeeksFromNow;
+
+    // Validaciones del calendario del estudiante
+    if (isPast) {
+      showAlert(
+        'Fecha No Válida',
+        'No se pueden agendar citas en fechas pasadas. Por favor, selecciona una fecha futura.',
+        'warning'
+      );
+      return;
+    }
+
+    if (isWeekend) {
+      showAlert(
+        'Fin de Semana',
+        'No se pueden agendar citas en fines de semana (sábados y domingos). El servicio está disponible de lunes a viernes.',
+        'info'
+      );
+      return;
+    }
+
+    if (isBeyondLimit) {
+      showAlert(
+        'Límite de Tiempo Excedido',
+        'No se pueden agendar citas más allá de 2 semanas desde hoy. Este límite nos permite brindar un servicio de calidad.',
+        'warning'
+      );
+      return;
+    }
+
+    // Verificar si es feriado
+    const dayEvents = calendarEvents.filter((event: any) => {
+      const eventDate = new Date(event.start);
+      return eventDate.toDateString() === selectedDate.toDateString() &&
+        event.title.toLowerCase().includes('feriado');
+    });
+
+    if (dayEvents.length > 0) {
+      const holidayName = dayEvents[0].title;
+      showAlert(
+        'Feriado Nacional',
+        `Esta fecha es un feriado: ${holidayName}. No se pueden agendar citas en días festivos.`,
+        'info'
+      );
+      return;
+    }
+
+    // Verificar si la fecha está bloqueada por el psicólogo
+    const isBlockedByPsychologist = blockedDates.some(blockedDate =>
+      blockedDate.toDateString() === selectedDate.toDateString()
     );
+
+    if (isBlockedByPsychologist) {
+      showAlert(
+        'Fecha No Disponible',
+        'Esta fecha no está disponible para agendar citas. El psicólogo ha bloqueado este día.',
+        'warning'
+      );
+      return;
+    }
+
+    // Si pasa todas las validaciones, abrir modal
+    setModalDate(format(selectedDate, 'yyyy-MM-dd'));
+    setModalOpen(true);
   }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Título Principal */}
-      <div className="text-center mb-6">
-        <div className="inline-block px-20 py-4 content-card border border-gray-200 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
-            Agendar Cita Psicológica
-          </h1>
-          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
-        </div>
-      </div>
-
-      {/* Mensajes de estado */}
-      {success && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
-          <div className="p-3 bg-green-50 border border-green-200 rounded-lg shadow-sm">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              <p className="text-green-800 font-medium text-sm">{success}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {error && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg shadow-sm">
-            <div className="flex items-center space-x-2">
-              <AlertCircle className="w-4 h-4 text-red-600" />
-              <p className="text-red-800 font-medium text-sm">{error}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-            {/* Layout principal con calendario simplificado */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        
-        {/* Cards de información útil */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          
-          {/* Card del Psicólogo */}
-          <Card className="p-3 content-card border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center shadow-lg">
-                <User className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xs font-bold text-gray-800">Psicólogo</h3>
-                <p className="font-semibold text-gray-800 text-sm">
-                  {psychologist?.name || 'Dr. María García'}
-                </p>
-                <p className="text-xs text-gray-600">
-                  {psychologist?.specialization || 'Psicología Clínica'}
-                </p>
-              </div>
-              <div className="flex items-center space-x-1">
-                <div className={`w-2 h-2 rounded-full ${psychologist?.available ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className={`text-xs font-medium ${psychologist?.available ? 'text-green-600' : 'text-red-600'}`}>
-                  {psychologist?.available ? '✓' : '✗'}
-                </span>
-              </div>
-            </div>
-          </Card>
-
-          {/* Card de Horario */}
-          <Card className="p-3 content-card border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center shadow-lg">
-                <Clock className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xs font-bold text-gray-800">Horario</h3>
-                <p className="font-semibold text-gray-800 text-sm">Lun-Vie 8:00-2:00</p>
-                <p className="text-xs text-gray-600">45 min/sesión</p>
-              </div>
-              <div className="p-1.5 bg-green-100 rounded">
-                <p className="text-xs text-green-700 font-medium">✓ Hoy</p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Card de Reprogramar */}
-          <Card className="p-3 content-card border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center shadow-lg">
-                <Calendar className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xs font-bold text-gray-800">Reprogramar</h3>
-                <p className="text-sm text-gray-600">reprogramar cita 24 horas antes</p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Card de Información */}
-          <Card className="p-3 content-card border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center shadow-lg">
-                <AlertCircle className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xs font-bold text-gray-800">Importante</h3>
-                <div className="space-y-1 mt-1">
-                  <div className="flex items-center space-x-1">
-                    <CheckSquare className="w-3 h-3 text-green-600" />
-                    <p className="text-xs text-gray-700">Llegar 5 min antes</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Calendario directo sin Card wrapper */}
-        <UnifiedCalendar
-          onDateSelect={(selectedDate) => {
-            const today = new Date();
-            const dayOfWeek = selectedDate.getDay();
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-            const isPast = selectedDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-            
-            // Calcular límite de 2 semanas
-            const twoWeeksFromNow = new Date(today);
-            twoWeeksFromNow.setDate(today.getDate() + 14);
-            const isBeyondLimit = selectedDate > twoWeeksFromNow;
-            
-            // Validaciones del calendario del estudiante
-            if (isPast) {
-              showAlert(
-                'Fecha No Válida',
-                'No se pueden agendar citas en fechas pasadas. Por favor, selecciona una fecha futura.',
-                'warning'
-              );
-              return;
-            }
-            
-            if (isWeekend) {
-              showAlert(
-                'Fin de Semana',
-                'No se pueden agendar citas en fines de semana (sábados y domingos). El servicio está disponible de lunes a viernes.',
-                'info'
-              );
-              return;
-            }
-            
-            if (isBeyondLimit) {
-              showAlert(
-                'Límite de Tiempo Excedido',
-                'No se pueden agendar citas más allá de 2 semanas desde hoy. Este límite nos permite brindar un servicio de calidad.',
-                'warning'
-              );
-              return;
-            }
-            
-            // Verificar si es feriado
-            const dayEvents = calendarEvents.filter((event: any) => {
-              const eventDate = new Date(event.start);
-              return eventDate.toDateString() === selectedDate.toDateString() && 
-                     event.title.toLowerCase().includes('feriado');
-            });
-        
-            if (dayEvents.length > 0) {
-              const holidayName = dayEvents[0].title;
-              showAlert(
-                'Feriado Nacional',
-                `Esta fecha es un feriado: ${holidayName}. No se pueden agendar citas en días festivos.`,
-                'info'
-              );
-              return;
-            }
-
-            // Verificar si la fecha está bloqueada por el psicólogo
-            const isBlockedByPsychologist = blockedDates.some(blockedDate => 
-              blockedDate.toDateString() === selectedDate.toDateString()
-            );
-
-            if (isBlockedByPsychologist) {
-              showAlert(
-                'Fecha No Disponible',
-                'Esta fecha no está disponible para agendar citas. El psicólogo ha bloqueado este día.',
-                'warning'
-              );
-              return;
-            }
-            
-            // Si pasa todas las validaciones, abrir modal
-            setModalDate(format(selectedDate, 'yyyy-MM-dd'));
-            setModalOpen(true);
-          }}
-          blockedDates={[
+}
+blockedDates = {
+  [
             ...calendarEvents
-              .filter((event: any) => event.type === 'blocked')
-              .map((event: any) => new Date(event.start)),
-            ...blockedDates
-          ]}
-          holidays={holidays}
-          showLegend={true}
-          showNavigation={true}
-          className="w-full"
-        />
+    .filter((event: any) => event.type === 'blocked')
+    .map((event: any) => new Date(event.start)),
+  ...blockedDates
+          ]
+}
+holidays = { holidays }
+showLegend = { true}
+showNavigation = { true}
+className = "w-full"
+  />
 
-        {/* Panel de información adicional inferior */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          
-          {/* Citas recientes */}
-          {recentAppointments.length > 0 && (
-            <Card className="p-6 content-card border border-gray-200 shadow-md">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center shadow-lg">
-                  <FileText className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800">Citas Recientes</h3>
-              </div>
-              <div className="space-y-3">
-                {recentAppointments.map((appointment, index) => (
-                  <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-100">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-semibold text-gray-800 text-sm">
-                          {format(parseLocalDateTime(appointment.date, appointment.time), 'dd/MM/yyyy')}
-                        </p>
-                        <p className="text-gray-600 text-xs">
-                          {format(parseLocalDateTime(appointment.date, appointment.time), 'HH:mm')} - {appointment.psychologist_name}
-                        </p>
-                      </div>
-                      <Badge className={`text-xs ${getStatusColor(appointment.status)}`}>
-                        {getStatusText(appointment.status)}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
+  {/* Panel de información adicional inferior */ }
+  < div className = "grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6" >
 
-
+    {/* Citas recientes */ }
+{
+  recentAppointments.length > 0 && (
+    <Card className="p-6 content-card border border-gray-200 shadow-md">
+      <div className="flex items-center space-x-3 mb-4">
+        <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center shadow-lg">
+          <FileText className="w-5 h-5 text-white" />
         </div>
+        <h3 className="text-lg font-bold text-gray-800">Citas Recientes</h3>
       </div>
+      <div className="space-y-3">
+        {recentAppointments.map((appointment, index) => (
+          <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="font-semibold text-gray-800 text-sm">
+                  {format(parseLocalDateTime(appointment.date, appointment.time), 'dd/MM/yyyy')}
+                </p>
+                <p className="text-gray-600 text-xs">
+                  {format(parseLocalDateTime(appointment.date, appointment.time), 'HH:mm')} - {appointment.psychologist_name}
+                </p>
+              </div>
+              <Badge className={`text-xs ${getStatusColor(appointment.status)}`}>
+                {getStatusText(appointment.status)}
+              </Badge>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+}
 
-      {/* Modal de múltiples pasos */}
-      {modalOpen && psychologist && (
-        <MultiStepAppointmentModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          psychologistId={psychologist.id}
-          selectedDate={modalDate}
-          isFirstAppointment={isFirstAppointment || false}
-          onSuccess={handleAppointmentSuccess}
-        />
-      )}
 
-      {/* Modal de alertas profesionales */}
-      <AlertModal
-        isOpen={alertModal.isOpen}
-        onClose={closeAlert}
-        title={alertModal.title}
-        message={alertModal.message}
-        type={alertModal.type}
-      />
-    </div>
+        </div >
+      </div >
+
+  {/* Modal de múltiples pasos */ }
+{
+  modalOpen && psychologist && (
+    <MultiStepAppointmentModal
+      isOpen={modalOpen}
+      onClose={() => setModalOpen(false)}
+      psychologistId={psychologist.id}
+      selectedDate={modalDate}
+      isFirstAppointment={isFirstAppointment || false}
+      onSuccess={handleAppointmentSuccess}
+    />
+  )
+}
+
+{/* Modal de alertas profesionales */ }
+<AlertModal
+  isOpen={alertModal.isOpen}
+  onClose={closeAlert}
+  title={alertModal.title}
+  message={alertModal.message}
+  type={alertModal.type}
+/>
+    </div >
   );
 }
 
@@ -591,7 +458,7 @@ function format(date: Date, formatStr: string): string {
   const year = date.getFullYear();
   const hours = date.getHours().toString().padStart(2, '0');
   const minutes = date.getMinutes().toString().padStart(2, '0');
-  
+
   return formatStr
     .replace('dd', day)
     .replace('MM', month)

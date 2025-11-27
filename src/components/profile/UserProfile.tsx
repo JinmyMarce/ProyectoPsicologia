@@ -206,17 +206,17 @@ export const UserProfile: React.FC = () => {
     }
   };
 
-  return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Título Principal */}
-      <div className="text-center mb-6">
-        <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
-            Mi Perfil de Usuario
-          </h1>
-          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
-        </div>
+return (
+  <div className="container mx-auto p-6 space-y-6 bg-slate-50">
+    {/* Título Principal */}
+    <div className="text-center mb-6">
+      <div className="inline-block px-20 py-4 bg-white border border-gray-200 rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-slate-800 tracking-tight mb-2">
+          Mi Perfil de Usuario
+        </h1>
+        <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
       </div>
+    </div>
 
       {/* Información del rol */}
       <div className="flex items-center justify-center space-x-2 mb-4">

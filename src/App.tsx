@@ -78,7 +78,7 @@ function AppContent() {
       return;
     }
     setCurrentPage(page);
-    
+
     // Manejar casos especiales de navegación
     switch (page) {
       case 'reschedule':
@@ -87,7 +87,7 @@ function AppContent() {
       default:
         navigate(`/${page}`);
     }
-    
+
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
@@ -95,7 +95,7 @@ function AppContent() {
 
   if (loading) {
     return (
-      <LoadingScreen 
+      <LoadingScreen
         title="Instituto Túpac Amaru"
         subtitle="Sistema de Gestión Psicológica"
         size="lg"
@@ -110,29 +110,29 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex" style={{fontFamily: undefined}}>
+    <div className="min-h-screen bg-gray-50 flex" style={{ fontFamily: undefined }}>
       <NavigationHandler onPageChange={setCurrentPage} />
-      
+
       {/* Contenedor unificado con sidebar y contenido */}
       <div className="flex w-full h-screen bg-gray-50">
         {/* Sidebar - deshabilitada cuando hay mensaje de bienvenida */}
         {!welcomeMessage && (
-          <Sidebar 
-            isOpen={sidebarOpen} 
+          <Sidebar
+            isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             onPageChange={handlePageChange}
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           />
         )}
-        
+
         {/* Área de contenido principal */}
         <div className="flex-1 flex flex-col relative bg-white">
           {/* Header - deshabilitado cuando hay mensaje de bienvenida */}
-          <Header 
-            onMenuClick={welcomeMessage ? undefined : () => setSidebarOpen(true)} 
+          <Header
+            onMenuClick={welcomeMessage ? undefined : () => setSidebarOpen(prev => !prev)}
           />
-          
+
           {/* Notificación de sincronización */}
           {syncMessage && (
             <SyncNotification
@@ -142,7 +142,7 @@ function AppContent() {
               onClose={() => setSyncMessage(null)}
             />
           )}
-          
+
           {/* Mensaje de bienvenida */}
           {welcomeMessage && (
             <WelcomeMessage
@@ -154,10 +154,8 @@ function AppContent() {
           )}
 
           {/* Contenido principal - deshabilitado cuando hay mensaje de bienvenida */}
-          <main className={`flex-1 p-8 overflow-y-auto bg-gray-50 ${welcomeMessage ? 'pointer-events-none opacity-50' : ''}`} style={{
-            marginTop: '60px'
-          }}>
-            <div className="max-w-7xl mx-auto h-full">
+          <main className={`flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto bg-gray-50 ${welcomeMessage ? 'pointer-events-none opacity-50' : ''}`}>
+            <div className="w-full h-full">
               <Routes>
                 {/* Rutas para Super Admin */}
                 {user.role === 'super_admin' && user.email === 'marcelojinmy2024@gmail.com' && (
