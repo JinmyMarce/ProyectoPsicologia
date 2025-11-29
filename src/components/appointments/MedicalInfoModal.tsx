@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, X, ArrowLeft, CheckCircle } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Heart, X, ArrowLeft, CheckCircle, CalendarCheck, Clock3, User } from 'lucide-react';
 
 interface MedicalInfo {
   medicalHistory: string;
@@ -121,16 +122,16 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
           <textarea
             value={formData.reason}
             onChange={(e) => handleInputChange('reason', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.reason ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full px-3 py-2 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base transition-all duration-300 ${errors.reason ? 'border-red-500' : 'border-gray-300'}`}
             rows={3}
             placeholder="Describe brevemente el motivo de tu consulta psicológica"
           />
-          {errors.reason && <p className="text-red-500 text-xs mt-1">{errors.reason}</p>}
+          {errors.reason && <p className="text-red-500 text-sm mt-1">{errors.reason}</p>}
         </div>
       )}
 
       {/* Fila 1: Antecedentes médicos y Medicamentos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 xs:gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Antecedentes médicos relevantes
@@ -138,7 +139,7 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
           <textarea
             value={formData.medicalHistory}
             onChange={(e) => handleInputChange('medicalHistory', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base transition-all duration-300"
             rows={3}
             placeholder="Condiciones médicas, cirugías previas, etc. (opcional)"
           />
@@ -150,7 +151,7 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
           <textarea
             value={formData.currentMedications}
             onChange={(e) => handleInputChange('currentMedications', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base transition-all duration-300"
             rows={3}
             placeholder="Lista de medicamentos, dosis, etc. (opcional)"
           />
@@ -165,7 +166,7 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
         <textarea
           value={formData.allergies}
           onChange={(e) => handleInputChange('allergies', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base transition-all duration-300"
           rows={3}
           placeholder="Alergias a medicamentos, alimentos, etc. (opcional)"
         />
@@ -276,33 +277,37 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
           </div>
         )}
 
-      {/* Botones de navegación - Elegantes */}
-      <div className="flex justify-between pt-6">
+      {/* Botones de navegación - Responsivos */}
+      <div className="flex justify-between pt-4 xs:pt-5 sm:pt-6 gap-2 xs:gap-3">
         <button
           onClick={onBack}
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-sm hover:shadow-md"
+          className="px-3 xs:px-4 sm:px-6 py-2 xs:py-2.5 sm:py-3 border border-gray-300 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-sm hover:shadow-md text-xs xs:text-sm flex-1 xs:flex-initial justify-center"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Atrás</span>
+          <ArrowLeft className="w-3 h-3 xs:w-4 xs:h-4" />
+          <span className="hidden xs:inline">Atrás</span>
+          <span className="xs:hidden">←</span>
         </button>
         <button
           onClick={handleContinue}
-          className="px-6 py-3 bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white rounded-xl hover:from-black hover:to-gray-800 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg transform hover:scale-105 hover:shadow-xl"
+          className="px-3 xs:px-4 sm:px-6 py-2 xs:py-2.5 sm:py-3 bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white rounded-lg sm:rounded-xl hover:from-black hover:to-gray-800 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg transform hover:scale-105 hover:shadow-xl text-xs xs:text-sm flex-1 xs:flex-initial justify-center"
         >
           {isEditingMode ? (
             <>
-              <span>Modificar Datos</span>
-              <CheckCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Modificar Datos</span>
+              <span className="sm:hidden">Modificar</span>
+              <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4" />
             </>
           ) : selectedDate && selectedTime ? (
             <>
-              <span>Confirmar Cita</span>
-              <CheckCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Confirmar Cita</span>
+              <span className="sm:hidden">Confirmar</span>
+              <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4" />
             </>
           ) : (
             <>
-              <span>Crear Paciente</span>
-              <CheckCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Crear Paciente</span>
+              <span className="sm:hidden">Crear</span>
+              <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4" />
             </>
           )}
         </button>
@@ -312,59 +317,79 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
 
   // Si isOpen es true, renderizar el modal completo
   if (isOpen) {
-    return (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto border border-gray-100" style={{
+    return createPortal(
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[9999]">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto border border-gray-100 relative" style={{
           boxShadow: `
             0 32px 64px rgba(0, 0, 0, 0.12), 
             0 16px 32px rgba(0, 0, 0, 0.08),
             0 8px 16px rgba(0, 0, 0, 0.04),
             inset 0 1px 0 rgba(255, 255, 255, 0.8)
           `,
-          background: 'linear-gradient(145deg, #ffffff 0%, #fafbfc 100%)'
+          background: 'linear-gradient(145deg, #ffffff 0%, #fafbfc 100%)',
+          zIndex: 10000
         }}>
           <div className="p-5">
-            {/* Header Elegante */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center shadow-xl border border-gray-700">
-                    <Heart className="w-7 h-7 text-white" />
+            {/* Header Responsivo */}
+            <div className="flex items-center justify-between mb-4 xs:mb-5 sm:mb-6">
+              <div className="flex items-center space-x-2 xs:space-x-3 sm:space-x-4 flex-1 min-w-0">
+                <div className="relative flex-shrink-0">
+                  <div className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center shadow-xl border border-gray-700">
+                    <Heart className="w-5 h-5 xs:w-6 xs:h-6 sm:w-7 sm:h-7 text-white" />
                   </div>
-                  <div className="absolute -inset-1 bg-gradient-to-br from-gray-900 to-black rounded-2xl blur opacity-20 -z-10"></div>
+                  <div className="absolute -inset-1 bg-gradient-to-br from-gray-900 to-black rounded-xl sm:rounded-2xl blur opacity-20 -z-10"></div>
                 </div>
-                <div>
-                  <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-lg xs:text-xl sm:text-2xl font-black text-gray-900 tracking-tight truncate">
                     Información Médica
                   </h2>
-                  <p className="text-sm text-gray-600 font-medium">
+                  <p className="text-sm xs:text-base sm:text-lg text-gray-600 font-medium truncate">
                     Paso 4 de 4 - Datos clínicos
                   </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="w-11 h-11 rounded-xl bg-white hover:bg-gray-50 flex items-center justify-center transition-all duration-300 shadow-lg border border-gray-200 hover:border-gray-300 hover:shadow-xl"
+                className="w-8 h-8 xs:w-9 xs:h-9 sm:w-11 sm:h-11 flex-shrink-0 rounded-lg sm:rounded-xl bg-white hover:bg-gray-50 flex items-center justify-center transition-all duration-300 shadow-lg border border-gray-200 hover:border-gray-300 hover:shadow-xl ml-2"
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <X className="w-4 h-4 xs:w-4.5 xs:h-4.5 sm:w-5 sm:h-5 text-gray-600" />
               </button>
             </div>
 
             {/* Resumen de selección solo para estudiantes (cuando hay fecha y hora) - Elegante */}
             {(selectedDate && selectedTime) && (
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-4 mb-5 border border-gray-200 shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600 font-semibold">Fecha:</span>
-                    <span className="font-bold text-gray-800">{formatDate(selectedDate)}</span>
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 mb-5 border border-gray-200 shadow-sm">
+                <div className="space-y-4">
+                  {/* Primera fila: Fecha y Horario */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-white rounded-lg p-3 border border-gray-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500 flex-shrink-0">
+                          <CalendarCheck className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Fecha</span>
+                      </div>
+                      <p className="text-sm font-bold text-gray-800 capitalize pl-7">{formatDate(selectedDate)}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 border border-gray-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-5 h-5 rounded-md bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 flex items-center justify-center shadow-sm border border-gray-500 flex-shrink-0">
+                          <Clock3 className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Horario</span>
+                      </div>
+                      <p className="text-sm font-bold text-gray-800 pl-7">{selectedTime}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600 font-semibold">Horario:</span>
-                    <span className="font-bold text-gray-800">{selectedTime}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600 font-semibold">Paciente:</span>
-                    <span className="font-bold text-gray-800">{personalData?.fullName || 'N/A'}</span>
+                  {/* Segunda fila: Paciente */}
+                  <div className="bg-white rounded-lg p-3 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-5 h-5 rounded-md bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 flex items-center justify-center shadow-sm border border-blue-500 flex-shrink-0">
+                        <User className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Paciente</span>
+                    </div>
+                    <p className="text-sm font-bold text-gray-800 pl-7 truncate">{personalData?.fullName || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -374,7 +399,8 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
             {content}
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 

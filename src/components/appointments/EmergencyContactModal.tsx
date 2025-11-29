@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Phone, X, ArrowRight, ArrowLeft } from 'lucide-react';
+import { CustomSelect } from '../ui/CustomSelect';
 
 interface EmergencyContact {
   name: string;
@@ -94,84 +96,84 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
     <div className="space-y-4">
       {/* Fila 1: Nombre completo del contacto */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-base font-medium text-gray-700 mb-1">
           Nombre completo del contacto <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
           value={formData.name}
           onChange={(e) => handleInputChange('name', e.target.value)}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base ${
             errors.name ? 'border-red-500' : 'border-gray-300'
           }`}
           placeholder="Nombre completo del contacto de emergencia"
         />
-        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
       </div>
 
       {/* Fila 2: Relación y Teléfono */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 xs:gap-4">
+        <div className="relative" style={{ overflow: 'visible' }}>
+          <label className="block text-base font-medium text-gray-700 mb-1">
             Relación con el paciente <span className="text-red-500">*</span>
           </label>
-          <select
+          <CustomSelect
             value={formData.relationship}
-            onChange={(e) => handleInputChange('relationship', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.relationship ? 'border-red-500' : 'border-gray-300'
-            }`}
-          >
-            <option value="">Seleccionar relación</option>
-            <option value="Padre">Padre</option>
-            <option value="Madre">Madre</option>
-            <option value="Hermano/a">Hermano/a</option>
-            <option value="Hijo/a">Hijo/a</option>
-            <option value="Cónyuge">Cónyuge</option>
-            <option value="Pareja">Pareja</option>
-            <option value="Tío/a">Tío/a</option>
-            <option value="Primo/a">Primo/a</option>
-            <option value="Amigo/a">Amigo/a</option>
-            <option value="Compañero/a de trabajo">Compañero/a de trabajo</option>
-            <option value="Otro">Otro</option>
-          </select>
-          {errors.relationship && <p className="text-red-500 text-xs mt-1">{errors.relationship}</p>}
+            onChange={(value) => handleInputChange('relationship', value)}
+            options={[
+              { value: 'Padre', label: 'Padre' },
+              { value: 'Madre', label: 'Madre' },
+              { value: 'Hermano/a', label: 'Hermano/a' },
+              { value: 'Hijo/a', label: 'Hijo/a' },
+              { value: 'Cónyuge', label: 'Cónyuge' },
+              { value: 'Pareja', label: 'Pareja' },
+              { value: 'Tío/a', label: 'Tío/a' },
+              { value: 'Primo/a', label: 'Primo/a' },
+              { value: 'Amigo/a', label: 'Amigo/a' },
+              { value: 'Compañero/a de trabajo', label: 'Compañero/a de trabajo' },
+              { value: 'Otro', label: 'Otro' }
+            ]}
+            placeholder="Seleccionar relación"
+            error={!!errors.relationship}
+            openDirection="top"
+          />
+          {errors.relationship && <p className="text-red-500 text-sm mt-1">{errors.relationship}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-base font-medium text-gray-700 mb-1">
             Teléfono del contacto <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <span className="text-gray-500 text-sm">+51</span>
+              <span className="text-gray-500 text-base">+51</span>
             </div>
             <input
               type="tel"
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
-              className={`w-full pl-12 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              className={`w-full pl-12 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base ${
                 errors.phone ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder="987654321"
               maxLength={9}
             />
           </div>
-          {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+          {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
         </div>
       </div>
 
-      {/* Botones de navegación - Compactos */}
+      {/* Botones de navegación */}
       <div className="flex justify-between pt-4">
         <button
           onClick={onBack}
-          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-sm hover:shadow-md text-sm"
+          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-sm hover:shadow-md text-base"
         >
           <ArrowLeft className="w-3 h-3" />
           <span>Atrás</span>
         </button>
         <button
           onClick={handleContinue}
-          className="px-4 py-2 bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white rounded-lg hover:from-black hover:to-gray-800 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg transform hover:scale-105 hover:shadow-xl text-sm"
+          className="px-4 py-2 bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white rounded-lg hover:from-black hover:to-gray-800 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg transform hover:scale-105 hover:shadow-xl text-base"
         >
           <span>Continuar</span>
           <ArrowRight className="w-3 h-3" />
@@ -182,19 +184,21 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
 
   // Si isOpen es true, renderizar el modal completo
   if (isOpen) {
-    return (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-3 max-h-[80vh] overflow-y-auto border border-gray-100" style={{
+    return createPortal(
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[9999]">
+        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-3 max-h-[85vh] border border-gray-100 relative" style={{
           boxShadow: `
             0 32px 64px rgba(0, 0, 0, 0.12), 
             0 16px 32px rgba(0, 0, 0, 0.08),
             0 8px 16px rgba(0, 0, 0, 0.04),
             inset 0 1px 0 rgba(255, 255, 255, 0.8)
           `,
-          background: 'linear-gradient(145deg, #ffffff 0%, #fafbfc 100%)'
+          background: 'linear-gradient(145deg, #ffffff 0%, #fafbfc 100%)',
+          zIndex: 10000,
+          overflow: 'visible'
         }}>
-          <div className="p-4">
-            {/* Header Compacto */}
+          <div className="p-4 max-h-[85vh] overflow-y-auto">
+            {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="relative">
@@ -204,10 +208,10 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
                   <div className="absolute -inset-1 bg-gradient-to-br from-gray-900 to-black rounded-xl blur opacity-20 -z-10"></div>
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-gray-900 tracking-tight">
+                  <h2 className="text-xl font-black text-gray-900 tracking-tight">
                     Contacto de Emergencia
                   </h2>
-                  <p className="text-xs text-gray-600 font-medium">
+                  <p className="text-base text-gray-600 font-medium">
                     Paso 3 de 4 - Información de contacto
                   </p>
                 </div>
@@ -234,7 +238,8 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
             {content}
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 

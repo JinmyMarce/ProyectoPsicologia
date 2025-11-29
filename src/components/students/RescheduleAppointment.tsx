@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Card } from '../ui/Card';
+import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import {
@@ -11,10 +11,63 @@ import {
   Loader2,
   RefreshCw,
   Edit,
-  Info
+  Info,
+  X,
+  FileText
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserAppointments } from '../../services/appointments';
+
+// Funciones compartidas para formatear fecha y hora
+function parseLocalDate(dateStr: string): Date {
+  if (!dateStr) return new Date();
+  if (dateStr.includes('T')) {
+    return new Date(dateStr);
+  }
+  if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  return new Date(dateStr);
+}
+
+const formatDate = (dateString: string) => {
+  try {
+    const date = parseLocalDate(dateString);
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  } catch (error) {
+    return dateString;
+  }
+};
+
+const formatTime = (timeString: string | null | undefined) => {
+  if (!timeString) return 'N/A';
+  let timeStr = String(timeString);
+  if (timeStr.includes(' ')) {
+    timeStr = timeStr.split(' ')[1] || timeStr.split(' ')[0];
+  }
+  timeStr = timeStr.replace(/[^\d:]/g, '');
+  if (timeStr.match(/^\d{2}:\d{2}$/)) {
+    return timeStr;
+  }
+  const parts = timeStr.split(':');
+  if (parts.length >= 2) {
+    let hours = parseInt(parts[0], 10);
+    let minutes = parseInt(parts[1], 10);
+    if (isNaN(hours) || isNaN(minutes)) {
+      return timeString;
+    }
+    hours = Math.max(0, Math.min(23, hours));
+    minutes = Math.max(0, Math.min(59, minutes));
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  }
+  return timeString;
+};
 
 interface Appointment {
   id: number;
@@ -46,9 +99,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
   const [error, setError] = useState('');
 
   const timeSlots = [
-    '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
-    '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30'
+    '08:00', '08:45', '09:30', '10:15', '11:00', '11:45', '12:30', '13:15'
   ];
 
   const getMinDate = () => {
@@ -78,117 +129,141 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
 
   if (!isOpen || !appointment) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Reprogramar Cita</h3>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-          >
-            ✕
-          </Button>
+  return createPortal(
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-50 p-3 sm:p-4" onClick={onClose}>
+      <div 
+        className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden border border-slate-200 relative" 
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          boxShadow: `
+            0 32px 64px rgba(0, 0, 0, 0.16), 
+            0 16px 32px rgba(0, 0, 0, 0.12),
+            0 8px 16px rgba(0, 0, 0, 0.08)
+          `
+        }}
+      >
+        {/* Header del Modal */}
+        <div className="bg-gradient-to-r from-violet-600 to-purple-600 p-3 xs:p-4 border-b border-violet-700/20">
+          <div className="flex justify-between items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-lg xs:text-xl font-black text-white tracking-tight">Reprogramar Cita</h3>
+              <p className="text-xs xs:text-sm text-violet-100 font-medium mt-0.5">Selecciona nueva fecha y hora</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-7 h-7 xs:w-8 xs:h-8 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-all duration-300 border border-white/30 hover:border-white/50 flex-shrink-0"
+            >
+              <X className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-white" />
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-2">Cita Actual</h4>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <p className="text-sm text-gray-600">
-                <Calendar className="w-4 h-4 inline mr-1" />
-                {new Date(appointment.date).toLocaleDateString('es-ES', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </p>
-              <p className="text-sm text-gray-600">
-                <Clock className="w-4 h-4 inline mr-1" />
-                {appointment.time}
-              </p>
-              <p className="text-sm text-gray-600">
-                <User className="w-4 h-4 inline mr-1" />
-                {appointment.psychologist_name}
-              </p>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nueva fecha
-            </label>
-            <input
-              type="date"
-              value={newDate}
-              onChange={(e) => setNewDate(e.target.value)}
-              min={getMinDate()}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nueva hora
-            </label>
-            <select
-              value={newTime}
-              onChange={(e) => setNewTime(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-transparent"
-            >
-              <option value="">Seleccionar hora</option>
-              {timeSlots.map(time => (
-                <option key={time} value={time}>{time}</option>
-              ))}
-            </select>
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-red-800 text-sm">{error}</p>
-            </div>
-          )}
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-start space-x-2">
-              <Info className="w-4 h-4 text-blue-600 mt-0.5" />
-              <div className="text-sm text-blue-800">
-                <p className="font-medium">Importante:</p>
-                <ul className="mt-1 space-y-1">
-                  <li>• Solo puedes reprogramar con 24 horas de anticipación</li>
-                  <li>• La nueva fecha debe ser al menos mañana</li>
-                  <li>• El psicólogo será notificado del cambio</li>
-                </ul>
+        {/* Contenido del Modal */}
+        <div className="p-3 xs:p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
+          <div className="space-y-3">
+            {/* Cita Actual */}
+            <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-3 border border-slate-200/50">
+              <h4 className="font-bold text-slate-900 mb-2 text-base flex items-center">
+                <Info className="w-4 h-4 mr-2 text-blue-600" />
+                Cita Actual
+              </h4>
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-2.5">
+                <div className="bg-white rounded-lg p-2.5 border border-slate-200/50">
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Fecha</p>
+                  <p className="text-sm font-bold text-slate-900">{formatDate(appointment.date)}</p>
+                </div>
+                <div className="bg-white rounded-lg p-2.5 border border-slate-200/50">
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Hora</p>
+                  <p className="text-sm font-bold text-slate-900">{formatTime(appointment.time)}</p>
+                </div>
+                <div className="bg-white rounded-lg p-2.5 border border-slate-200/50 xs:col-span-2">
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Psicólogo</p>
+                  <p className="text-sm font-bold text-slate-900 truncate">{appointment.psychologist_name}</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex space-x-3 pt-4">
-            <Button
-              onClick={handleReschedule}
-              disabled={loading || !newDate || !newTime}
-              className="flex-1"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Edit className="w-4 h-4 mr-2" />
-              )}
-              Reprogramar
-            </Button>
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancelar
-            </Button>
+            {/* Nueva Fecha y Hora */}
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">
+                  Nueva fecha
+                </label>
+                <input
+                  type="date"
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                  min={getMinDate()}
+                  className="w-full px-4 py-2.5 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-base transition-all duration-300"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">
+                  Nueva hora
+                </label>
+                <select
+                  value={newTime}
+                  onChange={(e) => setNewTime(e.target.value)}
+                  className="w-full px-4 py-2.5 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-base transition-all duration-300"
+                >
+                  <option value="">Seleccionar hora</option>
+                  {timeSlots.map(time => (
+                    <option key={time} value={time}>{time}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                  <p className="text-red-800 text-sm font-medium">{error}</p>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-gradient-to-br from-amber-50 to-yellow-50/50 border border-amber-200/50 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <Info className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-amber-800">
+                  <p className="font-bold mb-1.5">Importante:</p>
+                  <ul className="space-y-1 text-xs">
+                    <li>• Solo puedes reprogramar con 24 horas de anticipación</li>
+                    <li>• La nueva fecha debe ser al menos mañana</li>
+                    <li>• El psicólogo será notificado del cambio</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <button
+                onClick={handleReschedule}
+                disabled={loading || !newDate || !newTime}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-400 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg font-bold text-sm hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <Edit className="w-5 h-5 mr-2" />
+                )}
+                Reprogramar
+              </button>
+              <button
+                onClick={onClose}
+                disabled={loading}
+                className="px-4 py-2.5 bg-white border-2 border-slate-300 hover:border-slate-400 text-slate-700 rounded-lg transition-all duration-300 flex items-center justify-center font-bold text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -207,13 +282,7 @@ export function RescheduleAppointment() {
     appointment: null
   });
 
-  useEffect(() => {
-    if (user?.email) {
-      loadAppointments();
-    }
-  }, [user]);
-
-  const loadAppointments = async () => {
+  const loadAppointments = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -225,7 +294,13 @@ export function RescheduleAppointment() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user?.email) {
+      loadAppointments();
+    }
+  }, [user, loadAppointments]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -273,27 +348,59 @@ export function RescheduleAppointment() {
   const reschedulableAppointments = appointments.filter(canReschedule);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8 font-sans selection:bg-blue-100 selection:text-blue-900">
-      {/* Header - Dashboard Style */}
-      <div className="bg-gradient-to-br from-slate-200 via-gray-100 to-blue-200 rounded-2xl shadow-xl relative overflow-hidden mx-4 mt-4 border border-slate-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-8 relative z-10">
-          <div className="text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-2">Reprogramar Citas</h1>
-            <div className="w-28 h-1 bg-gradient-to-r from-slate-600 to-blue-600 mx-auto rounded-full"></div>
+    <div className="h-screen overflow-hidden bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900">
+      {/* Header Section - Compact & Professional */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl xs:rounded-2xl shadow-2xl relative overflow-hidden mx-1.5 xs:mx-2 sm:mx-3 mt-2 xs:mt-3 border border-white/10">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-slate-800/50 via-transparent to-slate-800/30 animate-pulse"></div>
+
+        {/* Minimal decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-600/10 via-slate-500/5 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr from-slate-700/8 to-transparent rounded-full blur-3xl -ml-12 -mb-12 pointer-events-none"></div>
+
+        {/* Subtle dots */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-12 left-16 w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+          <div className="absolute top-20 right-32 w-1 h-1 bg-slate-300 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute bottom-16 left-1/3 w-1.5 h-1.5 bg-slate-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
+
+        <div className="w-full px-3 xs:px-4 sm:px-6 lg:px-8 pt-4 xs:pt-5 pb-5 xs:pb-6 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 xs:gap-3">
+            <div className="animate-fade-in">
+              <div className="flex items-center space-x-1.5 xs:space-x-2 mb-1 xs:mb-1.5">
+                <span className="px-2.5 xs:px-3 py-1 xs:py-1.5 rounded-full bg-white/15 backdrop-blur-xl text-white text-[10px] xs:text-xs font-bold flex items-center tracking-wide uppercase shadow-lg border border-white/20">
+                  <RefreshCw className="w-3 h-3 xs:w-3.5 xs:h-3.5 mr-1 xs:mr-1.5" />
+                  Reprogramar
+                </span>
+              </div>
+              <h1 className="text-2xl xs:text-3xl md:text-4xl font-black tracking-tight text-white mb-1 xs:mb-1.5 leading-tight drop-shadow-lg">
+                Reprogramar Citas
+              </h1>
+              <p className="text-slate-300 text-xs xs:text-sm max-w-2xl font-medium leading-relaxed drop-shadow-md">
+                Modifica tus citas confirmadas con al menos 24 horas de anticipación
+              </p>
+            </div>
           </div>
         </div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 via-violet-400/20 to-transparent rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-violet-400/10 to-transparent rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
+
+        {/* Wave pattern - Compacto */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 overflow-hidden pointer-events-none">
+          <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M0,0 C150,80 350,80 600,40 C850,0 1050,0 1200,40 L1200,120 L0,120 Z" fill="white" fillOpacity="0.08" />
+            <path d="M0,20 C200,100 400,100 600,60 C800,20 1000,20 1200,60 L1200,120 L0,120 Z" fill="white" fillOpacity="0.04" />
+          </svg>
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Mensajes de estado */}
+      <div className="w-full px-2 xs:px-3 sm:px-4 lg:px-6 -mt-2 relative z-20 overflow-y-auto h-[calc(100vh-8rem)] xs:h-[calc(100vh-9rem)] sm:h-[calc(100vh-10rem)]">
+        {/* Mensajes de estado - Compactos */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm flex items-center space-x-3 animate-fade-in">
-            <div className="bg-red-100 p-2 rounded-full">
-              <AlertCircle className="w-5 h-5 text-red-600" />
+          <div className="mb-3 bg-red-50 border border-red-200 rounded-xl p-3 shadow-sm flex items-center space-x-2.5 animate-fade-in">
+            <div className="bg-red-100 p-1.5 rounded-full flex-shrink-0">
+              <AlertCircle className="w-4 h-4 text-red-600" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <h4 className="text-red-800 font-bold text-sm">Error</h4>
               <p className="text-red-700 text-sm">{error}</p>
             </div>
@@ -301,30 +408,30 @@ export function RescheduleAppointment() {
         )}
 
         {success && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 shadow-sm flex items-center space-x-3 animate-fade-in">
-            <div className="bg-green-100 p-2 rounded-full">
-              <CheckCircle className="w-5 h-5 text-green-600" />
+          <div className="mb-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-3 shadow-sm flex items-center space-x-2.5 animate-fade-in">
+            <div className="bg-green-100 p-1.5 rounded-full flex-shrink-0">
+              <CheckCircle className="w-4 h-4 text-green-600" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <h4 className="text-green-800 font-bold text-sm">Éxito</h4>
               <p className="text-green-700 text-sm">{success}</p>
             </div>
           </div>
         )}
 
-        {/* Políticas de Reprogramación - Diseño Dashboard */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 mb-8 p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-orange-50 to-amber-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        {/* Políticas de Reprogramación - Compactas */}
+        <div className="bg-white rounded-xl shadow-md border border-slate-200 mb-3 p-3 xs:p-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-50/50 to-orange-50/50 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
 
           {/* Header con botón integrado */}
-          <div className="flex items-center justify-between mb-6 relative z-10">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shadow-sm border border-amber-200">
-                <Info className="w-5 h-5 text-amber-600" />
+          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-3 mb-3 relative z-10">
+            <div className="flex items-center space-x-2.5 xs:space-x-3">
+              <div className="w-8 h-8 xs:w-9 xs:h-9 bg-amber-100 rounded-lg flex items-center justify-center shadow-sm border border-amber-200">
+                <Info className="w-4 h-4 xs:w-5 xs:h-5 text-amber-600" />
               </div>
               <div>
-                <h3 className="text-gray-900 font-bold text-lg">Políticas de Reprogramación</h3>
-                <p className="text-gray-500 text-sm">Reglas para gestionar tus citas</p>
+                <h3 className="text-slate-900 font-bold text-base xs:text-lg">Políticas de Reprogramación</h3>
+                <p className="text-slate-500 text-xs xs:text-sm">Reglas para gestionar tus citas</p>
               </div>
             </div>
 
@@ -333,30 +440,30 @@ export function RescheduleAppointment() {
               size="sm"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium shadow-sm transition-all duration-300"
+              className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
               Actualizar
             </Button>
           </div>
 
           {/* Reglas compactas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 relative z-10">
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2 xs:gap-2.5 relative z-10">
             {[
-              { id: 1, title: 'Solo Confirmadas', desc: 'Citas ya confirmadas', color: 'bg-blue-100 text-blue-700' },
+              { id: 1, title: 'Solo Confirmadas', desc: 'Citas confirmadas', color: 'bg-blue-100 text-blue-700' },
               { id: 2, title: '24h Anticipación', desc: 'Mínimo 24 horas', color: 'bg-indigo-100 text-indigo-700' },
               { id: 3, title: 'Fecha Mínima', desc: 'Al menos mañana', color: 'bg-violet-100 text-violet-700' },
-              { id: 4, title: 'Notificación', desc: 'Automática al Dr.', color: 'bg-purple-100 text-purple-700' },
+              { id: 4, title: 'Notificación', desc: 'Automática', color: 'bg-purple-100 text-purple-700' },
               { id: 5, title: 'Filtrado', desc: 'Inteligente', color: 'bg-fuchsia-100 text-fuchsia-700' }
             ].map((rule) => (
-              <div key={rule.id} className="bg-gray-50 rounded-xl p-3 border border-gray-100 hover:shadow-md transition-all duration-300 group">
-                <div className="flex items-center space-x-3 mb-1">
-                  <div className={`w-6 h-6 ${rule.color} rounded-full flex items-center justify-center font-bold text-xs group-hover:scale-110 transition-transform`}>
+              <div key={rule.id} className="bg-slate-50 rounded-lg p-2 xs:p-2.5 border border-slate-100 hover:shadow-md transition-all duration-300 group">
+                <div className="flex items-center space-x-1.5 xs:space-x-2 mb-1">
+                  <div className={`w-6 h-6 xs:w-7 xs:h-7 ${rule.color} rounded-full flex items-center justify-center font-bold text-xs xs:text-sm group-hover:scale-110 transition-transform flex-shrink-0`}>
                     {rule.id}
                   </div>
-                  <h4 className="text-gray-900 font-bold text-xs">{rule.title}</h4>
+                  <h4 className="text-slate-900 font-bold text-xs xs:text-sm truncate">{rule.title}</h4>
                 </div>
-                <p className="text-gray-500 text-xs pl-9">{rule.desc}</p>
+                <p className="text-slate-500 text-[10px] xs:text-xs pl-7 xs:pl-8">{rule.desc}</p>
               </div>
             ))}
           </div>
@@ -364,116 +471,112 @@ export function RescheduleAppointment() {
 
         {/* Lista de citas reprogramables */}
         {loading ? (
-          <div className="bg-white rounded-2xl shadow-lg p-12 border border-gray-200 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-              <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+          <div className="bg-white rounded-xl shadow-md p-4 border border-slate-200 text-center">
+            <div className="flex items-center justify-center py-6">
+              <div className="w-7 h-7 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
+              <span className="ml-3 text-slate-600 font-semibold text-sm">Cargando citas...</span>
             </div>
-            <h3 className="text-gray-900 font-bold text-lg mb-1">Cargando citas...</h3>
-            <p className="text-gray-500">Por favor espera un momento</p>
           </div>
         ) : reschedulableAppointments.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg p-12 border border-gray-200 text-center">
-            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-              <Calendar className="w-10 h-10 text-gray-400" />
+          <div className="bg-white rounded-xl shadow-md p-4 border border-slate-200 text-center">
+            <div className="text-center py-6">
+              <div className="w-14 h-14 bg-gradient-to-br from-violet-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-violet-100/50">
+                <Calendar className="w-7 h-7 text-violet-500" />
+              </div>
+              <h3 className="text-slate-900 font-bold mb-1.5 text-base">No hay citas para reprogramar</h3>
+              <p className="text-sm text-slate-500 leading-relaxed max-w-md mx-auto">
+                Solo se muestran citas confirmadas con más de 24 horas de anticipación. Si no ves tu cita aquí, es posible que ya no se pueda reprogramar.
+              </p>
             </div>
-            <h3 className="text-gray-900 font-bold text-xl mb-2">No hay citas para reprogramar</h3>
-            <p className="text-gray-500 max-w-md mx-auto">
-              Solo se muestran citas confirmadas con más de 24 horas de anticipación. Si no ves tu cita aquí, es posible que ya no se pueda reprogramar.
-            </p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-2.5">
             {reschedulableAppointments.map((appointment) => (
-              <div key={appointment.id} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-                <div className="p-6 md:p-8">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg text-white transform rotate-3">
-                        <Calendar className="w-8 h-8" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">
-                          Cita con {appointment.psychologist_name}
-                        </h3>
-                        <p className="text-indigo-600 font-medium flex items-center mt-1">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {new Date(appointment.date).toLocaleDateString('es-ES', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </p>
+              <div key={appointment.id} className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 xs:p-4 border border-slate-200 hover:border-slate-300 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
+                <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-slate-50/50 to-transparent rounded-full -mr-10 -mt-10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative z-10">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 mb-3">
+                    <div className="flex-1 min-w-0 w-full">
+                      <div className="flex items-center gap-2 xs:gap-2.5 mb-1.5">
+                        <div className="w-8 h-8 xs:w-10 xs:h-10 bg-gradient-to-br from-violet-100 to-purple-200 rounded-lg flex items-center justify-center shadow-sm border border-violet-100 flex-shrink-0">
+                          <Calendar className="w-4 h-4 xs:w-5 xs:h-5 text-violet-700" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">
+                            {appointment.psychologist_name}
+                          </h3>
+                          <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-0.5">
+                            {formatDate(appointment.date)} • {formatTime(appointment.time)}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <Badge className="bg-green-100 text-green-700 border-green-200 px-4 py-1.5 text-sm font-bold rounded-full">
-                      Reprogramable
-                    </Badge>
+                    <div className="flex items-center gap-1.5 self-start sm:self-center flex-shrink-0">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <Badge className="bg-green-50 text-green-700 border-green-200 px-2.5 py-1 text-xs xs:text-sm font-bold rounded-lg">
+                        Reprogramable
+                      </Badge>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-gray-50 rounded-xl p-6 border border-gray-100">
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm border border-gray-200">
-                          <Clock className="w-5 h-5 text-gray-500" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Hora</p>
-                          <p className="text-gray-900 font-bold text-lg">{appointment.time}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm border border-gray-200">
-                          <User className="w-5 h-5 text-gray-500" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Psicólogo</p>
-                          <p className="text-gray-900 font-bold">{appointment.psychologist_name}</p>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-2.5 border border-blue-100/50">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-blue-700 uppercase tracking-wide">Hora Cita</p>
+                          <p className="text-base font-bold text-slate-900">{formatTime(appointment.time)}</p>
                         </div>
                       </div>
                     </div>
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm border border-gray-200">
-                          <Calendar className="w-5 h-5 text-gray-500" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Agendada</p>
-                          <p className="text-gray-900 font-bold">{new Date(appointment.created_at).toLocaleDateString('es-ES')}</p>
+                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2.5 border border-emerald-100/50">
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-emerald-700 uppercase tracking-wide">Psicólogo</p>
+                          <p className="text-base font-bold text-slate-900 truncate">{appointment.psychologist_name.split(' ')[0]}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm border border-gray-200">
-                          <CheckCircle className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg p-2.5 border border-violet-100/50">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-violet-600 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-violet-700 uppercase tracking-wide">Agendada</p>
+                          <p className="text-base font-bold text-slate-900">{new Date(appointment.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}</p>
                         </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Estado</p>
-                          <p className="text-green-600 font-bold">Confirmada</p>
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-2.5 border border-green-100/50">
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-green-700 uppercase tracking-wide">Estado</p>
+                          <p className="text-base font-bold text-slate-900">Confirmada</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {appointment.reason && (
-                    <div className="mb-8">
-                      <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center">
-                        <Info className="w-4 h-4 mr-2 text-gray-400" />
-                        Motivo de Consulta
+                    <div className="mb-3 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-3 xs:p-4 border border-slate-200/50">
+                      <h4 className="font-bold text-slate-900 mb-2 text-sm flex items-center">
+                        <FileText className="w-4 h-4 mr-2 text-blue-600" />
+                        Motivo
                       </h4>
-                      <div className="bg-white p-4 rounded-xl border border-gray-200 text-gray-600 italic">
-                        "{appointment.reason}"
-                      </div>
+                      <p className="text-sm text-slate-700 leading-relaxed line-clamp-2">{appointment.reason}</p>
                     </div>
                   )}
 
-                  <div className="flex justify-end pt-4 border-t border-gray-100">
-                    <Button
+                  <div className="flex justify-end pt-2">
+                    <button
                       onClick={() => openRescheduleModal(appointment)}
-                      className="bg-gray-900 hover:bg-gray-800 text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                      className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg font-bold text-xs xs:text-sm hover:scale-105"
                     >
-                      <Edit className="w-4 h-4 mr-2" />
+                      <Edit className="w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5" />
                       Reprogramar Cita
-                    </Button>
+                    </button>
                   </div>
                 </div>
               </div>

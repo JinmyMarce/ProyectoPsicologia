@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { messageService, Message, MessageStats } from '../../services/messages';
 import { Mail, Trash2, Eye, Search, X, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 
@@ -273,7 +274,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <>
       <style>
         {`
@@ -317,10 +318,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
         `}
       </style>
     <div 
-      className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[70] p-4" 
-      style={{
-        paddingLeft: window.innerWidth >= 1024 ? 'calc(2rem + 288px)' : '1rem' // Ajustar para la barra lateral solo en desktop
-      }}
+      className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[9999] p-3 sm:p-4" 
       onClick={(e) => {
         // Cerrar modal al hacer clic fuera de él
         if (e.target === e.currentTarget) {
@@ -329,237 +327,173 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
       }}
     >
       <div 
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col transform transition-all duration-300 ${
+        className={`bg-white rounded-xl xs:rounded-2xl shadow-2xl w-full max-w-5xl h-[95vh] xs:h-[90vh] sm:h-[85vh] flex flex-col transform transition-all duration-300 ${
           isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-        }"
+        }`}
         style={{
           background: '#ffffff',
           boxShadow: `
-            0 10px 25px rgba(0, 0, 0, 0.1),
-            0 4px 10px rgba(0, 0, 0, 0.05)
+            0 32px 64px rgba(0, 0, 0, 0.16), 
+            0 16px 32px rgba(0, 0, 0, 0.12),
+            0 8px 16px rgba(0, 0, 0, 0.08)
           `,
           border: '1px solid #e5e7eb'
         }}
         onClick={(e) => e.stopPropagation()} // Prevenir que se cierre al hacer clic dentro del modal
       >
-        {/* Header - Formal y Sutil */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white" style={{
-          borderBottom: '1px solid #e5e7eb'
-        }}>
-          <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-100 border border-gray-200">
-            <Mail className="w-5 h-5 text-gray-600" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">
-                El Mensajero
-              </h2>
-            {stats && (
-                <div className="flex items-center space-x-4 text-xs mt-1 text-gray-500">
-                  <span className="flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" />
-                    Total: {stats.total}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    No leídos: {stats.unread}
-                  </span>
+        {/* Header - Moderno con Gradiente Slate */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 xs:p-5 sm:p-6 border-b border-slate-700/20 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-tr from-slate-800/50 via-transparent to-slate-800/30 animate-pulse"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-600/10 via-slate-500/5 to-transparent rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center space-x-3 xs:space-x-4">
+              <div className="w-10 h-10 xs:w-12 xs:h-12 bg-white/15 backdrop-blur-xl rounded-xl flex items-center justify-center border border-white/20 shadow-lg">
+                <Mail className="w-5 h-5 xs:w-6 xs:h-6 text-white" />
               </div>
-            )}
+              <div>
+                <h2 className="text-base xs:text-lg sm:text-xl font-black text-white tracking-tight">
+                  El Mensajero
+                </h2>
+                {stats && (
+                  <div className="flex items-center space-x-2 xs:space-x-3 text-[10px] xs:text-xs mt-1 text-slate-300">
+                    <span className="flex items-center gap-1 bg-white/15 px-2 py-0.5 rounded-full backdrop-blur-xl border border-white/20">
+                      <CheckCircle className="w-3 h-3" />
+                      Total: {stats.total}
+                    </span>
+                    <span className="flex items-center gap-1 bg-white/15 px-2 py-0.5 rounded-full backdrop-blur-xl border border-white/20">
+                      <AlertCircle className="w-3 h-3" />
+                      No leídos: {stats.unread}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
+            <button
+              onClick={handleClose}
+              className="w-8 h-8 xs:w-9 xs:h-9 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-white/20 backdrop-blur-xl border border-white/20 hover:border-white/30 shadow-lg hover:scale-110"
+              title="Cerrar"
+            >
+              <X className="w-4 h-4 xs:w-5 xs:h-5 text-white" />
+            </button>
           </div>
-          <button
-            onClick={handleClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:bg-gray-100 border border-gray-200"
-            title="Cerrar"
-          >
-            <X className="w-4 h-4 text-gray-600" />
-          </button>
         </div>
 
-        {/* Tabs - Formal y Sutil */}
-        <div className="flex border-b border-gray-200 bg-gray-50">
+        {/* Tabs - Modernos */}
+        <div className="flex border-b border-slate-200 bg-slate-50/50">
           <button
             onClick={() => setActiveTab('inbox')}
-            className={`flex-1 py-3 px-6 text-center font-medium transition-all duration-200 ${
+            className={`flex-1 py-3 xs:py-3.5 px-4 xs:px-6 text-center font-bold text-sm xs:text-base transition-all duration-300 relative ${
               activeTab === 'inbox'
-                ? 'bg-white text-gray-800 border-b-2 border-gray-600'
-                : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                ? 'bg-white text-slate-900 border-b-2 border-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
             }`}
           >
             Bandeja de entrada
           </button>
           <button
             onClick={() => setActiveTab('sent')}
-            className={`flex-1 py-3 px-6 text-center font-medium transition-all duration-200 ${
+            className={`flex-1 py-3 xs:py-3.5 px-4 xs:px-6 text-center font-bold text-sm xs:text-base transition-all duration-300 relative ${
               activeTab === 'sent'
-                ? 'bg-white text-gray-800 border-b-2 border-gray-600'
-                : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                ? 'bg-white text-slate-900 border-b-2 border-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
             }`}
           >
             Enviados
           </button>
         </div>
 
-        {/* Search and Filters - Formal y Sutil */}
-        <div className="p-4 border-b border-gray-200 bg-white">
-          <div className="flex items-center space-x-3">
-            <div className="flex-1 relative" style={{ minWidth: '200px' }}>
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar mensajes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg transition-all duration-200 text-gray-700 text-sm"
-                style={{
-                  borderColor: '#d1d5db',
-                  borderWidth: '1px',
-                  '--tw-placeholder-color': '#4a0e0f'
-                } as any}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#4a0e0f';
-                  e.target.style.boxShadow = '0 0 0 2px rgba(74, 14, 15, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#d1d5db';
-                  e.target.style.boxShadow = 'none';
-                }}
-                onMouseEnter={(e) => {
-                  (e.target as HTMLInputElement).style.borderColor = '#4a0e0f';
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLInputElement).style.borderColor = '#d1d5db';
-                }}
-              />
-            </div>
-            <div className="relative dropdown-container" style={{ minWidth: '50px', flex: '0.15' }}>
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="px-3 py-2 border rounded-lg transition-all duration-200 text-gray-700 bg-white w-full text-left flex items-center justify-between text-sm"
-                style={{
-                  borderColor: '#d1d5db',
-                  borderWidth: '1px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#4a0e0f';
-                  e.currentTarget.style.backgroundColor = '#f9fafb';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.backgroundColor = 'white';
-                }}
-              >
-                <span>
-                  {filter === 'all' ? 'Todos' : filter === 'unread' ? 'No leídos' : 'Leídos'}
-                </span>
-                <svg
-                  className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+        {/* Search and Filters - Modernos */}
+        <div className="p-3 xs:p-4 border-b border-slate-200 bg-slate-50/30">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 xs:gap-3">
+            {/* Grupo de búsqueda y filtro juntos */}
+            <div className="flex flex-1 items-center gap-2">
+              <div className="flex-1 relative min-w-0">
+                <Search className="absolute left-2.5 xs:left-3 top-1/2 transform -translate-y-1/2 w-3.5 xs:w-4 h-3.5 xs:h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar mensajes..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 xs:pl-10 pr-3 xs:pr-4 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl transition-all duration-300 text-slate-700 text-xs xs:text-sm focus:ring-2 focus:ring-slate-500 focus:border-slate-500 bg-white"
+                />
+              </div>
+              <div className="relative dropdown-container flex-shrink-0 w-auto min-w-[120px]">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl transition-all duration-300 text-slate-700 bg-white text-left flex items-center justify-between text-xs xs:text-sm font-medium hover:border-slate-500 focus:ring-2 focus:ring-slate-500 whitespace-nowrap"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                  <span>
+                    {filter === 'all' ? 'Todos' : filter === 'unread' ? 'No leídos' : 'Leídos'}
+                  </span>
+                  <svg
+                    className={`w-4 h-4 text-slate-400 transition-transform duration-300 flex-shrink-0 ml-2 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
 
-              {isDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                  <button
-                    onClick={() => {
-                      setFilter('all');
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full px-3 py-2 text-left transition-colors duration-200 first:rounded-t-lg text-sm"
-                    style={{
-                      backgroundColor: 'white',
-                      color: '#374151'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#4a0e0f';
-                      e.currentTarget.style.color = 'white';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'white';
-                      e.currentTarget.style.color = '#374151';
-                    }}
-                  >
-                    Todos
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFilter('unread');
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full px-3 py-2 text-left transition-colors duration-200 text-sm"
-                    style={{
-                      backgroundColor: 'white',
-                      color: '#374151'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#4a0e0f';
-                      e.currentTarget.style.color = 'white';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'white';
-                      e.currentTarget.style.color = '#374151';
-                    }}
-                  >
-                    No leídos
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFilter('read');
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full px-3 py-2 text-left transition-colors duration-200 last:rounded-b-lg text-sm"
-                    style={{
-                      backgroundColor: 'white',
-                      color: '#374151'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#4a0e0f';
-                      e.currentTarget.style.color = 'white';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'white';
-                      e.currentTarget.style.color = '#374151';
-                    }}
+                {isDropdownOpen && (
+                  <div className="absolute top-full right-0 mt-1 bg-white border-2 border-slate-200 rounded-xl shadow-xl z-10 overflow-hidden min-w-full">
+                    <button
+                      onClick={() => {
+                        setFilter('all');
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
+                        filter === 'all' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                    >
+                      Todos
+                    </button>
+                    <button
+                      onClick={() => {
+                        setFilter('unread');
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
+                        filter === 'unread' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      No leídos
+                    </button>
+                    <button
+                      onClick={() => {
+                        setFilter('read');
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
+                        filter === 'read' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
                   >
                     Leídos
                   </button>
                 </div>
               )}
             </div>
-            <div className="flex items-center space-x-3">
+            {/* Botones de acción separados */}
+            <div className="flex items-center gap-2 xs:gap-3 flex-shrink-0">
               <button
                 onClick={() => {
                   setShowNewMessageModal(true);
                 }}
-                className="px-3 py-2 text-white rounded-lg flex items-center space-x-2 transition-all duration-200 text-sm"
-                style={{
-                  background: '#4a0e0f',
-                  border: '1px solid #4a0e0f'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#6b1013';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#4a0e0f';
-                }}
+                className="px-2.5 xs:px-3 py-1.5 xs:py-2 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-lg flex items-center gap-1.5 xs:gap-2 transition-all duration-300 text-xs xs:text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 border border-slate-700/50"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 xs:w-4 xs:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                <span className="font-medium">Nuevo</span>
+                <span className="hidden xs:inline">Nuevo</span>
               </button>
               {activeTab === 'inbox' && stats && stats.unread > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                  className="px-4 py-2 text-white rounded-lg flex items-center space-x-2 transition-all duration-200 shadow-sm hover:shadow-md bg-gray-700 hover:bg-gray-800 border border-gray-600"
+                  className="px-2.5 xs:px-4 py-1.5 xs:py-2 text-white rounded-lg flex items-center gap-1.5 xs:gap-2 transition-all duration-300 shadow-sm hover:shadow-md bg-slate-700 hover:bg-slate-800 border border-slate-600 text-xs xs:text-sm font-bold"
               >
-                <Eye className="w-4 h-4" />
-                  <span className="font-medium">Marcar todos como leídos</span>
+                <Eye className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                  <span className="hidden xs:inline">Marcar todos como leídos</span>
+                  <span className="xs:hidden">Todos leídos</span>
               </button>
             )}
             </div>
@@ -568,27 +502,27 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
 
         {/* Barra de herramientas Gmail-style */}
         {selectedMessages.length > 0 && (
-          <div className="px-6 py-3 border-b border-gray-200 bg-blue-50 flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <span className="text-sm font-medium text-gray-700">
+          <div className="px-3 xs:px-4 sm:px-6 py-2 xs:py-3 border-b border-slate-200 bg-slate-50 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-4">
+            <div className="flex items-center gap-2 xs:gap-4 w-full xs:w-auto">
+              <span className="text-xs xs:text-sm font-bold text-slate-700 whitespace-nowrap">
                 {selectedMessages.length} seleccionado{selectedMessages.length > 1 ? 's' : ''}
               </span>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-1.5 xs:gap-2">
                 <button
                   onClick={handleBulkMarkAsRead}
-                  className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                  className="px-2 xs:px-3 py-1.5 text-xs bg-white border-2 border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-500 text-slate-700 font-bold transition-all duration-300"
                   title="Marcar como leído"
                 >
-                  <Eye className="w-4 h-4 inline mr-1" />
-                  Leído
+                  <Eye className="w-3.5 h-3.5 xs:w-4 xs:h-4 inline xs:mr-1" />
+                  <span className="hidden xs:inline">Leído</span>
                 </button>
                 <button
                   onClick={handleBulkDelete}
-                  className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors"
+                  className="px-2 xs:px-3 py-1.5 text-xs bg-white border-2 border-red-300 rounded-lg hover:bg-red-50 hover:border-red-500 text-red-600 font-bold transition-all duration-300"
                   title="Eliminar"
                 >
-                  <Trash2 className="w-4 h-4 inline mr-1" />
-                  Eliminar
+                  <Trash2 className="w-3.5 h-3.5 xs:w-4 xs:h-4 inline xs:mr-1" />
+                  <span className="hidden xs:inline">Eliminar</span>
                 </button>
               </div>
             </div>
@@ -597,7 +531,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                 setSelectedMessages([]);
                 setSelectAll(false);
               }}
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className="text-xs xs:text-sm text-slate-500 hover:text-slate-700 font-bold transition-colors whitespace-nowrap"
             >
               Cancelar
             </button>
@@ -605,95 +539,91 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
         )}
 
         {/* Content */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Message List - Formal */}
-          <div className="w-1/3 border-r border-gray-200 overflow-y-auto bg-gray-50">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          {/* Message List - Responsivo */}
+          <div className={`w-full md:w-1/3 border-r border-slate-200 overflow-y-auto bg-slate-50/50 ${
+            selectedMessage ? 'hidden md:block' : 'block'
+          }`}>
             {/* Header con checkbox para seleccionar todos */}
             {messages.length > 0 && (
-              <div className="p-4 border-b border-gray-200 bg-white flex items-center space-x-3">
+              <div className="p-3 xs:p-4 border-b border-slate-200 bg-white flex items-center space-x-2 xs:space-x-3">
                 <input
                   type="checkbox"
                   checked={selectAll}
                   onChange={handleSelectAll}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-slate-600 border-slate-300 rounded focus:ring-slate-500"
                 />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-xs xs:text-sm font-bold text-slate-700">
                   Seleccionar todos
                 </span>
               </div>
             )}
             {loading ? (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-6 xs:p-8 text-center">
                 <div className="flex flex-col items-center space-y-3">
-                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-gray-600"></div>
-                  <span className="text-sm font-medium">Cargando mensajes...</span>
+                  <div className="w-7 h-7 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin"></div>
+                  <span className="text-sm font-semibold text-slate-600">Cargando mensajes...</span>
                 </div>
               </div>
             ) : messages.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-6 xs:p-8 text-center">
                 <div className="flex flex-col items-center space-y-3">
-                  <Mail className="w-12 h-12 text-gray-400" />
-                  <span className="text-sm font-medium">
-                No hay mensajes {activeTab === 'inbox' ? 'recibidos' : 'enviados'}
+                  <div className="w-14 h-14 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center shadow-lg shadow-slate-100/50">
+                    <Mail className="w-7 h-7 text-slate-600" />
+                  </div>
+                  <span className="text-sm font-bold text-slate-700">
+                    No hay mensajes {activeTab === 'inbox' ? 'recibidos' : 'enviados'}
                   </span>
                 </div>
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
                 {messages.map((message) => (
-                  <div
+                  <div 
                     key={message.id}
-                    className={`p-4 transition-all duration-200 hover:bg-white hover:shadow-sm ${
-                      selectedMessage?.id === message.id ? 'bg-white shadow-sm' : ''
-                    } ${!message.read && activeTab === 'inbox' ? 'bg-white/80' : ''}`}
-                    style={{
-                      borderRight: selectedMessage?.id === message.id ? '3px solid #6b7280' : '3px solid transparent',
-                      backgroundColor: !message.read && activeTab === 'inbox' ? 'rgba(107, 114, 128, 0.05)' : 'transparent',
-                      borderRadius: selectedMessage?.id === message.id ? '0.5rem 0 0 0.5rem' : '0'
-                    }}
+                    className={`group relative p-3 xs:p-4 border-b border-slate-200 cursor-pointer transition-all duration-300 hover:bg-slate-50/50 ${
+                      selectedMessage?.id === message.id ? 'bg-slate-50/50 border-l-4 border-slate-600' : ''
+                    } ${!message.read && activeTab === 'inbox' ? 'bg-slate-50/30' : ''}`}
+                    onClick={() => setSelectedMessage(message)}
                   >
-                    <div className="flex items-start space-x-3">
+                    <div className="flex items-start gap-2 xs:gap-3">
                       {/* Checkbox para selección individual */}
                       <input
                         type="checkbox"
                         checked={selectedMessages.includes(message.id)}
                         onChange={() => handleSelectMessage(message.id)}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
+                        className="w-4 h-4 text-slate-600 border-slate-300 rounded focus:ring-slate-500 mt-1 flex-shrink-0"
                       />
                       <div className="flex-shrink-0">
                         <div className="relative">
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm" style={{
-                            backgroundColor: !message.read && activeTab === 'inbox' ? 'rgba(107, 114, 128, 0.1)' : '#f3f4f6',
-                            border: '1px solid rgba(107, 114, 128, 0.1)'
-                          }}>
-                            <span className="text-sm font-semibold" style={{
-                              color: !message.read && activeTab === 'inbox' ? '#6b7280' : '#6b7280'
-                            }}>
+                          <div className={`w-10 h-10 xs:w-12 xs:h-12 rounded-xl flex items-center justify-center shadow-sm border-2 font-bold text-sm xs:text-base transition-all duration-300 group-hover:scale-110 ${
+                            !message.read && activeTab === 'inbox' 
+                              ? 'bg-gradient-to-br from-slate-100 to-slate-200 border-slate-300 text-slate-700' 
+                              : 'bg-slate-100 border-slate-200 text-slate-600'
+                          }`}>
                             {message.sender?.name?.charAt(0) || message.recipient?.name?.charAt(0) || '?'}
-                          </span>
                           </div>
-                          {/* Indicador de no leído como Gmail */}
+                          {/* Indicador de no leído */}
                           {!message.read && activeTab === 'inbox' && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></div>
+                            <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-slate-600 rounded-full border-2 border-white shadow-sm"></div>
                           )}
                         </div>
                       </div>
-                      <div 
-                        className="flex-1 min-w-0 cursor-pointer"
-                        onClick={() => setSelectedMessage(message)}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="text-sm font-semibold truncate text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1 gap-2">
+                          <p className={`text-sm xs:text-base font-bold truncate ${
+                            !message.read && activeTab === 'inbox' ? 'text-slate-900' : 'text-slate-700'
+                          }`}>
                             {activeTab === 'inbox' ? message.sender?.name : message.recipient?.name}
                           </p>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center gap-1.5 xs:gap-2 flex-shrink-0">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 // Aquí se podría implementar la funcionalidad de estrella
                               }}
-                              className="text-gray-400 hover:text-yellow-500 transition-colors"
+                              className="text-slate-400 hover:text-amber-500 transition-all duration-300 hover:scale-110 p-1"
                               title="Marcar como importante"
                             >
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -701,31 +631,33 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                               </svg>
                             </button>
                             <span className="text-xs">{getPriorityIcon(message.priority)}</span>
-                            <span className="text-xs text-gray-500 font-medium">
+                            <span className="text-[10px] xs:text-xs text-slate-500 font-semibold whitespace-nowrap">
                               {formatDate(message.created_at)}
                             </span>
                           </div>
                         </div>
-                        <p className="text-sm truncate font-medium mb-1 text-gray-800">
+                        <p className={`text-sm xs:text-base truncate font-semibold mb-1.5 ${
+                          !message.read && activeTab === 'inbox' ? 'text-slate-900' : 'text-slate-700'
+                        }`}>
                           {message.subject}
                         </p>
-                        <p className="text-xs text-gray-500 truncate leading-relaxed">
+                        <p className="text-xs xs:text-sm text-slate-600 truncate leading-relaxed mb-2">
                           {message.content.substring(0, 60)}...
                         </p>
-                        {/* Etiquetas como Gmail */}
-                        <div className="flex flex-wrap gap-1 mt-2">
+                        {/* Badges modernos */}
+                        <div className="flex flex-wrap gap-1.5">
                           {message.priority === 'urgent' && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] xs:text-xs font-bold bg-red-100 text-red-700 border border-red-200">
                               Urgente
                             </span>
                           )}
                           {!message.read && activeTab === 'inbox' && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] xs:text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
                               No leído
                             </span>
                           )}
                           {activeTab === 'sent' && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] xs:text-xs font-bold bg-green-100 text-green-700 border border-green-200">
                               Enviado
                             </span>
                           )}
@@ -738,79 +670,75 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
             )}
           </div>
 
-          {/* Message Detail */}
-          <div className="flex-1 flex flex-col bg-white">
+          {/* Message Detail - Desktop */}
+          <div className="flex-1 flex flex-col bg-white hidden md:flex">
             {selectedMessage ? (
               <>
-                {/* Message Header - Granate Super Oscuro */}
-                <div className="p-6 border-b border-gray-200" style={{ 
-                  background: 'linear-gradient(135deg, #4a0e0f 0%, #6b1013 100%)',
-                  borderBottom: '2px solid #4a0e0f',
-                  borderRadius: '0 0 0.5rem 0.5rem'
-                }}>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2 text-white tracking-wide">{selectedMessage.subject}</h3>
-                      <div className="flex items-center space-x-4 text-xs text-white/85 mb-2 font-medium">
-                        <span className="flex items-center gap-2">
-                          <span className="font-semibold">De:</span>
+                {/* Message Header - Moderno con Gradiente Slate */}
+                <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 xs:p-5 sm:p-6 border-b border-slate-700/20 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-slate-800/50 via-transparent to-slate-800/30 animate-pulse"></div>
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-600/10 via-slate-500/5 to-transparent rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+                  <div className="flex items-start justify-between relative z-10">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base xs:text-lg sm:text-xl font-black mb-2 text-white tracking-tight">{selectedMessage.subject}</h3>
+                      <div className="flex flex-wrap items-center gap-3 xs:gap-4 text-xs text-slate-300 mb-2 font-medium">
+                        <span className="flex items-center gap-1.5 bg-white/15 px-2 py-1 rounded-lg backdrop-blur-xl border border-white/20">
+                          <span className="font-bold">De:</span>
                           <span className="text-white">{selectedMessage.sender?.name}</span>
                         </span>
-                        <span className="flex items-center gap-2">
-                          <span className="font-semibold">Para:</span>
+                        <span className="flex items-center gap-1.5 bg-white/15 px-2 py-1 rounded-lg backdrop-blur-xl border border-white/20">
+                          <span className="font-bold">Para:</span>
                           <span className="text-white">{selectedMessage.recipient?.name}</span>
                         </span>
                       </div>
-                      <div className="flex items-center space-x-4 text-xs text-white/75">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                        {new Date(selectedMessage.created_at).toLocaleString('es-ES')}
+                      <div className="flex flex-wrap items-center gap-2 xs:gap-3 text-xs text-slate-300">
+                        <span className="flex items-center gap-1.5 bg-white/15 px-2 py-1 rounded-lg backdrop-blur-xl border border-white/20">
+                          <Clock className="w-3.5 h-3.5" />
+                          {new Date(selectedMessage.created_at).toLocaleString('es-ES')}
                         </span>
-                        <span className={`flex items-center gap-1 ${getPriorityColor(selectedMessage.priority)}`}>
+                        <span className={`flex items-center gap-1.5 bg-white/15 px-2 py-1 rounded-lg backdrop-blur-xl border border-white/20 ${getPriorityColor(selectedMessage.priority)}`}>
                           {getPriorityIcon(selectedMessage.priority)} {selectedMessage.priority}
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2 ml-4">
+                    <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                       {activeTab === 'inbox' && !selectedMessage.read && (
                         <button
                           onClick={() => handleMarkAsRead(selectedMessage.id)}
-                          className="p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200"
-                          style={{ 
-                            border: '1px solid rgba(255, 255, 255, 0.15)'
-                          }}
+                          className="w-9 h-9 xs:w-10 xs:h-10 text-white hover:bg-white/20 rounded-lg transition-all duration-300 backdrop-blur-sm border border-white/30 hover:border-white/50 flex items-center justify-center shadow-lg hover:scale-110"
                           title="Marcar como leído"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4 xs:w-5 xs:h-5" />
                         </button>
                       )}
                       <button
                         onClick={() => handleDeleteMessage(selectedMessage.id)}
-                        className="p-2 text-white hover:bg-red-500/20 rounded-lg transition-all duration-200"
-                        style={{ border: '1px solid rgba(255, 255, 255, 0.15)' }}
+                        className="w-9 h-9 xs:w-10 xs:h-10 text-white hover:bg-red-500/30 rounded-lg transition-all duration-300 backdrop-blur-sm border border-white/30 hover:border-red-400/50 flex items-center justify-center shadow-lg hover:scale-110"
                         title="Eliminar mensaje"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4 xs:w-5 xs:h-5" />
                       </button>
                     </div>
                   </div>
                 </div>
 
                 {/* Message Content */}
-                <div className="flex-1 p-6 overflow-y-auto">
-                  <div className="prose max-w-none">
-                    <div className="whitespace-pre-wrap text-gray-800 leading-relaxed text-base">
+                <div className="flex-1 p-4 xs:p-5 sm:p-6 overflow-y-auto bg-slate-50/30">
+                  <div className="bg-white rounded-xl p-4 xs:p-5 sm:p-6 border border-slate-200 shadow-sm">
+                    <div className="whitespace-pre-wrap text-slate-800 leading-relaxed text-sm xs:text-base">
                       {selectedMessage.content}
                     </div>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
+              <div className="flex-1 flex items-center justify-center bg-slate-50/30">
                 <div className="text-center">
-                  <Mail className="w-16 h-16 mx-auto mb-4" style={{ color: '#6b1013', opacity: 0.3 }} />
-                  <p className="text-lg font-medium text-gray-600 mb-2">Selecciona un mensaje</p>
-                  <p className="text-sm text-gray-500">para ver su contenido</p>
+                  <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-slate-100/50">
+                    <Mail className="w-10 h-10 text-slate-600" />
+                  </div>
+                  <p className="text-base xs:text-lg font-bold text-slate-700 mb-1">Selecciona un mensaje</p>
+                  <p className="text-sm text-slate-500">para ver su contenido</p>
                 </div>
               </div>
             )}
@@ -821,61 +749,50 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
 
     {/* Modal de Nuevo Mensaje */}
     {showNewMessageModal && (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[80] p-4">
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[80] p-2 xs:p-3 sm:p-4">
         <div 
-          className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[75vh] overflow-y-auto flex flex-col"
+          className="bg-white rounded-xl xs:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] xs:max-h-[90vh] sm:max-h-[85vh] md:max-h-[75vh] overflow-y-auto flex flex-col"
           style={{
             border: '1px solid #e5e7eb'
           }}
         >
-          {/* Header - Formal y Sutil */}
-          <div className="p-4 bg-white" style={{
-            borderBottom: '2px solid #1a2332'
-          }}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 rounded flex items-center justify-center" style={{
-                  backgroundColor: '#4a0e0f'
-                }}>
-                  <Mail className="w-4 h-4 text-white" />
+          {/* Header - Moderno con Gradiente Slate */}
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 xs:p-5 sm:p-6 border-b border-slate-700/20 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-tr from-slate-800/50 via-transparent to-slate-800/30 animate-pulse"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-600/10 via-slate-500/5 to-transparent rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center space-x-2 xs:space-x-3">
+                <div className="w-9 h-9 xs:w-10 xs:h-10 bg-white/15 backdrop-blur-xl rounded-xl flex items-center justify-center border border-white/20 shadow-lg">
+                  <Mail className="w-4 h-4 xs:w-5 xs:h-5 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800">Nuevo Mensaje</h3>
+                <h3 className="text-base xs:text-lg sm:text-xl font-black text-white tracking-tight">Nuevo Mensaje</h3>
               </div>
               <button
                 onClick={() => setShowNewMessageModal(false)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 bg-white border border-gray-200 hover:bg-gray-50"
+                className="w-8 h-8 xs:w-9 xs:h-9 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-white/20 backdrop-blur-xl border border-white/20 hover:border-white/30 shadow-lg hover:scale-110"
               >
-                <X className="w-4 h-4 text-gray-600" />
+                <X className="w-4 h-4 xs:w-5 xs:h-5 text-white" />
               </button>
             </div>
           </div>
           
           {/* Contenido del formulario */}
-          <div className="flex-1 p-4 space-y-4 bg-white">
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Para:</label>
+          <div className="flex-1 p-3 xs:p-4 sm:p-5 lg:p-6 space-y-3 xs:space-y-4 bg-white">
+            <div className="flex flex-col xs:flex-row gap-3">
+              <div className="flex-1 min-w-0">
+                <label className="block text-xs xs:text-sm font-bold text-slate-700 mb-1.5">Para:</label>
                 <input
                   type="text"
                   placeholder="Nombre del destinatario"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-gray-400 focus:outline-none transition-colors text-sm"
+                  className="w-full px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500 focus:outline-none transition-all duration-300 text-xs xs:text-sm sm:text-base bg-white"
                 />
               </div>
               
-              <div style={{ width: '140px' }} className="relative priority-dropdown-container">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Prioridad:</label>
+              <div className="w-full xs:w-36 sm:w-40 relative priority-dropdown-container">
+                <label className="block text-xs xs:text-sm font-bold text-slate-700 mb-1.5">Prioridad:</label>
                 <button
                   onClick={() => setIsPriorityDropdownOpen(!isPriorityDropdownOpen)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md transition-all duration-200 text-gray-700 bg-white text-left flex items-center justify-between text-sm"
-                  style={{
-                    borderColor: '#d1d5db'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#4a0e0f';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#d1d5db';
-                  }}
+                  className="w-full px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl transition-all duration-300 text-slate-700 bg-white text-left flex items-center justify-between text-xs xs:text-sm sm:text-base font-medium hover:border-slate-500 focus:ring-2 focus:ring-slate-500"
                 >
                   <span>{getPriorityText(selectedPriority)}</span>
                   <svg
@@ -889,25 +806,15 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                 </button>
 
                 {isPriorityDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-slate-200 rounded-xl shadow-xl z-10 overflow-hidden">
                     <button
                       onClick={() => {
                         setSelectedPriority('normal');
                         setIsPriorityDropdownOpen(false);
                       }}
-                      className="w-full px-3 py-2 text-left transition-colors duration-200 first:rounded-t-md text-sm"
-                      style={{
-                        backgroundColor: 'white',
-                        color: '#374151'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#4a0e0f';
-                        e.currentTarget.style.color = 'white';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'white';
-                        e.currentTarget.style.color = '#374151';
-                      }}
+                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
+                        selectedPriority === 'normal' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
                     >
                       Normal
                     </button>
@@ -916,19 +823,9 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                         setSelectedPriority('high');
                         setIsPriorityDropdownOpen(false);
                       }}
-                      className="w-full px-3 py-2 text-left transition-colors duration-200 text-sm"
-                      style={{
-                        backgroundColor: 'white',
-                        color: '#374151'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#4a0e0f';
-                        e.currentTarget.style.color = 'white';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'white';
-                        e.currentTarget.style.color = '#374151';
-                      }}
+                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
+                        selectedPriority === 'high' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
                     >
                       Alta
                     </button>
@@ -937,19 +834,9 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                         setSelectedPriority('urgent');
                         setIsPriorityDropdownOpen(false);
                       }}
-                      className="w-full px-3 py-2 text-left transition-colors duration-200 last:rounded-b-md text-sm"
-                      style={{
-                        backgroundColor: 'white',
-                        color: '#374151'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#4a0e0f';
-                        e.currentTarget.style.color = 'white';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'white';
-                        e.currentTarget.style.color = '#374151';
-                      }}
+                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
+                        selectedPriority === 'urgent' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
                     >
                       Urgente
                     </button>
@@ -959,31 +846,29 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Asunto:</label>
+              <label className="block text-xs xs:text-sm font-bold text-slate-700 mb-1.5">Asunto:</label>
               <input
                 type="text"
                 placeholder="Asunto del mensaje"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-gray-400 focus:outline-none transition-colors text-sm"
+                className="w-full px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500 focus:outline-none transition-all duration-300 text-xs xs:text-sm sm:text-base bg-white"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje:</label>
+              <label className="block text-xs xs:text-sm font-bold text-slate-700 mb-1.5">Mensaje:</label>
               <textarea
                 placeholder="Escribe tu mensaje aquí..."
                 rows={5}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-gray-400 focus:outline-none transition-colors text-sm resize-none"
+                className="w-full px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500 focus:outline-none transition-all duration-300 text-xs xs:text-sm sm:text-base resize-none bg-white"
               />
             </div>
           </div>
           
-          {/* Footer - Formal y Sutil */}
-          <div className="p-4 flex justify-end space-x-2 bg-white" style={{
-            borderTop: '2px solid #1a2332'
-          }}>
+          {/* Footer - Moderno */}
+          <div className="p-3 xs:p-4 sm:p-5 lg:p-6 flex flex-col xs:flex-row justify-end gap-2 xs:gap-3 bg-white border-t border-slate-200">
             <button
               onClick={() => setShowNewMessageModal(false)}
-              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium"
+              className="px-4 py-2 xs:py-2.5 text-slate-600 border-2 border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition-all duration-300 text-xs xs:text-sm font-bold order-2 xs:order-1"
             >
               Cancelar
             </button>
@@ -993,17 +878,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                 setShowNewMessageModal(false);
                 // Mostrar notificación de éxito
               }}
-              className="px-4 py-2 text-white rounded-md transition-colors text-sm font-medium"
-              style={{
-                background: '#4a0e0f',
-                border: '1px solid #4a0e0f'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#6b1013';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#4a0e0f';
-              }}
+              className="px-5 py-2 xs:py-2.5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl hover:from-slate-800 hover:to-slate-700 transition-all duration-300 text-xs xs:text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 border border-slate-700/50 order-1 xs:order-2"
             >
               Enviar
             </button>
@@ -1011,8 +886,10 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
         </div>
       </div>
     )}
-    </>
+      
+  
+    document.body
   );
 };
 
-export default MessagePanel; 
+export default MessagePanel;

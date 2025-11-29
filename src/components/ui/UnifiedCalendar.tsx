@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,12 +13,12 @@ import {
   Plus,
   X,
   AlertCircle,
+  AlertTriangle,
   CheckCircle,
   Info,
   Star,
   MapPin
 } from 'lucide-react';
-import { Card } from './Card';
 import { Button } from './Button';
 import { Badge } from './Badge';
 import { AlertModal } from './AlertModal';
@@ -79,8 +80,6 @@ const checkImageExists = (url: string): Promise<boolean> => {
 
 // Función para obtener la imagen del feriado
 const getHolidayImage = (holidayName: string): string => {
-  console.log('Getting image for holiday:', holidayName);
-  
   // Rutas corregidas para las imágenes
   const images: { [key: string]: string } = {
     'Año Nuevo': '/images/Feriados/Añonuevo.png',
@@ -107,89 +106,69 @@ const getHolidayImage = (holidayName: string): string => {
 
   // Buscar coincidencias exactas primero
   if (images[holidayName]) {
-    console.log('Exact match found:', images[holidayName]);
     return images[holidayName];
   }
 
   // Buscar coincidencias parciales más inteligentes
-  const holidayNameLower = holidayName.toLowerCase();
+  const holidayNameLower = holidayName.toLowerCase().trim();
   
-  // Mapeo más específico para casos especiales
+  // Mapeo más específico para casos especiales - Día de Todos los Santos primero para prioridad
+  if (holidayNameLower.includes('todos los santos') || holidayNameLower.includes('todoslos santos') || holidayNameLower.includes('dia de todos los santos') || holidayNameLower.includes('día de todos los santos') || holidayNameLower === 'todos los santos') {
+    return '/images/Feriados/diadetodoslossantos.png';
+  }
   if (holidayNameLower.includes('año nuevo') || holidayNameLower.includes('ano nuevo')) {
-    console.log('Partial match for Año Nuevo:', '/images/Feriados/Añonuevo.png');
     return '/images/Feriados/Añonuevo.png';
   }
   if (holidayNameLower.includes('batalla de arica') || holidayNameLower.includes('día de la bandera')) {
-    console.log('Partial match for Batalla de Arica/Día de la Bandera:', '/images/Feriados/banderabatallaarica.png');
     return '/images/Feriados/banderabatallaarica.png';
   }
   if (holidayNameLower.includes('combate de angamos')) {
-    console.log('Partial match for Combate de Angamos:', '/images/Feriados/batallaangamos.png');
     return '/images/Feriados/batallaangamos.png';
   }
   if (holidayNameLower.includes('batalla de ayacucho')) {
-    console.log('Partial match for Batalla de Ayacucho:', '/images/Feriados/batallaayacucho.png');
     return '/images/Feriados/batallaayacucho.png';
   }
   if (holidayNameLower.includes('batalla de junin')) {
-    console.log('Partial match for Batalla de Junín:', '/images/Feriados/batalladejunin.png');
     return '/images/Feriados/batalladejunin.png';
   }
   if (holidayNameLower.includes('combate del 2 de mayo') || holidayNameLower.includes('combate de 2 de mayo')) {
-    console.log('Partial match for Combate del 2 de Mayo:', '/images/Feriados/combate2demayo.png');
     return '/images/Feriados/combate2demayo.png';
   }
-  if (holidayNameLower.includes('dia de todos los santos') || holidayNameLower.includes('día de todos los santos')) {
-    console.log('Partial match for Día de Todos los Santos:', '/images/Feriados/diadetodoslossantos.png');
-    return '/images/Feriados/diadetodoslossantos.png';
-  }
   if (holidayNameLower.includes('dia del trabajador') || holidayNameLower.includes('día del trabajador') || holidayNameLower.includes('día del trabajo')) {
-    console.log('Partial match for Día del Trabajo/Trabajador:', '/images/Feriados/Diadetrabajor.png');
     return '/images/Feriados/Diadetrabajor.png';
   }
   if (holidayNameLower.includes('fiestas patrias')) {
-    console.log('Partial match for Fiestas Patrias:', '/images/Feriados/fiestaspatrias.png');
     return '/images/Feriados/fiestaspatrias.png';
   }
   if (holidayNameLower.includes('fuerza aerea') || holidayNameLower.includes('fuerza aérea')) {
-    console.log('Partial match for Fuerza Aérea:', '/images/Feriados/Fuerzaarea.png');
     return '/images/Feriados/Fuerzaarea.png';
   }
   if (holidayNameLower.includes('fuerzas armadas')) {
-    console.log('Partial match for Fuerzas Armadas:', '/images/Feriados/fiestaspatrias.png');
     return '/images/Feriados/fiestaspatrias.png';
   }
   if (holidayNameLower.includes('independencia')) {
-    console.log('Partial match for Independencia:', '/images/Feriados/fiestaspatrias.png');
     return '/images/Feriados/fiestaspatrias.png';
   }
   if (holidayNameLower.includes('inmaculada concepcion') || holidayNameLower.includes('inmaculada concepción')) {
-    console.log('Partial match for Inmaculada Concepción:', '/images/Feriados/imaculadaconcepcion.png');
     return '/images/Feriados/imaculadaconcepcion.png';
   }
   if (holidayNameLower.includes('jueves santo')) {
-    console.log('Partial match for Jueves Santo:', '/images/Feriados/juevessanto.png');
     return '/images/Feriados/juevessanto.png';
   }
   if (holidayNameLower.includes('navidad')) {
-    console.log('Partial match for Navidad:', '/images/Feriados/navidad.jpg');
     return '/images/Feriados/navidad.jpg';
   }
   if (holidayNameLower.includes('san pedro y san pablo')) {
-    console.log('Partial match for San Pedro y San Pablo:', '/images/Feriados/pedropablo.png');
     return '/images/Feriados/pedropablo.png';
   }
   if (holidayNameLower.includes('santa rosa de lima')) {
-    console.log('Partial match for Santa Rosa de Lima:', '/images/Feriados/santarosadelima.png');
     return '/images/Feriados/santarosadelima.png';
   }
   if (holidayNameLower.includes('viernes santo')) {
-    console.log('Partial match for Viernes Santo:', '/images/Feriados/Viernessanto.png');
     return '/images/Feriados/Viernessanto.png';
   }
   
   // Si no hay coincidencia, usar imagen por defecto
-  console.log('No match found, using default image');
   return '/images/Feriados/fiestaspatrias.png';
 };
 
@@ -364,33 +343,6 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
   onSearch,
   onFilterChange
 }) => {
-  // Log para verificar props al montar el componente
-  useEffect(() => {
-    console.log('🔧 UnifiedCalendar montado con props:', {
-      onDateSelect: !!onDateSelect,
-      onDateSelectType: typeof onDateSelect,
-      onDateSelectFunction: onDateSelect,
-      userType,
-      showLegend,
-      showNavigation,
-      showToolbar,
-      showSearch,
-      selectedDate,
-      availableDates: availableDates?.length || 0,
-      blockedDates: blockedDates?.length || 0,
-      holidays: holidays?.length || 0,
-      appointments: appointments?.length || 0
-    });
-    
-    // Verificar si onDateSelect es realmente una función
-    if (onDateSelect) {
-      console.log('🔍 onDateSelect es:', onDateSelect);
-      console.log('🔍 Tipo de onDateSelect:', typeof onDateSelect);
-      console.log('🔍 onDateSelect.toString():', onDateSelect.toString());
-    } else {
-      console.warn('⚠️ onDateSelect NO está disponible');
-    }
-  }, [onDateSelect, userType, showLegend, showNavigation, showToolbar, showSearch, selectedDate, availableDates, blockedDates, holidays, appointments]);
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDateState, setSelectedDateState] = useState<Date | null>(null);
@@ -416,6 +368,9 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
   
     // Estados para información colapsable (solo uno puede estar abierto)
   const [openSection, setOpenSection] = useState<'description' | 'important' | null>(null);
+  
+  // Estado para colapsar/expandir descripción de temporada en móviles
+  const [showSeasonDescription, setShowSeasonDescription] = useState(false);
   
   // Estado de depuración (opcional)
   const [debugMode, setDebugMode] = useState(false);
@@ -462,14 +417,21 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
           region: holiday.region
         }));
         
-        // Eliminar duplicados por fecha de manera más eficiente
-        const uniqueHolidays = formattedHolidays.filter((holiday, index, self) => {
+        // Filtrar solo feriados activos y nacionales, y eliminar duplicados
+        const filteredHolidays = formattedHolidays
+          .filter(holiday => {
+            // Solo mostrar feriados nacionales activos
+            const isActive = holiday.is_national !== false; // Asumir activo si no está definido
+            const isNational = holiday.is_national === true || holiday.is_national === undefined;
+            return isActive && isNational;
+          })
+          .filter((holiday, index, self) => {
+            // Eliminar duplicados por fecha, manteniendo el primero
           const holidayDate = dayjs(holiday.date).format('YYYY-MM-DD');
           return index === self.findIndex(h => dayjs(h.date).format('YYYY-MM-DD') === holidayDate);
         });
         
-        setLocalHolidays(uniqueHolidays);
-        console.log(`🚀 Feriados cargados ultra rápido para ${currentYear}-${nextYear}:`, uniqueHolidays.length, 'encontrados');
+        setLocalHolidays(filteredHolidays);
       } catch (error) {
         console.error('Error loading holidays ultra fast:', error);
         // Fallback ultra rápido: cargar solo el año actual
@@ -477,17 +439,28 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
           const currentYear = new Date().getFullYear();
           const holidaysData = await holidayService.getHolidays(currentYear, 'Lima');
           
-          const formattedHolidays = holidaysData.map(holiday => ({
+          const formattedHolidays = holidaysData
+            .map(holiday => ({
             date: dayjs(holiday.date).toDate(),
             name: holiday.name,
             description: holiday.description,
             type: holiday.type,
             is_national: holiday.is_national,
             region: holiday.region
-          }));
+            }))
+            .filter(holiday => {
+              // Solo mostrar feriados nacionales activos
+              const isActive = holiday.is_national !== false;
+              const isNational = holiday.is_national === true || holiday.is_national === undefined;
+              return isActive && isNational;
+            })
+            .filter((holiday, index, self) => {
+              // Eliminar duplicados por fecha
+              const holidayDate = dayjs(holiday.date).format('YYYY-MM-DD');
+              return index === self.findIndex(h => dayjs(h.date).format('YYYY-MM-DD') === holidayDate);
+            });
           
           setLocalHolidays(formattedHolidays);
-          console.log(`🎉 Fallback: Feriados del año actual cargados:`, formattedHolidays.length);
         } catch (fallbackError) {
           console.error('Error en fallback rápido de feriados:', fallbackError);
           // Último recurso: array vacío
@@ -506,23 +479,18 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     const todayStart = dayjs(peruTime).startOf('day');
     const dateStart = dayjs(date).startOf('day');
     
-    console.log(`🔍 Verificando disponibilidad para: ${dayjs(date).format('YYYY-MM-DD')}`);
-    
     // No se puede agendar días anteriores
     if (dayjs(dateStart).isBefore(todayStart)) {
-      console.log(`❌ ${dayjs(date).format('YYYY-MM-DD')} - Es día pasado`);
       return false;
     }
     
     // Para HOY: verificar si ya pasó la hora límite (13:10) Y si hay 30 horas de anticipación
     if (dayjs(dateStart).format('YYYY-MM-DD') === dayjs(todayStart).format('YYYY-MM-DD')) {
-      console.log(`📅 ${dayjs(date).format('YYYY-MM-DD')} - Es hoy, verificando hora límite`);
       const currentTime = dayjs(peruTime).hour() * 60 + dayjs(peruTime).minute();
       const cutoffTime = 13 * 60 + 10; // 13:10 en minutos
       
       // Verificar si ya pasó la hora límite
       if (currentTime > cutoffTime) {
-        console.log(`⏰ ${dayjs(date).format('YYYY-MM-DD')} - Ya pasó la hora límite para hoy`);
         return false; // Ya pasó la hora límite para hoy
       }
       
@@ -532,11 +500,9 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
       const hoursDifference = appointmentDateTime.diff(currentDateTime, 'hour', true);
       
       if (hoursDifference < 30) {
-        console.log(`⏱️ ${dayjs(date).format('YYYY-MM-DD')} - No hay 30 horas de anticipación para hoy`);
         return false; // No hay 30 horas de anticipación para hoy
       }
       
-      console.log(`✅ ${dayjs(date).format('YYYY-MM-DD')} - HOY disponible con anticipación suficiente`);
       // Si pasa ambas validaciones, HOY SÍ está disponible
       return true;
     }
@@ -544,14 +510,12 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     // No se puede agendar más de 2 semanas adelante
     const twoWeeksFromNow = dayjs(todayStart).add(14, 'day');
     if (dayjs(dateStart).isAfter(twoWeeksFromNow)) {
-      console.log(`📅 ${dayjs(date).format('YYYY-MM-DD')} - Más de 2 semanas adelante`);
       return false;
     }
     
     // Verificar si es día hábil (Lunes a Viernes)
     const dayOfWeek = dayjs(date).day();
     if (dayOfWeek === 0 || dayOfWeek === 6) { // Domingo o Sábado
-      console.log(`🏠 ${dayjs(date).format('YYYY-MM-DD')} - Es fin de semana`);
       return false;
     }
     
@@ -560,7 +524,6 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
       dayjs(h.date).format('YYYY-MM-DD') === dayjs(date).format('YYYY-MM-DD')
     ) : false;
     if (localHoliday) {
-      console.log(`🎉 ${dayjs(date).format('YYYY-MM-DD')} - Es feriado`);
       return false;
     }
     
@@ -572,11 +535,9 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
       dayjs(blockedDate).format('YYYY-MM-DD') === dayjs(date).format('YYYY-MM-DD')
     );
     if (externalBlocked || localBlocked) {
-      console.log(`🚫 ${dayjs(date).format('YYYY-MM-DD')} - Está bloqueado`);
       return false;
     }
     
-    console.log(`✅ ${dayjs(date).format('YYYY-MM-DD')} - DISPONIBLE para agendamiento`);
     return true;
   };
 
@@ -644,7 +605,6 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
       
       // Verificar disponibilidad
       const isAvailable = isDateAvailableForBooking(date.toDate());
-      console.log(`📅 Día ${date.format('YYYY-MM-DD')} - Disponibilidad: ${isAvailable}`);
       
       // Verificar si está bloqueado (pero NO si es fin de semana)
       const isWeekend = date.day() === 0 || date.day() === 6;
@@ -710,23 +670,6 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
   // Usar useMemo para recalcular los días cuando cambie currentMonth
   const calendarDays = useMemo(() => {
     const days = generateCalendarDays();
-    const availableDays = days.filter(day => day.isAvailable);
-    const holidayDays = days.filter(day => day.isHoliday);
-    const blockedDays = days.filter(day => day.isBlocked);
-    const weekendDays = days.filter(day => day.isWeekend);
-    
-    console.log(`📅 Calendario generado para ${dayjs(currentMonth).format('MMMM YYYY')}:`);
-    console.log(`✅ Días disponibles: ${availableDays.length}`);
-    console.log(`🎉 Días feriados: ${holidayDays.length}`);
-    console.log(`🚫 Días bloqueados: ${blockedDays.length}`);
-    console.log(`🏠 Días fin de semana: ${weekendDays.length}`);
-    console.log(`📊 Total de días: ${days.length}`);
-    
-    // Mostrar fechas disponibles específicas
-    if (availableDays.length > 0) {
-      console.log('📋 Fechas disponibles:', availableDays.map(day => dayjs(day.date).format('YYYY-MM-DD')));
-    }
-    
     return days;
   }, [currentMonth, localHolidays, blockedDates, localBlockedDates, appointments]);
 
@@ -788,7 +731,7 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     if (day.isAppointment) return 'rgba(245, 158, 11, 0.15)'; // Ámbar moderno suave - Ocupado
     if (day.isAvailable) return 'rgba(34, 197, 94, 0.2)'; // Verde esmeralda suave - Disponible
     if (day.isBlocked) return 'rgba(156, 163, 175, 0.15)'; // Gris moderno suave - Bloqueado
-    if (day.isWeekend) return 'rgba(156, 163, 175, 0.12)'; // Gris moderno suave - Fin de semana
+    if (day.isWeekend) return 'rgba(255, 255, 255, 0.95)'; // Blanco muy claro - Fin de semana
     
     // Verificar si pasa de las 2 semanas
     const today = new Date();
@@ -845,23 +788,8 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
 
   // Manejar clic en día
   const handleDayClick = (day: CalendarDay) => {
-    console.log('🔍 Día clickeado:', {
-      date: day.date,
-      dateString: dayjs(day.date).format('YYYY-MM-DD'),
-      isAvailable: day.isAvailable,
-      isHoliday: day.isHoliday,
-      isWeekend: day.isWeekend,
-      isBlocked: day.isBlocked,
-      isToday: day.isToday,
-      isPast: day.isPast,
-      onDateSelect: !!onDateSelect,
-      onDateSelectType: typeof onDateSelect,
-      userType
-    });
-
     // Si es feriado, mostrar modal de feriado
     if (day.isHoliday && day.holidayData) {
-      console.log('🎉 Es feriado, abriendo modal de feriado');
       setSelectedHoliday({
         date: day.date,
         name: day.holidayData.name,
@@ -873,7 +801,6 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     
     // Si es fin de semana
     if (day.isWeekend) {
-      console.log('🏠 Es fin de semana, mostrando alerta');
       setAlertMessage('Los fines de semana no se atiende.');
       setAlertType('info');
       setShowValidationAlert(true);
@@ -882,7 +809,6 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     
     // Si está bloqueado
     if (day.isBlocked) {
-      console.log('🚫 Día bloqueado, mostrando alerta');
       setAlertMessage('Este día está bloqueado por el psicólogo.');
       setAlertType('warning');
       setShowValidationAlert(true);
@@ -891,7 +817,6 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     
     // Si es día pasado
     if (day.isPast) {
-      console.log('❌ Día pasado, mostrando alerta');
       setAlertMessage('No se puede seleccionar un día pasado.');
       setAlertType('warning');
       setShowValidationAlert(true);
@@ -900,31 +825,19 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     
     // Si tiene disponibilidad, abrir modal de agendamiento directamente
     if (day.isAvailable) {
-      console.log('✅ Día disponible, abriendo modal de agendamiento');
-      console.log('📅 Fecha seleccionada:', day.date);
-      console.log('🔗 onDateSelect disponible:', !!onDateSelect);
-      console.log('🔗 onDateSelect tipo:', typeof onDateSelect);
-      console.log('🔗 onDateSelect función:', onDateSelect);
-      
       setSelectedDateState(day.date);
       
       // Verificar si onDateSelect está disponible
       if (onDateSelect && typeof onDateSelect === 'function') {
-        console.log('🚀 Llamando a onDateSelect con fecha:', day.date);
         try {
           onDateSelect(day.date);
-          console.log('✅ onDateSelect ejecutado exitosamente');
         } catch (error) {
-          console.error('❌ Error al ejecutar onDateSelect:', error);
+          console.error('Error al ejecutar onDateSelect:', error);
           setAlertMessage('Error al abrir el modal de agendamiento. Intenta nuevamente.');
           setAlertType('error');
           setShowValidationAlert(true);
         }
       } else {
-        console.warn('⚠️ onDateSelect no está disponible o no es una función');
-        console.warn('onDateSelect:', onDateSelect);
-        console.warn('Tipo de onDateSelect:', typeof onDateSelect);
-        
         // Mostrar mensaje más específico
         if (!onDateSelect) {
           setAlertMessage('Error: No se pudo abrir el modal de agendamiento. El sistema no está configurado correctamente.');
@@ -941,7 +854,6 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     
     // Si es hoy, verificar disponibilidad especial
     if (day.isToday) {
-      console.log('📅 Es hoy, verificando disponibilidad');
       const currentTime = new Date();
       const peruTime = new Date(currentTime.toLocaleString("en-US", {timeZone: "America/Lima"}));
       const currentHour = peruTime.getHours();
@@ -950,7 +862,6 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
       const cutoffMinute = 10;
       
       if (currentHour > cutoffHour || (currentHour === cutoffHour && currentMinute > cutoffMinute)) {
-        console.log('⏰ Pasó la hora límite para hoy');
         setAlertMessage('Para hoy ya pasó la hora límite de agendamiento (13:10). Puedes agendar para mañana o días futuros.');
         setAlertType('warning');
         setShowValidationAlert(true);
@@ -961,25 +872,19 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
         const minimumHour = minimumTime.hour();
         const minimumMinute = minimumTime.minute();
         
-        console.log(`🕐 Hora actual: ${currentHour}:${currentMinute.toString().padStart(2, '0')}`);
-        console.log(`⏰ Hora mínima para agendar: ${minimumHour}:${minimumMinute.toString().padStart(2, '0')}`);
-        
         const minutesDifference = minimumTime.diff(currentDateTime, 'minute', true);
         
         if (minutesDifference < 60) {
-          console.log('⏱️ No hay 60 minutos de anticipación para hoy');
           setAlertMessage(`Para agendar una cita hoy mismo, necesitas hacer la reserva con al menos 60 minutos de anticipación. Los horarios disponibles son después de las ${minimumHour}:${minimumMinute.toString().padStart(2, '0')}. Puedes agendar para mañana o días futuros.`);
           setAlertType('info');
           setShowValidationAlert(true);
         } else {
-          console.log('✅ Hoy disponible con anticipación suficiente');
           // Si hoy está disponible, abrir directamente el modal de agendamiento
           if (onDateSelect && typeof onDateSelect === 'function') {
             try {
               onDateSelect(day.date);
-              console.log('✅ onDateSelect ejecutado exitosamente para hoy');
             } catch (error) {
-              console.error('❌ Error al ejecutar onDateSelect para hoy:', error);
+              console.error('Error al ejecutar onDateSelect para hoy:', error);
               setAlertMessage('Error al abrir el modal de agendamiento. Intenta nuevamente.');
               setAlertType('error');
               setShowValidationAlert(true);
@@ -995,7 +900,6 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     }
     
     // Si no tiene disponibilidad, mostrar mensaje específico
-    console.log('❌ Día no disponible');
     setAlertMessage('Este día no tiene horarios disponibles.');
     setAlertType('warning');
     setShowValidationAlert(true);
@@ -1018,24 +922,25 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
   const season = getSeason();
 
   return (
-    <div className={`unified-calendar premium-design ${className}`}>
+    <div className={`unified-calendar premium-design w-full ${className}`}>
       
-      {/* Navegación Premium con Temporadas - Diseño Mejorado */}
+      {/* Navegación Premium con Temporadas - Diseño Compacto */}
       {showNavigation && (
-        <Card className={`mb-2 premium-navigation overflow-hidden ${
+        <div className={`mb-1 premium-navigation overflow-hidden rounded-xl group/nav transition-all duration-500 hover:scale-[1.02] hover:shadow-xl hover:-translate-y-0.5 ${
           season.name === 'Temporada de Lluvias' 
-            ? 'bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-50 border-2 border-blue-200 shadow-lg'
-            : 'bg-gradient-to-br from-amber-50 via-yellow-100 to-orange-50 border-2 border-amber-200 shadow-lg'
+            ? 'bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-50 border-2 border-blue-200 shadow-md hover:border-blue-300'
+            : 'bg-gradient-to-br from-amber-50 via-yellow-100 to-amber-50 border-2 border-amber-200 shadow-md hover:border-amber-300'
         }`}>
-          <div className="flex items-center justify-between py-0.5 px-2 relative">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 py-2 sm:py-2.5 px-4 sm:px-5 relative">
             {/* Patrón de fondo decorativo */}
             <div className="absolute inset-0 opacity-5">
-              <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-current to-transparent rounded-full -translate-x-16 -translate-y-16"></div>
-              <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-current to-transparent rounded-full translate-x-12 translate-y-12"></div>
+              <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-current to-transparent rounded-full -translate-x-12 -translate-y-12"></div>
+              <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-current to-transparent rounded-full translate-x-10 translate-y-10"></div>
             </div>
             
-            {/* Flechas de navegación y botón Hoy en el centro */}
-            <div className="flex items-center gap-1.5 relative z-10">
+            {/* Controles de navegación y mes centrados */}
+            <div className="flex items-center justify-center gap-2 xs:gap-3 sm:gap-4 relative z-10 flex-1 flex-wrap">
+              {/* Flecha anterior */}
               {(() => {
                 const currentDate = dayjs();
                 const currentMonthDate = dayjs(currentMonth);
@@ -1046,83 +951,51 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
                     variant="outline"
                     onClick={goToPreviousMonth}
                     size="sm"
-                    className="p-1.5 hover:scale-110 transition-all duration-300 shadow-md hover:shadow-lg"
+                    className="p-0.5 xs:p-1 hover:scale-110 transition-all duration-300"
                     style={{
                       borderColor: season.primaryColor,
                       color: season.primaryColor,
                       background: season.secondaryColor,
-                      borderRadius: '10px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.1)';
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                      borderRadius: '8px',
+                      minWidth: '24px',
+                      width: '24px',
+                      height: '24px',
+                      padding: '2px'
                     }}
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeft className="w-3 h-3 xs:w-3.5 xs:h-3.5" />
                   </Button>
-                ) : null;
+                ) : (
+                  <div className="w-6 h-6 xs:w-7 xs:h-7"></div>
+                );
               })()}
               
-              {/* Botón Hoy en el centro - Diseño Premium */}
+              {/* Botón Hoy */}
               <Button
                 size="sm"
                 onClick={goToToday}
-                className="px-3 py-1.5 transition-all duration-300 font-bold text-sm shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="px-1.5 xs:px-2.5 py-0.5 xs:py-1 transition-all duration-300 font-bold text-[10px] xs:text-xs shadow-md hover:shadow-lg transform hover:scale-105"
                 style={{
                   background: `linear-gradient(135deg, ${season.primaryColor} 0%, ${season.accentColor} 100%)`,
                   color: 'white',
                   border: 'none',
-                  borderRadius: '12px',
-                  boxShadow: `0 4px 15px ${season.primaryColor}40`
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05) translateY(-1px)';
-                  e.currentTarget.style.boxShadow = `0 6px 20px ${season.primaryColor}60`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1) translateY(0)';
-                  e.currentTarget.style.boxShadow = `0 4px 15px ${season.primaryColor}40`;
+                  borderRadius: '8px',
+                  boxShadow: `0 3px 10px ${season.primaryColor}30`,
+                  height: '24px'
                 }}
               >
-                <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                Hoy
+                <Calendar className="w-2.5 h-2.5 xs:w-3 xs:h-3 xs:mr-1" />
+                <span className="hidden xs:inline">Hoy</span>
               </Button>
               
-              <Button
-                variant="outline"
-                onClick={goToNextMonth}
-                size="sm"
-                className="p-1.5 hover:scale-110 transition-all duration-300 shadow-md hover:shadow-lg"
-                style={{
-                  borderColor: season.primaryColor,
-                  color: season.primaryColor,
-                  background: season.secondaryColor,
-                  borderRadius: '10px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.1)';
-                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-                }}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            {/* Mes y año en el centro - Tipografía Mejorada */}
-            <div className="text-center flex-1 relative z-10">
+              {/* Mes y año */}
               <h3 
-                className="text-xl font-black transition-all duration-500 tracking-wide"
+                className="text-xs xs:text-sm sm:text-base md:text-lg font-black transition-all duration-500 tracking-wide px-2 xs:px-3 sm:px-4"
                 style={{
                   color: season.primaryColor,
-                  textShadow: `0 2px 4px ${season.primaryColor}20`
+                  textShadow: `0 1px 3px ${season.primaryColor}20`,
+                  minWidth: '110px',
+                  textAlign: 'center'
                 }}
               >
                 {(() => {
@@ -1135,52 +1008,81 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
                   return `${monthNames[month]} ${year}`;
                 })()}
               </h3>
+              
+              {/* Flecha siguiente */}
+              <Button
+                variant="outline"
+                onClick={goToNextMonth}
+                size="sm"
+                className="p-0.5 xs:p-1 hover:scale-110 transition-all duration-300"
+                style={{
+                  borderColor: season.primaryColor,
+                  color: season.primaryColor,
+                  background: season.secondaryColor,
+                  borderRadius: '8px',
+                  minWidth: '24px',
+                  width: '24px',
+                  height: '24px',
+                  padding: '2px'
+                }}
+              >
+                <ChevronRight className="w-3 h-3 xs:w-3.5 xs:h-3.5" />
+              </Button>
             </div>
            
-            {/* Temporada y descripción centrada - Diseño Mejorado */}
-            <div className="text-center flex-1 relative z-10">
-              <div className="flex items-center justify-center gap-1 mb-0.5">
-                <div className={`p-1 rounded-md shadow-md transition-all duration-300 hover:scale-110`} style={{
+            {/* Temporada y descripción a la derecha - Diseño Compacto */}
+            <div className="text-center relative z-10 w-full sm:w-auto flex-shrink-0">
+              <button
+                onClick={() => setShowSeasonDescription(!showSeasonDescription)}
+                className="w-full sm:w-auto transition-all duration-300"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <div className={`p-0.5 rounded-md shadow-sm transition-all duration-300 hover:scale-105 active:scale-95`} style={{
                   background: `linear-gradient(135deg, ${season.secondaryColor} 0%, ${season.secondaryColor}80 100%)`,
-                  border: `2px solid ${season.primaryColor}`,
-                  boxShadow: `0 2px 8px ${season.primaryColor}30`
+                    border: `1.5px solid ${season.primaryColor}`,
+                    boxShadow: `0 1px 5px ${season.primaryColor}25`
                 }}>
-                  <season.icon className="w-4 h-4" style={{ color: season.primaryColor }} />
+                    <season.icon className="w-3 h-3" style={{ color: season.primaryColor }} />
                 </div>
-                <span className="text-xs font-bold tracking-wide" style={{
+                  <span className="text-[10px] font-bold tracking-wide" style={{
                   color: season.primaryColor
                 }}>
                   {season.name}
                 </span>
               </div>
+              </button>
               
-              <p className="text-xs text-gray-700 italic px-1 py-0.5 rounded-md font-medium transition-all duration-300 hover:scale-105" style={{
+              {/* Descripción - visible en desktop, colapsable en móvil */}
+              <div className={`overflow-hidden transition-all duration-300 ${
+                showSeasonDescription ? 'max-h-16 opacity-100' : 'max-h-0 opacity-0 sm:max-h-16 sm:opacity-100'
+              }`}>
+                <p className="text-[10px] text-gray-700 italic px-1 py-0.5 rounded-md font-medium transition-all duration-300 mt-0.5" style={{
                 background: `linear-gradient(135deg, ${season.secondaryColor}80 0%, ${season.secondaryColor}60 100%)`,
                 border: `1px solid ${season.primaryColor}40`,
                 color: season.primaryColor,
-                boxShadow: `0 1px 4px ${season.primaryColor}20`
+                  boxShadow: `0 1px 3px ${season.primaryColor}20`
               }}>
                 "{season.description}"
               </p>
             </div>
           </div>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Calendario - Diseño Mejorado */}
-      <Card className="premium-calendar shadow-xl border-0 overflow-hidden">
-        <div className="p-3 bg-gradient-to-br from-white via-slate-50 to-gray-50">
-          {/* Headers de días - Diseño Premium */}
-          <div className="grid grid-cols-7 gap-1 mb-3">
+      <div className="premium-calendar shadow-xl border-0 overflow-hidden w-full bg-white rounded-2xl">
+        <div className="p-2 sm:p-3 bg-white w-full flex flex-col">
+          {/* Headers de días - Diseño Premium Responsivo */}
+          <div className="grid grid-cols-7 gap-0.5 mb-0.5 w-full">
             {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
               <div
                 key={day}
-                className="text-center py-2 px-1 font-black text-sm transition-all duration-300 rounded-xl shadow-lg hover:scale-105"
+                className="text-center py-1 xs:py-1.5 sm:py-2 px-0.5 xs:px-1 font-black text-[9px] xs:text-[10px] sm:text-xs md:text-sm transition-all duration-300 rounded-lg xs:rounded-xl shadow-lg hover:scale-105"
                 style={{
                   background: `linear-gradient(135deg, ${season.secondaryColor} 0%, ${season.secondaryColor}80 100%)`,
                   color: season.primaryColor,
-                  borderBottom: `3px solid ${season.primaryColor}`,
-                  borderRadius: '12px',
+                  borderBottom: `2px solid ${season.primaryColor}`,
                   textShadow: `0 1px 2px ${season.primaryColor}20`
                 }}
               >
@@ -1190,36 +1092,38 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
           </div>
 
           {/* Días del calendario - Diseño Mejorado */}
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-0.5 w-full">
             {filteredDays.map((day, index) => (
               <div
                 key={index}
-                className={`calendar-day-professional cursor-pointer transition-all duration-500 relative overflow-hidden rounded-xl hover:scale-105 group ${
+                className={`calendar-day-professional cursor-pointer transition-all duration-500 relative overflow-hidden rounded-lg xs:rounded-xl hover:scale-105 group aspect-square ${
                   !day.isCurrentMonth ? 'text-gray-400' : ''
-                } ${day.isToday ? 'ring-3 ring-offset-2 ring-blue-600 shadow-xl' : ''}`}
+                }`}
                 style={{
                   background: getDayBackgroundColor(day),
-                  border: `2px solid ${day.isToday ? '#1e40af' : getDayBorderColor(day)}`,
-                  minHeight: '55px',
+                  border: `1px solid ${day.isToday ? '#3b82f6' : getDayBorderColor(day)}`,
+                  width: '100%',
+                  minHeight: '40px',
+                  maxHeight: '60px',
+                  maxWidth: '100%',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0.375rem 0.125rem',
+                  padding: '0.15rem 0.05rem',
                   boxShadow: day.isToday 
-                    ? `0 0 0 3px #1e40af, 0 6px 20px rgba(30, 64, 175, 0.4)` 
-                    : '0 3px 10px rgba(0, 0, 0, 0.08)',
-                  borderRadius: '12px',
+                    ? `0 0 0 1px rgba(59, 130, 246, 0.3), 0 2px 6px rgba(59, 130, 246, 0.15)` 
+                    : '0 2px 8px rgba(0, 0, 0, 0.06)',
                   backdropFilter: 'blur(10px)'
                 }}
                 onClick={() => handleDayClick(day)}
                 onMouseEnter={() => setHoveredDate(day.date)}
                 onMouseLeave={() => setHoveredDate(null)}
               >
-                {/* Número del día - Tipografía Mejorada */}
+                {/* Número del día - Tipografía Mejorada Responsiva */}
                 <div className="text-center w-full">
                   <span 
-                    className={`text-base font-black transition-all duration-300 ${
+                    className={`text-xs xs:text-sm sm:text-base font-black transition-all duration-300 ${
                       day.isToday ? 'scale-110' : ''
                     }`}
                     style={{
@@ -1232,36 +1136,29 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
                   </span>
                 </div>
 
-                {/* Indicador de estado - Diseño Mejorado */}
-                <div className="flex flex-col items-center gap-0.5 mt-1.5">
+                {/* Indicador de estado - Diseño Mejorado Responsivo */}
+                <div className="flex flex-col items-center gap-0.5 mt-0.5 xs:mt-1">
                   {/* HOY nunca muestra punto verde, solo borde azul */}
                   {day.isHoliday && (
-                    <div className="w-2.5 h-2.5 bg-gradient-to-r from-red-500 to-red-600 rounded-full shadow-md animate-pulse border border-white transform group-hover:scale-125 transition-transform duration-300"></div>
+                    <div className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 bg-gradient-to-r from-red-500 to-red-600 rounded-full shadow-md animate-pulse border border-white transform group-hover:scale-125 transition-transform duration-300"></div>
                   )}
                   {day.isAppointment && (
-                    <div className="w-2.5 h-2.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full shadow-md animate-pulse border border-white transform group-hover:scale-125 transition-transform duration-300"></div>
+                    <div className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full shadow-md animate-pulse border border-white transform group-hover:scale-125 transition-transform duration-300"></div>
                   )}
                   {/* Solo mostrar punto verde si NO es hoy y SÍ está disponible */}
                   {!day.isToday && day.isAvailable && (
-                    <div className="w-2.5 h-2.5 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full shadow-md animate-pulse border border-white transform group-hover:scale-125 transition-transform duration-300"></div>
+                    <div className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full shadow-md animate-pulse border border-white transform group-hover:scale-125 transition-transform duration-300"></div>
                   )}
                   {day.isBlocked && (
-                    <div className="w-2.5 h-2.5 bg-gradient-to-r from-slate-400 to-slate-500 rounded-full shadow-md border border-white transform group-hover:scale-125 transition-transform duration-300"></div>
+                    <div className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 bg-gradient-to-r from-slate-400 to-slate-500 rounded-full shadow-md border border-white transform group-hover:scale-125 transition-transform duration-300"></div>
                   )}
                   {day.isWeekend && (
-                    <div className="w-2.5 h-2.5 bg-gradient-to-r from-slate-300 to-slate-400 rounded-full shadow-md transform group-hover:scale-125 transition-transform duration-300"></div>
-                  )}
-                  
-                  {/* Indicador especial para días disponibles */}
-                  {day.isAvailable && (
-                    <div className="mt-0.5 px-1 py-0.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold rounded-full shadow-md transform group-hover:scale-110 transition-transform duration-300 animate-pulse">
-                      AGENDAR
-                    </div>
+                    <div className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 bg-gradient-to-r from-slate-300 to-slate-400 rounded-full shadow-md transform group-hover:scale-125 transition-transform duration-300"></div>
                   )}
                   
                   {/* Indicador de disponibilidad adicional */}
                   {day.isAvailable && (
-                    <div className="absolute top-1 right-1 w-2 h-2 bg-emerald-400 rounded-full animate-ping"></div>
+                    <div className="absolute top-0.5 right-0.5 xs:top-1 xs:right-1 w-1.5 h-1.5 xs:w-2 xs:h-2 bg-emerald-400 rounded-full animate-ping"></div>
                   )}
                 </div>
 
@@ -1271,12 +1168,12 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
             ))}
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Leyenda del Calendario - Diseño Mejorado */}
       {showLegend && (
-        <Card className="mt-4 premium-legend shadow-xl border-0 overflow-hidden">
-          <div className="p-4 bg-gradient-to-br from-white via-slate-50 to-gray-50">
+        <div className="mt-4 premium-legend shadow-xl border-0 overflow-hidden bg-white rounded-2xl">
+          <div className="p-4 bg-white">
             <h4 className="text-lg font-black text-gray-900 mb-4 text-center border-b-2 border-gray-200 pb-3 tracking-wide">
               Leyenda del Sistema de Agendamiento
             </h4>
@@ -1337,266 +1234,280 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
               </div>
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
 
       {/* Alert Modal Ultra Formal - Diseño Corporativo */}
-      {showValidationAlert && (
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-auto max-w-md overflow-hidden relative transform transition-all duration-700 border-2 border-gray-100 scale-100 hover:scale-[1.02]">
-            {/* Header del modal ultra formal */}
-            <div className={`px-6 py-5 text-center relative overflow-hidden border-b-2 ${
-              alertType === 'success' ? 'bg-gradient-to-r from-emerald-700 via-emerald-800 to-emerald-900 border-emerald-600' :
-              alertType === 'warning' ? 'bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 border-amber-500' :
-              alertType === 'error' ? 'bg-gradient-to-r from-red-900 via-red-900 to-red-900 border-red-800' :
-              'bg-gradient-to-r from-slate-800 via-slate-900 to-slate-900 border-slate-700'
+      {showValidationAlert && createPortal(
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 xs:p-4 z-[9999] animate-in fade-in duration-300">
+          {/* Efecto de brillo en el fondo */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          </div>
+          
+          {/* Modal Moderno y Elegante */}
+          <div className="relative bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] max-w-[320px] xs:max-w-[360px] w-full transform transition-all duration-500 ease-out border border-slate-200/60 overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 backdrop-blur-sm">
+            {/* Línea decorativa superior animada */}
+            <div className={`absolute top-0 left-0 right-0 h-1 ${
+              alertType === 'success' 
+                ? 'bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600' 
+                : alertType === 'warning' 
+                ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600'
+                : alertType === 'error' 
+                ? 'bg-gradient-to-r from-red-400 via-red-500 to-red-600'
+                : 'bg-gradient-to-r from-slate-400 via-slate-500 to-slate-600'
+            }`}></div>
+            
+            {/* Header Moderno y Elegante */}
+            <div className={`px-5 xs:px-6 py-5 xs:py-6 text-center relative overflow-hidden ${
+              alertType === 'success' 
+                ? 'bg-gradient-to-br from-emerald-50 via-emerald-100/90 to-white border-b border-emerald-200/60' 
+                : alertType === 'warning' 
+                ? 'bg-gradient-to-br from-amber-50 via-amber-100/90 to-white border-b border-amber-200/60'
+                : alertType === 'error' 
+                ? 'bg-gradient-to-br from-red-50 via-red-100/90 to-white border-b border-red-200/60'
+                : 'bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 border-b border-slate-700/60'
             }`}>
-              {/* Patrón de líneas sutiles */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20 transform -skew-x-12"></div>
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
-                </div>
-              
-              <div className="flex items-center justify-center gap-3 mb-2 relative z-10">
-                <div className={`p-2.5 rounded-full ${
-                  alertType === 'success' ? 'bg-emerald-500/20' :
-                  alertType === 'warning' ? 'bg-amber-400/20' :
-                  alertType === 'error' ? 'bg-red-500/20' :
-                  'bg-slate-500/20'
-                }`}>
-                  {alertType === 'success' && <CheckCircle className="w-6 h-6 text-white drop-shadow-xl" />}
-                  {alertType === 'warning' && <AlertCircle className="w-6 h-6 text-white drop-shadow-xl" />}
-                  {alertType === 'error' && <X className="w-6 h-6 text-white drop-shadow-xl" />}
-                  {alertType === 'info' && <Info className="w-6 h-6 text-white drop-shadow-xl" />}
+              {/* Patrón decorativo sutil */}
+              <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-current to-transparent rounded-full blur-2xl -mr-16 -mt-16"></div>
               </div>
-                <div>
-                  <h3 className="text-lg font-black text-white tracking-wide drop-shadow-xl uppercase">
-                    {alertType === 'success' ? 'Operación Exitosa' :
-                     alertType === 'warning' ? 'Advertencia del Sistema' :
-                     alertType === 'error' ? 'Error Crítico' :
-                     'Información del Sistema'}
+              
+              <div className="flex flex-col items-center gap-3.5 xs:gap-4 relative z-10">
+                {/* Icono Moderno con efecto 3D */}
+                <div className={`relative p-3 xs:p-3.5 rounded-2xl border-2 shadow-xl transform transition-all duration-300 ${
+                  alertType === 'success' 
+                    ? 'bg-gradient-to-br from-emerald-100 via-emerald-50 to-white border-emerald-300 shadow-emerald-200/50' 
+                    : alertType === 'warning' 
+                    ? 'bg-gradient-to-br from-amber-100 via-amber-50 to-white border-amber-300 shadow-amber-200/50'
+                    : alertType === 'error' 
+                    ? 'bg-gradient-to-br from-red-100 via-red-50 to-white border-red-300 shadow-red-200/50'
+                    : 'bg-gradient-to-br from-slate-100 via-slate-50 to-white border-slate-300 shadow-slate-200/50'
+                }`}>
+                  {/* Efecto de brillo interno */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/50 to-transparent rounded-2xl"></div>
+                  
+                  {alertType === 'success' && <CheckCircle className="relative z-10 w-7 h-7 xs:w-8 xs:h-8 text-emerald-600 drop-shadow-md" strokeWidth={2.5} />}
+                  {alertType === 'warning' && <AlertTriangle className="relative z-10 w-7 h-7 xs:w-8 xs:h-8 text-amber-600 drop-shadow-md" strokeWidth={2.5} />}
+                  {alertType === 'error' && <AlertCircle className="relative z-10 w-7 h-7 xs:w-8 xs:h-8 text-red-600 drop-shadow-md" strokeWidth={2.5} />}
+                  {alertType === 'info' && <Info className="relative z-10 w-7 h-7 xs:w-8 xs:h-8 text-slate-600 drop-shadow-md" strokeWidth={2.5} />}
+                </div>
+                
+                {/* Título Moderno */}
+                <div className="space-y-1.5">
+                  <h3 className={`text-lg xs:text-xl font-black tracking-tight ${
+                    alertType === 'success' 
+                      ? 'text-emerald-900' 
+                      : alertType === 'warning' 
+                      ? 'text-amber-900'
+                      : alertType === 'error' 
+                      ? 'text-red-900'
+                      : 'text-slate-800'
+                  }`}>
+                    {alertType === 'success' ? 'Éxito' :
+                     alertType === 'warning' ? 'Advertencia' :
+                     alertType === 'error' ? 'Error' :
+                     'Información'}
                   </h3>
-                  <p className="text-sm text-white/80 font-medium tracking-wide">
-                    Validación de Fecha y Hora
-                  </p>
+                  <div className={`h-1 w-14 mx-auto rounded-full ${
+                    alertType === 'success' 
+                      ? 'bg-emerald-400' 
+                      : alertType === 'warning' 
+                      ? 'bg-amber-400'
+                      : alertType === 'error' 
+                      ? 'bg-red-400'
+                      : 'bg-slate-400'
+                  }`}></div>
                 </div>
               </div>
             </div>
             
-            {/* Contenido del modal ultra formal */}
-            <div className="p-6 bg-gradient-to-br from-white via-gray-50/30 to-slate-50/50">
-              <div className="text-center">
-                <div className="mb-6">
-                  <div className="w-12 h-1 bg-gradient-to-r from-gray-300 to-gray-400 mx-auto mb-4 rounded-full"></div>
-                  <p className="text-gray-800 text-base leading-relaxed font-medium tracking-wide">
+            {/* Contenido Moderno */}
+            <div className="p-5 xs:p-6 bg-gradient-to-br from-white via-slate-50/30 to-white relative">
+              {/* Fondo decorativo sutil */}
+              <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-400 to-transparent"></div>
+              </div>
+              
+              <div className="text-center relative z-10">
+                <p className={`text-sm xs:text-base leading-relaxed font-semibold mb-5 xs:mb-6 text-slate-700`}>
                   {alertMessage}
                 </p>
-                  <div className="w-12 h-1 bg-gradient-to-r from-gray-400 to-gray-300 mx-auto mt-4 rounded-full"></div>
-                </div>
                 
-                {/* Botón de cerrar ultra formal */}
+                {/* Botón Moderno */}
                 <button
                   onClick={() => setShowValidationAlert(false)}
-                  className={`px-10 py-3 rounded-xl font-black text-white transition-all duration-500 hover:scale-105 shadow-2xl hover:shadow-3xl text-sm relative overflow-hidden tracking-wide uppercase ${
-                    alertType === 'success' ? 'bg-gradient-to-r from-emerald-700 via-emerald-800 to-emerald-900 hover:from-emerald-800 hover:to-emerald-900 border-2 border-emerald-600' :
-                    alertType === 'warning' ? 'bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 hover:from-amber-700 hover:to-amber-900 border-2 border-amber-500' :
-                    alertType === 'error' ? 'bg-gradient-to-r from-red-900 via-red-900 to-red-900 hover:from-red-800 hover:to-red-900 border-2 border-red-800' :
-                    'bg-gradient-to-r from-slate-800 via-slate-900 to-slate-900 hover:from-slate-700 hover:to-slate-800 border-2 border-slate-700'
+                  className={`group relative w-full px-8 xs:px-10 py-3 xs:py-3.5 rounded-xl font-bold text-sm xs:text-base text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-xl hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 overflow-hidden ${
+                    alertType === 'success' 
+                      ? 'bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-600 hover:from-emerald-600 hover:via-emerald-700 hover:to-emerald-700 shadow-emerald-500/40 focus:ring-emerald-500/50' 
+                      : alertType === 'warning' 
+                      ? 'bg-gradient-to-r from-amber-500 via-amber-600 to-amber-600 hover:from-amber-600 hover:via-amber-700 hover:to-amber-700 shadow-amber-500/40 focus:ring-amber-500/50'
+                      : alertType === 'error' 
+                      ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-600 hover:from-red-600 hover:via-red-700 hover:to-red-700 shadow-red-500/40 focus:ring-red-500/50'
+                      : 'bg-gradient-to-r from-slate-600 via-slate-700 to-slate-700 hover:from-slate-700 hover:via-slate-800 hover:to-slate-800 shadow-slate-500/40 focus:ring-slate-500/50'
                   }`}
                 >
-                  {/* Efecto de brillo corporativo */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/25 via-transparent to-white/25 transform -skew-x-12"></div>
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-transparent"></div>
+                  {/* Efecto de brillo animado */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    <CheckCircle className="w-4 h-4" />
-                    Confirmar
+                    <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5" />
+                    Entendido
                   </span>
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Modal de Feriado - Diseño Ultra Compacto */}
-      {showHolidayModal && selectedHoliday && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-2 z-50">
-          <div className="bg-white rounded-xl shadow-2xl w-auto max-w-md max-h-[80vh] overflow-hidden relative transform transition-all duration-500 scale-100">
-            {/* Botón de Cerrar - X con Fondo Circular Negro Transparente */}
-            <div className="absolute top-1.5 right-1.5 z-20">
+      {/* Modal de Feriado - Ajustado al Tamaño de la Imagen - Renderizado con Portal */}
+      {showHolidayModal && selectedHoliday && createPortal(
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-lg flex items-center justify-center p-3 xs:p-4 sm:p-6 z-[9999]">
+          <div className="relative bg-white rounded-2xl xs:rounded-3xl shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] w-full max-w-[400px] max-h-[90vh] overflow-hidden animate-in zoom-in-95">
+            {/* Botón cerrar */}
               <button
                 onClick={() => setShowHolidayModal(false)}
-                className="w-6 h-6 bg-black/60 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-black/70"
+              className="absolute top-3 right-3 xs:top-4 xs:right-4 w-8 h-8 xs:w-9 xs:h-9 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 hover:shadow-xl z-20 border-2 border-slate-200/60"
               >
-                <X className="w-3 h-3 text-red-500 drop-shadow-2xl animate-pulse" />
+              <X className="w-4 h-4 xs:w-5 xs:h-5 text-slate-700" strokeWidth={2.5} />
               </button>
-            </div>
 
-            {/* Imagen del feriado - Diseño Ultra Compacto */}
-            <div className="relative w-full h-auto min-h-[180px] bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 overflow-hidden">
+            {/* IMAGEN COMPLETA - Tamaño Natural */}
+            <div className="relative w-full overflow-visible bg-slate-100 flex items-center justify-center">
               <img
                 src={getHolidayImage(selectedHoliday.name)}
                 alt={selectedHoliday.name}
-                className={`w-full h-full object-contain opacity-100 transition-all duration-500 ${
-                  shouldCropFromTop(selectedHoliday.name) ? 'object-top' : 'object-bottom'
-                }`}
+                className="w-full max-h-[50vh] h-auto object-contain transition-all duration-700"
                 onError={(e) => {
-                  console.log('Error loading image for:', selectedHoliday.name);
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
-                  // Mostrar imagen de respaldo o mensaje
                   const container = target.parentElement;
                   if (container) {
                     container.innerHTML = `
-                      <div class="flex items-center justify-center h-full">
-                        <div class="text-center text-white">
-                          <div class="text-6xl mb-4">🎉</div>
-                          <h3 class="text-2xl font-bold mb-2">${selectedHoliday.name}</h3>
-                          <p class="text-lg opacity-90">Feriado Nacional</p>
+                      <div class="flex items-center justify-center w-full min-h-[200px] bg-gradient-to-br from-slate-200 to-slate-300">
+                        <div class="text-center text-slate-600">
+                          <div class="text-5xl xs:text-6xl mb-3">🎉</div>
+                          <p class="text-sm xs:text-base font-bold">Feriado Nacional</p>
                         </div>
                       </div>
                     `;
                   }
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-slate-800/20 to-transparent"></div>
               
-              {/* Información sobre la imagen - Diseño Ultra Compacto */}
-              <div className="absolute inset-0 p-2.5 text-white">
-                {/* Título del feriado centrado en la parte INFERIOR con diseño bonito */}
-                {shouldShowTitle(selectedHoliday.name) && (
-                  <div className="absolute bottom-0 left-0 right-0 text-center">
-                    {/* Fondo más transparente para el título */}
-                    <div className="bg-gradient-to-t from-slate-900/50 via-slate-800/30 to-slate-700/20 backdrop-blur-md py-2 px-3 rounded-t-xl">
-                      <h3 className="text-sm font-black drop-shadow-2xl text-white px-1 mb-0.5 tracking-wide">
-                        {selectedHoliday.name}
-                      </h3>
-                      {/* Línea decorativa más sutil */}
-                      <div className="w-16 h-0.5 bg-gradient-to-r from-amber-400/90 via-orange-500/90 to-red-500/90 mx-auto rounded-full shadow-2xl"></div>
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none"></div>
+              
+              {/* Badge Perú - Más abajo */}
+              <div className="absolute top-20 left-3 xs:top-24 xs:left-4 z-10">
+                <div className="bg-gradient-to-r from-orange-700 to-red-800 backdrop-blur-md px-3 py-1.5 xs:px-4 xs:py-2 rounded-lg xs:rounded-xl shadow-xl border-2 border-white/30">
+                  <span className="text-[10px] xs:text-xs font-black text-white flex items-center gap-1.5 xs:gap-2 drop-shadow-lg">
+                    <span className="text-xs xs:text-sm">🇵🇪</span>
+                    <span>Perú</span>
+                    </span>
+                  </div>
+                </div>
+              
+              {/* Badge Cívico/Religioso - Más abajo, inferior derecho */}
+              <div className="absolute bottom-20 right-3 xs:bottom-24 xs:right-4 z-10">
+                {getHolidayType(selectedHoliday.name).toLowerCase().includes('religioso') ? (
+                  <div className="bg-gradient-to-r from-sky-200 to-sky-300 backdrop-blur-md px-3 py-1.5 xs:px-4 xs:py-2 rounded-lg xs:rounded-xl shadow-xl border-2 border-white/30">
+                    <span className="text-[10px] xs:text-xs font-black text-slate-800 flex items-center gap-1.5 xs:gap-2 uppercase tracking-wide drop-shadow-lg">
+                      <span className="text-xs xs:text-sm">⛪</span>
+                      <span>Religioso</span>
+                    </span>
                     </div>
+                ) : (
+                  <div className="bg-gradient-to-r from-slate-700 to-slate-800 backdrop-blur-md px-3 py-1.5 xs:px-4 xs:py-2 rounded-lg xs:rounded-xl shadow-xl border-2 border-white/30">
+                    <span className="text-[10px] xs:text-xs font-black text-white flex items-center gap-1.5 xs:gap-2 uppercase tracking-wide drop-shadow-lg">
+                      <span className="text-xs xs:text-sm">🏛️</span>
+                      <span>Cívico</span>
+                    </span>
                   </div>
                 )}
-                
-                {/* Tipo de feriado en la esquina superior izquierda - Fondo Más Transparente */}
-                <div className="absolute left-2.5 top-12">
-                  <div className={`backdrop-blur-sm px-2 py-1.5 rounded-lg border border-white/20 shadow-md transform hover:scale-105 transition-transform duration-300 ${
-                    getHolidayType(selectedHoliday.name).toLowerCase().includes('religioso') 
-                      ? 'bg-gradient-to-r from-purple-600/30 to-purple-700/30' 
-                      : 'bg-gradient-to-r from-blue-600/30 to-blue-700/30'
-                  }`}>
-                    <span className="text-xs font-bold text-white flex items-center gap-1 tracking-wide">
-                      {getHolidayType(selectedHoliday.name).toLowerCase().includes('religioso') ? '⛪' : '🏛️'} 
-                      {getHolidayType(selectedHoliday.name)}
-                    </span>
-                  </div>
-                </div>
-                
-                {/* Fecha en la parte inferior izquierda - Diseño Más Transparente */}
-                <div className="absolute left-2.5 bottom-12">
-                  <div className="bg-white/10 backdrop-blur-sm px-2 py-1.5 rounded-lg border border-white/10 shadow-sm transform hover:scale-105 transition-transform duration-300">
-                    <span className="text-xs font-bold text-white tracking-wide drop-shadow-lg">
-                      {dayjs(selectedHoliday.date).locale('es').format('dddd, D [de] MMMM').replace(/^\w/, c => c.toUpperCase())}
-                    </span>
-                  </div>
-                </div>
-                
-                {/* Alcance en la esquina inferior derecha - Diseño Más Transparente */}
-                <div className="absolute right-2.5 bottom-12">
-                  <div className="bg-gradient-to-r from-amber-500/30 to-orange-500/30 backdrop-blur-sm px-2 py-1.5 rounded-lg border border-white/20 shadow-md transform hover:scale-105 transition-transform duration-300">
-                    <span className="text-xs font-bold text-white tracking-wide">
-                      🇵🇪 Todo el Perú
-                    </span>
+              </div>
+              
+              {/* Título y fecha - Dentro de la imagen, fondo negro más transparente */}
+              <div className="absolute bottom-0 left-0 right-0 p-3 xs:p-4 bg-black/30 backdrop-blur-sm">
+                <div className="text-center">
+                  <h3 className="text-base xs:text-lg sm:text-xl font-black text-white mb-1 xs:mb-1.5 leading-tight drop-shadow-lg">
+                    {selectedHoliday.name}
+                  </h3>
+                  <div className="text-xs xs:text-sm text-white/90 font-bold drop-shadow-md">
+                    {dayjs(selectedHoliday.date).locale('es').format('dddd, D [de] MMMM').replace(/^\w/, c => c.toUpperCase())}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Contenido del modal - Diseño Ultra Compacto */}
-            <div className="p-2 space-y-1 bg-gradient-to-b from-white via-slate-50 to-gray-50">
-              {/* Botón Descripción Histórica - Diseño Ultra Compacto */}
+            {/* Contenido inferior compacto */}
+            <div className="p-3 xs:p-4 sm:p-5 space-y-2.5 xs:space-y-3 bg-white">
+              {/* Descripción Histórica - Botón Colapsable Más Pequeño */}
+              <div>
               <button
                 onClick={() => toggleSection('description')}
-                className={`w-full p-2 rounded-md border-2 shadow-md transition-all duration-300 hover:scale-[1.01] transform ${
+                  className={`w-full bg-gradient-to-br from-slate-50 via-white to-slate-50/50 rounded-lg xs:rounded-xl p-2 xs:p-2.5 border-2 shadow-sm transition-all hover:shadow-md ${
                   openSection === 'description' 
-                    ? 'bg-gradient-to-r from-slate-200 to-gray-200 border-slate-400 shadow-lg' 
-                    : 'bg-gradient-to-r from-slate-50 to-gray-50 hover:from-slate-100 hover:to-gray-100 border-slate-200 hover:border-slate-300 hover:shadow-lg'
+                      ? 'border-[#6b1013]/40 shadow-[#6b1013]/20' 
+                      : 'border-slate-200/60 hover:border-[#6b1013]/30'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <div className={`w-4 h-4 rounded flex items-center justify-center shadow-md flex-shrink-0 transition-all duration-300 ${
+                    <div className="flex items-center gap-2 xs:gap-2.5">
+                      <div className={`w-8 h-8 xs:w-9 xs:h-9 rounded-lg xs:rounded-xl flex items-center justify-center flex-shrink-0 shadow-md transition-all ${
                       openSection === 'description' 
-                        ? 'bg-gradient-to-br from-slate-700 to-gray-800 scale-105' 
-                        : 'bg-gradient-to-br from-slate-600 to-gray-700'
+                          ? 'bg-gradient-to-br from-[#6b1013] via-[#8e161a] to-[#b91c1c] scale-105' 
+                          : 'bg-gradient-to-br from-slate-600 to-slate-700'
                     }`}>
-                      <Info className="w-2 h-2 text-white" />
+                        <Info className="w-4 h-4 xs:w-5 xs:h-5 text-white" strokeWidth={2.5} />
                     </div>
-                    <div className="text-left">
-                      <span className="text-xs font-bold text-slate-800 block tracking-wide">
-                        📚 Descripción Histórica
+                      <span className={`text-xs xs:text-sm font-bold ${
+                        openSection === 'description' ? 'text-[#6b1013]' : 'text-slate-900'
+                      }`}>
+                        📚 Descripción
                       </span>
                     </div>
-                  </div>
-                  <div className={`w-3 h-3 transition-all duration-300 text-xs ${openSection === 'description' ? 'rotate-180 text-slate-600' : 'text-slate-400'}`}>
+                    <span className={`text-base xs:text-lg transition-transform duration-300 ${
+                      openSection === 'description' ? 'rotate-180' : ''
+                    }`}>
                     ▼
-                  </div>
+                    </span>
                 </div>
               </button>
               
-              {/* Contenido de Descripción (colapsable) - Diseño Ultra Compacto */}
+                {/* Contenido colapsable */}
               {openSection === 'description' && (
-                <div className="bg-gradient-to-r from-slate-100 to-gray-100 p-2 rounded-md border border-slate-300 ml-1 mr-1 mb-1 shadow-inner max-h-16 overflow-y-auto transform transition-all duration-500">
-                  <p className="text-slate-700 text-xs leading-relaxed font-medium">
-                    {getHolidayDescription(selectedHoliday.name)}
+                  <div className="mt-2 bg-[#6b1013]/5 rounded-lg xs:rounded-xl p-2.5 xs:p-3 border-2 border-[#6b1013]/20 animate-in slide-in-from-top-2">
+                    <p className="text-[10px] xs:text-xs text-slate-700 leading-relaxed font-medium">
+                      {selectedHoliday.description || getHolidayDescription(selectedHoliday.name)}
                   </p>
                 </div>
               )}
+              </div>
 
-              {/* Botón Información Importante - Diseño Ultra Compacto */}
-              <button
-                onClick={() => toggleSection('important')}
-                className={`w-full p-2 rounded-md border-2 shadow-md transition-all duration-300 hover:scale-[1.01] transform ${
-                  openSection === 'important' 
-                    ? 'bg-gradient-to-r from-amber-200 to-orange-200 border-amber-400 shadow-lg' 
-                    : 'bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 border-amber-200 hover:border-amber-300 hover:shadow-lg'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <div className={`w-4 h-4 rounded flex items-center justify-center shadow-md flex-shrink-0 transition-all duration-300 ${
-                      openSection === 'important' 
-                        ? 'bg-gradient-to-br from-amber-600 to-orange-700 scale-105' 
-                        : 'bg-gradient-to-br from-amber-500 to-orange-600'
-                    }`}>
-                      <AlertCircle className="w-2 h-2 text-white" />
+              {/* Información Importante - Más Compacto */}
+              <div className="bg-gradient-to-r from-amber-50 via-amber-50/90 to-orange-50 rounded-lg xs:rounded-xl p-2.5 xs:p-3 border-2 border-amber-300/60 shadow-sm">
+                <div className="flex items-start gap-2 xs:gap-3">
+                  <div className="w-8 h-8 xs:w-9 xs:h-9 rounded-lg xs:rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 flex items-center justify-center flex-shrink-0 shadow-md">
+                    <AlertCircle className="w-4 h-4 xs:w-5 xs:h-5 text-white" strokeWidth={2.5} />
                     </div>
-                    <div className="text-left">
-                      <span className="text-xs font-bold text-amber-900 block tracking-wide">
-                        ⚠️ Información Importante
-                      </span>
-                    </div>
-                  </div>
-                  <div className={`w-3 h-3 transition-all duration-300 text-xs ${openSection === 'important' ? 'rotate-180 text-amber-600' : 'text-amber-400'}`}>
-                    ▼
-                  </div>
-                </div>
-              </button>
-              
-              {/* Contenido de Información Importante (colapsable) - Diseño Ultra Compacto */}
-              {openSection === 'important' && (
-                <div className="bg-gradient-to-r from-amber-100 to-orange-100 p-2 rounded-md border border-amber-300 ml-1 mr-1 mb-1 shadow-inner max-h-12 overflow-y-auto transform transition-all duration-500">
-                  <p className="text-amber-800 text-xs leading-relaxed font-medium">
-                    <strong className="text-amber-900 font-bold">🚫 No se atiende</strong> en el servicio de psicología.
+                  <p className="text-[10px] xs:text-xs text-amber-900 leading-relaxed font-semibold flex-1">
+                    <strong>🚫 No se atiende</strong> en el servicio de psicología durante este feriado. Por favor, programa tu cita en un día hábil.
                   </p>
-                </div>
-              )}
+                    </div>
+                  </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
 
     </div>
   );
 };
+

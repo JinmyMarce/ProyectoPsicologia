@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Bell, 
   CheckCircle, 
@@ -8,12 +9,11 @@ import {
   Trash2, 
   Eye, 
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Sparkles
 } from 'lucide-react';
-import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import { PageHeader } from '../ui/PageHeader';
 import { 
   getNotifications, 
   markNotificationAsRead, 
@@ -152,16 +152,16 @@ export function NotificationCenter() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-gray-700" />;
+        return <CheckCircle className="w-4 h-4 text-emerald-600" />;
       case 'warning':
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-gray-600" />;
+        return <AlertCircle className="w-4 h-4 text-red-600" />;
       case 'appointment':
-        return <Bell className="w-5 h-5 text-gray-800" />;
+        return <Bell className="w-4 h-4 text-violet-600" />;
       case 'reminder':
-        return <Bell className="w-5 h-5 text-gray-500" />;
+        return <Bell className="w-4 h-4 text-amber-600" />;
       default:
-        return <Info className="w-5 h-5 text-gray-500" />;
+        return <Info className="w-4 h-4 text-blue-600" />;
     }
   };
 
@@ -198,318 +198,451 @@ export function NotificationCenter() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-600" />
-          <p className="text-gray-600">Cargando notificaciones...</p>
+      <div className="h-screen overflow-hidden bg-gray-50 font-sans flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200 text-center">
+          <div className="flex items-center justify-center">
+            <div className="w-7 h-7 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
+            <span className="ml-3 text-slate-600 font-semibold text-sm">Cargando notificaciones...</span>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Título Principal - Mismo diseño que dashboard del estudiante */}
-      <div className="text-center mb-6">
-        <div className="inline-block px-20 py-4 content-card border border-gray-200 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
-            Centro de Notificaciones
-          </h1>
-          <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
+    <div className="h-screen overflow-hidden bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900">
+      {/* Header Section - Compact & Professional */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl xs:rounded-2xl shadow-2xl relative overflow-hidden mx-1.5 xs:mx-2 sm:mx-3 mt-2 xs:mt-3 border border-white/10">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-slate-800/50 via-transparent to-slate-800/30 animate-pulse"></div>
+
+        {/* Minimal decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-600/10 via-slate-500/5 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr from-slate-700/8 to-transparent rounded-full blur-3xl -ml-12 -mb-12 pointer-events-none"></div>
+
+        {/* Subtle dots */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-12 left-16 w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+          <div className="absolute top-20 right-32 w-1 h-1 bg-slate-300 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute bottom-16 left-1/3 w-1.5 h-1.5 bg-slate-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
         </div>
-      </div>
 
-      {/* Botón de actualizar mejorado */}
-      <div className="flex justify-end mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="border-[#c2b280] text-[#1e2a37] hover:bg-[#c2b280] hover:text-white font-medium"
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          Actualizar
-        </Button>
-      </div>
-
-      {/* Alerts */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-          <AlertCircle className="w-5 h-5 mr-3" />
-          <p className="text-sm font-medium">{error}</p>
-        </div>
-      )}
-
-      {/* Estadísticas mejoradas con colores del sistema */}
-      {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-            <div className="text-2xl font-bold text-[#6d1115]">{stats.total || 0}</div>
-            <div className="text-sm text-[#1e2a37] font-medium">Total</div>
-          </Card>
-          <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-            <div className="text-2xl font-bold text-[#8e161a]">{unreadCount}</div>
-            <div className="text-sm text-[#1e2a37] font-medium">No leídas</div>
-          </Card>
-          <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-            <div className="text-2xl font-bold text-[#c2b280]">{stats.read || 0}</div>
-            <div className="text-sm text-[#1e2a37] font-medium">Leídas</div>
-          </Card>
-          <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-            <div className="text-2xl font-bold text-[#1e2a37]">{stats.by_type?.appointment || 0}</div>
-            <div className="text-sm text-[#1e2a37] font-medium">Citas</div>
-          </Card>
-        </div>
-      )}
-
-      {/* Acciones mejoradas */}
-      <Card className="p-6 bg-white border border-gray-200 shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-[#1e2a37] flex items-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-full flex items-center justify-center mr-3 shadow-md">
-              <Bell className="w-4 h-4 text-white" />
+        <div className="w-full px-3 xs:px-4 sm:px-6 lg:px-8 pt-4 xs:pt-5 pb-5 xs:pb-6 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 xs:gap-3">
+            <div className="animate-fade-in">
+              <div className="flex items-center space-x-1.5 xs:space-x-2 mb-1 xs:mb-1.5">
+                <span className="px-2.5 xs:px-3 py-1 xs:py-1.5 rounded-full bg-white/15 backdrop-blur-xl text-white text-[10px] xs:text-xs font-bold flex items-center tracking-wide uppercase shadow-lg border border-white/20">
+                  <Bell className="w-3 h-3 xs:w-3.5 xs:h-3.5 mr-1 xs:mr-1.5" />
+                  Notificaciones
+                </span>
+              </div>
+              <h1 className="text-2xl xs:text-3xl md:text-4xl font-black tracking-tight text-white mb-1 xs:mb-1.5 leading-tight drop-shadow-lg">
+                Centro de Notificaciones
+              </h1>
+              <p className="text-slate-300 text-xs xs:text-sm max-w-2xl font-medium leading-relaxed drop-shadow-md">
+                Gestiona y revisa todas tus notificaciones
+              </p>
             </div>
-            Notificaciones ({notifications.length})
-          </h2>
-          <div className="flex space-x-2">
-            {unreadCount > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleMarkAllAsRead}
-                className="border-[#c2b280] text-[#1e2a37] hover:bg-[#c2b280] hover:text-white font-medium"
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Marcar todas como leídas
-              </Button>
-            )}
-            {notifications.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDeleteAllNotifications}
-                className="border-[#6d1115] text-[#6d1115] hover:bg-[#6d1115] hover:text-white font-medium"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Eliminar todas
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border-white/20 text-white hover:bg-white/20"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
+              Actualizar
+            </Button>
           </div>
         </div>
 
-        {notifications.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <Bell className="w-8 h-8 text-white" />
+        {/* Wave pattern - Compacto */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 overflow-hidden pointer-events-none">
+          <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M0,0 C150,80 350,80 600,40 C850,0 1050,0 1200,40 L1200,120 L0,120 Z" fill="white" fillOpacity="0.08" />
+            <path d="M0,20 C200,100 400,100 600,60 C800,20 1000,20 1200,60 L1200,120 L0,120 Z" fill="white" fillOpacity="0.04" />
+          </svg>
+        </div>
+      </div>
+
+      <div className="w-full px-2 xs:px-3 sm:px-4 lg:px-6 -mt-2 relative z-20 overflow-y-auto h-[calc(100vh-8rem)] xs:h-[calc(100vh-9rem)] sm:h-[calc(100vh-10rem)]">
+        {/* Mensajes de estado - Compactos */}
+        {error && (
+          <div className="mb-3 bg-red-50 border border-red-200 rounded-xl p-3 shadow-sm flex items-center space-x-2.5 animate-fade-in">
+            <div className="bg-red-100 p-1.5 rounded-full flex-shrink-0">
+              <AlertCircle className="w-4 h-4 text-red-600" />
             </div>
-            <p className="text-[#1e2a37] font-medium text-lg">No tienes notificaciones</p>
-            <p className="text-[#c2b280] text-sm mt-1">Las notificaciones aparecerán aquí cuando las recibas</p>
+            <div className="min-w-0 flex-1">
+              <h4 className="text-red-800 font-bold text-sm">Error</h4>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Estadísticas mejoradas - Estilo Dashboard */}
+        {stats && (
+          <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-4 gap-2 xs:gap-3 mb-3">
+            {/* Total */}
+            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-slate-100/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-slate-200/60 transition-all duration-500"></div>
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <div className="w-8 h-8 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-lg flex items-center justify-center text-indigo-700 shadow-sm group-hover:scale-110 transition-all duration-300">
+                  <Bell className="w-4 h-4" />
+                </div>
+                <span className="text-[9px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">Total</span>
+              </div>
+              <div className="flex items-baseline gap-1.5 relative z-10">
+                <p className="text-2xl xs:text-3xl font-black text-slate-900 tracking-tight">{stats.total || 0}</p>
+              </div>
+            </div>
+            
+            {/* No leídas */}
+            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-red-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-red-100/60 transition-all duration-500"></div>
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <div className="w-8 h-8 bg-gradient-to-br from-red-100 to-red-200 rounded-lg flex items-center justify-center text-red-700 shadow-sm group-hover:scale-110 transition-all duration-300">
+                  <AlertCircle className="w-4 h-4" />
+                </div>
+                <span className="text-[9px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Nuevas</span>
+              </div>
+              <div className="flex items-baseline gap-1.5 relative z-10">
+                <p className="text-2xl xs:text-3xl font-black text-slate-900 tracking-tight">{unreadCount}</p>
+              </div>
+            </div>
+            
+            {/* Leídas */}
+            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-green-100/60 transition-all duration-500"></div>
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-lg flex items-center justify-center text-emerald-700 shadow-sm group-hover:scale-110 transition-all duration-300">
+                  <CheckCircle className="w-4 h-4" />
+                </div>
+                <span className="text-[9px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Leídas</span>
+              </div>
+              <div className="flex items-baseline gap-1.5 relative z-10">
+                <p className="text-2xl xs:text-3xl font-black text-slate-900 tracking-tight">{stats.read || 0}</p>
+              </div>
+            </div>
+            
+            {/* Citas */}
+            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-blue-100/60 transition-all duration-500"></div>
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center text-blue-700 shadow-sm group-hover:scale-110 transition-all duration-300">
+                  <Info className="w-4 h-4" />
+                </div>
+                <span className="text-[9px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Citas</span>
+              </div>
+              <div className="flex items-baseline gap-1.5 relative z-10">
+                <p className="text-2xl xs:text-3xl font-black text-slate-900 tracking-tight">{stats.by_type?.appointment || 0}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Acciones */}
+        <div className="bg-white rounded-xl shadow-md border border-slate-200 mb-3 p-3 xs:p-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-violet-50/50 to-purple-50/50 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
+          
+          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-3 mb-3 relative z-10">
+            <div className="flex items-center space-x-2.5 xs:space-x-3">
+              <div className="w-8 h-8 xs:w-9 xs:h-9 bg-gradient-to-br from-violet-100 to-purple-200 rounded-lg flex items-center justify-center shadow-sm border border-violet-100">
+                <Bell className="w-4 h-4 xs:w-5 xs:h-5 text-violet-700" />
+              </div>
+              <div>
+                <h3 className="text-slate-900 font-bold text-base xs:text-lg">Notificaciones</h3>
+                <p className="text-slate-500 text-xs xs:text-sm">Total: {notifications.length}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {unreadCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleMarkAllAsRead}
+                  className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105"
+                >
+                  <CheckCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5" />
+                  Marcar todas como leídas
+                </Button>
+              )}
+              {notifications.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDeleteAllNotifications}
+                  className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border-red-300 text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5" />
+                  Eliminar todas
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Lista de Notificaciones */}
+        {notifications.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-md p-4 border border-slate-200 text-center">
+            <div className="text-center py-6">
+              <div className="w-14 h-14 bg-gradient-to-br from-violet-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-violet-100/50">
+                <Bell className="w-7 h-7 text-violet-500" />
+              </div>
+              <h3 className="text-slate-900 font-bold mb-1.5 text-base">No tienes notificaciones</h3>
+              <p className="text-sm text-slate-500 leading-relaxed max-w-md mx-auto">
+                Las notificaciones aparecerán aquí cuando las recibas
+              </p>
+            </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {notifications.map((notification) => (
               <div 
                 key={notification.id}
-                className={`p-4 border rounded-lg transition-all duration-300 hover:shadow-md ${
+                className={`group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 xs:p-4 border transition-all duration-300 hover:-translate-y-0.5 overflow-hidden ${
                   notification.read_at 
-                    ? 'bg-white border-gray-200' 
-                    : 'bg-gradient-to-r from-[#c2b280]/10 to-white border-[#c2b280]/30 shadow-sm'
+                    ? 'border-slate-200 hover:border-slate-300' 
+                    : 'border-violet-200 hover:border-violet-300 bg-gradient-to-r from-violet-50/50 to-white'
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-3 flex-1">
-                    <div className="mt-1">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        notification.read_at 
-                          ? 'bg-gray-100' 
-                          : 'bg-gradient-to-br from-[#6d1115] to-[#4a0e10]'
-                      }`}>
-                        {getNotificationIcon(notification.type)}
+                <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-slate-50/50 to-transparent rounded-full -mr-10 -mt-10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative z-10">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3">
+                    <div className="flex-1 min-w-0 w-full">
+                      <div className="flex items-center gap-2 xs:gap-2.5 mb-2">
+                        <div className={`w-8 h-8 xs:w-10 xs:h-10 rounded-lg flex items-center justify-center shadow-sm border flex-shrink-0 ${
+                          notification.read_at 
+                            ? 'bg-slate-100 border-slate-200' 
+                            : 'bg-gradient-to-br from-violet-100 to-purple-200 border-violet-100'
+                        }`}>
+                          <div className={notification.read_at ? 'text-slate-600' : 'text-violet-700'}>
+                            {getNotificationIcon(notification.type)}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate">
+                              {notification.title}
+                            </h3>
+                            {!notification.read_at && (
+                              <Badge className="bg-red-100 text-red-700 border-red-200 px-2 py-0.5 text-[9px] xs:text-[10px] font-bold rounded-lg">
+                                Nueva
+                              </Badge>
+                            )}
+                            <Badge className="bg-violet-100 text-violet-700 border-violet-200 px-2 py-0.5 text-[9px] xs:text-[10px] font-bold rounded-lg">
+                              {getNotificationTypeText(notification.type)}
+                            </Badge>
+                          </div>
+                          <p className="text-xs sm:text-sm text-slate-700 mb-1.5 line-clamp-2">{notification.message}</p>
+                          <p className="text-[10px] xs:text-xs font-semibold text-slate-500">
+                            {formatDate(notification.created_at)}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="font-semibold text-[#1e2a37]">{notification.title}</h3>
-                        {!notification.read_at && (
-                          <Badge className="text-xs bg-[#6d1115] text-white">
-                            Nueva
-                          </Badge>
-                        )}
-                        <Badge className="text-xs bg-[#c2b280] text-[#1e2a37]">
-                          {getNotificationTypeText(notification.type)}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-[#1e2a37] mb-2 font-medium">{notification.message}</p>
-                      <p className="text-xs text-[#c2b280] font-medium">
-                        {formatDate(notification.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex space-x-1 ml-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewNotificationDetails(notification)}
-                      title="Ver detalles"
-                      className="text-[#1e2a37] hover:text-[#6d1115] hover:bg-[#c2b280]/20"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    {!notification.read_at && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleMarkAsRead(notification.id)}
-                        title="Marcar como leída"
-                        className="text-[#c2b280] hover:text-[#6d1115] hover:bg-[#c2b280]/20"
+                    <div className="flex items-center gap-1.5 self-start sm:self-center flex-shrink-0">
+                      <button
+                        onClick={() => handleViewNotificationDetails(notification)}
+                        title="Ver detalles"
+                        className="w-7 h-7 xs:w-8 xs:h-8 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:scale-110 text-slate-600 hover:text-violet-600"
                       >
-                        <CheckCircle className="w-4 h-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteNotification(notification.id)}
-                      title="Eliminar"
-                      className="text-[#6d1115] hover:text-[#4a0e10] hover:bg-[#6d1115]/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                        <Eye className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                      </button>
+                      {!notification.read_at && (
+                        <button
+                          onClick={() => handleMarkAsRead(notification.id)}
+                          title="Marcar como leída"
+                          className="w-7 h-7 xs:w-8 xs:h-8 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-green-100 hover:scale-110 text-green-600"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteNotification(notification.id)}
+                        title="Eliminar"
+                        className="w-7 h-7 xs:w-8 xs:h-8 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-red-100 hover:scale-110 text-red-600"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Modal de detalles de notificación */}
-      {showNotificationDetails && selectedNotification && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">Detalles de la Notificación</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowNotificationDetails(false)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                {getNotificationIcon(selectedNotification.type)}
-                <Badge variant="default">
-                  {getNotificationTypeText(selectedNotification.type)}
-                </Badge>
-                {!selectedNotification.read_at && (
-                  <Badge variant="warning">Nueva</Badge>
-                )}
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium text-gray-600">Título</p>
-                <p className="text-base font-semibold text-gray-900">{selectedNotification.title}</p>
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium text-gray-600">Mensaje</p>
-                <p className="text-base text-gray-900">{selectedNotification.message}</p>
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium text-gray-600">Fecha</p>
-                <p className="text-base text-gray-900">{formatDate(selectedNotification.created_at)}</p>
-              </div>
-              
-              {selectedNotification.data && (
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Datos adicionales</p>
-                  <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto">
-                    {JSON.stringify(selectedNotification.data, null, 2)}
-                  </pre>
+      {showNotificationDetails && selectedNotification && createPortal(
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[9999] p-3 sm:p-4" onClick={() => setShowNotificationDetails(false)}>
+          <div 
+            className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden border border-slate-200 relative" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              boxShadow: `
+                0 32px 64px rgba(0, 0, 0, 0.16), 
+                0 16px 32px rgba(0, 0, 0, 0.12),
+                0 8px 16px rgba(0, 0, 0, 0.08)
+              `
+            }}
+          >
+            {/* Header del Modal */}
+            <div className="bg-gradient-to-r from-violet-600 to-purple-600 p-3 xs:p-4 border-b border-violet-700/20">
+              <div className="flex justify-between items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base xs:text-lg font-black text-white tracking-tight">Detalles de la Notificación</h3>
+                  <p className="text-[10px] xs:text-xs text-violet-100 font-medium mt-0.5">Información completa</p>
                 </div>
-              )}
+                <button
+                  onClick={() => setShowNotificationDetails(false)}
+                  className="w-7 h-7 xs:w-8 xs:h-8 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-all duration-300 border border-white/30 hover:border-white/50 flex-shrink-0"
+                >
+                  <X className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-white" />
+                </button>
+              </div>
             </div>
 
-            <div className="flex justify-end space-x-2 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setShowNotificationDetails(false)}
-              >
-                Cerrar
-              </Button>
-              {!selectedNotification.read_at && (
-                <Button
-                  onClick={() => {
-                    handleMarkAsRead(selectedNotification.id);
-                    setShowNotificationDetails(false);
-                  }}
+            {/* Contenido del Modal */}
+            <div className="p-3 xs:p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div className="space-y-3">
+                {/* Tipo y Badges */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="w-10 h-10 bg-gradient-to-br from-violet-100 to-purple-200 rounded-lg flex items-center justify-center border border-violet-100">
+                    {getNotificationIcon(selectedNotification.type)}
+                  </div>
+                  <Badge className="bg-violet-100 text-violet-700 border-violet-200 px-2.5 py-1 text-xs font-bold rounded-lg">
+                    {getNotificationTypeText(selectedNotification.type)}
+                  </Badge>
+                  {!selectedNotification.read_at && (
+                    <Badge className="bg-red-100 text-red-700 border-red-200 px-2.5 py-1 text-xs font-bold rounded-lg">
+                      Nueva
+                    </Badge>
+                  )}
+                </div>
+                
+                {/* Título */}
+                <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-3 border border-slate-200/50">
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Título</p>
+                  <p className="text-base font-bold text-slate-900">{selectedNotification.title}</p>
+                </div>
+                
+                {/* Mensaje */}
+                <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-3 border border-slate-200/50">
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Mensaje</p>
+                  <p className="text-sm text-slate-700 leading-relaxed">{selectedNotification.message}</p>
+                </div>
+                
+                {/* Fecha */}
+                <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-3 border border-slate-200/50">
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Fecha</p>
+                  <p className="text-sm font-bold text-slate-900">{formatDate(selectedNotification.created_at)}</p>
+                </div>
+                
+                {/* Datos adicionales */}
+                {selectedNotification.data && (
+                  <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-3 border border-slate-200/50">
+                    <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">Datos adicionales</p>
+                    <pre className="text-xs bg-white p-2.5 rounded-lg border border-slate-200 overflow-auto max-h-40">
+                      {JSON.stringify(selectedNotification.data, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Botones del Modal */}
+            <div className="p-3 xs:p-4 border-t border-slate-200 bg-slate-50/50">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={() => setShowNotificationDetails(false)}
+                  className="px-4 py-2 bg-white border-2 border-slate-300 hover:border-slate-400 text-slate-700 rounded-lg transition-all duration-300 flex items-center justify-center font-bold text-sm hover:bg-slate-50"
                 >
-                  Marcar como leída
-                </Button>
-              )}
-              {/* Botones de aprobar/rechazar solo para notificaciones de cita */}
-              {selectedNotification.type === 'appointment' && selectedNotification.data && typeof (selectedNotification.data as any).appointment_id === 'number' && (
-                <React.Fragment>
-                  <Button
-                    variant="primary"
-                    onClick={async () => {
-                      try {
-                        await approveAppointment(Number((selectedNotification.data as any).appointment_id));
-                        setShowNotificationDetails(false);
-                        handleRefresh();
-                      } catch (e) {
-                        setError('Error al aprobar la cita');
-                      }
+                  Cerrar
+                </button>
+                {!selectedNotification.read_at && (
+                  <button
+                    onClick={() => {
+                      handleMarkAsRead(selectedNotification.id);
+                      setShowNotificationDetails(false);
                     }}
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg font-bold text-sm hover:scale-105"
                   >
-                    Aprobar cita
-                  </Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => setShowRejectForm(true)}
-                  >
-                    Rechazar cita
-                  </Button>
-                </React.Fragment>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Marcar como leída
+                  </button>
+                )}
+                {/* Botones de aprobar/rechazar solo para notificaciones de cita */}
+                {selectedNotification.type === 'appointment' && selectedNotification.data && typeof (selectedNotification.data as any).appointment_id === 'number' && (
+                  <>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await approveAppointment(Number((selectedNotification.data as any).appointment_id));
+                          setShowNotificationDetails(false);
+                          handleRefresh();
+                        } catch (e) {
+                          setError('Error al aprobar la cita');
+                        }
+                      }}
+                      className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg font-bold text-sm hover:scale-105"
+                    >
+                      Aprobar cita
+                    </button>
+                    <button
+                      onClick={() => setShowRejectForm(true)}
+                      className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg font-bold text-sm hover:scale-105"
+                    >
+                      Rechazar cita
+                    </button>
+                  </>
+                )}
+              </div>
+              {/* Formulario para rechazar cita */}
+              {showRejectForm && selectedNotification.type === 'appointment' && selectedNotification.data && typeof (selectedNotification.data as any).appointment_id === 'number' && (
+                <div className="mt-4 p-3 bg-amber-50/50 rounded-lg border border-amber-200">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Motivo del rechazo
+                  </label>
+                  <textarea
+                    className="w-full px-3 py-2 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm transition-all duration-300 mb-3"
+                    placeholder="Escribe el motivo del rechazo..."
+                    value={rejectReason}
+                    onChange={e => setRejectReason(e.target.value)}
+                    rows={3}
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowRejectForm(false)}
+                      className="px-4 py-2 bg-white border-2 border-slate-300 hover:border-slate-400 text-slate-700 rounded-lg transition-all duration-300 font-bold text-sm hover:bg-slate-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await rejectAppointment(Number((selectedNotification.data as any).appointment_id), rejectReason);
+                          setShowRejectForm(false);
+                          setShowNotificationDetails(false);
+                          handleRefresh();
+                        } catch (e) {
+                          setError('Error al rechazar la cita');
+                        }
+                      }}
+                      disabled={!rejectReason.trim()}
+                      className="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 disabled:from-slate-300 disabled:to-slate-400 text-white rounded-lg transition-all duration-300 font-bold text-sm hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                    >
+                      Confirmar rechazo
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
-            {/* Formulario para rechazar cita */}
-            {showRejectForm && selectedNotification.type === 'appointment' && selectedNotification.data && typeof (selectedNotification.data as any).appointment_id === 'number' && (
-              <div className="mt-4">
-                <textarea
-                  className="w-full border rounded p-2 mb-2"
-                  placeholder="Motivo del rechazo"
-                  value={rejectReason}
-                  onChange={e => setRejectReason(e.target.value)}
-                />
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setShowRejectForm(false)}>Cancelar</Button>
-                  <Button
-                    variant="danger"
-                    onClick={async () => {
-                      try {
-                        await rejectAppointment(Number((selectedNotification.data as any).appointment_id), rejectReason);
-                        setShowRejectForm(false);
-                        setShowNotificationDetails(false);
-                        handleRefresh();
-                      } catch (e) {
-                        setError('Error al rechazar la cita');
-                      }
-                    }}
-                    disabled={!rejectReason.trim()}
-                  >
-                    Confirmar rechazo
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
