@@ -22,7 +22,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   if (!isOpen) return null;
 
   const getIcon = () => {
-    const iconClass = "w-7 h-7 xs:w-8 xs:h-8";
+    const iconClass = "w-5 h-5 xs:w-6 xs:h-6 sm:w-7 sm:h-7";
     switch (type) {
       case 'success':
         return <CheckCircle className={`${iconClass} text-emerald-600 drop-shadow-md`} strokeWidth={2.5} />;
@@ -91,21 +91,44 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   const colors = getColors();
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 xs:p-4">
-      {/* Backdrop - Fondo negro transparente para toda la pantalla */}
+    <div 
+      className="fixed inset-0 z-[10000] flex items-center justify-center" 
+      style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        margin: 0,
+        padding: 0,
+        zIndex: 10000
+      }}
+    >
+      {/* Backdrop - Fondo transparente para toda la pantalla */}
       <div 
-        className="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity duration-300"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
         onClick={onClose}
+        style={{ 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh'
+        }}
       />
       
-      {/* Modal Moderno y Elegante */}
-      <div className={`relative bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3),0_0_40px_${type === 'warning' ? 'rgba(251,146,60,0.3)' : 'rgba(0,0,0,0.1)'}] max-w-[320px] xs:max-w-[380px] w-full transform transition-all duration-300 ease-out border-2 ${colors.border} ${colors.glow} animate-in fade-in zoom-in-95 backdrop-blur-sm overflow-hidden`}>
+      {/* Modal Moderno y Elegante - Más pequeño */}
+      <div className={`relative bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-[280px] xs:max-w-[320px] w-full transform transition-all duration-300 ease-out border border-slate-200 ${colors.glow} animate-in fade-in zoom-in-95 backdrop-blur-sm overflow-hidden m-2 xs:m-3 sm:m-4`}>
         {/* Efecto de brillo sutil para warning */}
         {type === 'warning' && (
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent animate-pulse"></div>
         )}
         {/* Header Moderno */}
-        <div className={`${colors.headerBg} border-b-2 ${colors.border} rounded-t-3xl p-5 xs:p-6 relative overflow-hidden`}>
+        <div className={`${colors.headerBg} border-b-2 ${colors.border} rounded-t-xl sm:rounded-t-2xl p-4 xs:p-5 relative overflow-hidden`}>
           {/* Patrón decorativo mejorado para warning */}
           {type === 'warning' ? (
             <>
@@ -118,18 +141,18 @@ export const AlertModal: React.FC<AlertModalProps> = ({
             </div>
           )}
           
-          <div className="flex flex-col items-center gap-3.5 xs:gap-4 relative z-10">
+          <div className="flex flex-col items-center gap-2.5 xs:gap-3 relative z-10">
             {showIcon && (
-              <div className={`${colors.iconBg} ${colors.iconBorder} border-2 rounded-2xl p-3 xs:p-3.5 flex-shrink-0 shadow-xl relative transform transition-all duration-300`}>
+              <div className={`${colors.iconBg} ${colors.iconBorder} border-2 rounded-xl p-2.5 xs:p-3 flex-shrink-0 shadow-xl relative transform transition-all duration-300`}>
                 {/* Efecto de brillo interno */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/50 to-transparent rounded-2xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/50 to-transparent rounded-xl"></div>
                 <div className="relative z-10">{getIcon()}</div>
               </div>
             )}
-            <h3 className={`text-lg xs:text-xl font-black ${colors.title} leading-tight text-center`}>
+            <h3 className={`text-base xs:text-lg sm:text-xl font-bold ${colors.title} leading-tight text-center`}>
               {title}
             </h3>
-            <div className={`h-1 w-14 rounded-full ${
+            <div className={`h-0.5 w-12 xs:w-14 rounded-full ${
               type === 'success' ? 'bg-emerald-400' :
               type === 'warning' ? 'bg-gradient-to-r from-orange-400 to-amber-400' :
               type === 'error' ? 'bg-red-400' :
@@ -139,13 +162,13 @@ export const AlertModal: React.FC<AlertModalProps> = ({
         </div>
         
         {/* Content Moderno */}
-        <div className="p-5 xs:p-6 bg-gradient-to-br from-white via-slate-50/30 to-white relative">
+        <div className="p-4 xs:p-5 sm:p-6 bg-gradient-to-br from-white via-slate-50/30 to-white relative">
           {/* Fondo decorativo sutil */}
           <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-400 to-transparent"></div>
           </div>
           
-          <p className={`text-sm xs:text-base leading-relaxed ${colors.message} mb-5 xs:mb-6 text-center font-medium relative z-10 whitespace-pre-line`}>
+          <p className={`text-xs xs:text-sm leading-relaxed ${colors.message} mb-4 xs:mb-5 text-center font-medium relative z-10 whitespace-pre-line`}>
             {message}
           </p>
           
@@ -153,7 +176,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
           <div className="flex justify-center relative z-10">
             <button
               onClick={onClose}
-              className={`${colors.button} group w-full px-8 xs:px-10 py-3 xs:py-3.5 rounded-xl font-bold text-sm xs:text-base transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white overflow-hidden relative`}
+              className={`${colors.button} group w-full px-4 xs:px-6 py-2.5 xs:py-3 rounded-xl font-semibold text-xs xs:text-sm transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white overflow-hidden relative`}
             >
               {/* Efecto de brillo animado */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>

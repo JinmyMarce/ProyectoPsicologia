@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import {
@@ -7,10 +8,15 @@ import {
   User,
   RefreshCw,
   AlertCircle,
-  Clock as ClockIcon
+  Clock as ClockIcon,
+  X,
+  Edit,
+  Eye
 } from 'lucide-react';
-import { getUserAppointments } from '../../services/appointments';
+import { getUserAppointments, cancelAppointment, rescheduleAppointment } from '../../services/appointments';
 import { useAuth } from '../../contexts/AuthContext';
+import { CancelAppointmentModal } from '../appointments/CancelAppointmentModal';
+import { RescheduleAppointmentModal } from '../appointments/RescheduleAppointmentModal';
 
 
 interface AppointmentHistory {
@@ -29,6 +35,7 @@ interface AppointmentHistory {
 
 export function StudentAppointmentHistory() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<AppointmentHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -36,6 +43,8 @@ export function StudentAppointmentHistory() {
   const [filter, setFilter] = useState<'all' | 'completed' | 'cancelled' | 'rescheduled'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+  const [appointmentToCancel, setAppointmentToCancel] = useState<AppointmentHistory | null>(null);
+  const [appointmentToReschedule, setAppointmentToReschedule] = useState<AppointmentHistory | null>(null);
 
   useEffect(() => {
     if (user?.email) {
@@ -63,6 +72,37 @@ export function StudentAppointmentHistory() {
     setRefreshing(false);
   };
 
+  const handleCancelClick = (appointment: AppointmentHistory) => {
+    console.log('handleCancelClick llamado con:', appointment);
+    console.log('Estado de la cita:', appointment.status);
+    setAppointmentToCancel(appointment);
+  };
+
+  const handleConfirmCancel = async (appointmentId: number) => {
+    try {
+      await cancelAppointment(appointmentId);
+      await loadAppointments(); // Recargar citas
+      setAppointmentToCancel(null);
+    } catch (error: any) {
+      throw error; // El modal manejará el error
+    }
+  };
+
+  const handleRescheduleClick = (appointment: AppointmentHistory) => {
+    // Navegar a la interfaz de reprogramar
+    navigate('/appointments/reschedule');
+  };
+
+  const handleConfirmReschedule = async (appointmentId: number, newDate: string, newTime: string) => {
+    try {
+      await rescheduleAppointment(appointmentId, newDate, newTime);
+      await loadAppointments(); // Recargar citas
+      setAppointmentToReschedule(null);
+    } catch (error: any) {
+      throw error; // El modal manejará el error
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
@@ -79,7 +119,8 @@ export function StudentAppointmentHistory() {
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
+    const statusLower = status?.toLowerCase() || '';
+    switch (statusLower) {
       case 'completed':
         return 'Completada';
       case 'cancelled':
@@ -93,6 +134,22 @@ export function StudentAppointmentHistory() {
       default:
         return status;
     }
+  };
+
+  // Función para verificar si una cita puede ser cancelada
+  const canCancelAppointment = (appointment: AppointmentHistory): boolean => {
+    const status = (appointment.status || '').toLowerCase().trim();
+    // Aceptar tanto en inglés como en español, y también si contiene la palabra
+    return status === 'pending' || 
+           status === 'pendiente' || 
+           status.includes('pending') || 
+           status.includes('pendiente');
+  };
+
+  // Función para verificar si una cita puede ser reprogramada
+  const canRescheduleAppointment = (appointment: AppointmentHistory): boolean => {
+    const status = (appointment.status || '').toLowerCase().trim();
+    return status === 'confirmed' || status === 'confirmada';
   };
 
 
@@ -339,7 +396,7 @@ export function StudentAppointmentHistory() {
             {/* Header con encabezados - Solo visible en pantallas grandes */}
             <div className="hidden lg:block bg-gradient-to-r from-[#1e2a37] to-[#2d3e4f] rounded-lg mb-2 sticky top-0 z-10">
               <div className="p-2.5 pr-4 lg:pr-6">
-                <div className="grid grid-cols-[50px_2fr_2.2fr_1fr_1.8fr_150px] gap-3 lg:gap-4 xl:gap-6 2xl:gap-8 w-full items-center">
+                <div className="grid grid-cols-[50px_2fr_2fr_1fr_1.5fr_280px] gap-3 lg:gap-4 xl:gap-6 2xl:gap-8 w-full items-center">
                   <div></div>
                   <div className="min-w-0">
                     <span className="text-[10px] text-white/90 uppercase font-semibold truncate block">Psicólogo</span>
@@ -354,18 +411,33 @@ export function StudentAppointmentHistory() {
                     <span className="text-[10px] text-white/90 uppercase font-semibold truncate block">Fecha de Agendamiento</span>
                   </div>
                   <div className="text-right pr-6 lg:pr-8 xl:pr-10 min-w-0 flex-shrink-0">
-                    <span className="text-[10px] text-white/90 uppercase font-semibold">Estado</span>
+                    <span className="text-[10px] text-white/90 uppercase font-semibold">Estado / Acciones</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              {paginatedAppointments.map((appointment) => (
+              {paginatedAppointments.map((appointment) => {
+                // Debug: verificar estado de la cita
+                const statusLower = appointment.status?.toLowerCase() || '';
+                const isPending = statusLower === 'pending';
+                const isConfirmed = statusLower === 'confirmed';
+                
+                if (isPending) {
+                  console.log('Cita pendiente encontrada:', {
+                    id: appointment.id,
+                    status: appointment.status,
+                    statusLower: statusLower,
+                    psychologist: appointment.psychologist_name
+                  });
+                }
+                
+                return (
                   <div key={appointment.id} className="bg-white rounded-lg border border-gray-200 hover:border-[#1e2a37]/30 hover:shadow-sm transition-all duration-200">
                     {/* Layout para pantallas grandes (lg+) */}
                     <div className="hidden lg:block p-2.5">
-                      <div className="grid grid-cols-[50px_2fr_2.2fr_1fr_1.8fr_150px] gap-3 lg:gap-4 xl:gap-6 2xl:gap-8 w-full items-center">
+                      <div className="grid grid-cols-[50px_2fr_2fr_1fr_1.5fr_280px] gap-3 lg:gap-4 xl:gap-6 2xl:gap-8 w-full items-center">
                         {/* Avatar/Icono */}
                         <div className="w-9 h-9 bg-gradient-to-br from-[#1e2a37] to-[#2d3e4f] rounded-lg flex items-center justify-center flex-shrink-0">
                           <User className="w-4.5 h-4.5 text-white" />
@@ -405,9 +477,9 @@ export function StudentAppointmentHistory() {
                         <div className="min-w-0">
                           <span className="text-xs text-gray-600 flex items-center gap-1">
                             <ClockIcon className="w-3 h-3 flex-shrink-0" />
-                            <span className="truncate">
+                            <span className="whitespace-nowrap">
                               {new Date(appointment.created_at).toLocaleDateString('es-ES', {
-                                weekday: 'short',
+                                weekday: 'long',
                                 day: 'numeric',
                                 month: 'long',
                                 year: 'numeric'
@@ -416,11 +488,56 @@ export function StudentAppointmentHistory() {
                           </span>
                         </div>
 
-                        {/* Estado - A la derecha */}
-                        <div className="text-right pr-6 lg:pr-8 xl:pr-10">
-                          <Badge variant={getStatusColor(appointment.status)} className="text-[9px] px-2 py-0.5 font-medium rounded">
+                        {/* Estado y Acciones - A la derecha */}
+                        <div className="flex items-center justify-end gap-2 flex-nowrap">
+                          <Badge variant={getStatusColor(appointment.status)} className="text-[9px] px-2 py-0.5 font-medium rounded flex-shrink-0 whitespace-nowrap">
                             {getStatusText(appointment.status)}
                           </Badge>
+                          {(canCancelAppointment(appointment) || (appointment.status || '').toLowerCase().includes('pendiente') || (appointment.status || '').toLowerCase().includes('pending')) && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Cancelar cita - Estado:', appointment.status, 'Cita completa:', appointment);
+                                handleCancelClick(appointment);
+                              }}
+                              title="Cancelar cita"
+                              className="px-2 py-0.5 text-white bg-[#4A0A0A] hover:bg-[#5A0A0A] active:bg-[#3A0A0A] rounded transition-all border border-[#4A0A0A] hover:border-[#5A0A0A] font-semibold text-xs flex items-center gap-1 shadow-md hover:shadow-lg whitespace-nowrap flex-shrink-0"
+                              style={{ display: 'inline-flex' }}
+                            >
+                              <X className="w-3 h-3 flex-shrink-0" />
+                              <span>Cancelar</span>
+                            </button>
+                          )}
+                          {canRescheduleAppointment(appointment) && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleRescheduleClick(appointment);
+                              }}
+                              title="Reprogramar cita"
+                              className="px-2 py-0.5 text-white bg-violet-600 hover:bg-violet-700 active:bg-violet-800 rounded transition-all border border-violet-600 hover:border-violet-700 font-semibold text-xs flex items-center gap-1 shadow-md hover:shadow-lg whitespace-nowrap flex-shrink-0"
+                            >
+                              <Edit className="w-3 h-3 flex-shrink-0" />
+                              <span>Reprogramar</span>
+                            </button>
+                          )}
+                          {((appointment.status || '').toLowerCase() === 'completed' || (appointment.status || '').toLowerCase() === 'completada') && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // Aquí puedes agregar lógica para ver detalles de la cita completada
+                                console.log('Ver detalles de cita completada:', appointment);
+                              }}
+                              title="Ver detalles de cita completada"
+                              className="px-2 py-1 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded transition-all border border-slate-300 hover:border-slate-400 font-semibold text-xs flex items-center gap-1 shadow-sm hover:shadow-md whitespace-nowrap flex-shrink-0"
+                              style={{ display: 'inline-flex' }}
+                            >
+                              <Eye className="w-3 h-3 flex-shrink-0" />
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -440,9 +557,55 @@ export function StudentAppointmentHistory() {
                             <h3 className="text-sm font-semibold text-[#1e2a37] truncate">
                               {appointment.psychologist_name}
                             </h3>
-                            <Badge variant={getStatusColor(appointment.status)} className="text-[9px] px-2 py-0.5 font-medium rounded flex-shrink-0">
-                              {getStatusText(appointment.status)}
-                            </Badge>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Badge variant={getStatusColor(appointment.status)} className="text-[9px] px-2 py-0.5 font-medium rounded">
+                                {getStatusText(appointment.status)}
+                              </Badge>
+                              {(canCancelAppointment(appointment) || (appointment.status || '').toLowerCase().includes('pendiente') || (appointment.status || '').toLowerCase().includes('pending')) && (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('Cancelar cita - Estado:', appointment.status, 'Cita completa:', appointment);
+                                    handleCancelClick(appointment);
+                                  }}
+                                  title="Cancelar cita"
+                                  className="px-2 py-1 text-white bg-[#4A0A0A] hover:bg-[#5A0A0A] active:bg-[#3A0A0A] rounded transition-all border border-[#4A0A0A] hover:border-[#5A0A0A] font-semibold text-xs flex items-center gap-1 shadow-md hover:shadow-lg whitespace-nowrap flex-shrink-0"
+                                  style={{ display: 'inline-flex' }}
+                                >
+                                  <X className="w-3 h-3 flex-shrink-0" />
+                                  <span>Cancelar</span>
+                                </button>
+                              )}
+                              {canRescheduleAppointment(appointment) && (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleRescheduleClick(appointment);
+                                  }}
+                                  title="Reprogramar cita"
+                                  className="px-3 py-1.5 text-white bg-violet-600 hover:bg-violet-700 active:bg-violet-800 rounded-lg transition-all border-2 border-violet-600 hover:border-violet-700 font-bold text-xs flex items-center gap-1.5 shadow-lg hover:shadow-xl whitespace-nowrap flex-shrink-0"
+                                >
+                                  <Edit className="w-3.5 h-3.5 flex-shrink-0" />
+                                  <span>Reprogramar</span>
+                                </button>
+                              )}
+                              {((appointment.status || '').toLowerCase() === 'completed' || (appointment.status || '').toLowerCase() === 'completada') && (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('Ver detalles de cita completada:', appointment);
+                                  }}
+                                  title="Ver detalles de cita completada"
+                                  className="px-2 py-1 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded transition-all border border-slate-300 hover:border-slate-400 font-semibold text-xs flex items-center gap-1 shadow-sm hover:shadow-md whitespace-nowrap flex-shrink-0"
+                                  style={{ display: 'inline-flex' }}
+                                >
+                                  <Eye className="w-3 h-3 flex-shrink-0" />
+                                </button>
+                              )}
+                            </div>
                           </div>
 
                           {/* Fecha y Hora */}
@@ -462,11 +625,14 @@ export function StudentAppointmentHistory() {
                             </span>
                             <span className="text-xs text-gray-600 flex items-center gap-1.5">
                               <ClockIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                              Agendado: {new Date(appointment.created_at).toLocaleDateString('es-ES', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
+                              <span className="whitespace-nowrap">
+                                Agendado: {new Date(appointment.created_at).toLocaleDateString('es-ES', {
+                                  weekday: 'long',
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric'
+                                })}
+                              </span>
                             </span>
                           </div>
                         </div>
@@ -488,9 +654,55 @@ export function StudentAppointmentHistory() {
                             <h3 className="text-sm font-semibold text-[#1e2a37]">
                               {appointment.psychologist_name}
                             </h3>
-                            <Badge variant={getStatusColor(appointment.status)} className="text-[9px] px-2 py-0.5 font-medium rounded flex-shrink-0">
-                              {getStatusText(appointment.status)}
-                            </Badge>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Badge variant={getStatusColor(appointment.status)} className="text-[9px] px-2 py-0.5 font-medium rounded">
+                                {getStatusText(appointment.status)}
+                              </Badge>
+                              {(canCancelAppointment(appointment) || (appointment.status || '').toLowerCase().includes('pendiente') || (appointment.status || '').toLowerCase().includes('pending')) && (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('Cancelar cita - Estado:', appointment.status, 'Cita completa:', appointment);
+                                    handleCancelClick(appointment);
+                                  }}
+                                  title="Cancelar cita"
+                                  className="px-2 py-1 text-white bg-[#4A0A0A] hover:bg-[#5A0A0A] active:bg-[#3A0A0A] rounded transition-all border border-[#4A0A0A] hover:border-[#5A0A0A] font-semibold text-xs flex items-center gap-1 shadow-md hover:shadow-lg whitespace-nowrap flex-shrink-0"
+                                  style={{ display: 'inline-flex' }}
+                                >
+                                  <X className="w-3 h-3 flex-shrink-0" />
+                                  <span>Cancelar</span>
+                                </button>
+                              )}
+                              {canRescheduleAppointment(appointment) && (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleRescheduleClick(appointment);
+                                  }}
+                                  title="Reprogramar cita"
+                                  className="px-3 py-1.5 text-white bg-violet-600 hover:bg-violet-700 active:bg-violet-800 rounded-lg transition-all border-2 border-violet-600 hover:border-violet-700 font-bold text-xs flex items-center gap-1.5 shadow-lg hover:shadow-xl whitespace-nowrap flex-shrink-0"
+                                >
+                                  <Edit className="w-3.5 h-3.5 flex-shrink-0" />
+                                  <span>Reprogramar</span>
+                                </button>
+                              )}
+                              {((appointment.status || '').toLowerCase() === 'completed' || (appointment.status || '').toLowerCase() === 'completada') && (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('Ver detalles de cita completada:', appointment);
+                                  }}
+                                  title="Ver detalles de cita completada"
+                                  className="px-2 py-1 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded transition-all border border-slate-300 hover:border-slate-400 font-semibold text-xs flex items-center gap-1 shadow-sm hover:shadow-md whitespace-nowrap flex-shrink-0"
+                                  style={{ display: 'inline-flex' }}
+                                >
+                                  <Eye className="w-3 h-3 flex-shrink-0" />
+                                </button>
+                              )}
+                            </div>
                           </div>
 
                           {/* Información detallada */}
@@ -527,7 +739,8 @@ export function StudentAppointmentHistory() {
                       </div>
                     </div>
                   </div>
-              ))}
+                );
+              })}
             </div>
           
           {/* Paginación */}
@@ -559,6 +772,22 @@ export function StudentAppointmentHistory() {
           </>
         )}
       </div>
+
+      {/* Modal de Cancelación de Cita */}
+      <CancelAppointmentModal
+        isOpen={appointmentToCancel !== null}
+        onClose={() => setAppointmentToCancel(null)}
+        appointment={appointmentToCancel}
+        onConfirm={handleConfirmCancel}
+      />
+
+      {/* Modal de Reprogramación de Cita */}
+      <RescheduleAppointmentModal
+        isOpen={appointmentToReschedule !== null}
+        onClose={() => setAppointmentToReschedule(null)}
+        appointment={appointmentToReschedule}
+        onConfirm={handleConfirmReschedule}
+      />
     </div>
   );
 } 

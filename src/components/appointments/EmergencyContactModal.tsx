@@ -186,7 +186,7 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
   if (isOpen) {
     return createPortal(
       <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[9999]">
-        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-3 max-h-[85vh] border border-gray-100 relative" style={{
+        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-3 max-h-[90vh] border border-gray-100 relative" style={{
           boxShadow: `
             0 32px 64px rgba(0, 0, 0, 0.12), 
             0 16px 32px rgba(0, 0, 0, 0.08),
@@ -197,7 +197,7 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
           zIndex: 10000,
           overflow: 'visible'
         }}>
-          <div className="p-4 max-h-[85vh] overflow-y-auto">
+          <div className="p-4 max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
@@ -208,10 +208,10 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
                   <div className="absolute -inset-1 bg-gradient-to-br from-gray-900 to-black rounded-xl blur opacity-20 -z-10"></div>
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-gray-900 tracking-tight">
+                  <h2 className="text-lg xs:text-xl font-bold text-gray-900 tracking-tight">
                     Contacto de Emergencia
                   </h2>
-                  <p className="text-base text-gray-600 font-medium">
+                  <p className="text-sm xs:text-base text-gray-600 font-medium">
                     Paso 3 de 4 - Información de contacto
                   </p>
                 </div>

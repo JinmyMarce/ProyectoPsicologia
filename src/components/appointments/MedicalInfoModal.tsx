@@ -340,10 +340,10 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
                   <div className="absolute -inset-1 bg-gradient-to-br from-gray-900 to-black rounded-xl sm:rounded-2xl blur opacity-20 -z-10"></div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-lg xs:text-xl sm:text-2xl font-black text-gray-900 tracking-tight truncate">
+                  <h2 className="text-lg xs:text-xl font-bold text-gray-900 tracking-tight truncate">
                     Información Médica
                   </h2>
-                  <p className="text-sm xs:text-base sm:text-lg text-gray-600 font-medium truncate">
+                  <p className="text-sm xs:text-base text-gray-600 font-medium truncate">
                     Paso 4 de 4 - Datos clínicos
                   </p>
                 </div>
@@ -358,38 +358,38 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
 
             {/* Resumen de selección solo para estudiantes (cuando hay fecha y hora) - Elegante */}
             {(selectedDate && selectedTime) && (
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 mb-5 border border-gray-200 shadow-sm">
-                <div className="space-y-4">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-2.5 xs:p-3 mb-4 border border-gray-200 shadow-sm">
+                <div className="space-y-2">
                   {/* Primera fila: Fecha y Horario */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500 flex-shrink-0">
-                          <CalendarCheck className="w-3 h-3 text-white" />
+                  <div className="grid grid-cols-12 gap-2">
+                    <div className="bg-white rounded-lg p-2 border border-gray-200 col-span-8 xs:col-span-9">
+                      <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                        <div className="w-4 h-4 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500 flex-shrink-0">
+                          <CalendarCheck className="w-2.5 h-2.5 text-white" />
                         </div>
-                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Fecha</span>
+                        <span className="text-[10px] xs:text-xs font-semibold text-gray-600 uppercase tracking-wide">Fecha</span>
                       </div>
-                      <p className="text-sm font-bold text-gray-800 capitalize pl-7">{formatDate(selectedDate)}</p>
+                      <p className="text-xs font-bold text-gray-800 capitalize text-center">{formatDate(selectedDate)}</p>
                     </div>
-                    <div className="bg-white rounded-lg p-3 border border-gray-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-5 h-5 rounded-md bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 flex items-center justify-center shadow-sm border border-gray-500 flex-shrink-0">
-                          <Clock3 className="w-3 h-3 text-white" />
+                    <div className="bg-white rounded-lg p-2 border border-gray-200 col-span-4 xs:col-span-3">
+                      <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                        <div className="w-4 h-4 rounded-md bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 flex items-center justify-center shadow-sm border border-gray-500 flex-shrink-0">
+                          <Clock3 className="w-2.5 h-2.5 text-white" />
                         </div>
-                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Horario</span>
+                        <span className="text-[10px] xs:text-xs font-semibold text-gray-600 uppercase tracking-wide">Horario</span>
                       </div>
-                      <p className="text-sm font-bold text-gray-800 pl-7">{selectedTime}</p>
+                      <p className="text-xs font-bold text-gray-800 text-center">{selectedTime}</p>
                     </div>
                   </div>
                   {/* Segunda fila: Paciente */}
-                  <div className="bg-white rounded-lg p-3 border border-gray-200">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-5 h-5 rounded-md bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 flex items-center justify-center shadow-sm border border-blue-500 flex-shrink-0">
-                        <User className="w-3 h-3 text-white" />
+                  <div className="bg-white rounded-lg p-2 border border-gray-200">
+                    <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                      <div className="w-4 h-4 rounded-md bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 flex items-center justify-center shadow-sm border border-blue-500 flex-shrink-0">
+                        <User className="w-2.5 h-2.5 text-white" />
                       </div>
-                      <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Paciente</span>
+                      <span className="text-[10px] xs:text-xs font-semibold text-gray-600 uppercase tracking-wide">Paciente</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-800 pl-7 truncate">{personalData?.fullName || 'N/A'}</p>
+                    <p className="text-xs font-bold text-gray-800 text-center truncate">{personalData?.fullName || 'N/A'}</p>
                   </div>
                 </div>
               </div>

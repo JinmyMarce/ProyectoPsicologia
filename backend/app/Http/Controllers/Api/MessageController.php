@@ -24,7 +24,14 @@ class MessageController extends Controller
         try {
             $user = Auth::user();
             $query = Message::where('recipient_id', $user->id)
-                           ->with(['sender']);
+                           ->with([
+                               'sender' => function($query) {
+                                   $query->select('id', 'name', 'email');
+                               },
+                               'recipient' => function($query) {
+                                   $query->select('id', 'name', 'email');
+                               }
+                           ]);
 
             // Filtros
             if ($request->has('read') && $request->read !== null) {
@@ -83,7 +90,14 @@ class MessageController extends Controller
         try {
             $user = Auth::user();
             $query = Message::where('sender_id', $user->id)
-                           ->with(['recipient']);
+                           ->with([
+                               'sender' => function($query) {
+                                   $query->select('id', 'name', 'email');
+                               },
+                               'recipient' => function($query) {
+                                   $query->select('id', 'name', 'email');
+                               }
+                           ]);
 
             // Filtros
             if ($request->has('type') && $request->type) {
@@ -142,7 +156,14 @@ class MessageController extends Controller
                                  $query->where('sender_id', $user->id)
                                        ->orWhere('recipient_id', $user->id);
                              })
-                             ->with(['sender', 'recipient'])
+                             ->with([
+                                 'sender' => function($query) {
+                                     $query->select('id', 'name', 'email');
+                                 },
+                                 'recipient' => function($query) {
+                                     $query->select('id', 'name', 'email');
+                                 }
+                             ])
                              ->first();
 
             if (!$message) {
@@ -155,6 +176,16 @@ class MessageController extends Controller
             // Marcar como leído si el usuario es el destinatario
             if ($message->recipient_id === $user->id && !$message->read) {
                 $message->markAsRead();
+                // Recargar el mensaje para obtener el read_at actualizado
+                $message->refresh();
+                $message->load([
+                    'sender' => function($query) {
+                        $query->select('id', 'name', 'email');
+                    },
+                    'recipient' => function($query) {
+                        $query->select('id', 'name', 'email');
+                    }
+                ]);
             }
 
             return response()->json([
@@ -163,6 +194,7 @@ class MessageController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Error al obtener mensaje: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener el mensaje'

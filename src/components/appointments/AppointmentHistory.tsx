@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserAppointments, cancelAppointment } from '../../services/appointments';
+import { getUserAppointments, cancelAppointment, rescheduleAppointment } from '../../services/appointments';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -22,6 +22,9 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../ui/PageHeader';
 import { useAuth } from '../../contexts/AuthContext';
+import { CancelAppointmentModal } from './CancelAppointmentModal';
+import { RescheduleAppointmentModal } from './RescheduleAppointmentModal';
+import { Edit } from 'lucide-react';
 
 interface Appointment {
   id: number;
@@ -47,7 +50,8 @@ export function AppointmentHistory() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
-  const [cancellingAppointment, setCancellingAppointment] = useState<number | null>(null);
+  const [appointmentToCancel, setAppointmentToCancel] = useState<Appointment | null>(null);
+  const [appointmentToReschedule, setAppointmentToReschedule] = useState<Appointment | null>(null);
 
   useEffect(() => {
     loadHistoryData();
@@ -74,13 +78,12 @@ export function AppointmentHistory() {
     setRefreshing(false);
   };
 
-  const handleCancelAppointment = async (appointmentId: number) => {
-    if (!confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
-      return;
-    }
+  const handleCancelClick = (appointment: Appointment) => {
+    setAppointmentToCancel(appointment);
+  };
 
+  const handleConfirmCancel = async (appointmentId: number) => {
     try {
-      setCancellingAppointment(appointmentId);
       await cancelAppointment(appointmentId);
       
       // Actualizar la lista de citas
@@ -92,11 +95,23 @@ export function AppointmentHistory() {
         )
       );
       setError('');
+      setAppointmentToCancel(null);
     } catch (error: any) {
-      setError('Error al cancelar la cita');
-      console.error('Error cancelling appointment:', error);
-    } finally {
-      setCancellingAppointment(null);
+      throw error; // El modal manejará el error
+    }
+  };
+
+  const handleRescheduleClick = (appointment: Appointment) => {
+    setAppointmentToReschedule(appointment);
+  };
+
+  const handleConfirmReschedule = async (appointmentId: number, newDate: string, newTime: string) => {
+    try {
+      await rescheduleAppointment(appointmentId, newDate, newTime);
+      await loadHistoryData(); // Recargar citas
+      setAppointmentToReschedule(null);
+    } catch (error: any) {
+      throw error; // El modal manejará el error
     }
   };
 
@@ -382,6 +397,24 @@ export function AppointmentHistory() {
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {getStatusBadge(appointment.status)}
+                    {appointment.status === 'pending' && (
+                      <button
+                        onClick={() => handleCancelClick(appointment)}
+                        title="Cancelar cita"
+                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all border border-transparent hover:border-red-200"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                    {appointment.status === 'confirmed' && (
+                      <button
+                        onClick={() => handleRescheduleClick(appointment)}
+                        title="Reprogramar cita"
+                        className="p-2 text-violet-600 hover:text-violet-700 hover:bg-violet-50 rounded-lg transition-all border border-transparent hover:border-violet-200"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -465,17 +498,30 @@ export function AppointmentHistory() {
             </div>
 
             <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-200">
-              {(selectedAppointment.status === 'pending' || selectedAppointment.status === 'confirmed') && (
+              {selectedAppointment.status === 'pending' && (
                 <Button
                   variant="outline"
                   size="sm"
                   className="text-red-600 hover:bg-red-50 border-red-200"
                   onClick={() => {
-                    handleCancelAppointment(selectedAppointment.id);
                     setShowAppointmentDetails(false);
+                    handleCancelClick(selectedAppointment);
                   }}
                 >
                   Cancelar Cita
+                </Button>
+              )}
+              {selectedAppointment.status === 'confirmed' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-violet-600 hover:bg-violet-50 border-violet-200"
+                  onClick={() => {
+                    setShowAppointmentDetails(false);
+                    handleRescheduleClick(selectedAppointment);
+                  }}
+                >
+                  Reprogramar Cita
                 </Button>
               )}
               <Button
@@ -490,6 +536,22 @@ export function AppointmentHistory() {
           </div>
         </div>
       )}
+
+      {/* Modal de Cancelación de Cita */}
+      <CancelAppointmentModal
+        isOpen={appointmentToCancel !== null}
+        onClose={() => setAppointmentToCancel(null)}
+        appointment={appointmentToCancel}
+        onConfirm={handleConfirmCancel}
+      />
+
+      {/* Modal de Reprogramación de Cita */}
+      <RescheduleAppointmentModal
+        isOpen={appointmentToReschedule !== null}
+        onClose={() => setAppointmentToReschedule(null)}
+        appointment={appointmentToReschedule}
+        onConfirm={handleConfirmReschedule}
+      />
     </div>
   );
 }

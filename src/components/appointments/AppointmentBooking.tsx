@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { User, Clock, AlertCircle, CheckCircle, Sparkles, Info, Mail, Phone } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { User, Clock, AlertCircle, CheckCircle, Sparkles, Info, Mail, Phone, Edit, X } from 'lucide-react';
 import { getPsychologists, getUserAppointments } from '../../services/appointments';
 import { getBlockedDatesForCalendar } from '../../services/schedule';
 import { UnifiedCalendar } from '../ui/UnifiedCalendar';
@@ -8,6 +9,7 @@ import { AlertModal } from '../ui/AlertModal';
 import { holidayService, Holiday } from '../../services/holidays';
 import { localHolidayService } from '../../services/holidaysLocal';
 import { useAuth } from '../../contexts/AuthContext';
+import { getProfile } from '../../services/users';
 
 interface Psychologist {
   id: number;
@@ -49,6 +51,7 @@ export function AppointmentBooking() {
   const [psychologist, setPsychologist] = useState<Psychologist | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isFirstAppointment, setIsFirstAppointment] = useState<boolean | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDate, setModalDate] = useState('');
@@ -69,6 +72,8 @@ export function AppointmentBooking() {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [holidaysLoaded, setHolidaysLoaded] = useState(false);
   const [userAppointments, setUserAppointments] = useState<Appointment[]>([]);
+  const [userDataComplete, setUserDataComplete] = useState<boolean | null>(null);
+  const [checkingUserData, setCheckingUserData] = useState(false);
 
   const loadHolidays = async () => {
     try {
@@ -171,19 +176,74 @@ export function AppointmentBooking() {
     setAlertModal(prev => ({ ...prev, isOpen: false }));
   };
 
+  // Función para verificar si los datos del usuario están completos
+  const checkUserDataComplete = async (): Promise<boolean> => {
+    try {
+      const profile = await getProfile();
+      
+      // Verificar campos esenciales requeridos para agendar cita
+      const hasEssentialData = !!(
+        profile.dni &&
+        profile.dni.trim() !== '' &&
+        profile.phone &&
+        profile.phone.trim() !== '' &&
+        profile.address &&
+        profile.address.trim() !== '' &&
+        profile.gender &&
+        profile.gender.trim() !== '' &&
+        profile.birthdate &&
+        profile.career &&
+        profile.career.trim() !== '' &&
+        profile.semester &&
+        profile.semester.trim() !== ''
+      );
+
+      // Verificar contacto de emergencia (puede estar en tabla users o emergency_contacts)
+      const emergencyContact = profile.emergency_contact || {
+        name: profile.emergency_name,
+        phone: profile.emergency_phone,
+        relationship: profile.emergency_relationship
+      };
+
+      const hasEmergencyContact = !!(
+        emergencyContact?.name &&
+        emergencyContact.name.trim() !== '' &&
+        emergencyContact?.phone &&
+        emergencyContact.phone.trim() !== '' &&
+        emergencyContact?.relationship &&
+        emergencyContact.relationship.trim() !== ''
+      );
+
+      return hasEssentialData && hasEmergencyContact;
+    } catch (error) {
+      console.error('Error verificando datos del usuario:', error);
+      return false;
+    }
+  };
+
   const loadInitialData = async () => {
     const startTime = Date.now();
     try {
       setLoadingData(true);
       setError('');
-      // Cargar psicólogo y citas en paralelo para máxima velocidad
-      const [, appointmentsData] = await Promise.all([loadPsychologist(), loadUserAppointments()]);
+      setCheckingUserData(true);
+      
+      // Cargar psicólogo, citas y verificar datos del usuario en paralelo
+      const [, appointmentsData, isComplete] = await Promise.all([
+        loadPsychologist(),
+        loadUserAppointments(),
+        checkUserDataComplete()
+      ]);
+      
       setIsFirstAppointment(appointmentsData.length === 0);
+      setUserDataComplete(isComplete);
       // Sección de citas recientes eliminada
     } catch (error) {
       console.error('Error cargando datos iniciales:', error);
       setError('Error al cargar los datos iniciales');
+      setUserDataComplete(false);
     } finally {
+      setCheckingUserData(false);
       // Ocultar loading rápidamente, máximo 1 segundo
       const loadTime = Date.now() - startTime;
       const minLoadTime = 300; // Mínimo 300ms para mejor UX
@@ -262,14 +322,15 @@ export function AppointmentBooking() {
   };
 
   const handleAppointmentSuccess = () => {
-    setSuccess('Cita agendada exitosamente');
     setModalOpen(false);
     setModalDate('');
     loadInitialData();
-    // Auto-cerrar mensaje de éxito después de 5 segundos
+    // Mostrar notificación de éxito arriba en la pantalla
+    setSuccessMessage('Datos guardados y cita agendada');
+    // Auto-cerrar notificación después de 4 segundos
     setTimeout(() => {
-      setSuccess('');
-    }, 5000);
+      setSuccessMessage(null);
+    }, 4000);
   };
 
 
@@ -343,32 +404,20 @@ export function AppointmentBooking() {
       <div className="w-full px-2 sm:px-3 lg:px-4 -mt-4 relative z-20">
         <div className="space-y-2.5 sm:space-y-3">
 
-          {(error || success) && (
+          {error && (
             <div className="grid grid-cols-1 gap-3 sm:gap-4 animate-fade-in">
-              {error && (
-                <div className="p-4 sm:p-5 bg-gradient-to-br from-white to-red-50/50 border border-red-200/50 rounded-2xl flex items-start space-x-4 shadow-lg shadow-red-100/50 hover:shadow-xl hover:shadow-red-200/50 hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-sm">
-                  <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-red-200 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                    <AlertCircle className="w-5 h-5 text-red-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-red-800 mb-1.5">Error</h4>
-                    <p className="text-sm text-red-700 leading-relaxed">{error}</p>
-                  </div>
+              <div className="p-4 sm:p-5 bg-gradient-to-br from-white to-red-50/50 border border-red-200/50 rounded-2xl flex items-start space-x-4 shadow-lg shadow-red-100/50 hover:shadow-xl hover:shadow-red-200/50 hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-sm">
+                <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-red-200 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
                 </div>
-              )}
-              {success && (
-                <div className="p-4 sm:p-5 bg-gradient-to-br from-white to-green-50 border border-green-200 rounded-2xl flex items-start space-x-4 shadow-lg shadow-green-100 animate-fade-in backdrop-blur-sm">
-                  <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-green-800 mb-1.5">Éxito</h4>
-                    <p className="text-sm text-green-700 leading-relaxed">{success}</p>
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-bold text-red-800 mb-1.5">Error</h4>
+                  <p className="text-sm text-red-700 leading-relaxed">{error}</p>
                 </div>
-              )}
+              </div>
             </div>
           )}
+
 
           {/* Información del Psicólogo y Horario - Diseño Moderno Estilo Dashboard */}
           <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-4 sm:p-5 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300 animate-fade-in">
@@ -467,28 +516,82 @@ export function AppointmentBooking() {
             </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full">
+          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full" data-calendar-section>
             <div className="w-full lg:w-[78%] lg:px-2">
               {holidaysLoaded ? (
                 <UnifiedCalendar
                   holidays={holidays}
                   onDateSelect={(selectedDate) => {
                   const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const selectedDateNormalized = new Date(selectedDate);
+                  selectedDateNormalized.setHours(0, 0, 0, 0);
+                  
                   const dayOfWeek = selectedDate.getDay();
                   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                  const isPast = selectedDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                  const isPast = selectedDateNormalized < today;
+                  
+                  // Función para contar días hábiles (lunes a viernes)
+                  const countBusinessDays = (startDate: Date, endDate: Date): number => {
+                    let count = 0;
+                    const current = new Date(startDate);
+                    current.setHours(0, 0, 0, 0);
+                    const end = new Date(endDate);
+                    end.setHours(0, 0, 0, 0);
+                    
+                    while (current < end) {
+                      const dayOfWeek = current.getDay();
+                      // Lunes a viernes (1-5) son días hábiles
+                      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                        count++;
+                      }
+                      current.setDate(current.getDate() + 1);
+                    }
+                    return count;
+                  };
+                  
+                  // Anticipación mínima de 2 días hábiles
+                  const businessDaysDifference = countBusinessDays(today, selectedDateNormalized);
+                  const isBeforeMinDate = businessDaysDifference < 2;
+                  
+                  // Calcular la primera fecha disponible (2 días hábiles después)
+                  const getMinAvailableDate = (): Date => {
+                    let current = new Date(today);
+                    current.setHours(0, 0, 0, 0);
+                    let businessDaysCount = 0;
+                    
+                    while (businessDaysCount < 2) {
+                      current.setDate(current.getDate() + 1);
+                      const dayOfWeek = current.getDay();
+                      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                        businessDaysCount++;
+                      }
+                    }
+                    return current;
+                  };
+                  
+                  const minDate = getMinAvailableDate();
+                  
                   const twoWeeksFromNow = new Date(today);
                   twoWeeksFromNow.setDate(today.getDate() + 14);
-                  const isBeyondLimit = selectedDate > twoWeeksFromNow;
+                  const isBeyondLimit = selectedDateNormalized > twoWeeksFromNow;
 
                   if (isPast) {
                     showAlert('Fecha No Válida', 'No se pueden agendar citas en fechas pasadas.', 'warning');
                     return;
                   }
-                  if (isWeekend) {
-                    showAlert('Fin de Semana', 'No se pueden agendar citas en fines de semana.', 'info');
+                  
+                  if (isBeforeMinDate) {
+                    const minDateFormatted = minDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+                    showAlert('Anticipación Mínima', `Las citas deben agendarse mínimo 2 días hábiles antes (excluyendo sábados y domingos).\n\nLa primera fecha disponible es: ${minDateFormatted}`, 'warning');
                     return;
                   }
+                  
+                  if (isWeekend) {
+                    showAlert('Fin de Semana', 'No se pueden agendar citas en fines de semana. Por favor, selecciona un día hábil (lunes a viernes).', 'info');
+                    return;
+                  }
+                  
                   if (isBeyondLimit) {
                     showAlert('Límite Excedido', 'Solo se pueden agendar citas con hasta 2 semanas de anticipación.', 'warning');
                     return;
@@ -496,11 +599,11 @@ export function AppointmentBooking() {
 
                   const dayEvents = calendarEvents.filter((event: any) => {
                     const eventDate = new Date(event.start);
-                    return eventDate.toDateString() === selectedDate.toDateString();
+                    return eventDate.toDateString() === selectedDateNormalized.toDateString();
                   });
 
                   if (dayEvents.length > 0) {
-                    showAlert('Feriado', `Es feriado: ${dayEvents[0].title}.`, 'info');
+                    showAlert('Feriado', `Es feriado: ${dayEvents[0].title}.\n\nPor favor, selecciona un día hábil.`, 'info');
                     return;
                   }
 
@@ -510,7 +613,29 @@ export function AppointmentBooking() {
                     return;
                   }
 
-                  // Validar si ya tiene una cita en la semana seleccionada
+                  // Calcular semanas (semana 1: días 2+ desde hoy, semana 2: días 9+ desde hoy)
+                  // Nota: La anticipación mínima es de 2 días hábiles, pero usamos días calendario para las semanas
+                  const daysFromToday = Math.floor((selectedDateNormalized.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  const selectedWeek = daysFromToday >= 2 && daysFromToday <= 8 ? 1 : (daysFromToday >= 9 && daysFromToday <= 15 ? 2 : 0);
+                  
+                  // Calcular rangos de semanas (respetando anticipación mínima de 2 días hábiles)
+                  const week1Start = new Date(today);
+                  week1Start.setDate(today.getDate() + 2); // Aproximación: anticipación mínima de 2 días hábiles
+                  week1Start.setHours(0, 0, 0, 0);
+                  
+                  const week1End = new Date(today);
+                  week1End.setDate(today.getDate() + 8);
+                  week1End.setHours(23, 59, 59, 999);
+                  
+                  const week2Start = new Date(today);
+                  week2Start.setDate(today.getDate() + 9);
+                  week2Start.setHours(0, 0, 0, 0);
+                  
+                  const week2End = new Date(today);
+                  week2End.setDate(today.getDate() + 15);
+                  week2End.setHours(23, 59, 59, 999);
+                  
+                  // Verificar si tiene cita en la semana seleccionada
                   const selectedWeekStart = new Date(selectedDate);
                   selectedWeekStart.setDate(selectedDate.getDate() - selectedDate.getDay() + 1);
                   selectedWeekStart.setHours(0, 0, 0, 0);
@@ -528,6 +653,20 @@ export function AppointmentBooking() {
                   if (hasAppointmentInSelectedWeek) {
                     showAlert('Límite de Citas Semanal', 'Solo puedes agendar una cita por semana.\n\nYa tienes una cita agendada en esta semana. Por favor, selecciona otra semana para agendar una nueva cita.', 'warning');
                     return;
+                  }
+                  
+                  // Si está intentando agendar en semana 1, verificar si tiene cita en semana 2
+                  if (selectedWeek === 1) {
+                    const hasAppointmentInWeek2 = userAppointments.some(apt => {
+                      if (apt.status === 'cancelled') return false;
+                      const aptDate = new Date(apt.date);
+                      return aptDate >= week2Start && aptDate <= week2End;
+                    });
+                    
+                    if (hasAppointmentInWeek2) {
+                      showAlert('Cita Futura en Semana 2', 'No puedes agendar una cita en la semana 1 porque ya tienes una cita agendada en la semana 2. Por favor, cancela tu cita de la semana 2 primero o espera a que pase.', 'warning');
+                      return;
+                    }
                   }
 
                   setModalDate(format(selectedDate, 'yyyy-MM-dd'));
@@ -615,6 +754,31 @@ export function AppointmentBooking() {
         message={alertModal.message}
         type={alertModal.type}
       />
+
+      {/* Notificación de éxito - Similar al de enviar mensaje */}
+      {successMessage && createPortal(
+        <div className="fixed top-2 xs:top-4 right-2 xs:right-4 z-[10001] animate-fade-in w-[calc(100%-1rem)] xs:w-auto max-w-md" style={{ zIndex: 10001 }}>
+          <div className={`px-3 xs:px-4 sm:px-5 py-3 xs:py-4 rounded-xl xs:rounded-2xl shadow-2xl flex items-center gap-2 xs:gap-3 min-w-0 xs:min-w-[280px] sm:min-w-[320px] backdrop-blur-sm ${
+            successMessage.includes('Error') || successMessage.includes('error')
+              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-2 border-red-400'
+              : 'bg-gradient-to-r from-green-500 to-green-600 text-white border-2 border-green-400'
+          }`}>
+            {successMessage.includes('Error') || successMessage.includes('error') ? (
+              <AlertCircle className="w-5 h-5 xs:w-6 xs:h-6 flex-shrink-0" />
+            ) : (
+              <CheckCircle className="w-5 h-5 xs:w-6 xs:h-6 flex-shrink-0" />
+            )}
+            <span className="flex-1 font-semibold text-xs xs:text-sm leading-relaxed break-words">{successMessage}</span>
+            <button
+              onClick={() => setSuccessMessage(null)}
+              className="text-white/90 hover:text-white hover:bg-white/20 rounded-lg p-1 transition-colors flex-shrink-0"
+            >
+              <X className="w-4 h-4 xs:w-5 xs:h-5" />
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

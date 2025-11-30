@@ -99,8 +99,22 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
           {/* Lado izquierdo - Botón de menú y título */}
           <div className="flex items-center gap-2">
             <button
-              onClick={onMenuClick}
-              className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onMenuClick) {
+                  onMenuClick();
+                }
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onMenuClick) {
+                  onMenuClick();
+                }
+              }}
+              className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 active:bg-white/10 transition-colors touch-manipulation z-50 relative"
+              aria-label="Abrir menú"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -114,8 +128,11 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
               <span className="text-red-500 text-lg font-serif font-bold drop-shadow-[0_2px_4px_rgba(127,29,29,0.5)] group-hover:scale-110 transition-transform inline-block">Ψ</span>
             </button>
 
-            {/* Título móvil */}
-            <h1 className="lg:hidden text-base font-black text-white font-sans tracking-widest">
+            {/* Título móvil - clickeable para ir al dashboard */}
+            <h1 
+              onClick={() => navigate('/dashboard')}
+              className="lg:hidden text-base font-black text-white font-sans tracking-widest cursor-pointer hover:text-blue-400 transition-colors active:scale-95"
+            >
               SAPTA
             </h1>
           </div>

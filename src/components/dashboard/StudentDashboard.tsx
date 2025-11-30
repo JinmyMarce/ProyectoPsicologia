@@ -22,8 +22,11 @@ import { QuickTestModal } from './QuickTestModal';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
-import { getUserAppointments, cancelAppointment } from '../../services/appointments';
+import { getUserAppointments, cancelAppointment, rescheduleAppointment } from '../../services/appointments';
 import { useNavigate } from 'react-router-dom';
+import { CancelAppointmentModal } from '../appointments/CancelAppointmentModal';
+import { RescheduleAppointmentModal } from '../appointments/RescheduleAppointmentModal';
+import { Edit } from 'lucide-react';
 
 interface Appointment {
   id: number;
@@ -49,7 +52,8 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
   const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showQuickTestModal, setShowQuickTestModal] = useState(false);
-  const [cancellingAppointment, setCancellingAppointment] = useState<number | null>(null);
+  const [appointmentToCancel, setAppointmentToCancel] = useState<Appointment | null>(null);
+  const [appointmentToReschedule, setAppointmentToReschedule] = useState<Appointment | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -109,20 +113,24 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
     }
   };
 
-  const handleCancelAppointment = async (appointmentId: number) => {
-    if (!confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
-      return;
-    }
+  const handleCancelClick = (appointment: Appointment) => {
+    setAppointmentToCancel(appointment);
+  };
 
-    try {
-      setCancellingAppointment(appointmentId);
-      await cancelAppointment(appointmentId);
-      await loadAppointments(); // Recargar citas
-    } catch (error) {
-      console.error('Error cancelando cita:', error);
-    } finally {
-      setCancellingAppointment(null);
-    }
+  const handleConfirmCancel = async (appointmentId: number) => {
+    await cancelAppointment(appointmentId);
+    await loadAppointments(); // Recargar citas
+    setAppointmentToCancel(null);
+  };
+
+  const handleRescheduleClick = (appointment: Appointment) => {
+    setAppointmentToReschedule(appointment);
+  };
+
+  const handleConfirmReschedule = async (appointmentId: number, newDate: string, newTime: string) => {
+    await rescheduleAppointment(appointmentId, newDate, newTime);
+    await loadAppointments(); // Recargar citas
+    setAppointmentToReschedule(null);
   };
 
   const handleViewAppointmentDetails = (appointment: Appointment) => {
@@ -177,7 +185,7 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
   const stagger3 = "delay-[300ms]";
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900">
+    <div className="min-h-screen bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900">
       {/* Header Section - Compact & Professional */}
       <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl relative overflow-hidden mx-2 sm:mx-3 mt-3 border border-white/10">
         {/* Subtle gradient overlay */}
@@ -403,7 +411,7 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
 
           {/* Sidebar - Upcoming Appointments - Neutral */}
           <div className={`lg:col-span-1 ${fadeInUp} ${stagger3}`}>
-            <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden sticky top-6 max-h-[calc(100vh-8rem)]">
+            <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden lg:sticky lg:top-6 lg:max-h-[calc(100vh-8rem)]">
               {/* Header */}
               <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
                 <h2 className="font-bold text-slate-800 flex items-center text-sm tracking-tight">
@@ -414,13 +422,13 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
                   variant="ghost"
                   size="sm"
                   className="text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl px-3 py-1.5 transition-all"
-                  onClick={() => handleNavigation('appointments')}
+                  onClick={() => handleNavigation('appointments/history')}
                 >
                   Ver todas
                 </Button>
               </div>
 
-              <div className="p-5">
+              <div className="p-5 lg:overflow-y-auto lg:max-h-[calc(100vh-16rem)]">
                 {loading ? (
                   <div className="flex flex-col items-center justify-center py-12 text-slate-400">
                     <div className="w-8 h-8 border-3 border-violet-200 border-t-violet-600 rounded-full animate-spin mb-3"></div>
@@ -495,24 +503,6 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
                             >
                               Ver Detalles
                             </Button>
-
-                            {(appointment.status === 'pending' || appointment.status === 'confirmed') && (
-                              <button
-                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-200 hover:scale-110"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCancelAppointment(appointment.id);
-                                }}
-                                disabled={cancellingAppointment === appointment.id}
-                                title="Cancelar cita"
-                              >
-                                {cancellingAppointment === appointment.id ? (
-                                  <RefreshCw className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <X className="w-4 h-4" />
-                                )}
-                              </button>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -774,18 +764,28 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
                 >
                   Cerrar
                 </Button>
-                {(selectedAppointment.status === 'pending' || selectedAppointment.status === 'confirmed') && (
+                {selectedAppointment.status === 'pending' && (
                   <Button
                     variant="outline"
                     onClick={() => {
-                      if (confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
-                        handleCancelAppointment(selectedAppointment.id);
-                        setShowAppointmentDetails(false);
-                      }
+                      setShowAppointmentDetails(false);
+                      handleCancelClick(selectedAppointment);
                     }}
                     className="bg-red-50 border-red-100 text-red-600 hover:bg-red-100 hover:border-red-200 font-bold px-6 rounded-xl"
                   >
                     Cancelar Cita
+                  </Button>
+                )}
+                {selectedAppointment.status === 'confirmed' && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowAppointmentDetails(false);
+                      handleRescheduleClick(selectedAppointment);
+                    }}
+                    className="bg-violet-50 border-violet-100 text-violet-600 hover:bg-violet-100 hover:border-violet-200 font-bold px-6 rounded-xl"
+                  >
+                    Reprogramar Cita
                   </Button>
                 )}
               </div>
@@ -797,6 +797,22 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
       <QuickTestModal
         isOpen={showQuickTestModal}
         onClose={() => setShowQuickTestModal(false)}
+      />
+
+      {/* Modal de Cancelación de Cita */}
+      <CancelAppointmentModal
+        isOpen={appointmentToCancel !== null}
+        onClose={() => setAppointmentToCancel(null)}
+        appointment={appointmentToCancel}
+        onConfirm={handleConfirmCancel}
+      />
+
+      {/* Modal de Reprogramación de Cita */}
+      <RescheduleAppointmentModal
+        isOpen={appointmentToReschedule !== null}
+        onClose={() => setAppointmentToReschedule(null)}
+        appointment={appointmentToReschedule}
+        onConfirm={handleConfirmReschedule}
       />
     </div >
   );

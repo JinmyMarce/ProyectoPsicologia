@@ -118,11 +118,13 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
           contain: 'layout style paint'
         };
         
-        // Asignar posición vertical
-        if (position === 'top') {
+        // Asignar posición vertical - Si openDirection es 'top', forzar hacia arriba
+        if (position === 'top' || openDirection === 'top') {
           style.bottom = `${viewportHeight - rect.top + 4}px`;
+          style.top = 'auto';
         } else {
           style.top = `${rect.bottom + 4}px`;
+          style.bottom = 'auto';
         }
         
         setDropdownPosition(position);
@@ -135,6 +137,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         
         let position: 'top' | 'bottom' = 'bottom';
         
+        // Forzar dirección si está especificada
         if (openDirection === 'top') {
           position = 'top';
         } else if (openDirection === 'bottom') {
@@ -149,13 +152,26 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         }
         
         setDropdownPosition(position);
-        setDropdownStyle({
+        const style: React.CSSProperties = {
           position: 'absolute',
           left: 0,
           right: 0,
           width: '100%',
           zIndex: 1000
-        });
+        };
+        
+        // Asegurar que se posicione correctamente según la dirección
+        if (position === 'top') {
+          style.bottom = '100%';
+          style.top = 'auto';
+          style.marginBottom = '4px';
+        } else {
+          style.top = '100%';
+          style.bottom = 'auto';
+          style.marginTop = '4px';
+        }
+        
+        setDropdownStyle(style);
       }
     }
   }, [isOpen, options.length, openDirection]);
@@ -286,6 +302,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
           ref={optionsRef}
           style={{
             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+            maxHeight: '240px',
             ...dropdownStyle
           }}
         >

@@ -60,6 +60,7 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [showMessagesPanel, setShowMessagesPanel] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Para cerrar el menú lateral al cambiar de página en desktop
@@ -71,6 +72,16 @@ function AppContent() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Redirigir al dashboard según el rol cuando el usuario inicia sesión
+  useEffect(() => {
+    if (!loading && user) {
+      // Si estamos en la ruta de login o en la raíz, redirigir al dashboard
+      if (location.pathname === '/login' || location.pathname === '/') {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [user, loading, navigate, location.pathname]);
 
   const handlePageChange = (page: string) => {
     if (page === 'messages') {
@@ -114,7 +125,7 @@ function AppContent() {
       <NavigationHandler onPageChange={setCurrentPage} />
 
       {/* Contenedor unificado con sidebar y contenido */}
-      <div className="flex w-full h-screen bg-gray-50">
+      <div className="flex w-full min-h-screen bg-gray-50">
         {/* Sidebar - deshabilitada cuando hay mensaje de bienvenida */}
         {!welcomeMessage && (
           <Sidebar
@@ -127,7 +138,7 @@ function AppContent() {
         )}
 
         {/* Área de contenido principal */}
-        <div className="flex-1 flex flex-col relative bg-white">
+        <div className={`flex-1 flex flex-col relative bg-white min-h-screen transition-all duration-300 ease-out ${!welcomeMessage && !isSidebarCollapsed ? 'lg:ml-72' : !welcomeMessage && isSidebarCollapsed ? 'lg:ml-20' : ''}`}>
           {/* Header - deshabilitado cuando hay mensaje de bienvenida */}
           <Header
             onMenuClick={welcomeMessage ? undefined : () => setSidebarOpen(prev => !prev)}
@@ -154,7 +165,7 @@ function AppContent() {
           )}
 
           {/* Contenido principal - deshabilitado cuando hay mensaje de bienvenida */}
-          <main className={`flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto bg-gray-50 ${welcomeMessage ? 'pointer-events-none opacity-50' : ''}`}>
+          <main className={`flex-1 p-3 sm:p-4 lg:p-6 bg-gray-50 ${welcomeMessage ? 'pointer-events-none opacity-50' : ''}`}>
             <div className="w-full h-full">
               <Routes>
                 {/* Rutas para Super Admin */}

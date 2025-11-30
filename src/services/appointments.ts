@@ -322,6 +322,26 @@ export const rejectAppointment = async (id: number, reason: string): Promise<App
   }
 };
 
+// Reprogramar cita
+export const rescheduleAppointment = async (id: number, newDate: string, newTime: string): Promise<Appointment> => {
+  try {
+    const response = await apiClient.patch(`/appointments/${id}/reschedule`, { 
+      date: newDate, 
+      time: newTime 
+    });
+    return response.data.data || response.data;
+  } catch (error: unknown) {
+    console.error('Error rescheduling appointment:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
+    }
+    throw new Error('Error al reprogramar la cita');
+  }
+};
+
 // Obtener citas pendientes (psicólogo)
 export const getPendingAppointments = async (): Promise<Appointment[]> => {
   try {

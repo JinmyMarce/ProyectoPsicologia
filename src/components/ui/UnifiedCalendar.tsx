@@ -515,27 +515,27 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
       return false;
     }
     
-    // Para HOY: verificar si ya pasó la hora límite (13:10) Y si hay 30 horas de anticipación
-    if (dayjs(dateStart).format('YYYY-MM-DD') === dayjs(todayStart).format('YYYY-MM-DD')) {
-      const currentTime = dayjs(peruTime).hour() * 60 + dayjs(peruTime).minute();
-      const cutoffTime = 13 * 60 + 10; // 13:10 en minutos
+    // Función para contar días hábiles (lunes a viernes)
+    const countBusinessDays = (start: dayjs.Dayjs, end: dayjs.Dayjs): number => {
+      let count = 0;
+      let current = start.startOf('day');
+      const endDate = end.startOf('day');
       
-      // Verificar si ya pasó la hora límite
-      if (currentTime > cutoffTime) {
-        return false; // Ya pasó la hora límite para hoy
+      while (current.isBefore(endDate)) {
+        const dayOfWeek = current.day();
+        // Lunes a viernes (1-5) son días hábiles
+        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+          count++;
+        }
+        current = current.add(1, 'day');
       }
-      
-      // Verificar si hay al menos 30 horas de anticipación
-      const currentDateTime = dayjs(peruTime);
-      const appointmentDateTime = dayjs(dateStart).hour(9).minute(0); // Asumiendo cita a las 9:00 AM
-      const hoursDifference = appointmentDateTime.diff(currentDateTime, 'hour', true);
-      
-      if (hoursDifference < 30) {
-        return false; // No hay 30 horas de anticipación para hoy
-      }
-      
-      // Si pasa ambas validaciones, HOY SÍ está disponible
-      return true;
+      return count;
+    };
+    
+    // Anticipación mínima de 2 días hábiles
+    const businessDaysDifference = countBusinessDays(todayStart, dateStart);
+    if (businessDaysDifference < 2) {
+      return false;
     }
     
     // No se puede agendar más de 2 semanas adelante
@@ -570,6 +570,59 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     }
     
     return true;
+  };
+  
+  // Función para encontrar el siguiente día hábil disponible
+  const getNextAvailableBusinessDay = (startDate: Date): Date => {
+    let currentDate = dayjs(startDate);
+    const maxAttempts = 30; // Máximo 30 días de búsqueda
+    let attempts = 0;
+    
+    while (attempts < maxAttempts) {
+      const dayOfWeek = currentDate.day();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      
+      // Verificar si es feriado
+      const isHoliday = localHolidays && localHolidays.length > 0 ? localHolidays.some(h => 
+        dayjs(h.date).format('YYYY-MM-DD') === currentDate.format('YYYY-MM-DD')
+      ) : false;
+      
+      // Verificar si está bloqueado
+      const isBlocked = blockedDates.some(blockedDate => 
+        dayjs(blockedDate).format('YYYY-MM-DD') === currentDate.format('YYYY-MM-DD')
+      ) || localBlockedDates.some(blockedDate => 
+        dayjs(blockedDate).format('YYYY-MM-DD') === currentDate.format('YYYY-MM-DD')
+      );
+      
+      // Si es día hábil, no es feriado y no está bloqueado, y cumple con la anticipación mínima
+      if (!isWeekend && !isHoliday && !isBlocked) {
+        const todayStart = dayjs(new Date().toLocaleString("en-US", {timeZone: "America/Lima"})).startOf('day');
+        // Contar días hábiles desde hoy
+        let businessDaysCount = 0;
+        let checkDate = dayjs(todayStart);
+        while (checkDate.isBefore(currentDate) || checkDate.isSame(currentDate, 'day')) {
+          const dayOfWeek = checkDate.day();
+          if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+            businessDaysCount++;
+          }
+          if (checkDate.isSame(currentDate, 'day')) {
+            break;
+          }
+          checkDate = checkDate.add(1, 'day');
+        }
+        // Anticipación mínima de 2 días hábiles
+        if (businessDaysCount >= 2) {
+          return currentDate.toDate();
+        }
+      }
+      
+      // Avanzar al siguiente día
+      currentDate = currentDate.add(1, 'day');
+      attempts++;
+    }
+    
+    // Si no se encuentra ningún día disponible, retornar la fecha original
+    return startDate;
   };
 
   // CALENDARIO COMPLETAMENTE REESCRITO DESDE CERO

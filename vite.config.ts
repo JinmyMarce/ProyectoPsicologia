@@ -13,4 +13,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  server: {
+    host: '0.0.0.0', // Escucha en todas las interfaces de red
+    port: 5173, // Puerto por defecto de Vite
+    strictPort: false, // Permite usar otro puerto si 5173 está ocupado
+  },
 });

@@ -78,7 +78,9 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
         ...prev,
         ...initialData,
         // Limpiar específicamente el teléfono si viene con +51
-        phone: initialData.phone ? (initialData.phone.replace('+51', '').replace(/\D/g, '')) : prev.phone
+        phone: initialData.phone ? (initialData.phone.replace('+51', '').replace(/\D/g, '')) : prev.phone,
+        // Normalizar estado civil a minúsculas para que coincida con las opciones del select
+        maritalStatus: initialData.maritalStatus ? initialData.maritalStatus.toLowerCase() : prev.maritalStatus
       }));
     }
   }, [initialData]);
@@ -132,6 +134,10 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
 
     if (!formData.gender) {
       newErrors.gender = 'El género es requerido';
+    }
+
+    if (!formData.maritalStatus) {
+      newErrors.maritalStatus = 'El estado civil es requerido';
     }
 
     if (!formData.address.trim()) {
@@ -231,10 +237,10 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 <div className="absolute -inset-0.5 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg blur opacity-20 -z-10"></div>
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="text-base xs:text-lg sm:text-xl font-black text-gray-900 tracking-tight truncate">
+                <h2 className="text-lg xs:text-xl font-bold text-gray-900 tracking-tight truncate">
                   Datos Personales
                 </h2>
-                <p className="text-slate-600 text-xs xs:text-sm sm:text-base font-medium truncate">
+                <p className="text-slate-600 text-sm xs:text-base font-medium truncate">
                   Completa tu información
                 </p>
               </div>
@@ -291,7 +297,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
                   <UserCheck className="w-2.5 h-2.5 text-white" />
                 </div>
-                <h3 className="text-base font-black text-gray-900 tracking-tight">
+                <h3 className="text-sm xs:text-base font-bold text-gray-900 tracking-tight">
                   Información Personal
                 </h3>
               </div>
@@ -403,7 +409,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 {/* Estado Civil */}
                 <div className="relative" style={{ overflow: 'visible' }}>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Estado Civil
+                    Estado Civil *
                   </label>
                   <CustomSelect
                     value={formData.maritalStatus}
@@ -460,7 +466,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
                   <GraduationCap className="w-2.5 h-2.5 text-white" />
                 </div>
-                <h3 className="text-base font-black text-gray-900 tracking-tight">
+                <h3 className="text-sm xs:text-base font-bold text-gray-900 tracking-tight">
                   Información Académica
                 </h3>
               </div>
@@ -527,7 +533,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                 <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500">
                   <PhoneCall className="w-2.5 h-2.5 text-white" />
                 </div>
-                <h3 className="text-base font-black text-gray-900 tracking-tight">
+                <h3 className="text-sm xs:text-base font-bold text-gray-900 tracking-tight">
                   Información de Contacto
                 </h3>
               </div>
