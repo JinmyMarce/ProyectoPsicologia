@@ -214,6 +214,22 @@ class AppointmentController extends Controller
                 return response()->json(['message' => 'Ya existe una cita para esta fecha y hora'], 409);
             }
 
+            // Validación: Cada usuario solo puede agendar una cita por semana
+            $weekStart = $appointmentDate->copy()->startOfWeek(); // Lunes de la semana
+            $weekEnd = $appointmentDate->copy()->endOfWeek(); // Domingo de la semana
+
+            $existingWeeklyAppointment = Cita::where('student_id', $user->id)
+                ->where('estado', '!=', 'cancelada')
+                ->whereBetween('fecha', [$weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d')])
+                ->first();
+
+            if ($existingWeeklyAppointment) {
+                return response()->json([
+                    'message' => 'Solo puedes agendar una cita por semana. Ya tienes una cita agendada en esta semana.',
+                    'errors' => ['date' => ['Límite de una cita por semana excedido']]
+                ], 422);
+            }
+
             // Verificar si el horario está disponible
             $conflictingAppointment = Cita::where('psychologist_id', $request->psychologist_id)
                 ->where('fecha', $request->date)
@@ -249,6 +265,7 @@ class AppointmentController extends Controller
                 'name' => $request->patient_name,
                 'birthdate' => $request->patient_birthdate,
                 'gender' => $request->patient_gender,
+                'marital_status' => $request->patient_marital_status,
                 'address' => $request->patient_address,
                 'career' => $request->patient_study_program,
                 'semester' => $request->patient_semester,

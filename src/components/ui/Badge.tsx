@@ -8,7 +8,7 @@ interface BadgeProps {
 }
 
 export function Badge({ children, variant = 'default', className }: BadgeProps) {
-  const baseClasses = 'inline-flex items-center px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 tracking-wide transform hover:scale-105';
+  const baseClasses = 'inline-flex items-center px-5 py-2 rounded-xl text-base font-bold transition-all duration-300 tracking-wide transform hover:scale-105';
   
   const getVariantStyles = (variant: string) => {
     switch (variant) {
@@ -38,9 +38,9 @@ export function Badge({ children, variant = 'default', className }: BadgeProps) 
         };
       case 'info':
         return {
-          background: 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)',
+          background: 'linear-gradient(135deg, #1e2a37 0%, #334155 100%)',
           color: 'white',
-          boxShadow: '0 2px 8px rgba(14, 165, 233, 0.3)',
+          boxShadow: '0 2px 8px rgba(30, 41, 59, 0.3)',
           textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
         };
       case 'warning':

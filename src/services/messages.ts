@@ -149,11 +149,17 @@ class MessageService {
     return response.data;
   }
 
-  // Obtener destinatarios (solo para psicólogos)
+  // Obtener destinatarios
   async getRecipients(params?: {
     search?: string;
   }): Promise<RecipientsResponse> {
     const response = await apiClient.get('/messages/recipients', { params });
+    return response.data;
+  }
+
+  // Obtener mi psicólogo asignado (solo para estudiantes)
+  async getMyPsychologist(): Promise<{ success: boolean; data: Recipient | null; message?: string }> {
+    const response = await apiClient.get('/messages/my-psychologist');
     return response.data;
   }
 

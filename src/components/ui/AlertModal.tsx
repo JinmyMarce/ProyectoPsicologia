@@ -27,7 +27,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
       case 'success':
         return <CheckCircle className={`${iconClass} text-emerald-600 drop-shadow-md`} strokeWidth={2.5} />;
       case 'warning':
-        return <AlertTriangle className={`${iconClass} text-amber-600 drop-shadow-md`} strokeWidth={2.5} />;
+        return <AlertTriangle className={`${iconClass} text-orange-600 drop-shadow-md`} strokeWidth={2.5} />;
       case 'error':
         return <AlertCircle className={`${iconClass} text-red-600 drop-shadow-md`} strokeWidth={2.5} />;
       default:
@@ -51,15 +51,15 @@ export const AlertModal: React.FC<AlertModalProps> = ({
         };
       case 'warning':
         return {
-          iconBg: 'bg-amber-50',
-          iconBorder: 'border-amber-200',
-          iconColor: 'text-amber-600',
-          headerBg: 'bg-gradient-to-r from-amber-50 to-amber-100',
-          border: 'border-amber-300',
-          title: 'text-amber-900',
-          message: 'text-slate-700',
-          button: 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg shadow-amber-500/30',
-          glow: 'shadow-amber-500/20'
+          iconBg: 'bg-gradient-to-br from-orange-100 to-amber-100',
+          iconBorder: 'border-orange-300',
+          iconColor: 'text-orange-700',
+          headerBg: 'bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100',
+          border: 'border-orange-400',
+          title: 'text-orange-900',
+          message: 'text-slate-800',
+          button: 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:via-amber-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/40',
+          glow: 'shadow-orange-500/30'
         };
       case 'error':
         return {
@@ -99,13 +99,24 @@ export const AlertModal: React.FC<AlertModalProps> = ({
       />
       
       {/* Modal Moderno y Elegante */}
-      <div className={`relative bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] max-w-[320px] xs:max-w-[360px] w-full transform transition-all duration-300 ease-out border-2 ${colors.border} ${colors.glow} animate-in fade-in zoom-in-95 backdrop-blur-sm`}>
+      <div className={`relative bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3),0_0_40px_${type === 'warning' ? 'rgba(251,146,60,0.3)' : 'rgba(0,0,0,0.1)'}] max-w-[320px] xs:max-w-[380px] w-full transform transition-all duration-300 ease-out border-2 ${colors.border} ${colors.glow} animate-in fade-in zoom-in-95 backdrop-blur-sm overflow-hidden`}>
+        {/* Efecto de brillo sutil para warning */}
+        {type === 'warning' && (
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent animate-pulse"></div>
+        )}
         {/* Header Moderno */}
-        <div className={`${colors.headerBg} border-b-2 ${colors.border} rounded-t-3xl p-5 xs:p-6`}>
-          {/* Patrón decorativo sutil */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-t-3xl">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-current to-transparent rounded-full blur-2xl -mr-16 -mt-16"></div>
-          </div>
+        <div className={`${colors.headerBg} border-b-2 ${colors.border} rounded-t-3xl p-5 xs:p-6 relative overflow-hidden`}>
+          {/* Patrón decorativo mejorado para warning */}
+          {type === 'warning' ? (
+            <>
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-orange-200/40 to-amber-200/30 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-amber-200/30 to-orange-200/20 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none"></div>
+            </>
+          ) : (
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-t-3xl">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-current to-transparent rounded-full blur-2xl -mr-16 -mt-16"></div>
+            </div>
+          )}
           
           <div className="flex flex-col items-center gap-3.5 xs:gap-4 relative z-10">
             {showIcon && (
@@ -120,7 +131,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
             </h3>
             <div className={`h-1 w-14 rounded-full ${
               type === 'success' ? 'bg-emerald-400' :
-              type === 'warning' ? 'bg-amber-400' :
+              type === 'warning' ? 'bg-gradient-to-r from-orange-400 to-amber-400' :
               type === 'error' ? 'bg-red-400' :
               'bg-blue-400'
             }`}></div>
@@ -134,7 +145,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
             <div className="absolute inset-0 bg-gradient-to-br from-slate-400 to-transparent"></div>
           </div>
           
-          <p className={`text-sm xs:text-base leading-relaxed ${colors.message} mb-5 xs:mb-6 text-center font-semibold relative z-10`}>
+          <p className={`text-sm xs:text-base leading-relaxed ${colors.message} mb-5 xs:mb-6 text-center font-medium relative z-10 whitespace-pre-line`}>
             {message}
           </p>
           

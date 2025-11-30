@@ -6,6 +6,7 @@ import { UnifiedCalendar } from '../ui/UnifiedCalendar';
 import { MultiStepAppointmentModal } from './MultiStepAppointmentModal';
 import { AlertModal } from '../ui/AlertModal';
 import { holidayService, Holiday } from '../../services/holidays';
+import { localHolidayService } from '../../services/holidaysLocal';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface Psychologist {
@@ -66,14 +67,37 @@ export function AppointmentBooking() {
   });
 
   const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [holidaysLoaded, setHolidaysLoaded] = useState(false);
+  const [userAppointments, setUserAppointments] = useState<Appointment[]>([]);
 
   const loadHolidays = async () => {
     try {
       const currentYear = new Date().getFullYear();
-      const holidaysData = await holidayService.getHolidays(currentYear);
+      // Usar servicio local primero para máxima velocidad (síncrono, sin red)
+      let holidaysData: Holiday[] = [];
+      
+      try {
+        holidaysData = await localHolidayService.getHolidays(currentYear, 'Lima');
+        // Si el servicio local devuelve datos, usarlos inmediatamente
+        if (holidaysData.length > 0) {
+          setHolidays(holidaysData);
+          setHolidaysLoaded(true);
+          return;
+        }
+      } catch (localError) {
+        // Si falla el servicio local, continuar con el servicio remoto
+        console.log('Servicio local no disponible, usando remoto');
+      }
+      
+      // Fallback al servicio remoto solo si es necesario
+      holidaysData = await holidayService.getHolidays(currentYear, 'Lima');
       setHolidays(holidaysData);
+      setHolidaysLoaded(true);
     } catch (error) {
       console.error('Error loading holidays:', error);
+      // En caso de error, usar array vacío para no bloquear la interfaz
+      setHolidays([]);
+      setHolidaysLoaded(true);
     }
   };
 
@@ -102,16 +126,28 @@ export function AppointmentBooking() {
     }))
   ];
 
+  // Cargar feriados PRIMERO, antes que todo
   useEffect(() => {
-    loadInitialData();
     loadHolidays();
   }, []);
+
+  // Cargar datos iniciales después de que los feriados estén listos o en paralelo
+  useEffect(() => {
+    // Si los feriados ya están cargados, cargar datos iniciales
+    // Si no, esperar un poco y cargar de todos modos para no bloquear
+    const timer = setTimeout(() => {
+      loadInitialData();
+    }, holidaysLoaded ? 0 : 100); // Si feriados ya cargados, cargar inmediatamente, sino esperar 100ms
+    
+    return () => clearTimeout(timer);
+  }, [holidaysLoaded]);
 
   useEffect(() => {
     if (psychologist?.id) {
       loadBlockedDates();
     }
   }, [psychologist?.id]);
+
 
   useEffect(() => {
     const handleScheduleBlocked = () => {
@@ -136,9 +172,11 @@ export function AppointmentBooking() {
   };
 
   const loadInitialData = async () => {
+    const startTime = Date.now();
     try {
       setLoadingData(true);
       setError('');
+      // Cargar psicólogo y citas en paralelo para máxima velocidad
       const [, appointmentsData] = await Promise.all([loadPsychologist(), loadUserAppointments()]);
       setIsFirstAppointment(appointmentsData.length === 0);
       // Sección de citas recientes eliminada
@@ -146,7 +184,13 @@ export function AppointmentBooking() {
       console.error('Error cargando datos iniciales:', error);
       setError('Error al cargar los datos iniciales');
     } finally {
-      setLoadingData(false);
+      // Ocultar loading rápidamente, máximo 1 segundo
+      const loadTime = Date.now() - startTime;
+      const minLoadTime = 300; // Mínimo 300ms para mejor UX
+      const remainingTime = Math.max(0, minLoadTime - loadTime);
+      setTimeout(() => {
+        setLoadingData(false);
+      }, remainingTime);
     }
   };
 
@@ -208,6 +252,8 @@ export function AppointmentBooking() {
   const loadUserAppointments = async () => {
     try {
       const appointments = await getUserAppointments();
+      setUserAppointments(appointments);
+      setIsFirstAppointment(appointments.length === 0);
       return appointments;
     } catch (error) {
       console.error('Error cargando citas del usuario:', error);
@@ -237,18 +283,18 @@ export function AppointmentBooking() {
     return (
       <div className="h-screen overflow-hidden bg-gray-50 font-sans flex items-center justify-center">
         <div className="text-center">
-          <div className="relative w-20 h-20 mx-auto mb-6">
-            <div className="absolute inset-0 border-4 border-slate-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-violet-600 rounded-full border-t-transparent animate-spin"></div>
+          <div className="relative w-12 h-12 mx-auto mb-4">
+            <div className="absolute inset-0 border-2 border-slate-200 rounded-full"></div>
+            <div className="absolute inset-0 border-2 border-slate-600 rounded-full border-t-transparent animate-spin"></div>
           </div>
-          <p className="text-lg text-slate-600 font-bold animate-pulse">Cargando sistema...</p>
+          <p className="text-sm text-slate-600 font-semibold animate-pulse">Cargando sistema...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 font-sans selection:bg-violet-200 selection:text-violet-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 font-sans selection:bg-violet-200 selection:text-violet-900">
       {/* Header Section - Compact & Professional */}
       <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl relative overflow-hidden mx-2 sm:mx-3 mt-3 border border-white/10">
         {/* Subtle gradient overlay */}
@@ -296,6 +342,7 @@ export function AppointmentBooking() {
 
       <div className="w-full px-2 sm:px-3 lg:px-4 -mt-4 relative z-20">
         <div className="space-y-2.5 sm:space-y-3">
+
           {(error || success) && (
             <div className="grid grid-cols-1 gap-3 sm:gap-4 animate-fade-in">
               {error && (
@@ -343,9 +390,6 @@ export function AppointmentBooking() {
                   {/* Información de texto al estilo dashboard */}
                   <div className="min-w-0 flex-1 space-y-2 relative z-10">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[9px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        Psicólogo
-                      </span>
                       <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight">
                         {psychologist.name}
                       </h3>
@@ -366,11 +410,14 @@ export function AppointmentBooking() {
                     
                     {/* Información de contacto al estilo dashboard */}
                     <div className="flex flex-wrap items-center gap-2 mt-2">
-                      {user?.email && (
+                      {psychologist.email && (
                         <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-50 border border-slate-200/60">
+                          <span className="text-[9px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                            Psicólogo
+                          </span>
                           <Mail className="w-3 h-3 text-slate-500" />
                           <span className="text-[10px] text-slate-600 font-medium truncate max-w-[150px]">
-                            {user.email}
+                            {psychologist.email}
                           </span>
                         </div>
                       )}
@@ -422,8 +469,10 @@ export function AppointmentBooking() {
 
           <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full">
             <div className="w-full lg:w-[78%] lg:px-2">
-              <UnifiedCalendar
-                onDateSelect={(selectedDate) => {
+              {holidaysLoaded ? (
+                <UnifiedCalendar
+                  holidays={holidays}
+                  onDateSelect={(selectedDate) => {
                   const today = new Date();
                   const dayOfWeek = selectedDate.getDay();
                   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
@@ -461,6 +510,26 @@ export function AppointmentBooking() {
                     return;
                   }
 
+                  // Validar si ya tiene una cita en la semana seleccionada
+                  const selectedWeekStart = new Date(selectedDate);
+                  selectedWeekStart.setDate(selectedDate.getDate() - selectedDate.getDay() + 1);
+                  selectedWeekStart.setHours(0, 0, 0, 0);
+                  
+                  const selectedWeekEnd = new Date(selectedWeekStart);
+                  selectedWeekEnd.setDate(selectedWeekStart.getDate() + 6);
+                  selectedWeekEnd.setHours(23, 59, 59, 999);
+                  
+                  const hasAppointmentInSelectedWeek = userAppointments.some(apt => {
+                    if (apt.status === 'cancelled') return false;
+                    const aptDate = new Date(apt.date);
+                    return aptDate >= selectedWeekStart && aptDate <= selectedWeekEnd;
+                  });
+                  
+                  if (hasAppointmentInSelectedWeek) {
+                    showAlert('Límite de Citas Semanal', 'Solo puedes agendar una cita por semana.\n\nYa tienes una cita agendada en esta semana. Por favor, selecciona otra semana para agendar una nueva cita.', 'warning');
+                    return;
+                  }
+
                   setModalDate(format(selectedDate, 'yyyy-MM-dd'));
                   setModalOpen(true);
                 }}
@@ -468,7 +537,18 @@ export function AppointmentBooking() {
                 showLegend={false}
                 showNavigation={true}
                 className="w-full"
-              />
+                />
+              ) : (
+                <div className="flex items-center justify-center h-96 bg-white rounded-xl border border-slate-200">
+                  <div className="text-center">
+                    <div className="relative w-8 h-8 mx-auto mb-2">
+                      <div className="absolute inset-0 border-2 border-slate-200 rounded-full"></div>
+                      <div className="absolute inset-0 border-2 border-slate-600 rounded-full border-t-transparent animate-spin"></div>
+                    </div>
+                    <p className="text-xs text-slate-600">Cargando calendario...</p>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Leyenda del Calendario - Al lado en desktop, abajo en móvil */}

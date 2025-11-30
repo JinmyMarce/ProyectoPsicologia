@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\User;
+use App\Models\Cita;
+use App\Models\PsychologicalSession;
+use App\Models\Derivation;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -206,6 +209,92 @@ class MessageController extends Controller
                 ], 404);
             }
 
+            // VALIDACIONES DE RESTRICCIONES POR ROL
+            
+            // Admin/Super Admin: Puede comunicarse con cualquiera
+            if (in_array($user->role, ['admin', 'super_admin'])) {
+                // Los admins pueden comunicarse con cualquier usuario
+            }
+            // Estudiante: Solo puede enviar mensajes a su psicólogo asignado
+            elseif ($user->role === 'student') {
+                // Verificar que el destinatario es un psicólogo
+                if ($recipient->role !== 'psychologist') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Solo puedes enviar mensajes a tu psicólogo asignado'
+                    ], 403);
+                }
+
+                // Verificar que el estudiante tiene al menos una cita o sesión con este psicólogo
+                $hasRelationship = Cita::where('student_id', $user->id)
+                    ->where('psychologist_id', $recipient->id)
+                    ->where('estado', '!=', 'cancelada')
+                    ->exists();
+
+                if (!$hasRelationship) {
+                    $hasSessionRelationship = PsychologicalSession::where('patient_id', $user->id)
+                        ->where('psychologist_id', $recipient->id)
+                        ->exists();
+
+                    if (!$hasSessionRelationship) {
+                        $hasDerivationRelationship = Derivation::where('student_id', $user->id)
+                            ->where('psychologist_id', $recipient->id)
+                            ->where('status', '!=', 'cancelled')
+                            ->exists();
+
+                        if (!$hasDerivationRelationship) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Solo puedes enviar mensajes a tu psicólogo asignado. No tienes citas, sesiones o derivaciones activas con este psicólogo.'
+                            ], 403);
+                        }
+                    }
+                }
+            }
+            // Psicólogo: Solo puede enviar mensajes a sus pacientes asignados
+            elseif ($user->role === 'psychologist') {
+                // Verificar que el destinatario es un estudiante
+                if ($recipient->role !== 'student') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Solo puedes enviar mensajes a tus pacientes asignados'
+                    ], 403);
+                }
+
+                // Verificar que el psicólogo tiene al menos una cita o sesión con este estudiante
+                $hasRelationship = Cita::where('psychologist_id', $user->id)
+                    ->where('student_id', $recipient->id)
+                    ->where('estado', '!=', 'cancelada')
+                    ->exists();
+
+                if (!$hasRelationship) {
+                    $hasSessionRelationship = PsychologicalSession::where('psychologist_id', $user->id)
+                        ->where('patient_id', $recipient->id)
+                        ->exists();
+
+                    if (!$hasSessionRelationship) {
+                        $hasDerivationRelationship = Derivation::where('psychologist_id', $user->id)
+                            ->where('student_id', $recipient->id)
+                            ->where('status', '!=', 'cancelled')
+                            ->exists();
+
+                        if (!$hasDerivationRelationship) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Solo puedes enviar mensajes a tus pacientes asignados. No tienes citas, sesiones o derivaciones activas con este estudiante.'
+                            ], 403);
+                        }
+                    }
+                }
+            }
+            // Otros roles no tienen permiso para enviar mensajes
+            else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes permisos para enviar mensajes'
+                ], 403);
+            }
+
             // Crear el mensaje
             $message = Message::create([
                 'sender_id' => $user->id,
@@ -349,6 +438,88 @@ class MessageController extends Controller
                 ], 404);
             }
 
+            // VALIDACIONES DE RESTRICCIONES POR ROL
+            // Admin/Super Admin: Puede ver cualquier conversación
+            if (!in_array($user->role, ['admin', 'super_admin'])) {
+                // Estudiante: Solo puede ver conversaciones con su psicólogo
+                if ($user->role === 'student') {
+                    if ($otherUser->role !== 'psychologist') {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Solo puedes ver conversaciones con tu psicólogo asignado'
+                        ], 403);
+                    }
+
+                    // Verificar relación
+                    $hasRelationship = Cita::where('student_id', $user->id)
+                        ->where('psychologist_id', $otherUser->id)
+                        ->where('estado', '!=', 'cancelada')
+                        ->exists();
+
+                    if (!$hasRelationship) {
+                        $hasRelationship = PsychologicalSession::where('patient_id', $user->id)
+                            ->where('psychologist_id', $otherUser->id)
+                            ->exists();
+
+                        if (!$hasRelationship) {
+                            $hasRelationship = Derivation::where('student_id', $user->id)
+                                ->where('psychologist_id', $otherUser->id)
+                                ->where('status', '!=', 'cancelled')
+                                ->exists();
+
+                            if (!$hasRelationship) {
+                                return response()->json([
+                                    'success' => false,
+                                    'message' => 'No tienes una relación activa con este psicólogo'
+                                ], 403);
+                            }
+                        }
+                    }
+                }
+                // Psicólogo: Solo puede ver conversaciones con sus pacientes
+                elseif ($user->role === 'psychologist') {
+                    if ($otherUser->role !== 'student') {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Solo puedes ver conversaciones con tus pacientes asignados'
+                        ], 403);
+                    }
+
+                    // Verificar relación
+                    $hasRelationship = Cita::where('psychologist_id', $user->id)
+                        ->where('student_id', $otherUser->id)
+                        ->where('estado', '!=', 'cancelada')
+                        ->exists();
+
+                    if (!$hasRelationship) {
+                        $hasRelationship = PsychologicalSession::where('psychologist_id', $user->id)
+                            ->where('patient_id', $otherUser->id)
+                            ->exists();
+
+                        if (!$hasRelationship) {
+                            $hasRelationship = Derivation::where('psychologist_id', $user->id)
+                                ->where('student_id', $otherUser->id)
+                                ->where('status', '!=', 'cancelled')
+                                ->exists();
+
+                            if (!$hasRelationship) {
+                                return response()->json([
+                                    'success' => false,
+                                    'message' => 'No tienes una relación activa con este estudiante'
+                                ], 403);
+                            }
+                        }
+                    }
+                }
+                // Otros roles no tienen permiso
+                else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No tienes permisos para ver esta conversación'
+                    ], 403);
+                }
+            }
+
             $query = Message::conversation($user->id, $userId)
                            ->with(['sender', 'recipient'])
                            ->orderBy('created_at', 'asc');
@@ -421,47 +592,228 @@ class MessageController extends Controller
     }
 
     /**
-     * Obtener usuarios para enviar mensajes (para psicólogos)
+     * Obtener usuarios para enviar mensajes
      */
     public function getRecipients(Request $request): JsonResponse
     {
         try {
             $user = Auth::user();
             
-            // Solo psicólogos pueden obtener lista de destinatarios
-            if ($user->role !== 'psychologist') {
+            // Admin/Super Admin: Puede ver todos los usuarios
+            if (in_array($user->role, ['admin', 'super_admin'])) {
+                $query = User::where('id', '!=', $user->id)
+                            ->where('active', true);
+
+                // Búsqueda por nombre o email
+                if ($request->has('search') && $request->search) {
+                    $query->where(function($q) use ($request) {
+                        $q->where('name', 'like', '%' . $request->search . '%')
+                          ->orWhere('email', 'like', '%' . $request->search . '%')
+                          ->orWhere('dni', 'like', '%' . $request->search . '%');
+                    });
+                }
+
+                $recipients = $query->select('id', 'name', 'email', 'dni', 'role')
+                                   ->orderBy('name')
+                                   ->limit(50)
+                                   ->get();
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $recipients
+                ]);
+            }
+            // Psicólogo: Solo puede ver sus pacientes asignados
+            elseif ($user->role === 'psychologist') {
+                // Obtener IDs de estudiantes que tienen citas, sesiones o derivaciones con este psicólogo
+                $studentIdsFromCitas = Cita::where('psychologist_id', $user->id)
+                    ->where('estado', '!=', 'cancelada')
+                    ->distinct()
+                    ->pluck('student_id');
+
+                $studentIdsFromSessions = PsychologicalSession::where('psychologist_id', $user->id)
+                    ->distinct()
+                    ->pluck('patient_id');
+
+                $studentIdsFromDerivations = Derivation::where('psychologist_id', $user->id)
+                    ->where('status', '!=', 'cancelled')
+                    ->distinct()
+                    ->pluck('student_id');
+
+                $allStudentIds = $studentIdsFromCitas
+                    ->merge($studentIdsFromSessions)
+                    ->merge($studentIdsFromDerivations)
+                    ->unique();
+
+                $query = User::whereIn('id', $allStudentIds)
+                            ->where('role', 'student')
+                            ->where('active', true);
+
+                // Búsqueda por nombre o email
+                if ($request->has('search') && $request->search) {
+                    $query->where(function($q) use ($request) {
+                        $q->where('name', 'like', '%' . $request->search . '%')
+                          ->orWhere('email', 'like', '%' . $request->search . '%')
+                          ->orWhere('dni', 'like', '%' . $request->search . '%');
+                    });
+                }
+
+                $recipients = $query->select('id', 'name', 'email', 'dni')
+                                   ->orderBy('name')
+                                   ->limit(50)
+                                   ->get();
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $recipients
+                ]);
+            }
+            // Estudiante: Solo puede ver su psicólogo asignado
+            elseif ($user->role === 'student') {
+                // Obtener el psicólogo de las citas, sesiones o derivaciones más recientes
+                $psychologistIdFromCita = Cita::where('student_id', $user->id)
+                    ->where('estado', '!=', 'cancelada')
+                    ->orderBy('created_at', 'desc')
+                    ->value('psychologist_id');
+
+                $psychologistIdFromSession = PsychologicalSession::where('patient_id', $user->id)
+                    ->orderBy('created_at', 'desc')
+                    ->value('psychologist_id');
+
+                $psychologistIdFromDerivation = Derivation::where('student_id', $user->id)
+                    ->where('status', '!=', 'cancelled')
+                    ->orderBy('created_at', 'desc')
+                    ->value('psychologist_id');
+
+                $psychologistIds = collect([
+                    $psychologistIdFromCita,
+                    $psychologistIdFromSession,
+                    $psychologistIdFromDerivation
+                ])->filter()->unique();
+
+                if ($psychologistIds->isEmpty()) {
+                    return response()->json([
+                        'success' => true,
+                        'data' => []
+                    ]);
+                }
+
+                $query = User::whereIn('id', $psychologistIds)
+                            ->where('role', 'psychologist')
+                            ->where('active', true);
+
+                // Búsqueda por nombre o email
+                if ($request->has('search') && $request->search) {
+                    $query->where(function($q) use ($request) {
+                        $q->where('name', 'like', '%' . $request->search . '%')
+                          ->orWhere('email', 'like', '%' . $request->search . '%');
+                    });
+                }
+
+                $recipients = $query->select('id', 'name', 'email')
+                                   ->orderBy('name')
+                                   ->get();
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $recipients
+                ]);
+            }
+            // Otros roles no tienen permiso
+            else {
                 return response()->json([
                     'success' => false,
                     'message' => 'No tienes permisos para realizar esta acción'
                 ], 403);
             }
 
-            $query = User::where('role', 'student')
-                        ->where('active', true);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener destinatarios: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
-            // Búsqueda por nombre o email
-            if ($request->has('search') && $request->search) {
-                $query->where(function($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->search . '%')
-                      ->orWhere('email', 'like', '%' . $request->search . '%')
-                      ->orWhere('dni', 'like', '%' . $request->search . '%');
-                });
+    /**
+     * Obtener mi psicólogo asignado (solo para estudiantes)
+     */
+    public function getMyPsychologist(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            
+            if ($user->role !== 'student') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Solo los estudiantes pueden usar este endpoint'
+                ], 403);
             }
 
-            $recipients = $query->select('id', 'name', 'email', 'dni')
-                               ->orderBy('name')
-                               ->limit(20)
-                               ->get();
+            // Obtener el psicólogo de la cita más reciente
+            $latestCita = Cita::where('student_id', $user->id)
+                ->where('estado', '!=', 'cancelada')
+                ->orderBy('created_at', 'desc')
+                ->with('psychologist')
+                ->first();
+
+            if ($latestCita && $latestCita->psychologist) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'id' => $latestCita->psychologist->id,
+                        'name' => $latestCita->psychologist->name,
+                        'email' => $latestCita->psychologist->email
+                    ]
+                ]);
+            }
+
+            // Si no hay cita, buscar en sesiones
+            $latestSession = PsychologicalSession::where('patient_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->with('psychologist')
+                ->first();
+
+            if ($latestSession && $latestSession->psychologist) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'id' => $latestSession->psychologist->id,
+                        'name' => $latestSession->psychologist->name,
+                        'email' => $latestSession->psychologist->email
+                    ]
+                ]);
+            }
+
+            // Si no hay sesión, buscar en derivaciones
+            $latestDerivation = Derivation::where('student_id', $user->id)
+                ->where('status', '!=', 'cancelled')
+                ->whereNotNull('psychologist_id')
+                ->orderBy('created_at', 'desc')
+                ->with('psychologist')
+                ->first();
+
+            if ($latestDerivation && $latestDerivation->psychologist) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'id' => $latestDerivation->psychologist->id,
+                        'name' => $latestDerivation->psychologist->name,
+                        'email' => $latestDerivation->psychologist->email
+                    ]
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
-                'data' => $recipients
+                'data' => null,
+                'message' => 'No tienes un psicólogo asignado aún'
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener destinatarios'
+                'message' => 'Error al obtener tu psicólogo asignado: ' . $e->getMessage()
             ], 500);
         }
     }

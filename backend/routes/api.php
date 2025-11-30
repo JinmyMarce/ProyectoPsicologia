@@ -282,6 +282,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas para mensajes
     Route::prefix('messages')->group(function () {
+        Route::get('/my-psychologist', [MessageController::class, 'getMyPsychologist']);
         Route::get('/', [MessageController::class, 'index']);
         Route::get('/sent', [MessageController::class, 'sent']);
         Route::get('/{id}', [MessageController::class, 'show']);

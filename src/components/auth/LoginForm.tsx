@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Lock, Eye, EyeOff, UserRound, Shield, Brain, Heart } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, UserRound, Shield, Brain, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -84,8 +84,6 @@ export function LoginForm() {
     if (fieldErrors[field as keyof typeof fieldErrors]) {
       setFieldErrors(prev => ({ ...prev, [field]: undefined }));
     }
-    
-
   };
 
   // Función de validación del formulario
@@ -140,7 +138,7 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-1 sm:p-2 lg:p-3" style={{
+    <div className="min-h-screen flex items-start sm:items-center justify-center relative overflow-hidden pt-2 pb-1 sm:pt-2 sm:pb-2 lg:p-3" style={{
       background: `
         linear-gradient(135deg, 
           #0f1419 0%, 
@@ -249,69 +247,16 @@ export function LoginForm() {
             <path d="M580 640 Q600 620 620 640 Q600 660 580 640" fill="rgba(44, 62, 80, 0.4)" className="animate-leaf-1" />
           </g>
           
-          {/* Símbolos de mente saludable dispersos - Muchos más círculos */}
+          {/* Símbolos de mente saludable */}
           <g>
-            {/* Círculos principales */}
             <circle cx="300" cy="300" r="5" fill="rgba(211, 183, 160, 0.6)" className="animate-mindful-dot-1" />
             <circle cx="500" cy="300" r="4" fill="rgba(142, 22, 26, 0.5)" className="animate-mindful-dot-2" />
             <circle cx="300" cy="500" r="4" fill="rgba(142, 22, 26, 0.5)" className="animate-mindful-dot-3" />
             <circle cx="500" cy="500" r="5" fill="rgba(211, 183, 160, 0.6)" className="animate-mindful-dot-1" />
-            
-            {/* Círculos en las esquinas */}
             <circle cx="150" cy="350" r="3" fill="rgba(211, 183, 160, 0.4)" className="animate-mindful-dot-2" />
             <circle cx="650" cy="350" r="3" fill="rgba(142, 22, 26, 0.4)" className="animate-mindful-dot-3" />
-            <circle cx="350" cy="150" r="3" fill="rgba(142, 22, 26, 0.4)" className="animate-mindful-dot-1" />
-            <circle cx="450" cy="650" r="3" fill="rgba(211, 183, 160, 0.4)" className="animate-mindful-dot-2" />
-            
-            {/* Círculos pequeños distribuidos por toda la interfaz */}
-            <circle cx="100" cy="200" r="2" fill="rgba(211, 183, 160, 0.3)" className="animate-mindful-dot-1" />
-            <circle cx="700" cy="180" r="2" fill="rgba(142, 22, 26, 0.3)" className="animate-mindful-dot-2" />
-            <circle cx="80" cy="400" r="2" fill="rgba(142, 22, 26, 0.3)" className="animate-mindful-dot-3" />
-            <circle cx="720" cy="420" r="2" fill="rgba(211, 183, 160, 0.3)" className="animate-mindful-dot-1" />
-            <circle cx="120" cy="600" r="2" fill="rgba(211, 183, 160, 0.3)" className="animate-mindful-dot-2" />
-            <circle cx="680" cy="620" r="2" fill="rgba(142, 22, 26, 0.3)" className="animate-mindful-dot-3" />
-            
-            {/* Círculos medianos en zonas intermedias */}
-            <circle cx="250" cy="150" r="3" fill="rgba(142, 22, 26, 0.35)" className="animate-mindful-dot-1" />
-            <circle cx="550" cy="120" r="3" fill="rgba(211, 183, 160, 0.35)" className="animate-mindful-dot-2" />
-            <circle cx="200" cy="650" r="3" fill="rgba(211, 183, 160, 0.35)" className="animate-mindful-dot-3" />
-            <circle cx="600" cy="680" r="3" fill="rgba(142, 22, 26, 0.35)" className="animate-mindful-dot-1" />
-            
-            {/* Círculos muy pequeños dispersos */}
-            <circle cx="180" cy="250" r="1.5" fill="rgba(211, 183, 160, 0.25)" className="animate-mindful-dot-2" />
-            <circle cx="620" cy="270" r="1.5" fill="rgba(142, 22, 26, 0.25)" className="animate-mindful-dot-3" />
-            <circle cx="160" cy="450" r="1.5" fill="rgba(142, 22, 26, 0.25)" className="animate-mindful-dot-1" />
-            <circle cx="640" cy="480" r="1.5" fill="rgba(211, 183, 160, 0.25)" className="animate-mindful-dot-2" />
-            <circle cx="220" cy="550" r="1.5" fill="rgba(211, 183, 160, 0.25)" className="animate-mindful-dot-3" />
-            <circle cx="580" cy="520" r="1.5" fill="rgba(142, 22, 26, 0.25)" className="animate-mindful-dot-1" />
-            
-            {/* Círculos en el centro superior e inferior */}
             <circle cx="400" cy="100" r="2.5" fill="rgba(211, 183, 160, 0.4)" className="animate-mindful-dot-2" />
             <circle cx="380" cy="700" r="2.5" fill="rgba(142, 22, 26, 0.4)" className="animate-mindful-dot-3" />
-            <circle cx="420" cy="80" r="2" fill="rgba(142, 22, 26, 0.3)" className="animate-mindful-dot-1" />
-            <circle cx="360" cy="720" r="2" fill="rgba(211, 183, 160, 0.3)" className="animate-mindful-dot-2" />
-            
-            {/* Círculos en los lados izquierdo y derecho */}
-            <circle cx="50" cy="300" r="2" fill="rgba(142, 22, 26, 0.3)" className="animate-mindful-dot-3" />
-            <circle cx="750" cy="320" r="2" fill="rgba(211, 183, 160, 0.3)" className="animate-mindful-dot-1" />
-            <circle cx="30" cy="500" r="2" fill="rgba(211, 183, 160, 0.3)" className="animate-mindful-dot-2" />
-            <circle cx="770" cy="480" r="2" fill="rgba(142, 22, 26, 0.3)" className="animate-mindful-dot-3" />
-            
-            {/* Círculos adicionales para mayor densidad */}
-            <circle cx="280" cy="220" r="1.5" fill="rgba(142, 22, 26, 0.2)" className="animate-mindful-dot-1" />
-            <circle cx="520" cy="240" r="1.5" fill="rgba(211, 183, 160, 0.2)" className="animate-mindful-dot-2" />
-            <circle cx="260" cy="580" r="1.5" fill="rgba(211, 183, 160, 0.2)" className="animate-mindful-dot-3" />
-            <circle cx="540" cy="560" r="1.5" fill="rgba(142, 22, 26, 0.2)" className="animate-mindful-dot-1" />
-            <circle cx="320" cy="380" r="1.5" fill="rgba(211, 183, 160, 0.2)" className="animate-mindful-dot-2" />
-            <circle cx="480" cy="420" r="1.5" fill="rgba(142, 22, 26, 0.2)" className="animate-mindful-dot-3" />
-            
-            {/* Micro círculos para textura sutil */}
-            <circle cx="140" cy="180" r="1" fill="rgba(211, 183, 160, 0.15)" className="animate-mindful-dot-1" />
-            <circle cx="660" cy="160" r="1" fill="rgba(142, 22, 26, 0.15)" className="animate-mindful-dot-2" />
-            <circle cx="120" cy="520" r="1" fill="rgba(142, 22, 26, 0.15)" className="animate-mindful-dot-3" />
-            <circle cx="680" cy="540" r="1" fill="rgba(211, 183, 160, 0.15)" className="animate-mindful-dot-1" />
-            <circle cx="340" cy="120" r="1" fill="rgba(142, 22, 26, 0.15)" className="animate-mindful-dot-2" />
-            <circle cx="460" cy="680" r="1" fill="rgba(211, 183, 160, 0.15)" className="animate-mindful-dot-3" />
           </g>
           
           {/* Ondas de respiración suaves */}
@@ -404,65 +349,18 @@ export function LoginForm() {
         }}>🧠</div>
       </div>
 
-      {/* Elementos decorativos modernos del sistema */}
-      <div className="absolute top-8 right-8 sm:top-10 sm:right-10 md:top-12 md:right-12 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 opacity-25" style={{
-        animation: 'starTwinkle 8s ease-in-out infinite',
-        background: `
-          radial-gradient(circle at center, 
-            rgba(142, 22, 26, 0.6) 0%, 
-            rgba(44, 62, 80, 0.4) 30%, 
-            rgba(25, 42, 61, 0.3) 60%, 
-            rgba(255, 255, 255, 0.1) 80%, 
-            transparent 100%
-          )
-        `,
-        borderRadius: '50%',
-        boxShadow: '0 0 15px rgba(142, 22, 26, 0.2), 0 0 30px rgba(44, 62, 80, 0.1)'
-      }}>
-        {/* Puntos de acento del sistema de psicología */}
-        <div className="absolute top-1 left-1 w-1 h-1 rounded-full opacity-80" style={{ 
-          background: '#ffffff',
-          animation: 'starSparkle 3s ease-in-out infinite' 
-        }}></div>
-        <div className="absolute top-2 right-1 w-0.5 h-0.5 rounded-full opacity-70" style={{ 
-          background: '#ffffff',
-          animation: 'starSparkle 3.5s ease-in-out infinite 0.5s' 
-        }}></div>
-        <div className="absolute bottom-1 left-2 w-0.5 h-0.5 rounded-full opacity-75" style={{ 
-          background: '#ffffff',
-          animation: 'starSparkle 4s ease-in-out infinite 1s' 
-        }}></div>
-      </div>
-      
-      {/* Elemento decorativo adicional esquina inferior */}
-      <div className="absolute bottom-12 left-8 sm:bottom-16 sm:left-12 md:bottom-20 md:left-16 w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 opacity-20" style={{
-        animation: 'floatDots 12s ease-in-out infinite 2s',
-        background: `
-          linear-gradient(45deg, 
-            rgba(142, 22, 26, 0.5) 0%, 
-            rgba(44, 62, 80, 0.4) 50%, 
-            rgba(25, 42, 61, 0.3) 100%
-          )
-        `,
-        borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%'
-      }}></div>
-
       <div className={`w-full max-w-full flex flex-col items-center relative z-10 transition-all duration-1000 ${showForm ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-8'}`}>
-        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4 items-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:gap-6 xl:gap-8 items-start sm:items-center">
         
         {/* Columna izquierda - Logo y Bienvenida mejorada */}
-        <div className="flex flex-col items-center justify-center text-center p-1 sm:p-2 lg:p-3">
-          <div className="flex items-center justify-center mb-1 lg:mb-3">
-            <div className="relative w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px] lg:w-[360px] lg:h-[360px] flex items-center justify-center">
+        <div className="flex flex-col items-center justify-start sm:justify-center text-center pt-12 pb-1 sm:pt-16 sm:pb-2 md:pt-20 md:pb-3 lg:pt-24 lg:pb-3">
+          <div className="flex flex-row lg:flex-col items-center justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-0 mb-1 sm:mb-1.5 md:mb-2 lg:mb-2.5">
+            <div className="relative w-[80px] h-[80px] sm:w-[110px] sm:h-[110px] md:w-[130px] md:h-[130px] lg:w-[280px] lg:h-[280px] flex items-center justify-center flex-shrink-0">
               {/* Fondo del logo - Luna realista más pequeña */}
-              <div className="absolute inset-0 w-[180px] h-[180px] sm:w-[200px] sm:h-[200px] md:w-[220px] md:h-[220px] lg:w-[250px] lg:h-[250px] rounded-full shadow-2xl" style={{
+              <div className="absolute inset-0 w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[95px] md:h-[95px] lg:w-[200px] lg:h-[200px] rounded-full shadow-2xl" style={{
                 animation: 'moonGlow 12s ease-in-out infinite, moonFloat 8s ease-in-out infinite',
         boxShadow: '0 0 60px rgba(255, 255, 255, 0.6), inset 0 0 40px rgba(255, 255, 255, 0.2), 0 0 100px rgba(255, 255, 255, 0.3)',
-        background: `
-          radial-gradient(circle at 25% 25%, #ffffff 0%, #f8fafc 30%, #e2e8f0 60%, #cbd5e1 80%, #94a3b8 90%, #64748b 95%, #475569 100%),
-          radial-gradient(circle at 70% 70%, rgba(148, 163, 184, 0.15) 0%, transparent 70%),
-          radial-gradient(circle at 40% 60%, rgba(100, 116, 139, 0.1) 0%, transparent 60%)
-        `
+        background: `radial-gradient(circle at 25% 25%, #ffffff 0%, #f8fafc 30%, #e2e8f0 60%, #cbd5e1 80%, #94a3b8 90%, #64748b 95%, #475569 100%), radial-gradient(circle at 70% 70%, rgba(148, 163, 184, 0.15) 0%, transparent 70%), radial-gradient(circle at 40% 60%, rgba(100, 116, 139, 0.1) 0%, transparent 60%)`
       }}>
         {/* Textura lunar realista */}
         <div className="absolute inset-0 rounded-full" style={{
@@ -475,22 +373,17 @@ export function LoginForm() {
                   backgroundSize: '25px 25px, 38px 38px, 30px 30px, 42px 42px'
         }}></div>
         
-        {/* Cráteres lunares realistas */}
-                <div className="absolute top-2 left-2 w-1.5 h-1.5 bg-gradient-to-br from-gray-500 to-gray-700 rounded-full opacity-70" style={{boxShadow: 'inset 0.5px 0.5px 1px rgba(0,0,0,0.3)'}}></div>
-                <div className="absolute top-5 right-3 w-1 h-1 bg-gradient-to-br from-gray-500 to-gray-700 rounded-full opacity-65" style={{boxShadow: 'inset 0.3px 0.3px 1px rgba(0,0,0,0.3)'}}></div>
-                <div className="absolute bottom-3 left-4 w-1 h-1 bg-gradient-to-br from-gray-500 to-gray-700 rounded-full opacity-75" style={{boxShadow: 'inset 0.3px 0.3px 1px rgba(0,0,0,0.3)'}}></div>
-                
                 {/* Brillo lunar natural */}
                 <div className="absolute top-1 left-1 w-2 h-2 bg-gradient-to-br from-white to-transparent rounded-full opacity-80"></div>
                 <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-white rounded-full opacity-90"></div>
               </div>
               
               {/* Contenedor del logo dentro del círculo */}
-              <div className="absolute inset-0 w-[180px] h-[180px] sm:w-[200px] sm:h-[200px] md:w-[220px] md:h-[220px] lg:w-[250px] lg:h-[250px] flex items-center justify-center">
+              <div className="absolute inset-0 w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[95px] md:h-[95px] lg:w-[200px] lg:h-[200px] flex items-center justify-center">
                 <img 
                   src={window.location.origin + "/images/icons/psicologia.png"}
                   alt="Logo Institucional"
-                  className={`w-48 h-48 sm:w-56 sm:h-56 md:w-60 md:h-60 lg:w-64 lg:h-64 xl:w-72 xl:h-72 object-contain drop-shadow-lg transition-all duration-1000 ${isAnimated ? 'transform scale-100 rotate-0' : 'transform scale-75 rotate-12'}`}
+                  className={`w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-48 lg:h-48 xl:w-56 xl:h-56 object-contain drop-shadow-lg transition-all duration-1000 ${isAnimated ? 'transform scale-100 rotate-0' : 'transform scale-75 rotate-12'}`}
                   style={{ 
                     maxWidth: '100%', 
                     maxHeight: '100%',
@@ -516,90 +409,103 @@ export function LoginForm() {
                 </div>
               </div>
             </div>
-          </div>
           
-          <div className="space-y-2">
+          <div className="space-y-3 sm:space-y-3 md:space-y-3.5 flex-1 text-left lg:text-center">
             <div className={`transition-all duration-1000 ${isAnimated ? 'transform translate-x-0' : 'transform -translate-x-8'}`}>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-1 tracking-tight leading-tight text-left">
-                Bienvenido al
-          </h1>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#8e161a] to-[#d3b7a0] mb-1 text-left">
-            Sistema de Psicología
-          </h2>
-            </div>
-            
-            <div className={`transition-all duration-1000 delay-200 ${isAnimated ? 'transform translate-x-0' : 'transform -translate-x-8'}`}>
-              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-200 font-semibold mb-1 text-left">
-                Instituto Túpac Amaru
-              </p>
-              <p className="text-base sm:text-lg md:text-xl text-gray-300 font-medium mb-1 text-left">
-                Cusco, Perú
-              </p>
+              <div className="mb-2 sm:mb-2 md:mb-2.5">
+                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-4xl xl:text-5xl font-black text-white mb-2 sm:mb-2 md:mb-2.5 tracking-tight leading-tight">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-50 to-white drop-shadow-2xl"
+                    style={{
+                      textShadow: '0 0 30px rgba(255, 255, 255, 0.3), 0 0 60px rgba(255, 255, 255, 0.2)',
+                      letterSpacing: '-0.02em'
+                    }}>
+                    Bienvenido a SAPTA
+                  </span>
+                </h1>
+              </div>
+              <div className="px-1 sm:px-2 md:px-3">
+                <h2 className="text-xs sm:text-sm md:text-base lg:text-xl xl:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#8e161a] via-[#c71f1f] via-[#d3b7a0] to-[#8e161a] mb-1.5 sm:mb-2 leading-relaxed"
+                  style={{
+                    backgroundSize: '200% auto',
+                    animation: 'gradient-shift 3s ease infinite',
+                    textShadow: '0 2px 8px rgba(142, 22, 26, 0.3)'
+                  }}>
+                  Sistema de Atención Psicológica Túpac Amaru
+                </h2>
+                <p className="text-[10px] sm:text-xs md:text-sm text-gray-300/80 mt-2 sm:mt-2 font-medium">
+                  Cusco, Perú
+                </p>
+              </div>
             </div>
           </div>
+          </div>
           
-          {/* Características del sistema - Solo visible en desktop */}
-          <div className="hidden lg:block mt-4">
-            <div className={`flex flex-row justify-start items-center gap-3 lg:gap-4 transition-all duration-1000 delay-600 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
-              <div className="flex items-center gap-1 text-gray-300 bg-black/30 backdrop-blur-md px-2 md:px-3 py-1.5 rounded-full border border-white/20 justify-center shadow-lg">
-                <Shield className="w-4 h-4 text-[#8e161a]" />
-                <span className="text-sm font-medium">Seguro y Confidencial</span>
+          {/* Características del sistema - Solo desktop */}
+          <div className="hidden lg:block mt-32 xl:mt-40 2xl:mt-48">
+            <div className={`flex flex-row justify-start items-center gap-2.5 xl:gap-3 transition-all duration-1000 delay-600 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
+              <div className="flex items-center gap-1 text-gray-300 bg-black/30 backdrop-blur-md px-2.5 py-1 xl:px-3 xl:py-1.5 rounded-full border border-white/20 justify-center shadow-lg">
+                <Shield className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-[#8e161a] flex-shrink-0" />
+                <span className="text-xs xl:text-sm font-medium whitespace-nowrap">Seguro y Confidencial</span>
               </div>
-              <div className="flex items-center gap-1 text-gray-300 bg-black/30 backdrop-blur-md px-2 md:px-3 py-1.5 rounded-full border border-white/20 justify-center shadow-lg">
-                <Brain className="w-4 h-4 text-[#d3b7a0]" />
-                <span className="text-sm font-medium">Gestión Profesional</span>
+              <div className="flex items-center gap-1 text-gray-300 bg-black/30 backdrop-blur-md px-2.5 py-1 xl:px-3 xl:py-1.5 rounded-full border border-white/20 justify-center shadow-lg">
+                <Brain className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-[#d3b7a0] flex-shrink-0" />
+                <span className="text-xs xl:text-sm font-medium whitespace-nowrap">Gestión Profesional</span>
               </div>
-              <div className="flex items-center gap-1 text-gray-300 bg-black/30 backdrop-blur-md px-2 md:px-3 py-1.5 rounded-full border border-white/20 justify-center shadow-lg">
-                <Heart className="w-4 h-4 text-[#8e161a]" />
-                <span className="text-sm font-medium">Atención Personalizada</span>
+              <div className="flex items-center gap-1 text-gray-300 bg-black/30 backdrop-blur-md px-2.5 py-1 xl:px-3 xl:py-1.5 rounded-full border border-white/20 justify-center shadow-lg">
+                <CheckCircle2 className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-[#8e161a] flex-shrink-0" />
+                <span className="text-xs xl:text-sm font-medium whitespace-nowrap">Atención Personalizada</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Columna derecha - Formulario de login mejorado */}
-        <div className="flex flex-col items-center px-1 sm:px-2 lg:px-3 pt-2 sm:pt-4 md:pt-6 lg:pt-8 pb-2 sm:pb-4 md:pb-6 lg:pb-8">
+        <div className="flex flex-col items-center px-2 sm:px-3 md:px-4 lg:px-3 pt-2 sm:pt-4 md:pt-5 lg:pt-8 pb-2 sm:pb-4 md:pb-5 lg:pb-8">
           <div 
-            className={`w-full max-w-sm sm:max-w-md lg:max-w-lg rounded-3xl sm:rounded-[2rem] transition-all duration-700 ${isAnimated ? 'transform scale-100 translate-y-0' : 'transform scale-95 translate-y-4'}`}
+            className={`w-full max-w-sm sm:max-w-md md:max-w-md lg:max-w-md xl:max-w-lg rounded-3xl sm:rounded-[2rem] transition-all duration-700 ${isAnimated ? 'transform scale-100 translate-y-0' : 'transform scale-95 translate-y-4'}`}
             style={{
               animation: isAnimated ? 'formSlideIn 1s ease-out forwards' : 'none',
-              background: '#ffffff',
-              border: '1px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.75), rgba(250, 250, 250, 0.75), rgba(245, 245, 245, 0.75))',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(142, 22, 26, 0.15)',
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(142, 22, 26, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
             }}
           >
-            <Card padding="sm" className="p-3 sm:p-4 lg:p-5 bg-transparent border-0 shadow-none">
-              <div className={`text-center mb-3 sm:mb-4 lg:mb-5 transition-all duration-1000 delay-300 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
-                <div className="flex flex-col items-center justify-center mb-3">
-                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center mb-2 overflow-hidden"
+            <Card padding="sm" className="p-4 sm:p-5 md:p-6 lg:p-7 bg-transparent border-0 shadow-none">
+              <div className={`text-center mb-3 sm:mb-3.5 md:mb-4 transition-all duration-1000 delay-300 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
+                <div className="flex flex-col items-center justify-center mb-2.5 sm:mb-3">
+                  <div className="relative w-12 h-12 sm:w-13 sm:h-13 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-xl flex items-center justify-center mb-2 overflow-hidden p-1"
                     style={{
-                      background: `
-                        linear-gradient(135deg, 
-                          #8e161a 0%, 
-                          #b91c1c 50%, 
-                          #d3b7a0 100%
-                        )
-                      `,
-                      boxShadow: `
-                        0 10px 30px -5px rgba(142, 22, 26, 0.3),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                        0 0 0 1px rgba(142, 22, 26, 0.1)
-                      `
+                      background: 'linear-gradient(135deg, rgba(142, 22, 26, 0.08) 0%, rgba(211, 183, 160, 0.08) 100%)',
+                      boxShadow: '0 4px 12px rgba(142, 22, 26, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 0 0 1px rgba(142, 22, 26, 0.05)'
                     }}>
-                    <UserRound className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white drop-shadow-sm" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/10 pointer-events-none"></div>
+                    <img 
+                      src="/images/icons/Icono del sitema.png"
+                      alt="Logo del Sistema"
+                      className="w-full h-full object-contain drop-shadow-sm"
+                      onError={(e) => {
+                        console.log('Error cargando logo del sistema:', e);
+                        const target = e.currentTarget;
+                        target.style.display = 'none';
+                      }}
+                    />
                   </div>
-                  <div className="text-center">
-                    
-                    <p className="text-gray-700 font-medium text-xs sm:text-sm">
-                      Inicia sesión en tu cuenta
-                    </p>
+                  <div className="text-center w-full">
+                    <div className="inline-block px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 bg-gradient-to-r from-[#6d1115] via-[#5a0f0f] to-[#4d0d0d] border border-[#7a1515]/30 rounded-lg shadow-md"
+                      style={{
+                        boxShadow: '0 2px 8px rgba(61, 10, 10, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15)'
+                      }}>
+                      <p className="text-white font-semibold text-sm sm:text-base md:text-lg">
+                        Ingresa a tu cuenta
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 lg:space-y-5" noValidate>
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5 md:space-y-4" noValidate>
           <div className={`transition-all duration-1000 delay-500 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
+            <div className="[&_input]:py-3 [&_label]:mb-2">
             <Input
               type="email"
               label="Correo Electrónico"
@@ -611,9 +517,11 @@ export function LoginForm() {
               placeholderPosition="right"
               error={fieldErrors.email}
             />
+            </div>
           </div>
 
           <div className={`transition-all duration-1000 delay-700 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
+            <div className="[&_input]:py-3 [&_label]:mb-2">
             <Input
               type={showPassword ? 'text' : 'password'}
               label="Contraseña"
@@ -628,7 +536,7 @@ export function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-gray-500 hover:text-[#8e161a] transition-all duration-200 p-2 rounded-lg focus:outline-none hover:scale-105"
+                  className="text-gray-500 hover:text-[#8e161a] transition-all duration-200 p-1.5 rounded-lg focus:outline-none hover:scale-105"
                   tabIndex={-1}
                   title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
@@ -642,6 +550,7 @@ export function LoginForm() {
               }
               error={fieldErrors.password}
             />
+            </div>
           </div>
 
           {/* Error del servidor - solo si no hay errores de campos específicos */}
@@ -656,9 +565,9 @@ export function LoginForm() {
 
                           {/* Aviso de términos y condiciones */}
                           <div className={`transition-all duration-1000 delay-900 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
-                            <div className="p-3 bg-white/70 rounded-xl border border-gray-300/40 max-w-sm mx-auto backdrop-blur-sm text-left"
+                            <div className="p-2.5 bg-gradient-to-br from-white/80 via-gray-50/80 to-white/80 rounded-lg border border-gray-200/60 max-w-sm mx-auto backdrop-blur-sm text-left"
                               style={{
-                                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.08)'
+                                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02)'
                               }}>
                               <p className="text-xs text-gray-600 leading-relaxed">
                               Al acceder al sistema, reconoces y aceptas de manera automática nuestros{' '}
@@ -682,10 +591,10 @@ export function LoginForm() {
                             </div>
                           </div>
 
-                          <div className="flex justify-center">
+                          <div className="flex justify-center pt-1 sm:pt-1.5">
           <Button
             type="submit"
-                    className="w-3/4 bg-gradient-to-r from-[#1a0a0a] via-[#2d0f0f] to-[#1e1b4b] text-white font-bold py-2.5 rounded-xl shadow-lg hover:shadow-xl hover:from-[#0f0505] hover:via-[#1a0a0a] hover:to-[#15123a] transition-all duration-300 text-sm transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-3/4 sm:w-4/5 md:w-3/4 bg-gradient-to-r from-[#1a0a0a] via-[#2d0f0f] to-[#1e1b4b] text-white font-bold !py-2 sm:!py-2.5 md:!py-3 rounded-xl shadow-lg hover:shadow-xl hover:from-[#0f0505] hover:via-[#1a0a0a] hover:to-[#15123a] transition-all duration-300 text-sm sm:text-base transform hover:scale-[1.02] active:scale-[0.98]"
             size="lg"
             loading={loading}
           >
@@ -697,12 +606,13 @@ export function LoginForm() {
               <div className="mt-3">
                 <div className="relative mb-2">
             <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200" />
+                    <div className="w-full border-t border-gray-200/60" />
             </div>
             <div className="relative flex justify-center text-sm">
-                    <span className="px-4 py-1 bg-white/80 text-gray-700 font-semibold rounded-lg shadow-sm border border-gray-200/50"
+                    <span className="px-3 py-0.5 bg-gradient-to-r from-white to-gray-50 text-gray-700 font-semibold rounded-lg shadow-sm border border-gray-200/60 text-xs"
                       style={{
-                        backdropFilter: 'blur(8px)'
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
                       }}>
                       O continúa con
                     </span>
@@ -713,12 +623,12 @@ export function LoginForm() {
           <Button
             type="button"
             variant="outline"
-                    className="w-3/4 border-2 border-gray-500 hover:border-[#7f1d1d] text-gray-900 hover:text-[#7f1d1d] font-semibold bg-white hover:bg-red-200 transition-all duration-300 py-2.5 rounded-xl shadow-sm hover:shadow-md"
+                    className="w-3/4 sm:w-4/5 md:w-3/4 border-2 border-gray-500 hover:border-[#7f1d1d] text-gray-900 hover:text-[#7f1d1d] font-semibold bg-white hover:bg-red-200 transition-all duration-300 !py-2 sm:!py-2.5 md:!py-3 rounded-xl shadow-sm hover:shadow-md text-sm sm:text-base"
             size="lg"
             onClick={handleGoogleLogin}
             loading={loading}
           >
-            <svg className="w-4 h-4 mr-3 pointer-events-none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 pointer-events-none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -729,16 +639,23 @@ export function LoginForm() {
                 </div>
         </div>
 
-              <div className="mt-3 p-3 bg-white/70 rounded-2xl border border-gray-300/40 backdrop-blur-sm"
+              <div className="mt-3 p-1.5 sm:p-2 bg-gradient-to-br from-blue-50/60 to-indigo-50/40 rounded-lg border border-blue-100/50 backdrop-blur-sm"
                 style={{
-                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 8px rgba(0, 0, 0, 0.08)'
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(59, 130, 246, 0.1)'
                 }}>
-                <div className="text-center">
-                  <h4 className="text-xs font-bold text-gray-800 mb-2">Instrucciones de Acceso</h4>
-                  <div className="space-y-1 text-xs text-gray-700">
-                    <p><span className="font-semibold text-[#8e161a]">Estudiantes:</span> Usa tu cuenta de Google institucional</p>
-                    <p><span className="font-semibold text-[#8e161a]">Personal:</span> Usa tu correo y contraseña</p>
-                  </div>
+                <h4 className="text-[10px] sm:text-xs font-semibold text-gray-800 mb-1 flex items-center justify-center gap-1">
+                  <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8e161a]" />
+                  <span>Instrucciones de Acceso</span>
+                </h4>
+                <div className="space-y-0.5 text-[10px] sm:text-xs text-gray-700 text-center">
+                  <p className="px-1 py-0.5">
+                    <span className="font-semibold text-[#8e161a]">Estudiantes:</span>{' '}
+                    <span className="text-gray-600">Accede utilizando tu correo institucional de Google.</span>
+                  </p>
+                  <p className="px-1 py-0.5">
+                    <span className="font-semibold text-[#8e161a]">psicólogo:</span>{' '}
+                    <span className="text-gray-600">Inicia sesión con tu correo y tu contraseña asignada.</span>
+                  </p>
                 </div>
               </div>
             </Card>
@@ -747,19 +664,19 @@ export function LoginForm() {
         </div>
         
         {/* Pie de página - Características del sistema - Solo móvil y tablet */}
-        <div className="w-full mt-2 sm:mt-3 lg:hidden px-1 sm:px-2 md:px-3">
-          <div className={`flex flex-row justify-center items-center gap-1 sm:gap-2 md:gap-3 transition-all duration-1000 delay-600 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
-            <div className="flex items-center gap-1 text-gray-300 bg-black/30 backdrop-blur-md px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 rounded-full border border-white/20 justify-center shadow-lg">
-              <Shield className="w-3 h-3 sm:w-4 sm:h-4 text-[#8e161a]" />
-              <span className="text-xs sm:text-sm font-medium">Seguro y Confidencial</span>
+        <div className="w-full mt-4 sm:mt-5 md:mt-6 lg:hidden px-2 sm:px-3 md:px-4">
+          <div className={`flex flex-row flex-wrap justify-center items-center gap-2 sm:gap-2.5 md:gap-3 transition-all duration-1000 delay-600 ${isAnimated ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
+            <div className="flex items-center gap-1.5 text-gray-300 bg-black/30 backdrop-blur-md px-3 py-1.5 sm:px-3.5 sm:py-2 md:px-4 md:py-2 rounded-full border border-white/20 justify-center shadow-lg">
+              <Shield className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-[#8e161a] flex-shrink-0" />
+              <span className="text-xs sm:text-sm md:text-sm font-medium whitespace-nowrap">Seguro y Confidencial</span>
             </div>
-            <div className="flex items-center gap-1 text-gray-300 bg-black/30 backdrop-blur-md px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 rounded-full border border-white/20 justify-center shadow-lg">
-              <Brain className="w-3 h-3 sm:w-4 sm:h-4 text-[#d3b7a0]" />
-              <span className="text-xs sm:text-sm font-medium">Gestión Profesional</span>
+            <div className="flex items-center gap-1.5 text-gray-300 bg-black/30 backdrop-blur-md px-3 py-1.5 sm:px-3.5 sm:py-2 md:px-4 md:py-2 rounded-full border border-white/20 justify-center shadow-lg">
+              <Brain className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-[#d3b7a0] flex-shrink-0" />
+              <span className="text-xs sm:text-sm md:text-sm font-medium whitespace-nowrap">Gestión Profesional</span>
             </div>
-            <div className="flex items-center gap-1 text-gray-300 bg-black/30 backdrop-blur-md px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 rounded-full border border-white/20 justify-center shadow-lg">
-              <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-[#8e161a]" />
-              <span className="text-xs sm:text-sm font-medium">Atención Personalizada</span>
+            <div className="flex items-center gap-1.5 text-gray-300 bg-black/30 backdrop-blur-md px-3 py-1.5 sm:px-3.5 sm:py-2 md:px-4 md:py-2 rounded-full border border-white/20 justify-center shadow-lg">
+              <CheckCircle2 className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-[#8e161a] flex-shrink-0" />
+              <span className="text-xs sm:text-sm md:text-sm font-medium whitespace-nowrap">Atención Personalizada</span>
             </div>
           </div>
         </div>
@@ -887,40 +804,6 @@ export function LoginForm() {
           100% { transform: translate(10px, 10px); }
         }
         
-        @keyframes floatSlow {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(5deg); }
-        }
-        
-        @keyframes rotateSlow {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 0.8; transform: scale(1.1); }
-        }
-        
-        @keyframes heartBeat {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.2); }
-        }
-        
-        @keyframes waveFloat {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(10deg); }
-        }
-        
-        @keyframes hexagonFloat {
-          0%, 100% { transform: translateY(0px) rotate(45deg); }
-          50% { transform: translateY(-25px) rotate(45deg); }
-        }
-        
-        @keyframes curveFloat {
-          0%, 100% { transform: translateY(0px) rotate(12deg); opacity: 0.2; }
-          50% { transform: translateY(-10px) rotate(12deg); opacity: 0.4; }
-        }
         
         @keyframes moonGlow {
           0%, 100% { 
@@ -933,66 +816,6 @@ export function LoginForm() {
           }
         }
         
-        @keyframes colorFade {
-          0%, 100% { 
-            filter: brightness(1) saturate(1);
-            opacity: 1;
-          }
-          50% { 
-            filter: brightness(1.3) saturate(0.8);
-            opacity: 0.8;
-          }
-        }
-        
-        @keyframes starGlow {
-          0%, 100% { 
-            opacity: 0.8;
-            filter: brightness(1) drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
-          }
-          50% { 
-            opacity: 1;
-            filter: brightness(1.3) drop-shadow(0 0 30px rgba(255, 215, 0, 0.6));
-          }
-        }
-        
-        @keyframes sunGlow {
-          0%, 100% { 
-            opacity: 0.7;
-            filter: brightness(1) drop-shadow(0 0 40px rgba(255, 255, 255, 0.4));
-          }
-          25% { 
-            opacity: 0.8;
-            filter: brightness(1.2) drop-shadow(0 0 50px rgba(255, 255, 255, 0.5));
-          }
-          50% { 
-            opacity: 0.75;
-            filter: brightness(1.1) drop-shadow(0 0 45px rgba(255, 255, 255, 0.45));
-          }
-          75% { 
-            opacity: 0.8;
-            filter: brightness(1.3) drop-shadow(0 0 55px rgba(255, 255, 255, 0.6));
-          }
-        }
-        
-        @keyframes sunRays {
-          0% { 
-            transform: rotate(0deg);
-          }
-          100% { 
-            transform: rotate(360deg);
-          }
-        }
-        
-        @keyframes sunSparkle {
-          0%, 100% { 
-            opacity: 0.4;
-            transform: scale(1);
-          }
-          50% { 
-            opacity: 1;
-            transform: scale(1.3);
-          }
-        }
         
         @keyframes logoFloat {
           0%, 100% { 
@@ -1028,96 +851,6 @@ export function LoginForm() {
           }
         }
         
-        @keyframes logoGlow {
-          0%, 100% { 
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.15)) brightness(1);
-          }
-          50% { 
-            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.25)) brightness(1.1);
-          }
-        }
-        
-        @keyframes pulseGlow {
-          0%, 100% { 
-            opacity: 0.15;
-            filter: brightness(1);
-          }
-          50% { 
-            opacity: 0.25;
-            filter: brightness(1.2);
-          }
-        }
-        
-        @keyframes backgroundBreathing {
-          0%, 0% { 
-            background: #ffffff;
-          }
-          25% { 
-            background: #ffffff;
-          }
-          50% { 
-            background: #ffffff;
-          }
-          75% { 
-            background: #ffffff;
-          }
-        }
-        
-        @keyframes psychologicalSymbols {
-          0%, 100% { 
-            opacity: 0.03;
-            transform: scale(1) rotate(0deg);
-            filter: blur(4px) brightness(1);
-          }
-          25% { 
-            opacity: 0.04;
-            transform: scale(1.05) rotate(5deg);
-            filter: blur(3px) brightness(1.1);
-          }
-          50% { 
-            opacity: 0.035;
-            transform: scale(1.02) rotate(-3deg);
-            filter: blur(4px) brightness(1.05);
-          }
-          75% { 
-            opacity: 0.045;
-            transform: scale(1.08) rotate(8deg);
-            filter: blur(2px) brightness(1.15);
-          }
-        }
-        
-        @keyframes starTwinkle {
-          0%, 100% { 
-            transform: scale(1);
-            opacity: 0.8;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2), 0 0 60px rgba(255, 255, 255, 0.1);
-          }
-          50% { 
-            transform: scale(1.2);
-            opacity: 1;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.3), 0 0 90px rgba(255, 255, 255, 0.2);
-          }
-        }
-        
-        @keyframes starSparkle {
-          0%, 100% { 
-            opacity: 0.6;
-            transform: scale(1);
-          }
-          50% { 
-            opacity: 1;
-            transform: scale(1.5);
-          }
-        }
-        
-        @keyframes starRays {
-          0% { 
-            transform: rotate(0deg);
-          }
-          100% { 
-            transform: rotate(360deg);
-          }
-        }
         
         @keyframes floatDots {
           0%, 100% { 
@@ -1469,7 +1202,32 @@ export function LoginForm() {
         .animate-breathe {
           animation: breathe 4s ease-in-out infinite;
         }
-      `}} />
+
+        @keyframes gradient-shift {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-5px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+      `}}>
+      </style>
     </div>
   );
 }

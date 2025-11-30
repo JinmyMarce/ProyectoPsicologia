@@ -37,6 +37,8 @@ class User extends Authenticatable
         'phone',
         'birthdate',
         'gender',
+        'marital_status',
+        'nationality',
         'address',
         // Campos específicos para tutores
         'classroom',
@@ -189,6 +191,9 @@ class User extends Authenticatable
             'phone' => $this->phone,
             'birthdate' => $this->birthdate,
             'gender' => $this->gender,
+            'marital_status' => $this->marital_status,
+            'nationality' => $this->nationality,
+            'address' => $this->address,
             // Campos específicos para tutores
             'classroom' => $this->classroom,
             'study_program' => $this->study_program,

@@ -10,8 +10,8 @@ interface LoadingScreenProps {
 }
 
 export function LoadingScreen({ 
-  title = "Instituto Túpac Amaru",
-  subtitle = "Sistema de Gestión Psicológica",
+  title = "SAPTA",
+  subtitle = "Sistema de Atención Psicológica Túpac Amaru",
   showParticles = true,
   showWaves = true,
   size = 'lg'
@@ -162,35 +162,6 @@ export function LoadingScreen({
           {showWaves && (
             <div className="loading-wave absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
           )}
-
-          {/* Círculos rotatorios alrededor del logo */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-full h-full rounded-full border-2 border-transparent border-t-[#1a0f14] animate-spin" style={{
-              animation: 'spin 4s linear infinite'
-            }}></div>
-            <div className="absolute w-3/4 h-3/4 rounded-full border-2 border-transparent border-t-[#1a2332] animate-spin" style={{
-              animation: 'spin 3s linear infinite reverse'
-            }}></div>
-            <div className="absolute w-1/2 h-1/2 rounded-full border-2 border-transparent border-t-[#0a0f14] animate-spin" style={{
-              animation: 'spin 2s linear infinite'
-            }}></div>
-          </div>
-
-          {/* Partículas flotantes alrededor del logo */}
-          <div className="absolute inset-0">
-            <div className="absolute top-0 left-1/4 w-2 h-2 bg-[#1a0f14] rounded-full opacity-60" style={{
-              animation: 'float-particle 3s ease-in-out infinite'
-            }}></div>
-            <div className="absolute top-1/4 right-0 w-1.5 h-1.5 bg-[#1a2332] rounded-full opacity-60" style={{
-              animation: 'float-particle 3s ease-in-out infinite 1s'
-            }}></div>
-            <div className="absolute bottom-1/4 left-0 w-1 h-1 bg-[#0a0f14] rounded-full opacity-60" style={{
-              animation: 'float-particle 3s ease-in-out infinite 2s'
-            }}></div>
-            <div className="absolute bottom-0 right-1/4 w-1.5 h-1.5 bg-[#1a0f14] rounded-full opacity-60" style={{
-              animation: 'float-particle 3s ease-in-out infinite 0.5s'
-            }}></div>
-          </div>
         </div>
         
         {/* Solo "Cargando sistema..." en el centro */}

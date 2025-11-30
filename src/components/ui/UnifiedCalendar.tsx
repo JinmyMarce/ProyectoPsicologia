@@ -27,6 +27,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/locale/es';
 import { holidayService } from '../../services/holidays';
+import { localHolidayService } from '../../services/holidaysLocal';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -392,23 +393,53 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
   };
 
   // Cargar feriados de manera ultra rápida al montar el componente
+  // Solo si no se pasan como prop
   useEffect(() => {
+    // Si ya se pasaron holidays como prop, no cargar
+    if (holidays && holidays.length > 0) {
+      const formattedHolidays = holidays.map(holiday => ({
+        date: dayjs(holiday.date).toDate(),
+        name: holiday.name,
+        description: holiday.description,
+        type: holiday.type,
+        is_national: holiday.is_national,
+        region: holiday.region
+      }));
+      setLocalHolidays(formattedHolidays);
+      return;
+    }
+
     const loadHolidaysUltraFast = async () => {
       try {
         const currentYear = new Date().getFullYear();
-        const nextYear = currentYear + 1; // Solo cargar año actual y siguiente para máxima velocidad
+        // Usar servicio local primero para máxima velocidad
+        let currentYearHolidays: any[] = [];
         
-        // Cargar solo 2 años en paralelo para velocidad máxima
-        const [currentYearHolidays, nextYearHolidays] = await Promise.all([
-          holidayService.getHolidays(currentYear, 'Lima'),
-          holidayService.getHolidays(nextYear, 'Lima')
-        ]);
+        try {
+          currentYearHolidays = await localHolidayService.getHolidays(currentYear, 'Lima');
+          if (currentYearHolidays.length > 0) {
+            // Formatear y establecer inmediatamente
+            const formattedHolidays = currentYearHolidays.map(holiday => ({
+              date: dayjs(holiday.date).toDate(),
+              name: holiday.name,
+              description: holiday.description,
+              type: holiday.type,
+              is_national: holiday.is_national,
+              region: holiday.region
+            }));
+            setLocalHolidays(formattedHolidays);
+            return;
+          }
+        } catch (localError) {
+          // Si falla el servicio local, usar el remoto
+          console.log('Servicio local no disponible, usando remoto');
+        }
         
-        // Combinar feriados
-        const allHolidays = [...currentYearHolidays, ...nextYearHolidays];
+        // Fallback al servicio remoto
+        currentYearHolidays = await holidayService.getHolidays(currentYear, 'Lima');
         
         // Convertir y formatear de manera más eficiente
-        const formattedHolidays = allHolidays.map(holiday => ({
+        const formattedHolidays = currentYearHolidays.map(holiday => ({
           date: dayjs(holiday.date).toDate(),
           name: holiday.name,
           description: holiday.description,
@@ -470,7 +501,7 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
     };
 
             loadHolidaysUltraFast();
-  }, []); // Solo se ejecuta una vez al montar
+  }, [holidays]); // Se ejecuta cuando cambian los holidays o al montar
 
   // Validaciones de agendamiento
   const isDateAvailableForBooking = (date: Date): boolean => {

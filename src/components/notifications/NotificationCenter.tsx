@@ -47,6 +47,7 @@ export function NotificationCenter() {
   const [showNotificationDetails, setShowNotificationDetails] = useState(false);
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
 
   useEffect(() => {
     loadNotifications();
@@ -196,6 +197,14 @@ export function NotificationCenter() {
 
   const unreadCount = notifications.filter(n => !n.read_at).length;
 
+  // Filtrar notificaciones según el filtro seleccionado
+  const filteredNotifications = notifications.filter(notification => {
+    if (filter === 'all') return true;
+    if (filter === 'unread') return !notification.read_at;
+    if (filter === 'read') return !!notification.read_at;
+    return true;
+  });
+
   if (loading) {
     return (
       <div className="h-screen overflow-hidden bg-gray-50 font-sans flex items-center justify-center">
@@ -243,16 +252,14 @@ export function NotificationCenter() {
                 Gestiona y revisa todas tus notificaciones
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border-white/20 text-white hover:bg-white/20"
+              className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border border-white/20 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-1.5"
             >
-              <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 ${refreshing ? 'animate-spin' : ''}`} />
               Actualizar
-            </Button>
+            </button>
           </div>
         </div>
 
@@ -281,7 +288,7 @@ export function NotificationCenter() {
 
         {/* Estadísticas mejoradas - Estilo Dashboard */}
         {stats && (
-          <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-4 gap-2 xs:gap-3 mb-3">
+          <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 gap-2 xs:gap-3 mb-3">
             {/* Total */}
             <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
               <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-slate-100/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-slate-200/60 transition-all duration-500"></div>
@@ -324,66 +331,37 @@ export function NotificationCenter() {
               </div>
             </div>
             
-            {/* Citas */}
-            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-blue-100/60 transition-all duration-500"></div>
-              <div className="flex items-center justify-between mb-2 relative z-10">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center text-blue-700 shadow-sm group-hover:scale-110 transition-all duration-300">
-                  <Info className="w-4 h-4" />
-                </div>
-                <span className="text-[9px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Citas</span>
-              </div>
-              <div className="flex items-baseline gap-1.5 relative z-10">
-                <p className="text-2xl xs:text-3xl font-black text-slate-900 tracking-tight">{stats.by_type?.appointment || 0}</p>
-              </div>
-            </div>
           </div>
         )}
 
-        {/* Acciones */}
-        <div className="bg-white rounded-xl shadow-md border border-slate-200 mb-3 p-3 xs:p-4 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-violet-50/50 to-purple-50/50 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
-          
-          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-3 mb-3 relative z-10">
-            <div className="flex items-center space-x-2.5 xs:space-x-3">
-              <div className="w-8 h-8 xs:w-9 xs:h-9 bg-gradient-to-br from-violet-100 to-purple-200 rounded-lg flex items-center justify-center shadow-sm border border-violet-100">
-                <Bell className="w-4 h-4 xs:w-5 xs:h-5 text-violet-700" />
-              </div>
-              <div>
-                <h3 className="text-slate-900 font-bold text-base xs:text-lg">Notificaciones</h3>
-                <p className="text-slate-500 text-xs xs:text-sm">Total: {notifications.length}</p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {unreadCount > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleMarkAllAsRead}
-                  className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105"
-                >
-                  <CheckCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5" />
-                  Marcar todas como leídas
-                </Button>
-              )}
-              {notifications.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDeleteAllNotifications}
-                  className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border-red-300 text-red-600 hover:bg-red-50"
-                >
-                  <Trash2 className="w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5" />
-                  Eliminar todas
-                </Button>
-              )}
-            </div>
+        {/* Filtros - Diseño Moderno */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+          <div className="flex flex-wrap gap-2 justify-center items-center">
+            {[
+              { key: 'all', label: 'Todas' },
+              { key: 'unread', label: 'No leídas' },
+              { key: 'read', label: 'Leídas' }
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key as any)}
+                className={`
+                  px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300
+                  ${filter === key
+                    ? 'bg-gradient-to-r from-[#1e2a37] to-[#2d3e4f] text-white shadow-lg shadow-[#1e2a37]/30 transform scale-105'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
+                  }
+                  hover:scale-105 active:scale-95
+                `}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Lista de Notificaciones */}
-        {notifications.length === 0 ? (
+        {filteredNotifications.length === 0 ? (
           <div className="bg-white rounded-xl shadow-md p-4 border border-slate-200 text-center">
             <div className="text-center py-6">
               <div className="w-14 h-14 bg-gradient-to-br from-violet-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-violet-100/50">
@@ -397,7 +375,7 @@ export function NotificationCenter() {
           </div>
         ) : (
           <div className="space-y-2.5">
-            {notifications.map((notification) => (
+            {filteredNotifications.map((notification) => (
               <div 
                 key={notification.id}
                 className={`group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 xs:p-4 border transition-all duration-300 hover:-translate-y-0.5 overflow-hidden ${

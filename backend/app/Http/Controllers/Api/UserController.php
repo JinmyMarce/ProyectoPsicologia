@@ -613,6 +613,8 @@ class UserController extends Controller
                     'phone' => $user->phone,
                     'birthdate' => $user->birthdate,
                     'gender' => $user->gender,
+                    'marital_status' => $user->marital_status,
+                    'nationality' => $user->nationality,
                     'address' => $user->address,
                     'career' => $user->career,
                     'semester' => $user->semester,
@@ -685,6 +687,8 @@ class UserController extends Controller
                 'phone' => 'sometimes|nullable|string|max:20',
                 'birthdate' => 'sometimes|nullable|date',
                 'gender' => 'sometimes|nullable|in:masculino,femenino,otro',
+                'marital_status' => 'sometimes|nullable|string|max:50',
+                'nationality' => 'sometimes|nullable|string|max:100',
                 'address' => 'sometimes|nullable|string|max:500',
                 'career' => 'sometimes|nullable|string|max:255',
                 'semester' => 'sometimes|nullable|integer|min:1|max:10',
@@ -721,7 +725,7 @@ class UserController extends Controller
 
             // Actualizar información del estudiante (tabla users)
             $userData = $request->only([
-                'name', 'dni', 'phone', 'birthdate', 'gender', 'address', 
+                'name', 'dni', 'phone', 'birthdate', 'gender', 'marital_status', 'nationality', 'address', 
                 'career', 'semester', 'specialization',
                 'emergency_name', 'emergency_phone', 'emergency_relationship',
                 'allergies', 'current_medications', 'medical_conditions'
@@ -764,6 +768,8 @@ class UserController extends Controller
                     'phone' => $user->phone,
                     'birthdate' => $user->birthdate,
                     'gender' => $user->gender,
+                    'marital_status' => $user->marital_status,
+                    'nationality' => $user->nationality,
                     'address' => $user->address,
                     'career' => $user->career,
                     'semester' => $user->semester,

@@ -210,18 +210,18 @@ export function AppointmentHistory() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-[#8e161a]" />
-          <p className="text-gray-600">Cargando historial...</p>
+          <p className="text-gray-600 text-base">Cargando historial...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6" style={{fontFamily: 'Inter, system-ui, sans-serif'}}>
+      <div className="space-y-6 text-base" style={{fontFamily: 'Inter, system-ui, sans-serif'}}>
       {/* Título Principal - Mismo diseño que otras interfaces */}
       <div className="text-center mb-6">
         <div className="inline-block px-20 py-4 content-card border border-gray-200 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight mb-2">
+          <h1 className="text-4xl font-bold text-gray-800 tracking-tight mb-2">
             Historial de Citas
           </h1>
           <div className="w-28 h-1 bg-gradient-to-r from-gray-800 to-gray-600 mx-auto rounded-full"></div>
@@ -246,38 +246,38 @@ export function AppointmentHistory() {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
           <AlertCircle className="w-5 h-5 mr-3" />
-          <p className="text-sm font-medium">{error}</p>
+          <p className="text-base font-medium">{error}</p>
         </div>
       )}
 
       {/* Estadísticas mejoradas con colores del sistema */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="text-2xl font-bold text-[#6d1115]">{stats.total}</div>
-          <div className="text-sm text-[#1e2a37] font-medium">Total</div>
+          <div className="text-4xl font-bold text-[#6d1115]">{stats.total}</div>
+          <div className="text-lg text-[#1e2a37] font-medium">Total</div>
         </Card>
         <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="text-2xl font-bold text-[#c2b280]">{stats.pending}</div>
-          <div className="text-sm text-[#1e2a37] font-medium">Pendientes</div>
+          <div className="text-4xl font-bold text-[#c2b280]">{stats.pending}</div>
+          <div className="text-lg text-[#1e2a37] font-medium">Pendientes</div>
         </Card>
         <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="text-2xl font-bold text-[#8e161a]">{stats.confirmed}</div>
-          <div className="text-sm text-[#1e2a37] font-medium">Confirmadas</div>
+          <div className="text-4xl font-bold text-[#8e161a]">{stats.confirmed}</div>
+          <div className="text-lg text-[#1e2a37] font-medium">Confirmadas</div>
         </Card>
         <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="text-2xl font-bold text-[#1e2a37]">{stats.completed}</div>
-          <div className="text-sm text-[#1e2a37] font-medium">Completadas</div>
+          <div className="text-4xl font-bold text-[#1e2a37]">{stats.completed}</div>
+          <div className="text-lg text-[#1e2a37] font-medium">Completadas</div>
         </Card>
         <Card className="p-4 text-center bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="text-2xl font-bold text-[#4a0e10]">{stats.cancelled}</div>
-          <div className="text-sm text-[#1e2a37] font-medium">Canceladas</div>
+          <div className="text-4xl font-bold text-[#4a0e10]">{stats.cancelled}</div>
+          <div className="text-lg text-[#1e2a37] font-medium">Canceladas</div>
         </Card>
       </div>
 
       {/* Filtros mejorados */}
       <Card className="p-6 bg-white border border-gray-200 shadow-lg">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-[#1e2a37] flex items-center">
+          <h2 className="text-2xl font-bold text-[#1e2a37] flex items-center">
             <div className="w-8 h-8 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-full flex items-center justify-center mr-3 shadow-md">
               <Filter className="w-4 h-4 text-white" />
             </div>
@@ -303,7 +303,7 @@ export function AppointmentHistory() {
               placeholder="Buscar por psicólogo, motivo o fecha..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-[#c2b280] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6d1115] focus:border-[#6d1115] text-[#1e2a37] font-medium"
+              className="w-full pl-10 pr-4 py-3 border border-[#c2b280] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6d1115] focus:border-[#6d1115] text-[#1e2a37] font-medium text-lg"
             />
           </div>
 
@@ -312,7 +312,7 @@ export function AppointmentHistory() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-[#c2b280] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6d1115] focus:border-[#6d1115] text-[#1e2a37] font-medium"
+              className="w-full px-4 py-3 border border-[#c2b280] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6d1115] focus:border-[#6d1115] text-[#1e2a37] font-medium text-lg"
             >
               <option value="all">Todos los estados</option>
               <option value="pending">Pendientes</option>
@@ -326,7 +326,7 @@ export function AppointmentHistory() {
 
       {/* Lista de citas mejorada */}
       <Card className="p-6 bg-white border border-gray-200 shadow-lg">
-        <h2 className="text-lg font-bold text-[#1e2a37] mb-4 flex items-center">
+        <h2 className="text-2xl font-bold text-[#1e2a37] mb-4 flex items-center">
           <div className="w-8 h-8 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-full flex items-center justify-center mr-3 shadow-md">
             <FileText className="w-4 h-4 text-white" />
           </div>
@@ -338,74 +338,59 @@ export function AppointmentHistory() {
             <div className="w-16 h-16 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               <FileText className="w-8 h-8 text-white" />
             </div>
-            <p className="text-[#1e2a37] font-medium text-lg">No se encontraron citas</p>
-            <p className="text-[#c2b280] text-sm mt-1">Ajusta los filtros para ver más resultados</p>
+            <p className="text-[#1e2a37] font-medium text-2xl">No se encontraron citas</p>
+            <p className="text-[#c2b280] text-lg mt-1">Ajusta los filtros para ver más resultados</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {sortedAppointments.map((appointment) => (
               <div 
                 key={appointment.id}
-                className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-300 bg-white"
+                className="p-3 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-300 bg-white"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#6d1115] to-[#4a0e10] rounded-lg flex items-center justify-center shadow-md">
-                      <User className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-[#1e2a37] text-lg">
-                        Dr. {appointment.psychologist_name}
-                      </h3>
-                      <div className="flex items-center space-x-4 text-sm text-[#c2b280] mt-1 font-medium">
-                        <span className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {parseLocalDate(appointment.date).toLocaleDateString('es-ES', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </span>
-                        <span className="flex items-center">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {appointment.time}
-                        </span>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 bg-gradient-to-br from-[#8e161a] to-[#6d1115] rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                        <User className="w-5 h-5 text-white" />
                       </div>
-                      <p className="text-sm text-[#1e2a37] mt-1 font-medium">
-                        Motivo: {appointment.reason}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-[#1e2a37] text-lg truncate">
+                          {appointment.psychologist_name}
+                        </h3>
+                        <div className="flex items-center gap-3 text-sm text-gray-600 mt-0.5">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3.5 h-3.5 text-[#8e161a]" />
+                            {parseLocalDate(appointment.date).toLocaleDateString('es-ES', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5 text-[#8e161a]" />
+                            {appointment.time}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {appointment.reason && (
+                      <p className="text-sm text-gray-600 ml-[52px] truncate">
+                        {appointment.reason}
                       </p>
-                    </div>
+                    )}
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {getStatusBadge(appointment.status)}
-                    <div className="flex space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewAppointmentDetails(appointment)}
-                        title="Ver detalles"
-                        className="text-[#1e2a37] hover:text-[#6d1115] hover:bg-[#c2b280]/20"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      {(appointment.status === 'pending' || appointment.status === 'confirmed') && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-[#6d1115] hover:text-[#4a0e10] hover:bg-[#6d1115]/10"
-                          onClick={() => handleCancelAppointment(appointment.id)}
-                          disabled={cancellingAppointment === appointment.id}
-                          title="Cancelar cita"
-                        >
-                          {cancellingAppointment === appointment.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <X className="w-4 h-4" />
-                          )}
-                        </Button>
-                      )}
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewAppointmentDetails(appointment)}
+                      title="Ver detalles"
+                      className="text-[#1e2a37] hover:text-[#8e161a] hover:bg-[#d3b7a0]/20 p-2"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -416,74 +401,75 @@ export function AppointmentHistory() {
 
       {/* Modal de detalles de cita */}
       {showAppointmentDetails && selectedAppointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">Detalles de la Cita</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowAppointmentDetails(false)}>
+          <div className="bg-white rounded-lg p-4 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-[#1e2a37]">Detalles de la Cita</h3>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={() => setShowAppointmentDetails(false)}
+                className="p-1 h-auto hover:bg-gray-100"
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
             
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Psicólogo</p>
-                <p className="text-base font-semibold text-gray-900">Dr. {selectedAppointment.psychologist_name}</p>
+            <div className="space-y-2.5 text-sm">
+              <div className="flex items-start gap-2">
+                <User className="w-4 h-4 text-[#8e161a] mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500 mb-0.5">Psicólogo</p>
+                  <p className="text-sm font-semibold text-[#1e2a37]">{selectedAppointment.psychologist_name}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Fecha</p>
-                <p className="text-base font-semibold text-gray-900">{parseLocalDate(selectedAppointment.date).toLocaleDateString('es-ES', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}</p>
+              <div className="flex items-start gap-2">
+                <Calendar className="w-4 h-4 text-[#8e161a] mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500 mb-0.5">Fecha</p>
+                  <p className="text-sm font-semibold text-[#1e2a37]">{parseLocalDate(selectedAppointment.date).toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Hora</p>
-                <p className="text-base font-semibold text-gray-900">{selectedAppointment.time}</p>
+              <div className="flex items-start gap-2">
+                <Clock className="w-4 h-4 text-[#8e161a] mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500 mb-0.5">Hora</p>
+                  <p className="text-sm font-semibold text-[#1e2a37]">{selectedAppointment.time}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Motivo</p>
-                <p className="text-base text-gray-900">{selectedAppointment.reason}</p>
+              <div className="flex items-start gap-2">
+                <FileText className="w-4 h-4 text-[#8e161a] mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500 mb-0.5">Motivo</p>
+                  <p className="text-sm text-[#1e2a37] break-words">{selectedAppointment.reason}</p>
+                </div>
               </div>
               {selectedAppointment.notes && (
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Notas</p>
-                  <p className="text-base text-gray-900">{selectedAppointment.notes}</p>
+                <div className="flex items-start gap-2">
+                  <FileText className="w-4 h-4 text-[#8e161a] mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-gray-500 mb-0.5">Notas</p>
+                    <p className="text-sm text-[#1e2a37] break-words">{selectedAppointment.notes}</p>
+                  </div>
                 </div>
               )}
-              <div>
-                <p className="text-sm font-medium text-gray-600">Estado</p>
-                <Badge variant={selectedAppointment.status === 'pending' ? 'warning' : 
-                               selectedAppointment.status === 'confirmed' ? 'success' :
-                               selectedAppointment.status === 'completed' ? 'info' : 'danger'}>
-                  {getStatusText(selectedAppointment.status)}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Creada</p>
-                <p className="text-base text-gray-900">
-                  {parseLocalDate(selectedAppointment.created_at).toLocaleDateString('es-ES')}
-                </p>
+              <div className="flex items-center gap-2 pt-1 border-t border-gray-100">
+                <span className="text-xs text-gray-500">Estado:</span>
+                {getStatusBadge(selectedAppointment.status)}
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setShowAppointmentDetails(false)}
-              >
-                Cerrar
-              </Button>
+            <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-200">
               {(selectedAppointment.status === 'pending' || selectedAppointment.status === 'confirmed') && (
                 <Button
                   variant="outline"
-                  className="text-red-600 hover:bg-red-50"
+                  size="sm"
+                  className="text-red-600 hover:bg-red-50 border-red-200"
                   onClick={() => {
                     handleCancelAppointment(selectedAppointment.id);
                     setShowAppointmentDetails(false);
@@ -492,6 +478,14 @@ export function AppointmentHistory() {
                   Cancelar Cita
                 </Button>
               )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAppointmentDetails(false)}
+                className="border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white"
+              >
+                Cerrar
+              </Button>
             </div>
           </div>
         </div>

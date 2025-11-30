@@ -223,9 +223,9 @@ export const deleteUser = async (id: number): Promise<void> => {
 };
 
 // Desactivar usuario
-export const deactivateUser = async (id: number): Promise<void> => {
+export const deactivateUser = async (id: number, reason: string): Promise<void> => {
   try {
-    await apiClient.post(`/users/${id}/deactivate`);
+    await apiClient.post(`/users/${id}/deactivate`, { reason });
   } catch (error: unknown) {
     console.error('Error deactivating user:', error);
     if (error && typeof error === 'object' && 'response' in error) {
@@ -235,6 +235,24 @@ export const deactivateUser = async (id: number): Promise<void> => {
       }
     }
     throw new Error('Error al desactivar el usuario');
+  }
+};
+
+// Desactivar cuenta propia (usuario autenticado)
+export const deactivateOwnAccount = async (reason: string): Promise<void> => {
+  try {
+    const response = await apiClient.get('/user/profile');
+    const user = response.data.data || response.data;
+    await apiClient.post(`/users/${user.id}/deactivate`, { reason });
+  } catch (error: unknown) {
+    console.error('Error deactivating own account:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
+    }
+    throw new Error('Error al desactivar tu cuenta');
   }
 };
 

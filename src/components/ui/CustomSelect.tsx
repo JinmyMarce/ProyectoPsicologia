@@ -15,6 +15,7 @@ interface CustomSelectProps {
   error?: boolean;
   disabled?: boolean;
   openDirection?: 'top' | 'bottom' | 'auto';
+  focusColor?: 'blue' | 'blue-dark' | 'rose-dark';
 }
 
 export const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -25,40 +26,136 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   className = '',
   error = false,
   disabled = false,
-  openDirection = 'auto'
+  openDirection = 'auto',
+  focusColor = 'blue'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>(openDirection === 'top' ? 'top' : 'bottom');
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const selectRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find(opt => opt.value === value);
 
-  // Calcular posición del dropdown para evitar que se salga del viewport
+  // Calcular posición del dropdown para evitar que se salga del viewport y del modal
   useEffect(() => {
-    if (isOpen && selectRef.current) {
-      // Si la dirección está forzada, usar esa
-      if (openDirection === 'top') {
-        setDropdownPosition('top');
-        return;
-      }
-      if (openDirection === 'bottom') {
-        setDropdownPosition('bottom');
-        return;
-      }
-
-      // Solo calcular automáticamente si es 'auto'
-      const rect = selectRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      const dropdownHeight = Math.min(240, options.length * 42 + 16); // max-h-60 aproximado
-
-      // Si no hay espacio suficiente abajo pero sí arriba, mostrar arriba
-      if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
-        setDropdownPosition('top');
+    if (isOpen && selectRef.current && buttonRef.current) {
+      // Usar el rect del botón, no del contenedor
+      const rect = buttonRef.current.getBoundingClientRect();
+      const dropdownHeight = Math.min(240, options.length * 42 + 16);
+      
+      // Buscar el contenedor del modal solo por atributos específicos de modal
+      // No usar overflow como indicador porque puede causar problemas de posicionamiento
+      const modalContainer = selectRef.current.closest('[role="dialog"]') || 
+                             selectRef.current.closest('.modal') ||
+                             selectRef.current.closest('[class*="Modal"]') ||
+                             selectRef.current.closest('[class*="modal"]') ||
+                             selectRef.current.closest('[data-modal="true"]');
+      
+      // Si está dentro de un modal, usar position fixed y calcular posición relativa al viewport
+      if (modalContainer) {
+        const modalRect = modalContainer.getBoundingClientRect();
+        const spaceBelowInModal = modalRect.bottom - rect.bottom;
+        const spaceAboveInModal = rect.top - modalRect.top;
+        const minSpace = 8;
+        
+        let position: 'top' | 'bottom' = 'bottom';
+        let maxHeight = dropdownHeight;
+        
+        if (openDirection === 'top') {
+          position = 'top';
+        } else if (openDirection === 'bottom') {
+          position = 'bottom';
+        } else {
+          // Auto: calcular mejor posición
+          if (spaceBelowInModal < dropdownHeight + minSpace && spaceAboveInModal > dropdownHeight + minSpace) {
+            position = 'top';
+          } else if (spaceBelowInModal >= dropdownHeight + minSpace) {
+            position = 'bottom';
+          } else {
+            // Ajustar altura al espacio disponible
+            const availableSpace = Math.max(spaceBelowInModal - minSpace, spaceAboveInModal - minSpace, 100);
+            maxHeight = availableSpace;
+            position = spaceBelowInModal > spaceAboveInModal ? 'bottom' : 'top';
+          }
+        }
+        
+        // Calcular posición fixed para que se mantenga dentro del viewport y del contenedor
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        
+        // Asegurar que el dropdown no se salga del viewport horizontalmente
+        let left = rect.left;
+        if (left + rect.width > viewportWidth - 8) {
+          left = viewportWidth - rect.width - 8;
+        }
+        if (left < 8) {
+          left = 8;
+        }
+        
+        // Calcular posición vertical considerando el contenedor y el viewport
+        if (position === 'top') {
+          // Calcular desde arriba del input hacia arriba
+          const topSpace = rect.top - modalRect.top;
+          const availableTopSpace = Math.min(topSpace - minSpace, viewportHeight - (viewportHeight - rect.top) - minSpace);
+          maxHeight = Math.min(maxHeight, availableTopSpace);
+        } else {
+          // Calcular desde abajo del input hacia abajo
+          const bottomSpace = modalRect.bottom - rect.bottom;
+          const availableBottomSpace = Math.min(bottomSpace - minSpace, viewportHeight - rect.bottom - minSpace);
+          maxHeight = Math.min(maxHeight, availableBottomSpace);
+        }
+        
+        // Crear el objeto style con todas las propiedades
+        const style: React.CSSProperties = {
+          position: 'fixed',
+          left: `${left}px`,
+          width: `${Math.min(rect.width, viewportWidth - left - 8)}px`,
+          maxHeight: `${maxHeight}px`,
+          zIndex: 10001,
+          contain: 'layout style paint'
+        };
+        
+        // Asignar posición vertical
+        if (position === 'top') {
+          style.bottom = `${viewportHeight - rect.top + 4}px`;
+        } else {
+          style.top = `${rect.bottom + 4}px`;
+        }
+        
+        setDropdownPosition(position);
+        setDropdownStyle(style);
       } else {
-        setDropdownPosition('bottom');
+        // Si no está en un modal, usar position absolute normal relativo al contenedor
+        const viewportHeight = window.innerHeight;
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        let position: 'top' | 'bottom' = 'bottom';
+        
+        if (openDirection === 'top') {
+          position = 'top';
+        } else if (openDirection === 'bottom') {
+          position = 'bottom';
+        } else {
+          // Auto: calcular mejor posición
+          if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+            position = 'top';
+          } else {
+            position = 'bottom';
+          }
+        }
+        
+        setDropdownPosition(position);
+        setDropdownStyle({
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          width: '100%',
+          zIndex: 1000
+        });
       }
     }
   }, [isOpen, options.length, openDirection]);
@@ -140,15 +237,30 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
     setHighlightedIndex(-1);
   };
 
-  const baseClasses = `w-full px-3 py-2 rounded-lg border-2 transition-all duration-300 focus:outline-none focus:ring-2 text-base relative cursor-pointer ${
-    error 
-      ? 'border-red-300 focus:border-red-500 focus:ring-red-100' 
-      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-100'
+  // Determinar clases de focus según focusColor
+  const getFocusClasses = () => {
+    if (error) {
+      return 'border-red-300 focus:border-red-500 focus:ring-red-100';
+    }
+    switch (focusColor) {
+      case 'blue-dark':
+        return 'border-slate-300 focus:border-blue-900 focus:ring-blue-900';
+      case 'rose-dark':
+        return 'border-slate-300 focus:border-rose-950 focus:ring-rose-950';
+      case 'blue':
+      default:
+        return 'border-gray-300 focus:border-blue-500 focus:ring-blue-100';
+    }
+  };
+
+  const baseClasses = `w-full px-2.5 py-2 rounded-md border transition-all duration-300 focus:outline-none focus:ring-2 text-sm relative cursor-pointer ${
+    getFocusClasses()
   } ${disabled ? 'bg-gray-100 cursor-not-allowed opacity-50' : 'bg-white'}`;
 
   return (
     <div ref={selectRef} className={`relative ${className}`}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
@@ -166,17 +278,15 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 
       {isOpen && (
         <div 
-          className={`absolute z-[10001] w-full bg-white border-2 border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto ${
-            dropdownPosition === 'top' ? 'bottom-full mb-1' : 'top-full mt-1'
+          className={`bg-white border-2 border-gray-300 rounded-lg shadow-xl overflow-y-auto ${
+            dropdownPosition === 'top' && !dropdownStyle.position ? 'bottom-full mb-1' : 
+            dropdownPosition === 'bottom' && !dropdownStyle.position ? 'top-full mt-1' : ''
           }`}
           role="listbox"
           ref={optionsRef}
           style={{
             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
-            // Renderizar dentro del contenedor, no usar portal
-            position: 'absolute',
-            left: 0,
-            right: 0
+            ...dropdownStyle
           }}
         >
           {options.length === 0 ? (

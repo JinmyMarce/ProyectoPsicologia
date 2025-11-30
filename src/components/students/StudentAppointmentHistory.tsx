@@ -5,13 +5,8 @@ import {
   Calendar,
   Clock,
   User,
-  FileText,
   RefreshCw,
-  Eye,
   AlertCircle,
-  CheckCircle,
-  XCircle,
-  X,
   Clock as ClockIcon
 } from 'lucide-react';
 import { getUserAppointments } from '../../services/appointments';
@@ -39,8 +34,8 @@ export function StudentAppointmentHistory() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState<'all' | 'completed' | 'cancelled' | 'rescheduled'>('all');
-  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentHistory | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   useEffect(() => {
     if (user?.email) {
@@ -100,20 +95,6 @@ export function StudentAppointmentHistory() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'cancelled':
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'rescheduled':
-        return <ClockIcon className="w-4 h-4 text-yellow-500" />;
-      case 'confirmed':
-        return <CheckCircle className="w-4 h-4 text-blue-500" />;
-      default:
-        return <AlertCircle className="w-4 h-4 text-gray-500" />;
-    }
-  };
 
   const filteredAppointments = appointments.filter(appointment => {
     if (filter === 'all') return true;
@@ -121,10 +102,28 @@ export function StudentAppointmentHistory() {
     return appointment.status === filter;
   });
 
-  const handleViewDetails = (appointment: AppointmentHistory) => {
-    setSelectedAppointment(appointment);
-    setShowDetails(true);
-  };
+  // Ordenar por fecha más reciente (los más recientes primero)
+  const sortedAppointments = filteredAppointments.sort((a, b) => {
+    const dateA = parseLocalDate(a.date).getTime();
+    const dateB = parseLocalDate(b.date).getTime();
+    if (dateB !== dateA) {
+      return dateB - dateA;
+    }
+    // Si las fechas son iguales, ordenar por hora (más reciente primero)
+    return b.time.localeCompare(a.time);
+  });
+
+  // Paginación
+  const totalPages = Math.ceil(sortedAppointments.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedAppointments = sortedAppointments.slice(startIndex, endIndex);
+
+  // Resetear página cuando cambia el filtro
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
+
 
   // Función para parsear fecha local
   function parseLocalDate(dateStr: string): Date {
@@ -142,20 +141,6 @@ export function StudentAppointmentHistory() {
     return new Date(dateStr);
   }
 
-  // Función para formatear fecha legible
-  const formatDate = (dateString: string) => {
-    try {
-      const date = parseLocalDate(dateString);
-      return date.toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch (error) {
-      return dateString;
-    }
-  };
 
   // Función para formatear hora correctamente (HH:mm)
   const formatTime = (timeString: string | null | undefined) => {
@@ -201,9 +186,10 @@ export function StudentAppointmentHistory() {
   const totalAppointments = appointments.length;
   const completedAppointments = appointments.filter(apt => apt.status === 'completed').length;
   const rescheduledAppointments = appointments.filter(apt => apt.rescheduled_from || apt.rescheduled_to).length;
+  const cancelledAppointments = appointments.filter(apt => apt.status === 'cancelled').length;
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900">
+    <div className="min-h-screen bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900 overflow-x-hidden">
       {/* Header Section - Compact & Professional */}
       <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl xs:rounded-2xl shadow-2xl relative overflow-hidden mx-1.5 xs:mx-2 sm:mx-3 mt-2 xs:mt-3 border border-white/10">
         {/* Subtle gradient overlay */}
@@ -229,13 +215,21 @@ export function StudentAppointmentHistory() {
                   Historial
                 </span>
               </div>
-              <h1 className="text-xl xs:text-2xl md:text-3xl font-black tracking-tight text-white mb-0.5 xs:mb-1 leading-tight drop-shadow-lg">
+              <h1 className="text-2xl xs:text-3xl md:text-4xl font-black tracking-tight text-white mb-0.5 xs:mb-1 leading-tight drop-shadow-lg">
                 Historial de Citas
               </h1>
-              <p className="text-slate-300 text-[10px] xs:text-xs max-w-2xl font-medium leading-relaxed drop-shadow-md">
+              <p className="text-slate-300 text-xs xs:text-sm max-w-2xl font-medium leading-relaxed drop-shadow-md">
                 Revisa todas tus sesiones anteriores
               </p>
             </div>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border border-white/20 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-1.5"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Actualizar
+            </button>
           </div>
         </div>
 
@@ -248,94 +242,79 @@ export function StudentAppointmentHistory() {
         </div>
       </div>
 
-      <div className="w-full px-2 xs:px-3 sm:px-4 lg:px-6 -mt-2 relative z-20 overflow-y-auto h-[calc(100vh-10.5rem)]">
-        {/* Estadísticas - Compactas y Responsivas */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 xs:gap-2.5 mb-3 animate-fade-in delay-[100ms]">
+      <div className="w-full max-w-full px-2 xs:px-3 sm:px-4 lg:px-6 -mt-2 relative z-20 pb-4 overflow-x-hidden">
+        {/* Estadísticas - Copiado del Dashboard */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Total Citas */}
-          <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-2.5 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-slate-100/50 to-transparent rounded-full -mr-6 -mt-6 blur-2xl group-hover:from-slate-200/60 transition-all duration-500"></div>
-            <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-lg flex items-center justify-center text-indigo-700 shadow-sm group-hover:scale-110 transition-all duration-300">
-                  <Calendar className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-slate-900 tracking-tight leading-none">{totalAppointments}</p>
-                  <p className="text-xs font-bold text-slate-600 mt-0.5">Total Citas</p>
-                </div>
-              </div>
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-violet-100 transition-colors group">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Total Citas</p>
+            <p className="text-3xl font-black text-slate-900 group-hover:text-violet-600 transition-colors">{totalAppointments}</p>
+            <div className="h-1 w-8 bg-slate-100 mt-3 rounded-full overflow-hidden">
+              <div className="h-full bg-slate-900 w-full rounded-full"></div>
             </div>
           </div>
 
           {/* Completadas */}
-          <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-2.5 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-50/50 to-transparent rounded-full -mr-6 -mt-6 blur-2xl group-hover:from-green-100/60 transition-all duration-500"></div>
-            <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-lg flex items-center justify-center text-emerald-700 shadow-sm group-hover:scale-110 transition-all duration-300">
-                  <CheckCircle className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-slate-900 tracking-tight leading-none">{completedAppointments}</p>
-                  <p className="text-xs font-bold text-slate-600 mt-0.5">Completadas</p>
-                </div>
-              </div>
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-100 transition-colors group">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Completadas</p>
+            <p className="text-3xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors">{completedAppointments}</p>
+            <div className="h-1 w-8 bg-slate-100 mt-3 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 w-[80%] rounded-full"></div>
             </div>
           </div>
 
           {/* Reprogramadas */}
-          <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-2.5 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-amber-50/50 to-transparent rounded-full -mr-6 -mt-6 blur-2xl group-hover:from-amber-100/60 transition-all duration-500"></div>
-            <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg flex items-center justify-center text-amber-700 shadow-sm group-hover:scale-110 transition-all duration-300">
-                  <ClockIcon className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-slate-900 tracking-tight leading-none">{rescheduledAppointments}</p>
-                  <p className="text-xs font-bold text-slate-600 mt-0.5">Reprogramadas</p>
-                </div>
-              </div>
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-amber-100 transition-colors group">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Reprogramadas</p>
+            <p className="text-3xl font-black text-slate-900 group-hover:text-amber-600 transition-colors">{rescheduledAppointments}</p>
+            <div className="h-1 w-8 bg-slate-100 mt-3 rounded-full overflow-hidden">
+              <div className="h-full bg-amber-500 w-[60%] rounded-full"></div>
+            </div>
+          </div>
+
+          {/* Canceladas */}
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-rose-100 transition-colors group">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Canceladas</p>
+            <p className="text-3xl font-black text-slate-900 group-hover:text-rose-500 transition-colors">{cancelledAppointments}</p>
+            <div className="h-1 w-8 bg-slate-100 mt-3 rounded-full overflow-hidden">
+              <div className="h-full bg-rose-500 w-[10%] rounded-full"></div>
             </div>
           </div>
         </div>
 
-        {/* Filtros - Compactos y Responsivos */}
-        <div className="flex flex-wrap gap-1 xs:gap-1.5 justify-center items-center mb-3">
-          {[
-            { key: 'all', label: 'Todas' },
-            { key: 'completed', label: 'Completadas' },
-            { key: 'cancelled', label: 'Canceladas' },
-            { key: 'rescheduled', label: 'Reprogramadas' }
-          ].map(({ key, label }) => (
-            <Button
-              key={key}
-              variant={filter === key ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => setFilter(key as any)}
-              className="text-[10px] font-bold rounded-lg px-3 py-1.5 transition-all hover:scale-105"
-            >
-              {label}
-            </Button>
-          ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="text-[10px] font-bold rounded-lg px-3 py-1.5 transition-all hover:scale-105"
-          >
-            <RefreshCw className={`w-3 h-3 mr-1 ${refreshing ? 'animate-spin' : ''}`} />
-            Actualizar
-          </Button>
+        {/* Filtros - Diseño Moderno */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+          <div className="flex flex-wrap gap-2 justify-center items-center">
+            {[
+              { key: 'all', label: 'Todas' },
+              { key: 'completed', label: 'Completadas' },
+              { key: 'cancelled', label: 'Canceladas' },
+              { key: 'rescheduled', label: 'Reprogramadas' }
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key as any)}
+                className={`
+                  px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300
+                  ${filter === key
+                    ? 'bg-gradient-to-r from-[#1e2a37] to-[#2d3e4f] text-white shadow-lg shadow-[#1e2a37]/30 transform scale-105'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
+                  }
+                  hover:scale-105 active:scale-95
+                `}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Lista de citas */}
         {loading ? (
           <div className="bg-white rounded-xl shadow-md p-4 border border-slate-200">
             <div className="flex items-center justify-center py-6">
-              <div className="w-7 h-7 border-3 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
-              <span className="ml-3 text-slate-600 font-semibold text-xs">Cargando historial...</span>
+              <div className="w-7 h-7 border-3 border-slate-200 border-t-slate-600 rounded-full animate-spin"></div>
+              <span className="ml-3 text-slate-600 font-semibold text-base">Cargando historial...</span>
             </div>
           </div>
         ) : error ? (
@@ -345,248 +324,271 @@ export function StudentAppointmentHistory() {
               <p className="text-red-600 font-semibold text-sm">{error}</p>
             </div>
           </div>
-        ) : filteredAppointments.length === 0 ? (
+        ) : sortedAppointments.length === 0 ? (
           <div className="bg-white rounded-xl shadow-md p-4 border border-slate-200">
             <div className="text-center py-6">
-              <div className="w-14 h-14 bg-gradient-to-br from-violet-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-violet-100/50">
-                <Calendar className="w-7 h-7 text-violet-500" />
+              <div className="w-14 h-14 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-slate-100/50">
+                <Calendar className="w-7 h-7 text-slate-600" />
               </div>
-              <h3 className="text-slate-900 font-bold mb-1.5 text-sm">No hay citas en el historial</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Cuando tengas citas, aparecerán aquí</p>
+              <h3 className="text-slate-900 font-bold mb-1.5 text-lg">No hay citas en el historial</h3>
+              <p className="text-base text-slate-500 leading-relaxed">Cuando tengas citas, aparecerán aquí</p>
             </div>
           </div>
         ) : (
-          <div className="space-y-2.5">
-            {filteredAppointments.map((appointment) => (
-              <div key={appointment.id} className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 xs:p-4 border border-slate-200 hover:border-slate-300 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
-                <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-slate-50/50 to-transparent rounded-full -mr-10 -mt-10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                <div className="relative z-10">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 mb-3">
-                    <div className="flex-1 min-w-0 w-full">
-                      <div className="flex items-center gap-2 xs:gap-2.5 mb-1.5">
-                        <div className="w-7 h-7 xs:w-8 xs:h-8 bg-gradient-to-br from-violet-100 to-purple-200 rounded-lg flex items-center justify-center shadow-sm border border-violet-100 flex-shrink-0">
-                          <Calendar className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-violet-700" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate">
-                            {appointment.psychologist_name}
-                          </h3>
-                          <p className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5">
-                            {formatDate(appointment.date)} • {formatTime(appointment.time)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 self-start sm:self-center flex-shrink-0">
-                      {getStatusIcon(appointment.status)}
-                      <Badge variant={getStatusColor(appointment.status)} className="text-[9px] xs:text-[10px] px-1.5 xs:px-2 py-0.5 uppercase tracking-wider font-bold shadow-sm rounded-lg">
-                        {getStatusText(appointment.status)}
-                      </Badge>
-                    </div>
+          <>
+            {/* Header con encabezados - Solo visible en pantallas grandes */}
+            <div className="hidden lg:block bg-gradient-to-r from-[#1e2a37] to-[#2d3e4f] rounded-lg mb-2 sticky top-0 z-10">
+              <div className="p-2.5 pr-4 lg:pr-6">
+                <div className="grid grid-cols-[50px_2fr_2.2fr_1fr_1.8fr_150px] gap-3 lg:gap-4 xl:gap-6 2xl:gap-8 w-full items-center">
+                  <div></div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-white/90 uppercase font-semibold truncate block">Psicólogo</span>
                   </div>
-
-                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
-                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-2 border border-blue-100/50">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wide">Hora Cita</p>
-                          <p className="text-sm font-bold text-slate-900">{formatTime(appointment.time)}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2 border border-emerald-100/50">
-                      <div className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wide">Psicólogo</p>
-                          <p className="text-sm font-bold text-slate-900 truncate">{appointment.psychologist_name.split(' ')[0]}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg p-2 border border-violet-100/50">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-violet-600 flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wide">Fecha Cita</p>
-                          <p className="text-sm font-bold text-slate-900">{formatDate(appointment.date)}</p>
-                        </div>
-                      </div>
-                    </div>
-                    {(appointment.rescheduled_from || appointment.rescheduled_to) && (
-                      <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg p-2 border border-amber-100/50">
-                        <div className="flex items-center gap-1.5">
-                          <ClockIcon className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide">Estado</p>
-                            <p className="text-sm font-bold text-slate-900">Reprog.</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-white/90 uppercase font-semibold truncate block">Fecha de la Cita</span>
                   </div>
-
-                  {appointment.reason && (
-                    <div className="mb-3 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-2.5 xs:p-3 border border-slate-200/50">
-                      <h4 className="font-bold text-slate-900 mb-1.5 text-xs sm:text-sm flex items-center">
-                        <FileText className="w-3 h-3 xs:w-3.5 xs:h-3.5 mr-1.5 text-blue-600" />
-                        Motivo
-                      </h4>
-                      <p className="text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-2">{appointment.reason}</p>
-                    </div>
-                  )}
-
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => handleViewDetails(appointment)}
-                      className="w-full sm:w-auto px-3 py-1.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg font-bold text-[10px] xs:text-xs hover:scale-105"
-                    >
-                      <Eye className="w-3 h-3 xs:w-3.5 xs:h-3.5 mr-1.5" />
-                      Ver Detalles
-                    </button>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-white/90 uppercase font-semibold truncate block">Hora de la Cita</span>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Modal de detalles - Moderno y Compacto */}
-        {showDetails && selectedAppointment && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-50 p-3 sm:p-4" onClick={() => setShowDetails(false)}>
-            <div 
-              className="bg-white rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-hidden border border-slate-200 relative" 
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                boxShadow: `
-                  0 32px 64px rgba(0, 0, 0, 0.16), 
-                  0 16px 32px rgba(0, 0, 0, 0.12),
-                  0 8px 16px rgba(0, 0, 0, 0.08)
-                `
-              }}
-            >
-              {/* Header del Modal */}
-              <div className="bg-gradient-to-r from-violet-600 to-purple-600 p-3 xs:p-4 border-b border-violet-700/20">
-                <div className="flex justify-between items-center gap-2">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-base xs:text-lg font-black text-white tracking-tight">Detalles de la Cita</h3>
-                    <p className="text-[10px] xs:text-xs text-violet-100 font-medium mt-0.5">Información completa de la sesión</p>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-white/90 uppercase font-semibold truncate block">Fecha de Agendamiento</span>
                   </div>
-                  <button
-                    onClick={() => setShowDetails(false)}
-                    className="w-7 h-7 xs:w-8 xs:h-8 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-all duration-300 border border-white/30 hover:border-white/50 flex-shrink-0"
-                  >
-                    <X className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-white" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Contenido del Modal */}
-              <div className="p-3 xs:p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
-                <div className="space-y-2.5 xs:space-y-3">
-                  {/* Información Principal - Compacta y Responsiva */}
-                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-2.5">
-                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-2.5 xs:p-3 border border-blue-200/50">
-                      <div className="flex items-center gap-1.5 xs:gap-2 mb-1.5">
-                        <Calendar className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-blue-600 flex-shrink-0" />
-                        <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wide">Fecha de la Cita</p>
-                      </div>
-                      <p className="text-xs xs:text-sm font-bold text-slate-900 leading-tight">
-                        {formatDate(selectedAppointment.date)}
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg p-2.5 xs:p-3 border border-emerald-200/50">
-                      <div className="flex items-center gap-1.5 xs:gap-2 mb-1.5">
-                        <Clock className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-emerald-600 flex-shrink-0" />
-                        <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wide">Hora de la Cita</p>
-                      </div>
-                      <p className="text-xs xs:text-sm font-bold text-slate-900">{formatTime(selectedAppointment.time)}</p>
-                    </div>
+                  <div className="text-right pr-6 lg:pr-8 xl:pr-10 min-w-0 flex-shrink-0">
+                    <span className="text-[10px] text-white/90 uppercase font-semibold">Estado</span>
                   </div>
-
-                  {/* Psicólogo y Estado */}
-                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-2.5">
-                    <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-lg p-2.5 xs:p-3 border border-violet-200/50">
-                      <div className="flex items-center gap-1.5 xs:gap-2 mb-1.5">
-                        <User className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-violet-600 flex-shrink-0" />
-                        <p className="text-[10px] font-bold text-violet-700 uppercase tracking-wide">Psicólogo</p>
-                      </div>
-                      <p className="text-xs xs:text-sm font-bold text-slate-900 truncate">{selectedAppointment.psychologist_name}</p>
-                    </div>
-                    <div className="bg-gradient-to-br from-slate-50 to-gray-50 rounded-lg p-2.5 xs:p-3 border border-slate-200/50">
-                      <div className="flex items-center gap-1.5 xs:gap-2 mb-1.5">
-                        {getStatusIcon(selectedAppointment.status)}
-                        <p className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Estado</p>
-                      </div>
-                      <Badge variant={getStatusColor(selectedAppointment.status)} className="text-[9px] xs:text-[10px] px-1.5 xs:px-2 py-0.5 uppercase tracking-wider font-bold shadow-sm rounded-lg">
-                        {getStatusText(selectedAppointment.status)}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Información adicional - Cuándo se agendó */}
-                  <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-2.5 xs:p-3 border border-slate-200/50">
-                    <div className="flex items-center gap-1.5 xs:gap-2 mb-1.5 xs:mb-2">
-                      <Calendar className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-slate-600 flex-shrink-0" />
-                      <p className="text-[10px] font-bold text-slate-700 uppercase tracking-wide">Agendada el</p>
-                    </div>
-                    <p className="text-xs xs:text-sm font-bold text-slate-900">
-                      {new Date(selectedAppointment.created_at).toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </p>
-                  </div>
-
-                  {/* Motivo de Consulta */}
-                  {selectedAppointment.reason && (
-                    <div className="bg-gradient-to-br from-blue-50/50 to-violet-50/30 rounded-lg p-2.5 xs:p-3 border border-blue-200/50">
-                      <h4 className="font-bold text-slate-900 mb-1.5 xs:mb-2 text-xs xs:text-sm flex items-center">
-                        <FileText className="w-3 h-3 xs:w-3.5 xs:h-3.5 mr-1.5 text-blue-600 flex-shrink-0" />
-                        Motivo de Consulta
-                      </h4>
-                      <p className="text-xs xs:text-sm text-slate-700 leading-relaxed bg-white/60 p-2 xs:p-2.5 rounded-lg border border-blue-200/30">
-                        {selectedAppointment.reason}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Notas */}
-                  {selectedAppointment.notes && (
-                    <div className="bg-gradient-to-br from-slate-50 to-gray-50/30 rounded-lg p-2.5 xs:p-3 border border-slate-200/50">
-                      <h4 className="font-bold text-slate-900 mb-1.5 xs:mb-2 text-xs xs:text-sm flex items-center">
-                        <FileText className="w-3 h-3 xs:w-3.5 xs:h-3.5 mr-1.5 text-slate-600 flex-shrink-0" />
-                        Notas Adicionales
-                      </h4>
-                      <p className="text-xs xs:text-sm text-slate-700 leading-relaxed bg-white/60 p-2 xs:p-2.5 rounded-lg border border-slate-200/30">
-                        {selectedAppointment.notes}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Información de Reprogramación */}
-                  {(selectedAppointment.rescheduled_from || selectedAppointment.rescheduled_to) && (
-                    <div className="bg-gradient-to-br from-amber-50 to-yellow-50/50 rounded-lg p-3 border border-amber-200/50">
-                      <h4 className="font-bold text-slate-900 mb-2 text-xs flex items-center">
-                        <ClockIcon className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
-                        Reprogramación
-                      </h4>
-                      <div className="bg-white/60 p-2.5 rounded-lg border border-amber-200/30">
-                        <p className="text-amber-800 text-sm font-medium leading-relaxed">
-                          Esta cita fue reprogramada. Si necesitas más información, contacta al psicólogo.
-                        </p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
-          </div>
+
+            <div className="space-y-1.5">
+              {paginatedAppointments.map((appointment) => (
+                  <div key={appointment.id} className="bg-white rounded-lg border border-gray-200 hover:border-[#1e2a37]/30 hover:shadow-sm transition-all duration-200">
+                    {/* Layout para pantallas grandes (lg+) */}
+                    <div className="hidden lg:block p-2.5">
+                      <div className="grid grid-cols-[50px_2fr_2.2fr_1fr_1.8fr_150px] gap-3 lg:gap-4 xl:gap-6 2xl:gap-8 w-full items-center">
+                        {/* Avatar/Icono */}
+                        <div className="w-9 h-9 bg-gradient-to-br from-[#1e2a37] to-[#2d3e4f] rounded-lg flex items-center justify-center flex-shrink-0">
+                          <User className="w-4.5 h-4.5 text-white" />
+                        </div>
+                        
+                        {/* Psicólogo */}
+                        <div className="min-w-0">
+                          <h3 className="text-xs font-semibold text-[#1e2a37] truncate">
+                            {appointment.psychologist_name}
+                          </h3>
+                        </div>
+
+                        {/* Fecha */}
+                        <div className="min-w-0">
+                          <span className="text-xs text-[#1e2a37] font-medium flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-[#1e2a37] flex-shrink-0" />
+                            <span className="truncate">
+                              {parseLocalDate(appointment.date).toLocaleDateString('es-ES', {
+                                weekday: 'long',
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          </span>
+                        </div>
+
+                        {/* Hora */}
+                        <div>
+                          <span className="text-xs text-[#1e2a37] font-medium flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-[#1e2a37] flex-shrink-0" />
+                            {formatTime(appointment.time)}
+                          </span>
+                        </div>
+
+                        {/* Fecha de agendamiento */}
+                        <div className="min-w-0">
+                          <span className="text-xs text-gray-600 flex items-center gap-1">
+                            <ClockIcon className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">
+                              {new Date(appointment.created_at).toLocaleDateString('es-ES', {
+                                weekday: 'short',
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          </span>
+                        </div>
+
+                        {/* Estado - A la derecha */}
+                        <div className="text-right pr-6 lg:pr-8 xl:pr-10">
+                          <Badge variant={getStatusColor(appointment.status)} className="text-[9px] px-2 py-0.5 font-medium rounded">
+                            {getStatusText(appointment.status)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Layout para pantallas medianas (md) */}
+                    <div className="hidden md:block lg:hidden p-3">
+                      <div className="grid grid-cols-[50px_1fr_120px] gap-4 w-full items-start">
+                        {/* Avatar/Icono */}
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#1e2a37] to-[#2d3e4f] rounded-lg flex items-center justify-center flex-shrink-0">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        
+                        {/* Información principal */}
+                        <div className="space-y-2 min-w-0">
+                          {/* Psicólogo y Estado */}
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="text-sm font-semibold text-[#1e2a37] truncate">
+                              {appointment.psychologist_name}
+                            </h3>
+                            <Badge variant={getStatusColor(appointment.status)} className="text-[9px] px-2 py-0.5 font-medium rounded flex-shrink-0">
+                              {getStatusText(appointment.status)}
+                            </Badge>
+                          </div>
+
+                          {/* Fecha y Hora */}
+                          <div className="space-y-1">
+                            <span className="text-xs text-[#1e2a37] font-medium flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-[#1e2a37] flex-shrink-0" />
+                              {parseLocalDate(appointment.date).toLocaleDateString('es-ES', {
+                                weekday: 'short',
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </span>
+                            <span className="text-xs text-[#1e2a37] font-medium flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5 text-[#1e2a37] flex-shrink-0" />
+                              {formatTime(appointment.time)}
+                            </span>
+                            <span className="text-xs text-gray-600 flex items-center gap-1.5">
+                              <ClockIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                              Agendado: {new Date(appointment.created_at).toLocaleDateString('es-ES', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Layout para pantallas pequeñas (sm y menores) */}
+                    <div className="md:hidden p-3">
+                      <div className="flex gap-3">
+                        {/* Avatar/Icono */}
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#1e2a37] to-[#2d3e4f] rounded-lg flex items-center justify-center flex-shrink-0">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        
+                        {/* Información */}
+                        <div className="flex-1 space-y-2 min-w-0">
+                          {/* Psicólogo y Estado */}
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="text-sm font-semibold text-[#1e2a37]">
+                              {appointment.psychologist_name}
+                            </h3>
+                            <Badge variant={getStatusColor(appointment.status)} className="text-[9px] px-2 py-0.5 font-medium rounded flex-shrink-0">
+                              {getStatusText(appointment.status)}
+                            </Badge>
+                          </div>
+
+                          {/* Información detallada */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-3.5 h-3.5 text-[#1e2a37] flex-shrink-0" />
+                              <span className="text-xs text-[#1e2a37] font-medium">
+                                {parseLocalDate(appointment.date).toLocaleDateString('es-ES', {
+                                  weekday: 'short',
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-3.5 h-3.5 text-[#1e2a37] flex-shrink-0" />
+                              <span className="text-xs text-[#1e2a37] font-medium">
+                                {formatTime(appointment.time)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <ClockIcon className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                              <span className="text-xs text-gray-600">
+                                Agendado: {new Date(appointment.created_at).toLocaleDateString('es-ES', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              ))}
+            </div>
+          
+          {/* Paginación */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="text-sm border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white"
+              >
+                Anterior
+              </Button>
+              <span className="text-sm font-medium text-[#1e2a37]">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="text-sm border-[#8e161a] text-[#8e161a] hover:bg-[#8e161a] hover:text-white"
+              >
+                Siguiente
+              </Button>
+            </div>
+          )}
+          </>
         )}
       </div>
     </div>
   );
 } 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

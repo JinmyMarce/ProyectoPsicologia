@@ -381,6 +381,14 @@ export function RescheduleAppointment() {
                 Modifica tus citas confirmadas con al menos 24 horas de anticipación
               </p>
             </div>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border border-white/20 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-1.5"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Actualizar
+            </button>
           </div>
         </div>
 
@@ -435,16 +443,6 @@ export function RescheduleAppointment() {
               </div>
             </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
-              Actualizar
-            </Button>
           </div>
 
           {/* Reglas compactas */}

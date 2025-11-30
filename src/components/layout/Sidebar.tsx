@@ -65,15 +65,13 @@ const menuItems: MenuItem[] = [
     label: 'Notificaciones',
     icon: Bell,
     page: 'notifications',
-    roles: ['student', 'psychologist', 'admin', 'super_admin', 'tutor'],
-    badge: 3
+    roles: ['student', 'psychologist', 'admin', 'super_admin', 'tutor']
   },
   {
     label: 'Mensajes',
     icon: MessageSquare,
     page: 'messages',
-    roles: ['student'],
-    badge: 2
+    roles: ['student']
   },
   {
     label: 'Mi cuenta',

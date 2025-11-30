@@ -157,6 +157,7 @@ export const MultiStepAppointmentModal: React.FC<MultiStepAppointmentModalProps>
         patient_name: appointmentData.personalData?.fullName || '',
         patient_birthdate: birthDate,
         patient_gender: appointmentData.personalData?.gender || '',
+        patient_marital_status: appointmentData.personalData?.maritalStatus || '',
         patient_address: appointmentData.personalData?.address || '',
         patient_study_program: appointmentData.personalData?.studyProgram || '',
         patient_semester: appointmentData.personalData?.semester || '',

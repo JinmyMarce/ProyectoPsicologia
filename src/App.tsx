@@ -96,8 +96,8 @@ function AppContent() {
   if (loading) {
     return (
       <LoadingScreen
-        title="Instituto Túpac Amaru"
-        subtitle="Sistema de Gestión Psicológica"
+        title="SAPTA"
+        subtitle="Sistema de Atención Psicológica Túpac Amaru"
         size="lg"
         showParticles={true}
         showWaves={true}

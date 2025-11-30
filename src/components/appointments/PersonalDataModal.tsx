@@ -8,6 +8,7 @@ interface PersonalData {
   fullName: string;
   birthDate: string;
   gender: string;
+  maritalStatus: string;
   address: string;
   studyProgram: string;
   semester: string;
@@ -54,6 +55,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
     fullName: userData?.fullName || '',
     birthDate: '',
     gender: '',
+    maritalStatus: '',
     address: '',
     studyProgram: userData?.career || '',
     semester: userData?.semester ? String(userData.semester) : '',
@@ -320,8 +322,8 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                   )}
                 </div>
 
-                {/* Fila 2: DNI, Fecha de Nacimiento y Género */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-3">
+                {/* Fila 2: DNI y Fecha de Nacimiento */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xs:gap-3">
                   {/* DNI */}
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">
@@ -369,7 +371,10 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                     </p>
                   )}
                 </div>
+                </div>
 
+                {/* Fila 3: Género y Estado Civil - Referencia ocupando poco espacio */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xs:gap-3">
                 {/* Género */}
                 <div className="relative" style={{ overflow: 'visible' }}>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -391,6 +396,33 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
                       <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" />
                       {errors.gender}
+                    </p>
+                  )}
+                  </div>
+
+                {/* Estado Civil */}
+                <div className="relative" style={{ overflow: 'visible' }}>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Estado Civil
+                  </label>
+                  <CustomSelect
+                    value={formData.maritalStatus}
+                    onChange={(value) => handleInputChange('maritalStatus', value)}
+                    options={[
+                      { value: 'soltero', label: 'Soltero' },
+                      { value: 'casado', label: 'Casado' },
+                      { value: 'divorciado', label: 'Divorciado' },
+                      { value: 'viudo', label: 'Viudo' },
+                      { value: 'conviviente', label: 'Conviviente' }
+                    ]}
+                    placeholder="Selecciona"
+                    error={!!errors.maritalStatus}
+                    className={errors.maritalStatus ? 'border-red-300' : 'border-gray-200'}
+                  />
+                  {errors.maritalStatus && (
+                      <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                      {errors.maritalStatus}
                     </p>
                   )}
                   </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { messageService, Message, MessageStats } from '../../services/messages';
+import SendMessageModal from './SendMessageModal';
 import { Mail, Trash2, Eye, Search, X, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface MessagePanelProps {
@@ -8,6 +9,8 @@ interface MessagePanelProps {
   onClose: () => void;
 }
 
+
+/* ----------  PANEL PRINCIPAL  ---------- */
 const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [stats, setStats] = useState<MessageStats | null>(null);
@@ -21,8 +24,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
   const [selectAll, setSelectAll] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
-  const [isPriorityDropdownOpen, setIsPriorityDropdownOpen] = useState(false);
-  const [selectedPriority, setSelectedPriority] = useState('normal');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -34,55 +36,36 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen, activeTab, searchTerm, filter]);
 
-  // Cerrar dropdown cuando se hace clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest('.dropdown-container')) {
-        setIsDropdownOpen(false);
-      }
-      if (!target.closest('.priority-dropdown-container')) {
-        setIsPriorityDropdownOpen(false);
-      }
+      if (!target.closest('.dropdown-container')) setIsDropdownOpen(false);
     };
-
-    if (isDropdownOpen || isPriorityDropdownOpen) {
+    if (isDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [isDropdownOpen, isPriorityDropdownOpen]);
+  }, [isDropdownOpen]);
 
-  // Efecto para cerrar modal cuando cambia la interfaz (navegación)
   useEffect(() => {
     const handleRouteChange = () => {
-      if (isOpen) {
-        handleClose();
-      }
+      if (isOpen) onClose();
     };
-
-    // Escuchar cambios en la URL
-    const handlePopState = () => {
-      handleRouteChange();
-    };
-
-    // Escuchar clics en enlaces de navegación
     const handleLinkClick = (e: Event) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'A' || target.closest('a')) {
         handleRouteChange();
       }
     };
-
     if (isOpen) {
-      window.addEventListener('popstate', handlePopState);
+      window.addEventListener('popstate', handleRouteChange);
       document.addEventListener('click', handleLinkClick);
-      
       return () => {
-        window.removeEventListener('popstate', handlePopState);
+        window.removeEventListener('popstate', handleRouteChange);
         document.removeEventListener('click', handleLinkClick);
       };
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   const loadMessages = async () => {
     setLoading(true);
@@ -91,13 +74,12 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
       if (searchTerm) params.search = searchTerm;
       if (filter !== 'all') params.read = filter === 'read';
 
-      const response = activeTab === 'inbox' 
+      const response =
+        activeTab === 'inbox'
         ? await messageService.getMessages(params)
         : await messageService.getSentMessages(params);
 
-      if (response.success) {
-        setMessages(response.data);
-      }
+      if (response.success) setMessages(response.data);
     } catch (error) {
       console.error('Error cargando mensajes:', error);
     } finally {
@@ -108,9 +90,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
   const loadStats = async () => {
     try {
       const response = await messageService.getStats();
-      if (response.success) {
-        setStats(response.data);
-      }
+      if (response.success) setStats(response.data);
     } catch (error) {
       console.error('Error cargando estadísticas:', error);
     }
@@ -120,9 +100,11 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
     try {
       const response = await messageService.markAsRead(messageId);
       if (response.success) {
-        setMessages(messages.map(msg => 
+        setMessages((prev) =>
+          prev.map((msg) =>
           msg.id === messageId ? { ...msg, read: true, read_at: new Date().toISOString() } : msg
-        ));
+          )
+        );
         loadStats();
       }
     } catch (error) {
@@ -134,11 +116,11 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
     try {
       const response = await messageService.markAllAsRead();
       if (response.success) {
-        setMessages(messages.map(msg => ({ ...msg, read: true, read_at: new Date().toISOString() })));
+        setMessages((prev) => prev.map((msg) => ({ ...msg, read: true, read_at: new Date().toISOString() })));
         loadStats();
       }
     } catch (error) {
-      console.error('Error marcando todos los mensajes como leídos:', error);
+      console.error('Error marcando todos como leídos:', error);
     }
   };
 
@@ -146,10 +128,8 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
     try {
       const response = await messageService.deleteMessage(messageId);
       if (response.success) {
-        setMessages(messages.filter(msg => msg.id !== messageId));
-        if (selectedMessage?.id === messageId) {
-          setSelectedMessage(null);
-        }
+        setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+        if (selectedMessage?.id === messageId) setSelectedMessage(null);
         loadStats();
       }
     } catch (error) {
@@ -157,12 +137,9 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  // Funciones para selección múltiple como Gmail
   const handleSelectMessage = (messageId: number) => {
-    setSelectedMessages(prev => 
-      prev.includes(messageId) 
-        ? prev.filter(id => id !== messageId)
-        : [...prev, messageId]
+    setSelectedMessages((prev) =>
+      prev.includes(messageId) ? prev.filter((id) => id !== messageId) : [...prev, messageId]
     );
   };
 
@@ -170,19 +147,17 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
     if (selectAll) {
       setSelectedMessages([]);
     } else {
-      setSelectedMessages(messages.map((m: Message) => m.id));
+      setSelectedMessages(messages.map((m) => m.id));
     }
     setSelectAll(!selectAll);
   };
 
   const handleBulkMarkAsRead = async () => {
     try {
-      for (const messageId of selectedMessages) {
-        await messageService.markAsRead(messageId);
-      }
-      setMessages(messages.map((m: Message) => 
-        selectedMessages.includes(m.id) ? { ...m, read: true } : m
-      ));
+      for (const id of selectedMessages) await messageService.markAsRead(id);
+      setMessages((prev) =>
+        prev.map((m) => (selectedMessages.includes(m.id) ? { ...m, read: true } : m))
+      );
       setSelectedMessages([]);
       setSelectAll(false);
     } catch (error) {
@@ -192,15 +167,11 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
 
   const handleBulkDelete = async () => {
     try {
-      for (const messageId of selectedMessages) {
-        await messageService.deleteMessage(messageId);
-      }
-      setMessages(messages.filter((m: Message) => !selectedMessages.includes(m.id)));
+      for (const id of selectedMessages) await messageService.deleteMessage(id);
+      setMessages((prev) => prev.filter((m) => !selectedMessages.includes(m.id)));
+      if (selectedMessage && selectedMessages.includes(selectedMessage.id)) setSelectedMessage(null);
       setSelectedMessages([]);
       setSelectAll(false);
-      if (selectedMessage && selectedMessages.includes(selectedMessage.id)) {
-        setSelectedMessage(null);
-      }
     } catch (error) {
       console.error('Error deleting messages:', error);
     }
@@ -236,26 +207,9 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return 'Urgente';
-      case 'high':
-        return 'Alta';
-      case 'normal':
-        return 'Normal';
-      case 'low':
-        return 'Baja';
-      default:
-        return 'Normal';
-    }
-  };
-
   const handleClose = () => {
     setIsAnimating(false);
-    setTimeout(() => {
-      onClose();
-    }, 200);
+    setTimeout(() => onClose(), 200);
   };
 
   const formatDate = (dateString: string) => {
@@ -263,13 +217,9 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
     const now = new Date();
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
 
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-    } else if (diffInHours < 48) {
-      return 'Ayer';
-    } else {
+    if (diffInHours < 24) return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    if (diffInHours < 48) return 'Ayer';
       return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
-    }
   };
 
   if (!isOpen) return null;
@@ -317,17 +267,15 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
           }
         `}
       </style>
+
     <div 
       className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[9999] p-3 sm:p-4" 
       onClick={(e) => {
-        // Cerrar modal al hacer clic fuera de él
-        if (e.target === e.currentTarget) {
-          handleClose();
-        }
+          if (e.target === e.currentTarget) handleClose();
       }}
     >
       <div 
-        className={`bg-white rounded-xl xs:rounded-2xl shadow-2xl w-full max-w-5xl h-[95vh] xs:h-[90vh] sm:h-[85vh] flex flex-col transform transition-all duration-300 ${
+        className={`bg-white rounded-3xl rounded-b-3xl shadow-2xl w-full max-w-5xl h-[95vh] xs:h-[90vh] sm:h-[85vh] flex flex-col transform transition-all duration-300 overflow-hidden ${
           isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         }`}
         style={{
@@ -337,23 +285,22 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
             0 16px 32px rgba(0, 0, 0, 0.12),
             0 8px 16px rgba(0, 0, 0, 0.08)
           `,
-          border: '1px solid #e5e7eb'
+            border: '1px solid #e5e7eb',
         }}
-        onClick={(e) => e.stopPropagation()} // Prevenir que se cierre al hacer clic dentro del modal
+          onClick={(e) => e.stopPropagation()}
       >
-        {/* Header - Moderno con Gradiente Slate */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 xs:p-5 sm:p-6 border-b border-slate-700/20 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-tr from-slate-800/50 via-transparent to-slate-800/30 animate-pulse"></div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-600/10 via-slate-500/5 to-transparent rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+          {/* ----  RESTO DEL PANEL SIN CAMBIOS  ---- */}
+          {/* Header */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 xs:p-5 sm:p-6 border-b border-slate-700/20 relative overflow-hidden rounded-t-3xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-slate-800/50 via-transparent to-slate-800/30 animate-pulse" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-600/10 via-slate-500/5 to-transparent rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center space-x-3 xs:space-x-4">
-              <div className="w-10 h-10 xs:w-12 xs:h-12 bg-white/15 backdrop-blur-xl rounded-xl flex items-center justify-center border border-white/20 shadow-lg">
+              <div className="w-10 h-10 xs:w-12 xs:h-12 bg-white/15 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
                 <Mail className="w-5 h-5 xs:w-6 xs:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-base xs:text-lg sm:text-xl font-black text-white tracking-tight">
-                  El Mensajero
-                </h2>
+                  <h2 className="text-base xs:text-lg sm:text-xl font-black text-white tracking-tight">El Mensajero</h2>
                 {stats && (
                   <div className="flex items-center space-x-2 xs:space-x-3 text-[10px] xs:text-xs mt-1 text-slate-300">
                     <span className="flex items-center gap-1 bg-white/15 px-2 py-0.5 rounded-full backdrop-blur-xl border border-white/20">
@@ -378,7 +325,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Tabs - Modernos */}
+          {/* Tabs */}
         <div className="flex border-b border-slate-200 bg-slate-50/50">
           <button
             onClick={() => setActiveTab('inbox')}
@@ -402,10 +349,9 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Search and Filters - Modernos */}
+          {/* Search and Filters */}
         <div className="p-3 xs:p-4 border-b border-slate-200 bg-slate-50/30">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 xs:gap-3">
-            {/* Grupo de búsqueda y filtro juntos */}
             <div className="flex flex-1 items-center gap-2">
               <div className="flex-1 relative min-w-0">
                 <Search className="absolute left-2.5 xs:left-3 top-1/2 transform -translate-y-1/2 w-3.5 xs:w-4 h-3.5 xs:h-4 text-slate-400" />
@@ -414,17 +360,15 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                   placeholder="Buscar mensajes..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 xs:pl-10 pr-3 xs:pr-4 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl transition-all duration-300 text-slate-700 text-xs xs:text-sm focus:ring-2 focus:ring-slate-500 focus:border-slate-500 bg-white"
+                  className="w-full pl-9 xs:pl-10 pr-3 xs:pr-4 py-2 xs:py-2.5 border-2 border-slate-300 rounded-2xl transition-all duration-300 text-slate-700 text-xs xs:text-sm focus:ring-2 focus:ring-slate-500 focus:border-slate-500 bg-white"
                 />
               </div>
               <div className="relative dropdown-container flex-shrink-0 w-auto min-w-[120px]">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl transition-all duration-300 text-slate-700 bg-white text-left flex items-center justify-between text-xs xs:text-sm font-medium hover:border-slate-500 focus:ring-2 focus:ring-slate-500 whitespace-nowrap"
+                  className="px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-2xl transition-all duration-300 text-slate-700 bg-white text-left flex items-center justify-between text-xs xs:text-sm font-medium hover:border-slate-500 focus:ring-2 focus:ring-slate-500 whitespace-nowrap"
                 >
-                  <span>
-                    {filter === 'all' ? 'Todos' : filter === 'unread' ? 'No leídos' : 'Leídos'}
-                  </span>
+                    <span>{filter === 'all' ? 'Todos' : filter === 'unread' ? 'No leídos' : 'Leídos'}</span>
                   <svg
                     className={`w-4 h-4 text-slate-400 transition-transform duration-300 flex-shrink-0 ml-2 ${isDropdownOpen ? 'rotate-180' : ''}`}
                     fill="none"
@@ -436,15 +380,13 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute top-full right-0 mt-1 bg-white border-2 border-slate-200 rounded-xl shadow-xl z-10 overflow-hidden min-w-full">
+                  <div className="absolute top-full right-0 mt-1 bg-white border-2 border-slate-200 rounded-2xl shadow-xl z-10 overflow-hidden min-w-full">
                     <button
                       onClick={() => {
                         setFilter('all');
                         setIsDropdownOpen(false);
                       }}
-                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
-                        filter === 'all' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
-                        }`}
+                        className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${filter === 'all' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'}`}
                     >
                       Todos
                     </button>
@@ -453,9 +395,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                         setFilter('unread');
                         setIsDropdownOpen(false);
                       }}
-                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
-                        filter === 'unread' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
-                      }`}
+                        className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${filter === 'unread' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'}`}
                     >
                       No leídos
                     </button>
@@ -464,22 +404,18 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                         setFilter('read');
                         setIsDropdownOpen(false);
                       }}
-                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
-                        filter === 'read' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
-                      }`}
+                        className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${filter === 'read' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'}`}
                   >
                     Leídos
                   </button>
                 </div>
               )}
             </div>
-            {/* Botones de acción separados */}
+              </div>
             <div className="flex items-center gap-2 xs:gap-3 flex-shrink-0">
               <button
-                onClick={() => {
-                  setShowNewMessageModal(true);
-                }}
-                className="px-2.5 xs:px-3 py-1.5 xs:py-2 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-lg flex items-center gap-1.5 xs:gap-2 transition-all duration-300 text-xs xs:text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 border border-slate-700/50"
+                  onClick={() => setShowNewMessageModal(true)}
+                className="px-2.5 xs:px-3 py-1.5 xs:py-2 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl flex items-center gap-1.5 xs:gap-2 transition-all duration-300 text-xs xs:text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 border border-slate-700/50"
               >
                 <svg className="w-3.5 h-3.5 xs:w-4 xs:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -489,7 +425,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
               {activeTab === 'inbox' && stats && stats.unread > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                  className="px-2.5 xs:px-4 py-1.5 xs:py-2 text-white rounded-lg flex items-center gap-1.5 xs:gap-2 transition-all duration-300 shadow-sm hover:shadow-md bg-slate-700 hover:bg-slate-800 border border-slate-600 text-xs xs:text-sm font-bold"
+                  className="px-2.5 xs:px-4 py-1.5 xs:py-2 text-white rounded-xl flex items-center gap-1.5 xs:gap-2 transition-all duration-300 shadow-sm hover:shadow-md bg-slate-700 hover:bg-slate-800 border border-slate-600 text-xs xs:text-sm font-bold"
               >
                 <Eye className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
                   <span className="hidden xs:inline">Marcar todos como leídos</span>
@@ -500,7 +436,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Barra de herramientas Gmail-style */}
+          {/* Bulk actions bar */}
         {selectedMessages.length > 0 && (
           <div className="px-3 xs:px-4 sm:px-6 py-2 xs:py-3 border-b border-slate-200 bg-slate-50 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-4">
             <div className="flex items-center gap-2 xs:gap-4 w-full xs:w-auto">
@@ -510,7 +446,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
               <div className="flex items-center gap-1.5 xs:gap-2">
                 <button
                   onClick={handleBulkMarkAsRead}
-                  className="px-2 xs:px-3 py-1.5 text-xs bg-white border-2 border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-500 text-slate-700 font-bold transition-all duration-300"
+                  className="px-2 xs:px-3 py-1.5 text-xs bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-500 text-slate-700 font-bold transition-all duration-300"
                   title="Marcar como leído"
                 >
                   <Eye className="w-3.5 h-3.5 xs:w-4 xs:h-4 inline xs:mr-1" />
@@ -518,7 +454,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                 </button>
                 <button
                   onClick={handleBulkDelete}
-                  className="px-2 xs:px-3 py-1.5 text-xs bg-white border-2 border-red-300 rounded-lg hover:bg-red-50 hover:border-red-500 text-red-600 font-bold transition-all duration-300"
+                  className="px-2 xs:px-3 py-1.5 text-xs bg-white border-2 border-red-300 rounded-xl hover:bg-red-50 hover:border-red-500 text-red-600 font-bold transition-all duration-300"
                   title="Eliminar"
                 >
                   <Trash2 className="w-3.5 h-3.5 xs:w-4 xs:h-4 inline xs:mr-1" />
@@ -539,12 +475,13 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
         )}
 
         {/* Content */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-          {/* Message List - Responsivo */}
-          <div className={`w-full md:w-1/3 border-r border-slate-200 overflow-y-auto bg-slate-50/50 ${
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden rounded-b-3xl">
+            {/* Message List */}
+            <div
+              className={`w-full md:w-1/3 border-r border-slate-200 overflow-y-auto bg-slate-50/50 ${
             selectedMessage ? 'hidden md:block' : 'block'
-          }`}>
-            {/* Header con checkbox para seleccionar todos */}
+              }`}
+            >
             {messages.length > 0 && (
               <div className="p-3 xs:p-4 border-b border-slate-200 bg-white flex items-center space-x-2 xs:space-x-3">
                 <input
@@ -553,9 +490,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                   onChange={handleSelectAll}
                     className="w-4 h-4 text-slate-600 border-slate-300 rounded focus:ring-slate-500"
                 />
-                <span className="text-xs xs:text-sm font-bold text-slate-700">
-                  Seleccionar todos
-                </span>
+                  <span className="text-xs xs:text-sm font-bold text-slate-700">Seleccionar todos</span>
               </div>
             )}
             {loading ? (
@@ -568,7 +503,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
             ) : messages.length === 0 ? (
               <div className="p-6 xs:p-8 text-center">
                 <div className="flex flex-col items-center space-y-3">
-                  <div className="w-14 h-14 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center shadow-lg shadow-slate-100/50">
+                    <div className="w-14 h-14 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-slate-100/50">
                     <Mail className="w-7 h-7 text-slate-600" />
                   </div>
                   <span className="text-sm font-bold text-slate-700">
@@ -587,7 +522,6 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                     onClick={() => setSelectedMessage(message)}
                   >
                     <div className="flex items-start gap-2 xs:gap-3">
-                      {/* Checkbox para selección individual */}
                       <input
                         type="checkbox"
                         checked={selectedMessages.includes(message.id)}
@@ -597,14 +531,15 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                       />
                       <div className="flex-shrink-0">
                         <div className="relative">
-                          <div className={`w-10 h-10 xs:w-12 xs:h-12 rounded-xl flex items-center justify-center shadow-sm border-2 font-bold text-sm xs:text-base transition-all duration-300 group-hover:scale-110 ${
+                            <div
+                              className={`w-10 h-10 xs:w-12 xs:h-12 rounded-2xl flex items-center justify-center shadow-sm border-2 font-bold text-sm xs:text-base transition-all duration-300 group-hover:scale-110 ${
                             !message.read && activeTab === 'inbox' 
                               ? 'bg-gradient-to-br from-slate-100 to-slate-200 border-slate-300 text-slate-700' 
                               : 'bg-slate-100 border-slate-200 text-slate-600'
-                          }`}>
+                              }`}
+                            >
                             {message.sender?.name?.charAt(0) || message.recipient?.name?.charAt(0) || '?'}
                           </div>
-                          {/* Indicador de no leído */}
                           {!message.read && activeTab === 'inbox' && (
                             <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-slate-600 rounded-full border-2 border-white shadow-sm"></div>
                           )}
@@ -612,16 +547,17 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1 gap-2">
-                          <p className={`text-sm xs:text-base font-bold truncate ${
+                            <p
+                              className={`text-sm xs:text-base font-bold truncate ${
                             !message.read && activeTab === 'inbox' ? 'text-slate-900' : 'text-slate-700'
-                          }`}>
+                              }`}
+                            >
                             {activeTab === 'inbox' ? message.sender?.name : message.recipient?.name}
                           </p>
                           <div className="flex items-center gap-1.5 xs:gap-2 flex-shrink-0">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // Aquí se podría implementar la funcionalidad de estrella
                               }}
                               className="text-slate-400 hover:text-amber-500 transition-all duration-300 hover:scale-110 p-1"
                               title="Marcar como importante"
@@ -636,28 +572,33 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                             </span>
                           </div>
                         </div>
-                        <p className={`text-sm xs:text-base truncate font-semibold mb-1.5 ${
+                          <p
+                            className={`text-sm xs:text-base font-semibold mb-1.5 ${
                           !message.read && activeTab === 'inbox' ? 'text-slate-900' : 'text-slate-700'
-                        }`}>
-                          {message.subject}
+                            }`}
+                          >
+                          {message.subject || 'Sin asunto'}
                         </p>
-                        <p className="text-xs xs:text-sm text-slate-600 truncate leading-relaxed mb-2">
-                          {message.content.substring(0, 60)}...
-                        </p>
-                        {/* Badges modernos */}
+                        <div className="text-xs xs:text-sm text-slate-600 leading-relaxed mb-2 line-clamp-2">
+                          <p className="break-words">
+                            {message.content?.trim() || (
+                              <span className="italic text-slate-400">Sin contenido en este mensaje</span>
+                            )}
+                          </p>
+                        </div>
                         <div className="flex flex-wrap gap-1.5">
                           {message.priority === 'urgent' && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] xs:text-xs font-bold bg-red-100 text-red-700 border border-red-200">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-xl text-[10px] xs:text-xs font-bold bg-red-100 text-red-700 border border-red-200">
                               Urgente
                             </span>
                           )}
                           {!message.read && activeTab === 'inbox' && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] xs:text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-xl text-[10px] xs:text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
                               No leído
                             </span>
                           )}
                           {activeTab === 'sent' && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] xs:text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-xl text-[10px] xs:text-xs font-bold bg-green-100 text-green-700 border border-green-200">
                               Enviado
                             </span>
                           )}
@@ -671,33 +612,36 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Message Detail - Desktop */}
-          <div className="flex-1 flex flex-col bg-white hidden md:flex">
+          <div className="flex-1 flex flex-col bg-white hidden md:flex rounded-br-3xl">
             {selectedMessage ? (
               <>
-                {/* Message Header - Moderno con Gradiente Slate */}
-                <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 xs:p-5 sm:p-6 border-b border-slate-700/20 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-slate-800/50 via-transparent to-slate-800/30 animate-pulse"></div>
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-600/10 via-slate-500/5 to-transparent rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-                  <div className="flex items-start justify-between relative z-10">
+                  {/* Message Header */}
+                <div className="bg-gray-800 p-5 border-b border-gray-700">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base xs:text-lg sm:text-xl font-black mb-2 text-white tracking-tight">{selectedMessage.subject}</h3>
-                      <div className="flex flex-wrap items-center gap-3 xs:gap-4 text-xs text-slate-300 mb-2 font-medium">
-                        <span className="flex items-center gap-1.5 bg-white/15 px-2 py-1 rounded-lg backdrop-blur-xl border border-white/20">
-                          <span className="font-bold">De:</span>
-                          <span className="text-white">{selectedMessage.sender?.name}</span>
+                      <h3 className="text-xl font-semibold mb-3 text-white">{selectedMessage.subject}</h3>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300 mb-2">
+                        <span className="bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-600/50">
+                          De: <span className="text-white">{selectedMessage.sender?.name || 'N/A'}</span>
                         </span>
-                        <span className="flex items-center gap-1.5 bg-white/15 px-2 py-1 rounded-lg backdrop-blur-xl border border-white/20">
-                          <span className="font-bold">Para:</span>
-                          <span className="text-white">{selectedMessage.recipient?.name}</span>
+                        <span className="bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-600/50">
+                          Para: <span className="text-white">{selectedMessage.recipient?.name}</span>
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 xs:gap-3 text-xs text-slate-300">
-                        <span className="flex items-center gap-1.5 bg-white/15 px-2 py-1 rounded-lg backdrop-blur-xl border border-white/20">
-                          <Clock className="w-3.5 h-3.5" />
-                          {new Date(selectedMessage.created_at).toLocaleString('es-ES')}
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300">
+                        <span className="flex items-center gap-2 bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-600/50">
+                          <Clock className="w-4 h-4" />
+                          {new Date(selectedMessage.created_at).toLocaleString('es-ES', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                          })}
                         </span>
-                        <span className={`flex items-center gap-1.5 bg-white/15 px-2 py-1 rounded-lg backdrop-blur-xl border border-white/20 ${getPriorityColor(selectedMessage.priority)}`}>
-                          {getPriorityIcon(selectedMessage.priority)} {selectedMessage.priority}
+                        <span className="bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-600/50">
+                          {selectedMessage.priority === 'normal' ? 'normal' : selectedMessage.priority}
                         </span>
                       </div>
                     </div>
@@ -705,28 +649,54 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
                       {activeTab === 'inbox' && !selectedMessage.read && (
                         <button
                           onClick={() => handleMarkAsRead(selectedMessage.id)}
-                          className="w-9 h-9 xs:w-10 xs:h-10 text-white hover:bg-white/20 rounded-lg transition-all duration-300 backdrop-blur-sm border border-white/30 hover:border-white/50 flex items-center justify-center shadow-lg hover:scale-110"
+                          className="w-9 h-9 text-white hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center"
                           title="Marcar como leído"
                         >
-                          <Eye className="w-4 h-4 xs:w-5 xs:h-5" />
+                          <Eye className="w-5 h-5" />
                         </button>
                       )}
                       <button
                         onClick={() => handleDeleteMessage(selectedMessage.id)}
-                        className="w-9 h-9 xs:w-10 xs:h-10 text-white hover:bg-red-500/30 rounded-lg transition-all duration-300 backdrop-blur-sm border border-white/30 hover:border-red-400/50 flex items-center justify-center shadow-lg hover:scale-110"
+                        className="w-9 h-9 text-white hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center"
                         title="Eliminar mensaje"
                       >
-                        <Trash2 className="w-4 h-4 xs:w-5 xs:h-5" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
                 </div>
 
                 {/* Message Content */}
-                <div className="flex-1 p-4 xs:p-5 sm:p-6 overflow-y-auto bg-slate-50/30">
-                  <div className="bg-white rounded-xl p-4 xs:p-5 sm:p-6 border border-slate-200 shadow-sm">
-                    <div className="whitespace-pre-wrap text-slate-800 leading-relaxed text-sm xs:text-base">
-                      {selectedMessage.content}
+                <div className="flex-1 overflow-y-auto bg-gray-50">
+                  <div className="bg-white">
+                    {/* Contenido del mensaje */}
+                    <div className="p-6">
+                      {selectedMessage.content ? (
+                        <div className="whitespace-pre-wrap text-gray-900 leading-relaxed text-base break-words mb-4">
+                          {selectedMessage.content}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <p className="text-gray-400 text-sm">Este mensaje no tiene contenido</p>
+                        </div>
+                      )}
+                      
+                      {/* Separador y fecha */}
+                      <div className="border-t border-gray-200 pt-4">
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <Clock className="w-4 h-4" />
+                          <span>
+                            Enviado el {new Date(selectedMessage.created_at).toLocaleDateString('es-ES', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            })}, {new Date(selectedMessage.created_at).toLocaleTimeString('es-ES', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -734,7 +704,7 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
             ) : (
               <div className="flex-1 flex items-center justify-center bg-slate-50/30">
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-slate-100/50">
+                  <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-slate-100/50">
                     <Mail className="w-10 h-10 text-slate-600" />
                   </div>
                   <p className="text-base xs:text-lg font-bold text-slate-700 mb-1">Selecciona un mensaje</p>
@@ -747,147 +717,47 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ isOpen, onClose }) => {
       </div>
     </div>
 
-    {/* Modal de Nuevo Mensaje */}
-    {showNewMessageModal && (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[80] p-2 xs:p-3 sm:p-4">
-        <div 
-          className="bg-white rounded-xl xs:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] xs:max-h-[90vh] sm:max-h-[85vh] md:max-h-[75vh] overflow-y-auto flex flex-col"
-          style={{
-            border: '1px solid #e5e7eb'
-          }}
-        >
-          {/* Header - Moderno con Gradiente Slate */}
-          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 xs:p-5 sm:p-6 border-b border-slate-700/20 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-tr from-slate-800/50 via-transparent to-slate-800/30 animate-pulse"></div>
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-600/10 via-slate-500/5 to-transparent rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-            <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center space-x-2 xs:space-x-3">
-                <div className="w-9 h-9 xs:w-10 xs:h-10 bg-white/15 backdrop-blur-xl rounded-xl flex items-center justify-center border border-white/20 shadow-lg">
-                  <Mail className="w-4 h-4 xs:w-5 xs:h-5 text-white" />
-                </div>
-                <h3 className="text-base xs:text-lg sm:text-xl font-black text-white tracking-tight">Nuevo Mensaje</h3>
-              </div>
-              <button
-                onClick={() => setShowNewMessageModal(false)}
-                className="w-8 h-8 xs:w-9 xs:h-9 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-white/20 backdrop-blur-xl border border-white/20 hover:border-white/30 shadow-lg hover:scale-110"
-              >
-                <X className="w-4 h-4 xs:w-5 xs:h-5 text-white" />
-              </button>
-            </div>
-          </div>
-          
-          {/* Contenido del formulario */}
-          <div className="flex-1 p-3 xs:p-4 sm:p-5 lg:p-6 space-y-3 xs:space-y-4 bg-white">
-            <div className="flex flex-col xs:flex-row gap-3">
-              <div className="flex-1 min-w-0">
-                <label className="block text-xs xs:text-sm font-bold text-slate-700 mb-1.5">Para:</label>
-                <input
-                  type="text"
-                  placeholder="Nombre del destinatario"
-                  className="w-full px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500 focus:outline-none transition-all duration-300 text-xs xs:text-sm sm:text-base bg-white"
-                />
-              </div>
-              
-              <div className="w-full xs:w-36 sm:w-40 relative priority-dropdown-container">
-                <label className="block text-xs xs:text-sm font-bold text-slate-700 mb-1.5">Prioridad:</label>
-                <button
-                  onClick={() => setIsPriorityDropdownOpen(!isPriorityDropdownOpen)}
-                  className="w-full px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl transition-all duration-300 text-slate-700 bg-white text-left flex items-center justify-between text-xs xs:text-sm sm:text-base font-medium hover:border-slate-500 focus:ring-2 focus:ring-slate-500"
-                >
-                  <span>{getPriorityText(selectedPriority)}</span>
-                  <svg
-                    className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${isPriorityDropdownOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+      {/* Modal de Nuevo Mensaje usando SendMessageModal */}
+      <SendMessageModal
+        isOpen={showNewMessageModal}
+        onClose={() => setShowNewMessageModal(false)}
+        onMessageSent={() => {
+          loadMessages();
+          loadStats();
+          setShowNewMessageModal(false);
+        }}
+        onSuccess={(message) => {
+          setSuccessMessage(message);
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 3000);
+        }}
+      />
 
-                {isPriorityDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-slate-200 rounded-xl shadow-xl z-10 overflow-hidden">
-                    <button
-                      onClick={() => {
-                        setSelectedPriority('normal');
-                        setIsPriorityDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
-                        selectedPriority === 'normal' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      Normal
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedPriority('high');
-                        setIsPriorityDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
-                        selectedPriority === 'high' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      Alta
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedPriority('urgent');
-                        setIsPriorityDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2.5 text-left transition-all duration-200 text-sm font-medium ${
-                        selectedPriority === 'urgent' ? 'bg-slate-50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      Urgente
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-xs xs:text-sm font-bold text-slate-700 mb-1.5">Asunto:</label>
-              <input
-                type="text"
-                placeholder="Asunto del mensaje"
-                className="w-full px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500 focus:outline-none transition-all duration-300 text-xs xs:text-sm sm:text-base bg-white"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-xs xs:text-sm font-bold text-slate-700 mb-1.5">Mensaje:</label>
-              <textarea
-                placeholder="Escribe tu mensaje aquí..."
-                rows={5}
-                className="w-full px-3 py-2 xs:py-2.5 border-2 border-slate-300 rounded-xl focus:border-slate-500 focus:ring-2 focus:ring-slate-500 focus:outline-none transition-all duration-300 text-xs xs:text-sm sm:text-base resize-none bg-white"
-              />
-            </div>
-          </div>
-          
-          {/* Footer - Moderno */}
-          <div className="p-3 xs:p-4 sm:p-5 lg:p-6 flex flex-col xs:flex-row justify-end gap-2 xs:gap-3 bg-white border-t border-slate-200">
+      {/* Notificación de éxito/error */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-[10001] animate-fade-in">
+          <div className={`px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[320px] max-w-md backdrop-blur-sm ${
+            successMessage.includes('Error') || successMessage.includes('error')
+              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-2 border-red-400'
+              : 'bg-gradient-to-r from-green-500 to-green-600 text-white border-2 border-green-400'
+          }`}>
+            {successMessage.includes('Error') || successMessage.includes('error') ? (
+              <AlertCircle className="w-6 h-6 flex-shrink-0" />
+            ) : (
+              <CheckCircle className="w-6 h-6 flex-shrink-0" />
+            )}
+            <span className="flex-1 font-semibold text-sm leading-relaxed">{successMessage}</span>
             <button
-              onClick={() => setShowNewMessageModal(false)}
-              className="px-4 py-2 xs:py-2.5 text-slate-600 border-2 border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition-all duration-300 text-xs xs:text-sm font-bold order-2 xs:order-1"
+              onClick={() => setSuccessMessage(null)}
+              className="text-white/90 hover:text-white hover:bg-white/20 rounded-lg p-1 transition-colors flex-shrink-0"
             >
-              Cancelar
-            </button>
-            <button
-              onClick={() => {
-                // Aquí se enviaría el mensaje
-                setShowNewMessageModal(false);
-                // Mostrar notificación de éxito
-              }}
-              className="px-5 py-2 xs:py-2.5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl hover:from-slate-800 hover:to-slate-700 transition-all duration-300 text-xs xs:text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 border border-slate-700/50 order-1 xs:order-2"
-            >
-              Enviar
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
-      </div>
-    )}
-      
-  
+      )}
+    </>,
     document.body
   );
 };
