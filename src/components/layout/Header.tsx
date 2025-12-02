@@ -22,10 +22,35 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showPsychologyModal, setShowPsychologyModal] = useState(false);
+  const [avatarLoadError, setAvatarLoadError] = useState(false);
+  const [avatarLoading, setAvatarLoading] = useState(true);
 
   const notificationRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Resetear estados de carga cuando cambie el usuario o su avatar
+  useEffect(() => {
+    const avatarSrc = user?.avatar || user?.google_avatar;
+    if (avatarSrc) {
+      setAvatarLoadError(false);
+      setAvatarLoading(true);
+      
+      // Pre-cargar la imagen para carga más rápida
+      const img = new Image();
+      img.src = avatarSrc;
+      img.onload = () => {
+        setAvatarLoading(false);
+      };
+      img.onerror = () => {
+        setAvatarLoadError(true);
+        setAvatarLoading(false);
+      };
+    } else {
+      setAvatarLoadError(true);
+      setAvatarLoading(false);
+    }
+  }, [user?.avatar, user?.google_avatar]);
 
   // Cargar estadísticas de notificaciones
   useEffect(() => {
@@ -177,13 +202,38 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-white/5 transition-all duration-300 group"
               >
-                <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-700 bg-slate-800 group-hover:border-slate-500 transition-colors shadow-sm">
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-700 bg-slate-800 group-hover:border-slate-500 transition-colors shadow-sm relative">
                   {user?.avatar || user?.google_avatar ? (
-                    <img
-                      src={user?.avatar || user?.google_avatar}
-                      alt={user?.name}
-                      className="w-full h-full object-cover"
-                    />
+                    <>
+                      {avatarLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
+                          <span className="text-xs font-bold text-slate-400">
+                            {user?.name?.charAt(0).toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                      )}
+                      {!avatarLoadError && (
+                        <img
+                          src={user?.avatar || user?.google_avatar}
+                          alt={user?.name}
+                          loading="eager"
+                          fetchPriority="high"
+                          className={`w-full h-full object-cover ${avatarLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+                          onLoad={() => setAvatarLoading(false)}
+                          onError={() => {
+                            setAvatarLoadError(true);
+                            setAvatarLoading(false);
+                          }}
+                        />
+                      )}
+                      {avatarLoadError && (
+                        <div className="w-full h-full flex items-center justify-center bg-slate-800">
+                          <span className="text-xs font-bold text-slate-400">
+                            {user?.name?.charAt(0).toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">
                       <User className="w-4 h-4" />

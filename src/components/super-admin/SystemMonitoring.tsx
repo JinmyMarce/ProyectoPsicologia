@@ -16,7 +16,8 @@ import {
   RefreshCw,
   Download,
   Eye,
-  Settings
+  Settings,
+  Sparkles
 } from 'lucide-react';
 
 interface SystemStats {
@@ -52,6 +53,7 @@ export function SystemMonitoring() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
+  const [refreshing, setRefreshing] = useState(false);
 
   // NUEVO: Estado para logs y métricas
   const [logs, setLogs] = useState<any[]>([]);
@@ -88,6 +90,13 @@ export function SystemMonitoring() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchSystemStats();
+    await fetchRecentActivity();
+    setRefreshing(false);
   };
 
   const fetchRecentActivity = async () => {
@@ -211,30 +220,86 @@ export function SystemMonitoring() {
     }
   };
 
+  // Animation classes
+  const fadeInUp = "animate-fade-in";
+  const stagger1 = "delay-[100ms]";
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8e161a]"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="w-8 h-8 border-3 border-violet-200 border-t-violet-600 rounded-full animate-spin mb-3 mx-auto"></div>
+          <p className="text-xs font-semibold text-slate-500">Cargando monitoreo...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      {/* Header original */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <Activity className="w-8 h-8 mr-3 text-[#8e161a]" />
-            Monitoreo del Sistema
-          </h1>
+    <div className="min-h-screen bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900 w-full overflow-x-hidden">
+      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+      {/* Header Section - Compact & Professional */}
+      <div className="rounded-lg sm:rounded-xl lg:rounded-2xl shadow-2xl relative overflow-hidden mt-2 sm:mt-3 lg:mt-4 border border-white/10" style={{
+        background: 'linear-gradient(180deg, #0a0e17 0%, #020408 50%, #000000 100%)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
+      }}>
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#09090b]/50 via-transparent to-[#09090b]/30 animate-pulse"></div>
+
+        {/* Minimal decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#0a0e17]/10 via-[#020408]/5 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr from-[#020408]/8 to-transparent rounded-full blur-3xl -ml-12 -mb-12 pointer-events-none"></div>
+
+        {/* Subtle dots */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-12 left-16 w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+          <div className="absolute top-20 right-32 w-1 h-1 bg-slate-300 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute bottom-16 left-1/3 w-1.5 h-1.5 bg-slate-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
+
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-5 lg:pt-6 pb-5 sm:pb-6 lg:pb-8 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
+            <div className={`${fadeInUp}`}>
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="px-3 py-1 rounded-full bg-white/15 backdrop-blur-xl text-white text-[10px] font-bold flex items-center tracking-wide uppercase shadow-lg border border-white/20 hover:bg-white/25 transition-all duration-300">
+                  <Sparkles className="w-3 h-3 mr-1.5 animate-pulse" />
+                  SUPER ADMIN
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-white mb-1.5 leading-tight drop-shadow-lg">
+                Monitoreo del Sistema
+              </h1>
+              <p className="text-red-100 text-[11px] sm:text-xs md:text-sm max-w-2xl font-medium leading-relaxed drop-shadow-md">
+                Supervisa y gestiona el rendimiento del sistema.
+                <span className="hidden md:inline text-red-200/80"> Logs, métricas y mantenimiento.</span>
+              </p>
+            </div>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border border-white/20 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-1.5"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Actualizar
+            </button>
+          </div>
+        </div>
+
+        {/* Wave pattern */}
+        <div className="absolute bottom-0 left-0 right-0 h-12 overflow-hidden pointer-events-none">
+          <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M0,0 C150,80 350,80 600,40 C850,0 1050,0 1200,40 L1200,120 L0,120 Z" fill="white" fillOpacity="0.08" />
+            <path d="M0,20 C200,100 400,100 600,60 C800,20 1000,20 1200,60 L1200,120 L0,120 Z" fill="white" fillOpacity="0.04" />
+          </svg>
         </div>
       </div>
 
+      <div className="w-full -mt-4 relative z-20">
+
       {/* Acciones del sistema en tarjetas profesionales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mt-4 sm:mt-6">
         {/* Monitoreo de Actividad (Logs) */}
-        <Card className="p-8 rounded-2xl shadow-xl border-0 bg-gradient-to-br from-green-50 to-white hover:shadow-2xl transition-shadow duration-300">
+        <Card className="p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md hover:shadow-lg border border-slate-200 hover:border-slate-300 bg-white hover:-translate-y-0.5 transition-all duration-300">
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 bg-green-200 rounded-full flex items-center justify-center mb-4 shadow">
               <Eye className="w-8 h-8 text-green-700" />
@@ -262,7 +327,7 @@ export function SystemMonitoring() {
           </div>
         </Card>
         {/* Gestión de Copias de Seguridad (Backups) */}
-        <Card className="p-8 rounded-2xl shadow-xl border-0 bg-gradient-to-br from-blue-50 to-white hover:shadow-2xl transition-shadow duration-300">
+        <Card className="p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md hover:shadow-lg border border-slate-200 hover:border-slate-300 bg-white hover:-translate-y-0.5 transition-all duration-300">
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center mb-4 shadow">
               <Download className="w-8 h-8 text-blue-700" />
@@ -277,7 +342,7 @@ export function SystemMonitoring() {
           </div>
         </Card>
         {/* Monitoreo de Rendimiento */}
-        <Card className="p-8 rounded-2xl shadow-xl border-0 bg-gradient-to-br from-orange-50 to-white hover:shadow-2xl transition-shadow duration-300">
+        <Card className="p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md hover:shadow-lg border border-slate-200 hover:border-slate-300 bg-white hover:-translate-y-0.5 transition-all duration-300">
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 bg-orange-200 rounded-full flex items-center justify-center mb-4 shadow">
               <BarChart3 className="w-8 h-8 text-orange-700" />
@@ -306,7 +371,7 @@ export function SystemMonitoring() {
           </div>
         </Card>
         {/* Gestión de Actualizaciones */}
-        <Card className="p-8 rounded-2xl shadow-xl border-0 bg-gradient-to-br from-purple-50 to-white hover:shadow-2xl transition-shadow duration-300">
+        <Card className="p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md hover:shadow-lg border border-slate-200 hover:border-slate-300 bg-white hover:-translate-y-0.5 transition-all duration-300">
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 bg-purple-200 rounded-full flex items-center justify-center mb-4 shadow">
               <Settings className="w-8 h-8 text-purple-700" />
@@ -321,7 +386,7 @@ export function SystemMonitoring() {
           </div>
         </Card>
         {/* Limpieza de Datos */}
-        <Card className="p-8 rounded-2xl shadow-xl border-0 bg-gradient-to-br from-red-50 to-white hover:shadow-2xl transition-shadow duration-300">
+        <Card className="p-4 sm:p-6 lg:p-8 rounded-lg sm:rounded-xl shadow-md hover:shadow-lg border border-slate-200 hover:border-slate-300 bg-white hover:-translate-y-0.5 transition-all duration-300">
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center mb-4 shadow">
               <AlertTriangle className="w-8 h-8 text-red-700" />
@@ -336,6 +401,9 @@ export function SystemMonitoring() {
           </div>
         </Card>
       </div>
+      </div>
+      </div>
+
       {/* MODAL DE CONFIRMACIÓN PARA ACCIONES */}
       {modal.open && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">

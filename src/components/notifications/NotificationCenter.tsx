@@ -24,6 +24,7 @@ import {
 } from '../../services/notifications';
 import { approveAppointment, rejectAppointment } from '../../services/appointments';
 import { Notification } from '../../services/notifications';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface NotificationStats {
   total: number;
@@ -38,6 +39,7 @@ interface NotificationStats {
 }
 
 export function NotificationCenter() {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -48,6 +50,68 @@ export function NotificationCenter() {
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
+
+  // Determinar el rol del usuario para aplicar el color correspondiente
+  const userRole = user?.role || 'student';
+  
+  // Configuración de colores según el rol
+  const getHeaderConfig = () => {
+    switch (userRole) {
+      case 'super_admin':
+        return {
+          background: 'linear-gradient(180deg, #0a0e17 0%, #020408 50%, #000000 100%)',
+          overlay: 'from-[#09090b]/50 via-transparent to-[#09090b]/30',
+          decorative1: 'from-[#0a0e17]/10 via-[#020408]/5',
+          decorative2: 'from-[#020408]/8',
+          textColor: 'text-red-100',
+          textColorAccent: 'text-red-200/80',
+          badgeText: 'SUPER ADMIN'
+        };
+      case 'admin':
+        return {
+          background: 'linear-gradient(180deg, #1e3a5f 0%, #1a2f4f 50%, #0f1b2e 100%)',
+          overlay: 'from-blue-900/50 via-transparent to-indigo-900/30',
+          decorative1: 'from-blue-600/10 via-indigo-500/5',
+          decorative2: 'from-cyan-600/8',
+          textColor: 'text-blue-100',
+          textColorAccent: 'text-blue-200/80',
+          badgeText: 'ADMINISTRADOR'
+        };
+      case 'psychologist':
+        return {
+          background: 'linear-gradient(180deg, #8e161a 0%, #6b1013 50%, #4a0b0d 100%)',
+          overlay: 'from-red-900/50 via-transparent to-rose-900/30',
+          decorative1: 'from-red-600/10 via-rose-500/5',
+          decorative2: 'from-pink-600/8',
+          textColor: 'text-red-50',
+          textColorAccent: 'text-red-100/80',
+          badgeText: 'PSICÓLOGO'
+        };
+      case 'tutor':
+        return {
+          background: 'linear-gradient(180deg, #1f2937 0%, #111827 50%, #0f172a 100%)',
+          overlay: 'from-gray-800/50 via-transparent to-gray-900/30',
+          decorative1: 'from-gray-600/10 via-gray-500/5',
+          decorative2: 'from-slate-600/8',
+          textColor: 'text-gray-100',
+          textColorAccent: 'text-gray-200/80',
+          badgeText: 'TUTOR'
+        };
+      case 'student':
+      default:
+        return {
+          background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 50%, #020617 100%)',
+          overlay: 'from-slate-800/50 via-transparent to-slate-900/30',
+          decorative1: 'from-slate-600/10 via-slate-500/5',
+          decorative2: 'from-slate-700/8',
+          textColor: 'text-slate-100',
+          textColorAccent: 'text-slate-200/80',
+          badgeText: 'ESTUDIANTE'
+        };
+    }
+  };
+
+  const headerConfig = getHeaderConfig();
 
   useEffect(() => {
     loadNotifications();
@@ -219,15 +283,19 @@ export function NotificationCenter() {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900">
+    <div className="min-h-screen bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900 w-full overflow-x-hidden">
+      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
       {/* Header Section - Compact & Professional */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl xs:rounded-2xl shadow-2xl relative overflow-hidden mx-1.5 xs:mx-2 sm:mx-3 mt-2 xs:mt-3 border border-white/10">
+      <div className="rounded-lg sm:rounded-xl lg:rounded-2xl shadow-2xl relative overflow-hidden mt-2 sm:mt-3 lg:mt-4 border border-white/10" style={{
+        background: headerConfig.background,
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
+      }}>
         {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-slate-800/50 via-transparent to-slate-800/30 animate-pulse"></div>
+        <div className={`absolute inset-0 bg-gradient-to-tr ${headerConfig.overlay} animate-pulse`}></div>
 
         {/* Minimal decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-600/10 via-slate-500/5 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr from-slate-700/8 to-transparent rounded-full blur-3xl -ml-12 -mb-12 pointer-events-none"></div>
+        <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${headerConfig.decorative1} to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`}></div>
+        <div className={`absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr ${headerConfig.decorative2} to-transparent rounded-full blur-3xl -ml-12 -mb-12 pointer-events-none`}></div>
 
         {/* Subtle dots */}
         <div className="absolute inset-0 opacity-10">
@@ -236,35 +304,39 @@ export function NotificationCenter() {
           <div className="absolute bottom-16 left-1/3 w-1.5 h-1.5 bg-slate-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
         </div>
 
-        <div className="w-full px-3 xs:px-4 sm:px-6 lg:px-8 pt-4 xs:pt-5 pb-5 xs:pb-6 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 xs:gap-3">
-            <div className="animate-fade-in">
-              <div className="flex items-center space-x-1.5 xs:space-x-2 mb-1 xs:mb-1.5">
-                <span className="px-2.5 xs:px-3 py-1 xs:py-1.5 rounded-full bg-white/15 backdrop-blur-xl text-white text-[10px] xs:text-xs font-bold flex items-center tracking-wide uppercase shadow-lg border border-white/20">
-                  <Bell className="w-3 h-3 xs:w-3.5 xs:h-3.5 mr-1 xs:mr-1.5" />
-                  Notificaciones
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-5 lg:pt-6 pb-5 sm:pb-6 lg:pb-8 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
+            <div className="animate-fade-in flex-1 min-w-0">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-xl text-white text-[9px] sm:text-[10px] font-bold flex items-center tracking-wide uppercase shadow-lg border border-white/20 hover:bg-white/25 transition-all duration-300">
+                  <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5 animate-pulse flex-shrink-0" />
+                  <span className="hidden xs:inline">{headerConfig.badgeText}</span>
+                  <span className="xs:hidden">{headerConfig.badgeText.split(' ')[0]}</span>
                 </span>
               </div>
-              <h1 className="text-2xl xs:text-3xl md:text-4xl font-black tracking-tight text-white mb-1 xs:mb-1.5 leading-tight drop-shadow-lg">
+              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black tracking-tight text-white mb-1 sm:mb-1.5 leading-tight drop-shadow-lg">
                 Centro de Notificaciones
               </h1>
-              <p className="text-slate-300 text-xs xs:text-sm max-w-2xl font-medium leading-relaxed drop-shadow-md">
-                Gestiona y revisa todas tus notificaciones
+              <p className={`${headerConfig.textColor} text-[10px] sm:text-[11px] md:text-xs lg:text-sm max-w-2xl font-medium leading-relaxed drop-shadow-md`}>
+                Gestiona y revisa todas tus notificaciones.
+                <span className={`hidden sm:inline ${headerConfig.textColorAccent}`}> Mantente al día con el sistema.</span>
               </p>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border border-white/20 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-1.5"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Actualizar
-            </button>
+            <div className="w-full md:w-auto">
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="w-full md:w-auto text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border border-white/20 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-1.5"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                Actualizar
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Wave pattern - Compacto */}
-        <div className="absolute bottom-0 left-0 right-0 h-8 overflow-hidden pointer-events-none">
+        {/* Wave pattern */}
+        <div className="absolute bottom-0 left-0 right-0 h-12 overflow-hidden pointer-events-none">
           <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
             <path d="M0,0 C150,80 350,80 600,40 C850,0 1050,0 1200,40 L1200,120 L0,120 Z" fill="white" fillOpacity="0.08" />
             <path d="M0,20 C200,100 400,100 600,60 C800,20 1000,20 1200,60 L1200,120 L0,120 Z" fill="white" fillOpacity="0.04" />
@@ -272,7 +344,7 @@ export function NotificationCenter() {
         </div>
       </div>
 
-      <div className="w-full px-2 xs:px-3 sm:px-4 lg:px-6 -mt-2 relative z-20 overflow-y-auto h-[calc(100vh-8rem)] xs:h-[calc(100vh-9rem)] sm:h-[calc(100vh-10rem)]">
+      <div className="w-full -mt-4 relative z-20">
         {/* Mensajes de estado - Compactos */}
         {error && (
           <div className="mb-3 bg-red-50 border border-red-200 rounded-xl p-3 shadow-sm flex items-center space-x-2.5 animate-fade-in">
@@ -622,6 +694,7 @@ export function NotificationCenter() {
         </div>,
         document.body
       )}
+      </div>
     </div>
   );
 }

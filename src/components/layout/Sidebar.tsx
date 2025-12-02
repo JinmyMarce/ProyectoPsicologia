@@ -15,7 +15,10 @@ import {
   School,
   GraduationCap,
   LogOut,
-  RefreshCw
+  RefreshCw,
+  Settings,
+  History,
+  Database
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLocation } from 'react-router-dom';
@@ -132,6 +135,24 @@ const menuItems: MenuItem[] = [
     label: 'Monitoreo del Sistema',
     icon: Activity,
     page: 'monitoring',
+    roles: ['super_admin']
+  },
+  {
+    label: 'Configuraciones',
+    icon: Settings,
+    page: 'settings',
+    roles: ['super_admin']
+  },
+  {
+    label: 'Auditoría',
+    icon: History,
+    page: 'audit',
+    roles: ['super_admin']
+  },
+  {
+    label: 'Respaldos',
+    icon: Database,
+    page: 'backups',
     roles: ['super_admin']
   },
   {

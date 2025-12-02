@@ -22,6 +22,9 @@ import { AppointmentHistory } from './components/appointments/AppointmentHistory
 import { UserManagement } from './components/admin/UserManagement';
 import { UserManagement as SuperAdminUserManagement } from './components/super-admin/UserManagement';
 import { SystemMonitoring } from './components/super-admin/SystemMonitoring';
+import { SystemSettings } from './components/super-admin/SystemSettings';
+import { AuditLog } from './components/super-admin/AuditLog';
+import { BackupManager } from './components/super-admin/BackupManager';
 import { NotificationCenter } from './components/notifications/NotificationCenter';
 import { ReportsAnalytics } from './components/reports/ReportsAnalytics';
 import { ScheduleManager } from './components/psychologist/ScheduleManager';
@@ -177,6 +180,9 @@ function AppContent() {
                     <Route path="/monitoring" element={<SystemMonitoring />} />
                     <Route path="/reports" element={<ReportsAnalytics />} />
                     <Route path="/notifications" element={<NotificationCenter />} />
+                    <Route path="/settings" element={<SystemSettings />} />
+                    <Route path="/audit" element={<AuditLog />} />
+                    <Route path="/backups" element={<BackupManager />} />
                     <Route path="/profile" element={<UserProfile />} />
                   </>
                 )}
