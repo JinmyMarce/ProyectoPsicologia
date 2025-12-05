@@ -132,6 +132,9 @@ class UserController extends Controller
                 ],
                 'birthdate' => 'required|date',
                 'gender' => 'required|in:masculino,femenino,otro',
+                'marital_status' => 'nullable|string|max:50',
+                'address' => 'nullable|string|max:500',
+                'nationality' => 'nullable|string|max:100',
                 'specialization' => 'nullable|string|max:255',
                 'verified' => 'boolean',
                 // Campos específicos para tutores
@@ -182,6 +185,9 @@ class UserController extends Controller
                 'phone' => $request->phone,
                 'birthdate' => $request->birthdate,
                 'gender' => $request->gender,
+                'marital_status' => $request->marital_status,
+                'address' => $request->address,
+                'nationality' => $request->nationality,
                 'specialization' => $request->specialization,
                 'verified' => $request->verified ?? false,
                 'active' => true,
@@ -562,24 +568,49 @@ class UserController extends Controller
      */
     public function stats()
     {
-        $stats = [
-            'total_users' => User::count(),
-            'active_users' => User::where('active', true)->count(),
-            'inactive_users' => User::where('active', false)->count(),
-            'verified_users' => User::where('verified', true)->count(),
-            'unverified_users' => User::where('verified', false)->count(),
-            'by_role' => [
-                'students' => User::where('role', 'student')->count(),
-                'psychologists' => User::where('role', 'psychologist')->count(),
-                'admins' => User::where('role', 'admin')->count(),
-                'super_admins' => User::where('role', 'super_admin')->count(),
-            ]
-        ];
+        try {
+            $user = Auth::user();
+            
+            // Función helper para crear query base
+            $getBaseQuery = function() use ($user) {
+                $query = User::query();
+                if ($user && $user->role === 'admin') {
+                    $query->where('role', '!=', 'super_admin');
+                }
+                return $query;
+            };
+            
+            $stats = [
+                'total_users' => $getBaseQuery()->count(),
+                'active_users' => $getBaseQuery()->where('active', true)->count(),
+                'inactive_users' => $getBaseQuery()->where('active', false)->count(),
+                'verified_users' => $getBaseQuery()->where('verified', true)->count(),
+                'unverified_users' => $getBaseQuery()->where('verified', false)->count(),
+                'by_role' => [
+                    'students' => $getBaseQuery()->where('role', 'student')->count(),
+                    'psychologists' => $getBaseQuery()->where('role', 'psychologist')->count(),
+                    'admins' => $getBaseQuery()->where('role', 'admin')->count(),
+                ]
+            ];
+            
+            // Solo agregar super_admins si no es admin
+            if (!$user || $user->role !== 'admin') {
+                $stats['by_role']['super_admins'] = User::where('role', 'super_admin')->count();
+            }
 
-        return response()->json([
-            'success' => true,
-            'data' => $stats
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => $stats
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error en UserController@stats: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener estadísticas',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

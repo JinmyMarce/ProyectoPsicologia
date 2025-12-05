@@ -132,7 +132,9 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
                 }
               }}
               onTouchStart={(e) => {
-                e.preventDefault();
+                if (e.cancelable) {
+                  e.preventDefault();
+                }
                 e.stopPropagation();
                 if (onMenuClick) {
                   onMenuClick();
@@ -217,7 +219,7 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
                           src={user?.avatar || user?.google_avatar}
                           alt={user?.name}
                           loading="eager"
-                          fetchPriority="high"
+                          fetchpriority="high"
                           className={`w-full h-full object-cover ${avatarLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
                           onLoad={() => setAvatarLoading(false)}
                           onError={() => {

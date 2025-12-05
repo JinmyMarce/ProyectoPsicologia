@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
+use App\Services\AuditService;
 
 class AuthController extends Controller
 {
@@ -49,6 +50,9 @@ class AuthController extends Controller
             
             $token = $user->createToken('auth-token')->plainTextToken;
 
+            // Registrar en auditoría
+            AuditService::logLogin($user->id, $user->email, $user->name, 'success');
+
             return response()->json([
                 'success' => true,
                 'message' => 'Login exitoso',
@@ -57,6 +61,15 @@ class AuthController extends Controller
                     'token' => $token
                 ]
             ]);
+        }
+
+        // Registrar intento fallido de login
+        $email = $request->email;
+        $user = User::where('email', $email)->first();
+        if ($user) {
+            AuditService::logLogin($user->id, $user->email, $user->name, 'failed');
+        } else {
+            AuditService::logLogin(null, $email, null, 'failed');
         }
 
         return response()->json([
@@ -141,6 +154,9 @@ class AuthController extends Controller
             }
 
             $token = $user->createToken('auth-token')->plainTextToken;
+
+            // Registrar en auditoría
+            AuditService::logLogin($user->id, $user->email, $user->name, 'success');
 
             return response()->json([
                 'success' => true,
@@ -279,6 +295,13 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
+        $user = $request->user();
+        
+        // Registrar en auditoría antes de eliminar el token
+        if ($user) {
+            AuditService::logLogout();
+        }
+        
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([

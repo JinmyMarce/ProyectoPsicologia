@@ -14,7 +14,16 @@ import {
   BarChart3,
   Shield,
   UserCheck,
-  Settings
+  Settings,
+  TrendingUp,
+  FileBarChart,
+  UserPlus,
+  ClipboardList,
+  Bell,
+  Download,
+  Filter,
+  Zap,
+  RefreshCw
 } from 'lucide-react';
 
 interface AdminStats {
@@ -246,6 +255,56 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="space-y-4 sm:space-y-6">
+          {/* Widget de Estadísticas Rápidas */}
+          <section className="w-full">
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200 p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h2 className="text-xs sm:text-sm md:text-base font-bold text-slate-800 flex items-center tracking-tight">
+                  <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-2 text-slate-600 flex-shrink-0" />
+                  <span className="hidden sm:inline">Resumen Rápido</span>
+                  <span className="sm:hidden">Resumen</span>
+                </h2>
+                <button
+                  onClick={loadDashboardData}
+                  className="text-slate-600 hover:text-slate-900 transition-colors p-1 hover:bg-slate-100 rounded-lg"
+                  title="Actualizar datos"
+                >
+                  <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-2 sm:p-3 border border-blue-200 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/reports')}>
+                  <div className="text-[8px] sm:text-[9px] font-semibold text-blue-700 uppercase tracking-wide mb-1">Citas Totales</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-black text-blue-900">{stats.totalAppointments}</div>
+                  <div className="text-[8px] sm:text-[9px] text-blue-600 mt-1">
+                    {stats.completedAppointments} completadas
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-2 sm:p-3 border border-green-200 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/reports')}>
+                  <div className="text-[8px] sm:text-[9px] font-semibold text-green-700 uppercase tracking-wide mb-1">Citas Pendientes</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-black text-green-900">{stats.pendingAppointments}</div>
+                  <div className="text-[8px] sm:text-[9px] text-green-600 mt-1">
+                    Requieren atención
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-2 sm:p-3 border border-purple-200 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/users')}>
+                  <div className="text-[8px] sm:text-[9px] font-semibold text-purple-700 uppercase tracking-wide mb-1">Psicólogos</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-black text-purple-900">{stats.activePsychologists}</div>
+                  <div className="text-[8px] sm:text-[9px] text-purple-600 mt-1">
+                    Activos en el sistema
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-2 sm:p-3 border border-orange-200 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/users')}>
+                  <div className="text-[8px] sm:text-[9px] font-semibold text-orange-700 uppercase tracking-wide mb-1">Estudiantes</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-black text-orange-900">{stats.activeStudents}</div>
+                  <div className="text-[8px] sm:text-[9px] text-orange-600 mt-1">
+                    Registrados activos
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Tabla de usuarios - Full Width */}
           <section className="w-full flex flex-col">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
@@ -254,12 +313,22 @@ export const AdminDashboard: React.FC = () => {
                 <span className="hidden sm:inline">Últimos Usuarios Registrados</span>
                 <span className="sm:hidden">Últimos Usuarios</span>
               </h2>
-              <button
-                className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-800 hover:text-slate-900 px-2.5 sm:px-3 py-1.5 rounded-md transition-all duration-200 flex items-center gap-1.5 font-medium text-xs sm:text-sm w-full sm:w-auto justify-center"
-                onClick={() => navigate('/users')}
-              >
-                Ver Todos
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 sm:px-3 py-1.5 rounded-md transition-all duration-200 flex items-center gap-1.5 font-medium text-xs sm:text-sm"
+                  onClick={() => navigate('/users')}
+                  title="Crear nuevo usuario"
+                >
+                  <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Nuevo</span>
+                </button>
+                <button
+                  className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-800 hover:text-slate-900 px-2.5 sm:px-3 py-1.5 rounded-md transition-all duration-200 flex items-center gap-1.5 font-medium text-xs sm:text-sm"
+                  onClick={() => navigate('/users')}
+                >
+                  Ver Todos
+                </button>
+              </div>
             </div>
 
             <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200 overflow-hidden">

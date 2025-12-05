@@ -27,6 +27,7 @@ import { AuditLog } from './components/super-admin/AuditLog';
 import { BackupManager } from './components/super-admin/BackupManager';
 import { NotificationCenter } from './components/notifications/NotificationCenter';
 import { ReportsAnalytics } from './components/reports/ReportsAnalytics';
+import { AdminReports } from './components/admin/AdminReports';
 import { ScheduleManager } from './components/psychologist/ScheduleManager';
 import { PatientRegistration } from './components/patients/PatientRegistration';
 import PatientList from './components/patients/PatientList';
@@ -198,7 +199,7 @@ function AppContent() {
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     <Route path="/dashboard" element={<AdminDashboard />} />
                     <Route path="/users" element={<UserManagement />} />
-                    <Route path="/reports" element={<ReportsAnalytics />} />
+                    <Route path="/reports" element={<AdminReports />} />
                     <Route path="/notifications" element={<NotificationCenter />} />
                     <Route path="/profile" element={<UserProfile />} />
                   </>

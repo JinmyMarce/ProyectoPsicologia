@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import { Users, Plus, Edit, Trash2, UserCheck, UserX, Mail, Search, Filter, Sparkles, RefreshCw, X } from 'lucide-react';
+import { CustomSelect } from '../ui/CustomSelect';
+import { Users, Plus, Edit, Trash2, UserCheck, UserX, Mail, Search, Filter, Sparkles, RefreshCw, X, CheckCircle, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { createUser, deactivateUser, reactivateUser, deleteUser } from '../../services/users';
 import type { User as UserType } from '../../types';
 
 export function UserManagement() {
@@ -11,30 +14,65 @@ export function UserManagement() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [showAddUser, setShowAddUser] = useState(false);
   const [showEditUser, setShowEditUser] = useState(false);
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const [showReactivateModal, setShowReactivateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deactivateReason, setDeactivateReason] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 5;
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const usersPerPage = 4;
   const paginatedUsers = users.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
   const totalPages = Math.ceil(users.length / usersPerPage);
 
-  // 1. Estados para errores por campo en el modal de crear usuario
+  // 1. Estados para el formulario de crear usuario
+  const [addUserForm, setAddUserForm] = useState({
+    name: '',
+    email: '',
+    dni: '',
+    birthdate: '',
+    gender: '',
+    marital_status: '',
+    phone: '',
+    address: '',
+    password: '',
+    confirmPassword: '',
+    specialization: ''
+  });
+
+  // 2. Estados para errores por campo en el modal de crear usuario
   const [addUserFieldErrors, setAddUserFieldErrors] = useState({
     name: '',
     email: '',
     dni: '',
     birthdate: '',
     gender: '',
+    marital_status: '',
     phone: '',
     password: '',
     confirmPassword: ''
   });
 
-  // 2. Validación manual para crear usuario
+  // Función para validar fortaleza de contraseña
+  const validatePasswordStrength = (password: string): string | null => {
+    if (!password) return 'La contraseña es obligatoria.';
+    if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
+    if (!/[A-Z]/.test(password)) return 'La contraseña debe contener al menos una mayúscula.';
+    if (!/[a-z]/.test(password)) return 'La contraseña debe contener al menos una minúscula.';
+    if (!/[0-9]/.test(password)) return 'La contraseña debe contener al menos un número.';
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return 'La contraseña debe contener al menos un símbolo especial.';
+    return null;
+  };
+
+  // 3. Validación manual para crear usuario
   const validateAddUserForm = (form: any) => {
     const errors: any = {};
     if (!form.name?.trim()) errors.name = 'El nombre completo es obligatorio.';
@@ -44,13 +82,167 @@ export function UserManagement() {
     if (!form.birthdate?.trim()) errors.birthdate = 'La fecha de nacimiento es obligatoria.';
     if (form.birthdate && new Date().getFullYear() - new Date(form.birthdate).getFullYear() < 20) errors.birthdate = 'Debes tener más de 20 años.';
     if (!form.gender?.trim()) errors.gender = 'El género es obligatorio.';
+    if (!form.marital_status?.trim()) errors.marital_status = 'El estado civil es obligatorio.';
     if (!form.phone?.trim()) errors.phone = 'El celular es obligatorio.';
     if (form.phone && form.phone.length !== 9) errors.phone = 'El celular debe tener 9 dígitos.';
-    if (!form.password?.trim()) errors.password = 'La contraseña es obligatoria.';
-    if (!form.confirmPassword?.trim()) errors.confirmPassword = 'Confirma la contraseña.';
-    if (form.password !== form.confirmPassword) errors.confirmPassword = 'Las contraseñas no coinciden.';
+    
+    // Validar contraseña con requisitos de fortaleza
+    const passwordError = validatePasswordStrength(form.password);
+    if (passwordError) {
+      errors.password = passwordError;
+    }
+    
+    if (!form.confirmPassword?.trim()) {
+      errors.confirmPassword = 'Confirma la contraseña.';
+    } else if (form.password !== form.confirmPassword) {
+      errors.confirmPassword = 'Las contraseñas no coinciden.';
+    }
+    
     setAddUserFieldErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  // Función para formatear el teléfono con el prefijo +51 en formato +519xxxxxxxx
+  const formatPhoneForBackend = (phone: string): string => {
+    if (!phone) return '';
+    // Remover cualquier carácter que no sea número
+    const cleaned = phone.replace(/\D/g, '');
+    
+    // Si ya tiene el formato +519xxxxxxxx, devolverlo
+    if (phone.startsWith('+51') && phone.length === 12) {
+      return phone;
+    }
+    
+    // Si tiene 9 dígitos, agregar +51 (formato: +519xxxxxxxx)
+    if (cleaned.length === 9) {
+      return `+51${cleaned}`;
+    }
+    
+    // Si tiene 11 dígitos y empieza con 51, agregar el +
+    if (cleaned.length === 11 && cleaned.startsWith('51')) {
+      return `+${cleaned}`;
+    }
+    
+    // Si tiene 10 dígitos y empieza con 9, agregar +51
+    if (cleaned.length === 10 && cleaned.startsWith('9')) {
+      return `+51${cleaned}`;
+    }
+    
+    return phone;
+  };
+
+  // Función para resetear el formulario
+  const resetAddUserForm = () => {
+    setAddUserForm({
+      name: '',
+      email: '',
+      dni: '',
+      birthdate: '',
+      gender: '',
+      marital_status: '',
+      phone: '',
+      address: '',
+      password: '',
+      confirmPassword: '',
+      specialization: ''
+    });
+    setAddUserFieldErrors({
+      name: '',
+      email: '',
+      dni: '',
+      birthdate: '',
+      gender: '',
+      marital_status: '',
+      phone: '',
+      password: '',
+      confirmPassword: ''
+    });
+  };
+
+  // Función para crear usuario
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    
+    if (!validateAddUserForm(addUserForm)) {
+      return;
+    }
+
+    setCreatingUser(true);
+    
+    try {
+      // Formatear el teléfono con el prefijo +51 en el formato correcto
+      const formattedPhone = formatPhoneForBackend(addUserForm.phone);
+      
+      // Determinar nacionalidad según el género
+      const nationality = addUserForm.gender === 'femenino' ? 'Peruana' : 'Peruano';
+
+      const userData = {
+        name: addUserForm.name,
+        email: addUserForm.email,
+        password: addUserForm.password,
+        dni: addUserForm.dni,
+        phone: formattedPhone,
+        birthdate: addUserForm.birthdate,
+        gender: addUserForm.gender,
+        marital_status: addUserForm.marital_status,
+        address: addUserForm.address,
+        nationality: nationality,
+        role: 'psychologist' as const,
+        specialization: addUserForm.specialization || undefined
+      };
+
+      await createUser(userData);
+      
+      // Cerrar modal y resetear formulario primero
+      resetAddUserForm();
+      setShowAddUser(false);
+      
+      // Mostrar mensaje de éxito después de cerrar el modal
+      setSuccess('Usuario registrado exitosamente');
+      await loadUsers();
+      
+      // Ocultar mensaje de éxito después de 3 segundos
+      setTimeout(() => {
+        setSuccess(null);
+      }, 3000);
+    } catch (err: unknown) {
+      console.error('Error creating user:', err);
+      if (err && typeof err === 'object' && 'response' in err) {
+        const apiError = err as { 
+          response?: { 
+            status?: number;
+            data?: { 
+              message?: string;
+              errors?: Record<string, string[]>;
+            } 
+          } 
+        };
+        
+        if (apiError.response?.status === 422 && apiError.response.data?.errors) {
+          // Manejar errores de validación del backend
+          const errors = apiError.response.data.errors;
+          setAddUserFieldErrors({
+            name: errors.name?.[0] || '',
+            email: errors.email?.[0] || '',
+            dni: errors.dni?.[0] || '',
+            birthdate: errors.birthdate?.[0] || '',
+            gender: errors.gender?.[0] || '',
+            marital_status: errors.marital_status?.[0] || '',
+            phone: errors.phone?.[0] || '',
+            password: errors.password?.[0] || '',
+            confirmPassword: ''
+          });
+        } else {
+          setError(apiError.response?.data?.message || 'Error al crear el usuario');
+        }
+      } else {
+        setError(err instanceof Error ? err.message : 'Error al crear el usuario');
+      }
+    } finally {
+      setCreatingUser(false);
+    }
   };
 
   function mapUser(u: UserType): UserType {
@@ -71,6 +263,12 @@ export function UserManagement() {
         }
       }).then(res => res.json()).then(res => res.data || []) as UserType[];
       allUsers = allUsers.map(mapUser);
+      
+      // Si el usuario actual es admin, filtrar los super_admin
+      if (currentUser?.role === 'admin') {
+        allUsers = allUsers.filter(u => u.role !== 'super_admin');
+      }
+      
       if (roleFilter !== 'all') {
         allUsers = allUsers.filter(u => u.role === roleFilter);
       }
@@ -207,7 +405,7 @@ export function UserManagement() {
 
       <div className="w-full -mt-4 relative z-20">
       <Card className="p-3 sm:p-4 mb-4 sm:mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Buscar</label>
             <div className="relative">
@@ -246,16 +444,6 @@ export function UserManagement() {
               <option value="inactive">Inactivos</option>
             </select>
           </div>
-          <div className="flex items-end">
-            <Button
-              onClick={loadUsers}
-              variant="outline"
-              className="w-full text-xs sm:text-sm py-2 sm:py-2.5"
-            >
-              <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-              Actualizar
-            </Button>
-          </div>
         </div>
       </Card>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4">
@@ -267,16 +455,37 @@ export function UserManagement() {
               <p className="text-xs sm:text-sm text-gray-400 mt-1">Intenta ajustar los filtros de búsqueda</p>
             </Card>
           ) : (
-            paginatedUsers.map((user) => (
+            paginatedUsers.map((user) => {
+              const UserAvatar = () => {
+                const [imgError, setImgError] = React.useState(false);
+                const avatarUrl = user.avatar || user.google_avatar;
+                
+                return (
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-700 to-blue-300 rounded-full flex items-center justify-center text-sm sm:text-base font-bold flex-shrink-0 overflow-hidden relative">
+                    {avatarUrl && !imgError ? (
+                      <img
+                        src={avatarUrl}
+                        alt={user.name}
+                        className="w-full h-full object-cover"
+                        onError={() => setImgError(true)}
+                      />
+                    ) : (
+                      <span className="text-white">
+                        {user.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                );
+              };
+
+              return (
               <Card
                 key={user.id}
                 className={`p-2.5 sm:p-3 border rounded-xl shadow-sm border-blue-200 hover:border-blue-300 transition-all`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full">
                   <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-600 to-blue-400 rounded-full flex items-center justify-center text-sm sm:text-base font-bold flex-shrink-0">
-                      <span className="text-white">{user.name.charAt(0).toUpperCase()}</span>
-                    </div>
+                    <UserAvatar />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 truncate text-sm sm:text-base">{user.name}</h3>
                       <p className="text-xs sm:text-sm text-gray-600 truncate">{user.email}</p>
@@ -314,10 +523,8 @@ export function UserManagement() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            const reason = prompt('Motivo de desactivación:');
-                            if (reason) {
-                              // handleDeactivateUser(user.id);
-                            }
+                            setSelectedUser(user);
+                            setShowDeactivateModal(true);
                           }}
                           className="flex items-center justify-center border-orange-600 text-orange-600 hover:bg-orange-50 font-semibold p-1.5 sm:px-2.5 sm:py-1.5 text-[10px] sm:text-xs min-w-[32px] sm:min-w-auto"
                           title="Desactivar usuario"
@@ -329,7 +536,10 @@ export function UserManagement() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {/* handleReactivateUser(user.id) */}}
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowReactivateModal(true);
+                          }}
                           className="flex items-center justify-center border-green-600 text-green-600 hover:bg-green-50 font-semibold p-1.5 sm:px-2.5 sm:py-1.5 text-[10px] sm:text-xs min-w-[32px] sm:min-w-auto"
                           title="Reactivar usuario"
                         >
@@ -340,7 +550,10 @@ export function UserManagement() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {/* handleDeleteUser(user.id) */}}
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowDeleteModal(true);
+                        }}
                         className="flex items-center justify-center border-red-600 text-red-600 hover:bg-red-50 font-semibold p-1.5 sm:px-2.5 sm:py-1.5 text-[10px] sm:text-xs min-w-[32px] sm:min-w-auto"
                         title="Eliminar usuario"
                       >
@@ -351,32 +564,67 @@ export function UserManagement() {
                   </div>
                 </div>
               </Card>
-            ))
+              );
+            })
           )}
           {/* Paginación */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-3 sm:mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="text-xs sm:text-sm px-2 sm:px-3 py-1.5"
-              >
-                Anterior
-              </Button>
-              <span className="text-xs sm:text-sm text-gray-600 font-medium">
-                Página {currentPage} de {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="text-xs sm:text-sm px-2 sm:px-3 py-1.5"
-              >
-                Siguiente
-              </Button>
+          {users.length > usersPerPage && totalPages > 1 && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-blue-950 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  <svg className="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
+                            currentPage === page
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-900 text-white/80 hover:bg-blue-950'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (
+                      page === currentPage - 2 ||
+                      page === currentPage + 2
+                    ) {
+                      return (
+                        <span key={page} className="text-gray-400 px-1">
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-blue-950 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  <svg className="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -412,13 +660,42 @@ export function UserManagement() {
           )}
         </div>
       </div>
-      {showEditUser && selectedUser && (
-  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-500 p-2 sm:p-4">
-    <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg max-w-md w-full border border-gray-200 animate-fade-in-up max-h-[90vh] overflow-y-auto">
+      {showEditUser && selectedUser && createPortal(
+  <div 
+    className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] transition-all duration-500" 
+    style={{ 
+      position: 'fixed', 
+      top: 0, 
+      left: 0, 
+      right: 0, 
+      bottom: 0,
+      width: '100vw',
+      height: '100vh',
+      margin: 0,
+      padding: '1rem',
+      boxSizing: 'border-box',
+      overflow: 'auto',
+      zIndex: 9999
+    }}
+    onClick={(e) => {
+      if (e.target === e.currentTarget) {
+        setShowEditUser(false);
+      }
+    }}
+  >
+    <div 
+      className="bg-white rounded-lg sm:rounded-xl shadow-2xl max-w-xl w-full border border-gray-300 animate-fade-in-up max-h-[90vh] overflow-y-auto my-auto"
+      onClick={(e) => e.stopPropagation()}
+      style={{ margin: 'auto' }}
+    >
       <div className="p-0">
-        <div className="rounded-t-xl sm:rounded-t-2xl mb-0 shadow-md overflow-hidden border-b-4 border-blue-600" style={{background: 'linear-gradient(90deg, #1e3a5f 0%, #1a2f4f 100%)'}}>
-          <div className="flex items-center justify-between px-3 sm:px-4 py-3 sm:py-4">
-            <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-wide">Editar Usuario</h2>
+        <div className="rounded-t-lg sm:rounded-t-xl mb-0 shadow-lg overflow-hidden relative" style={{
+          background: 'linear-gradient(180deg, #0a0e17 0%, #020408 50%, #000000 100%)',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)'
+        }}>
+          <div className="absolute inset-0 bg-gradient-to-tr from-gray-900/50 via-transparent to-gray-900/30"></div>
+          <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3">
+            <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-white tracking-wide drop-shadow-lg">Editar Usuario</h2>
             <button
               onClick={() => setShowEditUser(false)}
               className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
@@ -428,15 +705,19 @@ export function UserManagement() {
           </div>
         </div>
         <div className="px-3 sm:px-4 py-3 sm:py-4">
-          <form className="flex flex-col gap-4 items-center w-full">
-            <div className="w-full max-w-xs space-y-3">
+          <form className="space-y-2.5 sm:space-y-3" onSubmit={(e) => {
+            e.preventDefault();
+            // Aquí iría la lógica para actualizar el usuario
+            setShowEditUser(false);
+          }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Nombre completo <span className="text-red-600">*</span></label>
                 <input
                   type="text"
                   value={selectedUser.name}
                   onChange={e => setSelectedUser({...selectedUser, name: e.target.value})}
-                  className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] text-sm transition-all"
+                  className="w-full border rounded-md p-2 text-xs focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                 />
               </div>
               <div>
@@ -445,50 +726,47 @@ export function UserManagement() {
                   type="email"
                   value={selectedUser.email}
                   readOnly
-                  className="w-full border rounded-lg p-2 bg-gray-100 text-gray-700 text-sm cursor-not-allowed"
+                  className="w-full border rounded-md p-2 text-xs bg-gray-100 text-gray-700 cursor-not-allowed"
                 />
               </div>
-              <div className="flex gap-2 w-full">
-                <div className="w-1/2">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">País</label>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mt-2.5">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Celular <span className="text-red-600">*</span></label>
+                <div className="flex items-center">
+                  <span className="px-2 py-2 border border-gray-300 rounded-l-md bg-gray-100 text-gray-700 select-none text-xs h-[36px] flex items-center">+51</span>
                   <input
                     type="text"
-                    value="Perú"
-                    readOnly
-                    className="w-full border rounded-lg p-2 bg-gray-100 text-gray-700 text-sm cursor-not-allowed"
+                    value={selectedUser.phone ? selectedUser.phone.replace(/^\+?51/, '') : ''}
+                    maxLength={9}
+                    onChange={e => setSelectedUser({...selectedUser, phone: e.target.value.replace(/[^0-9]/g, '')})}
+                    className="pl-2 w-full border-t border-b border-r border-gray-300 rounded-r-md bg-white focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-xs h-[36px]"
+                    placeholder="987654321"
                   />
                 </div>
-                <div className="w-1/2">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Celular <span className="text-red-600">*</span></label>
-                  <div className="flex items-center">
-                    <span className="px-2 py-2 border border-gray-300 rounded-l-lg bg-gray-100 text-gray-700 select-none text-sm h-[36px] flex items-center">+51</span>
-                    <input
-                      type="text"
-                      value={selectedUser.phone ? selectedUser.phone.replace(/^\+?51/, '') : ''}
-                      maxLength={9}
-                      onChange={e => setSelectedUser({...selectedUser, phone: e.target.value.replace(/[^0-9]/g, '')})}
-                      className="pl-2 w-full border-t border-b border-r border-gray-300 rounded-r-lg bg-white focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] text-sm h-[36px]"
-                      placeholder="987654321"
-                    />
-                  </div>
-                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">País</label>
+                <input
+                  type="text"
+                  value="Perú"
+                  readOnly
+                  className="w-full border rounded-md p-2 text-xs bg-gray-100 text-gray-700 cursor-not-allowed"
+                />
               </div>
             </div>
-            <div className="flex justify-between w-full pt-3 gap-8">
+            <div className="flex flex-col sm:flex-row gap-2 pt-3 mt-3 border-t border-gray-200">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowEditUser(false)}
-                className="border-[#8e161a] text-[#8e161a] hover:bg-[#f3e7e8] font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-sm py-2 px-6"
-                style={{ minWidth: '120px' }}
+                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition-all duration-200 text-xs py-2"
               >
                 Cancelar
               </Button>
               <Button
-                type="button"
-                className="bg-[#8e161a] hover:bg-[#6b1115] text-white font-bold shadow-md transition-all duration-200 shadow-sm hover:shadow-lg text-sm py-2 px-6"
-                style={{ minWidth: '120px' }}
-                onClick={() => setShowEditUser(false)}
+                type="submit"
+                className="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold shadow-md transition-all duration-200 text-xs py-2"
               >
                 Guardar Cambios
               </Button>
@@ -498,31 +776,80 @@ export function UserManagement() {
       </div>
     </div>
   </div>
+  , document.body
 )}
-      {showAddUser && (
-  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-500 p-2 sm:p-4">
-    <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg max-w-3xl w-full border border-gray-200 animate-fade-in-up max-h-[90vh] overflow-y-auto">
+      {showAddUser && createPortal(
+  <div 
+    className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] transition-all duration-500" 
+    style={{ 
+      position: 'fixed', 
+      top: 0, 
+      left: 0, 
+      right: 0, 
+      bottom: 0,
+      width: '100vw',
+      height: '100vh',
+      margin: 0,
+      padding: '1rem',
+      boxSizing: 'border-box',
+      overflow: 'auto',
+      zIndex: 9999
+    }}
+    onClick={(e) => {
+      if (e.target === e.currentTarget) {
+        setShowAddUser(false);
+        resetAddUserForm();
+      }
+    }}
+  >
+    <div 
+      className="bg-white rounded-lg sm:rounded-xl shadow-2xl max-w-xl w-full border border-gray-300 animate-fade-in-up max-h-[90vh] overflow-y-auto my-auto"
+      onClick={(e) => e.stopPropagation()}
+      style={{ margin: 'auto' }}
+    >
       <div className="p-0">
-        <div className="rounded-t-xl sm:rounded-t-2xl mb-0 shadow-md overflow-hidden border-b-4 border-blue-600" style={{background: 'linear-gradient(90deg, #1e3a5f 0%, #1a2f4f 100%)'}}>
-          <div className="flex items-center justify-between px-3 sm:px-4 py-3 sm:py-4">
-            <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-extrabold text-white tracking-wide">Crear Nuevo Usuario</h2>
+        <div className="rounded-t-lg sm:rounded-t-xl mb-0 shadow-lg overflow-hidden relative" style={{
+          background: 'linear-gradient(180deg, #0a0e17 0%, #020408 50%, #000000 100%)',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)'
+        }}>
+          <div className="absolute inset-0 bg-gradient-to-tr from-gray-900/50 via-transparent to-gray-900/30"></div>
+          <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3">
+            <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-white tracking-wide drop-shadow-lg">Crear Nuevo Usuario</h2>
             <button
-              onClick={() => setShowAddUser(false)}
+              onClick={() => {
+                setShowAddUser(false);
+                resetAddUserForm();
+              }}
               className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
             >
               <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </button>
           </div>
         </div>
-        <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          <form className="space-y-3 sm:space-y-4 lg:space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+        <div className="px-3 sm:px-4 py-3 sm:py-4">
+          {/* Mensajes de estado */}
+          {error && (
+            <div className="mb-3 bg-red-50 border border-red-200 rounded-md p-2.5 shadow-sm flex items-center space-x-2.5 animate-fade-in">
+              <div className="bg-red-500 p-1.5 rounded-md">
+                <AlertCircle className="w-3.5 h-3.5 text-white" />
+              </div>
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Nombre completo <span className="text-red-600">*</span></label>
+                <h4 className="text-red-900 font-medium text-xs mb-0.5">Error</h4>
+                <p className="text-red-800 text-xs">{error}</p>
+              </div>
+            </div>
+          )}
+
+
+          <form className="space-y-2.5 sm:space-y-3" onSubmit={handleCreateUser}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Nombre completo <span className="text-red-600">*</span></label>
                 <input
                   type="text"
-                  // value, onChange, etc. según tu estado
-                  className="w-full border rounded-lg p-2 sm:p-2.5 lg:p-3 text-xs sm:text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
+                  value={addUserForm.name}
+                  onChange={(e) => setAddUserForm({ ...addUserForm, name: e.target.value })}
+                  className="w-full border rounded-md p-2 text-xs focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                 />
                 {addUserFieldErrors.name && (
                   <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
@@ -534,11 +861,12 @@ export function UserManagement() {
                 )}
               </div>
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-600">*</span></label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Email <span className="text-red-600">*</span></label>
                 <input
-                  type="text"
-                  // value, onChange, etc. según tu estado
-                  className="w-full border rounded-lg p-2 sm:p-2.5 lg:p-3 text-xs sm:text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
+                  type="email"
+                  value={addUserForm.email}
+                  onChange={(e) => setAddUserForm({ ...addUserForm, email: e.target.value })}
+                  className="w-full border rounded-md p-2 text-xs focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                 />
                 {addUserFieldErrors.email && (
                   <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
@@ -550,14 +878,51 @@ export function UserManagement() {
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mt-2.5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">DNI <span className="text-red-600">*</span></label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Rol <span className="text-red-600">*</span></label>
+                <select
+                  value="psychologist"
+                  disabled
+                  className="w-full border rounded-md p-2 text-xs focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all bg-gray-100 text-gray-700 cursor-not-allowed"
+                >
+                  <option value="psychologist">Psicólogo</option>
+                </select>
+              </div>
+              <div className="relative" style={{ overflow: 'visible' }}>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Estado Civil <span className="text-red-600">*</span></label>
+                <CustomSelect
+                  value={addUserForm.marital_status}
+                  onChange={(value) => setAddUserForm({ ...addUserForm, marital_status: value })}
+                  options={[
+                    { value: 'soltero', label: 'Soltero/a' },
+                    { value: 'casado', label: 'Casado/a' },
+                    { value: 'divorciado', label: 'Divorciado/a' },
+                    { value: 'viudo', label: 'Viudo/a' },
+                    { value: 'conviviente', label: 'Conviviente' }
+                  ]}
+                  placeholder="Seleccionar estado civil"
+                  focusColor="blue"
+                />
+                {addUserFieldErrors.marital_status && (
+                  <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
+                    <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span className="text-red-800 text-xs font-semibold">{addUserFieldErrors.marital_status}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3 mt-2.5">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">DNI <span className="text-red-600">*</span></label>
                 <input
                   type="text"
-                  // value, onChange, etc. según tu estado
+                  value={addUserForm.dni}
+                  onChange={(e) => setAddUserForm({ ...addUserForm, dni: e.target.value.replace(/[^0-9]/g, '') })}
                   maxLength={8}
-                  className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all"
+                  className="w-full border rounded-md p-2 text-xs focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                 />
                 {addUserFieldErrors.dni && (
                   <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
@@ -569,11 +934,12 @@ export function UserManagement() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento <span className="text-red-600">*</span></label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Fecha de nacimiento <span className="text-red-600">*</span></label>
                 <input
                   type="date"
-                  // value, onChange, etc. según tu estado
-                  className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all"
+                  value={addUserForm.birthdate}
+                  onChange={(e) => setAddUserForm({ ...addUserForm, birthdate: e.target.value })}
+                  className="w-full border rounded-md p-2 text-xs focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                 />
                 {addUserFieldErrors.birthdate && (
                   <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
@@ -584,17 +950,19 @@ export function UserManagement() {
                   </div>
                 )}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Género <span className="text-red-600">*</span></label>
-                <select
-                  // value, onChange, etc. según tu estado
-                  className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all"
-                >
-                  <option value="">Seleccionar género</option>
-                  <option value="masculino">Masculino</option>
-                  <option value="femenino">Femenino</option>
-                  <option value="otro">Otro</option>
-                </select>
+              <div className="relative" style={{ overflow: 'visible' }}>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Género <span className="text-red-600">*</span></label>
+                <CustomSelect
+                  value={addUserForm.gender}
+                  onChange={(value) => setAddUserForm({ ...addUserForm, gender: value })}
+                  options={[
+                    { value: 'masculino', label: 'Masculino' },
+                    { value: 'femenino', label: 'Femenino' },
+                    { value: 'otro', label: 'Otro' }
+                  ]}
+                  placeholder="Seleccionar género"
+                  focusColor="blue"
+                />
                 {addUserFieldErrors.gender && (
                   <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
                     <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -605,16 +973,17 @@ export function UserManagement() {
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mt-2.5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Celular <span className="text-red-600">*</span></label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Celular <span className="text-red-600">*</span></label>
                 <div className="flex items-center">
-                  <span className="px-3 py-3 border border-gray-300 rounded-l-lg bg-gray-100 text-gray-700 select-none text-base h-[48px] flex items-center">+51</span>
+                  <span className="px-2 py-2 border border-gray-300 rounded-l-md bg-gray-100 text-gray-700 select-none text-xs h-[36px] flex items-center">+51</span>
                   <input
                     type="text"
-                    // value, onChange, etc. según tu estado
+                    value={addUserForm.phone}
+                    onChange={(e) => setAddUserForm({ ...addUserForm, phone: e.target.value.replace(/[^0-9]/g, '').substring(0, 9) })}
                     maxLength={9}
-                    className="pl-3 w-full border-t border-b border-r border-gray-300 rounded-r-lg bg-white focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all text-base h-[48px]"
+                    className="pl-2 w-full border-t border-b border-r border-gray-300 rounded-r-md bg-white focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-xs h-[36px]"
                     placeholder="987654321"
                   />
                 </div>
@@ -628,34 +997,48 @@ export function UserManagement() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Rol <span className="text-red-600">*</span></label>
-                <select
-                  value="psychologist"
-                  disabled
-                  className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all bg-gray-100 text-gray-700 cursor-not-allowed"
-                >
-                  <option value="psychologist">Psicólogo</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Especialización</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Especialización</label>
                 <input
                   type="text"
-                  // value, onChange, etc. según tu estado
-                  className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all"
+                  value={addUserForm.specialization}
+                  onChange={(e) => setAddUserForm({ ...addUserForm, specialization: e.target.value })}
+                  className="w-full border rounded-md p-2 text-xs focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                   placeholder="Ej: Psicología Clínica"
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mt-3 sm:mt-4">
+            <div className="mt-2.5">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Dirección</label>
+              <input
+                type="text"
+                value={addUserForm.address}
+                onChange={(e) => setAddUserForm({ ...addUserForm, address: e.target.value })}
+                className="w-full border rounded-md p-2 text-xs focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
+                placeholder="Ej: Av. Principal 123, Lima"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mt-2.5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña <span className="text-red-600">*</span></label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Contraseña <span className="text-red-600">*</span></label>
                 <div className="relative">
                   <input
-                    type="password"
-                    // value, onChange, etc. según tu estado
-                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all pr-10"
+                    type={showPassword ? "text" : "password"}
+                    value={addUserForm.password}
+                    onChange={(e) => setAddUserForm({ ...addUserForm, password: e.target.value })}
+                    className="w-full border rounded-md p-2 pr-9 text-xs focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
+                    placeholder="Mín. 8 caracteres, mayúscula, número y símbolo"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
                 {addUserFieldErrors.password && (
                   <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
@@ -667,13 +1050,26 @@ export function UserManagement() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña <span className="text-red-600">*</span></label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Confirmar Contraseña <span className="text-red-600">*</span></label>
                 <div className="relative">
                   <input
-                    type="password"
-                    // value, onChange, etc. según tu estado
-                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] transition-all pr-10"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={addUserForm.confirmPassword}
+                    onChange={(e) => setAddUserForm({ ...addUserForm, confirmPassword: e.target.value })}
+                    className="w-full border rounded-md p-2 pr-9 text-xs focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
+                    placeholder="Repite la contraseña"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
                 {addUserFieldErrors.confirmPassword && (
                   <div className="bg-red-50 border-2 border-red-200 rounded-xl p-2 flex items-center space-x-2 mt-1">
@@ -685,20 +1081,31 @@ export function UserManagement() {
                 )}
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row gap-2 pt-3 mt-3 border-t border-gray-200">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setShowAddUser(false)}
-                className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold transition-all duration-200 shadow-sm hover:shadow-md text-xs sm:text-sm py-2 sm:py-2.5"
+                onClick={() => {
+                  setShowAddUser(false);
+                  resetAddUserForm();
+                }}
+                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition-all duration-200 text-xs py-2"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition-all duration-200 shadow-sm hover:shadow-lg text-xs sm:text-sm py-2 sm:py-2.5"
+                disabled={creatingUser}
+                className="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold shadow-md transition-all duration-200 text-xs py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Crear Usuario
+                {creatingUser ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Creando...
+                  </>
+                ) : (
+                  'Crear Usuario'
+                )}
               </Button>
             </div>
           </form>
@@ -706,7 +1113,308 @@ export function UserManagement() {
       </div>
     </div>
   </div>
+  , document.body
 )}
+      {/* Modal de Desactivar Usuario */}
+      {showDeactivateModal && selectedUser && createPortal(
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] transition-all duration-500" 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            margin: 0,
+            padding: '1rem',
+            boxSizing: 'border-box',
+            overflow: 'auto',
+            zIndex: 9999
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowDeactivateModal(false);
+              setDeactivateReason('');
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-lg sm:rounded-xl shadow-2xl max-w-md w-full border border-gray-300 animate-fade-in-up max-h-[90vh] overflow-y-auto my-auto"
+            onClick={(e) => e.stopPropagation()}
+            style={{ margin: 'auto' }}
+          >
+            <div className="p-0">
+              <div className="rounded-t-lg sm:rounded-t-xl mb-0 shadow-lg overflow-hidden relative" style={{
+                background: 'linear-gradient(180deg, #0a0e17 0%, #020408 50%, #000000 100%)',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)'
+              }}>
+                <div className="absolute inset-0 bg-gradient-to-tr from-gray-900/50 via-transparent to-gray-900/30"></div>
+                <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3">
+                  <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-white tracking-wide drop-shadow-lg">Desactivar Usuario</h2>
+                  <button
+                    onClick={() => {
+                      setShowDeactivateModal(false);
+                      setDeactivateReason('');
+                    }}
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+                  >
+                    <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                  </button>
+                </div>
+              </div>
+              <div className="px-3 sm:px-4 py-3 sm:py-4">
+                <div className="mb-3">
+                  <p className="text-xs text-gray-700 mb-3">
+                    ¿Estás seguro de que deseas desactivar al usuario <span className="font-semibold">{selectedUser.name}</span>?
+                  </p>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Motivo de desactivación <span className="text-red-600">*</span>
+                  </label>
+                  <textarea
+                    value={deactivateReason}
+                    onChange={(e) => setDeactivateReason(e.target.value)}
+                    className="w-full border rounded-md p-2 text-xs focus:ring-2 focus:ring-orange-600 focus:border-orange-600 transition-all resize-none"
+                    rows={4}
+                    placeholder="Ingresa el motivo de desactivación..."
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-gray-200">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowDeactivateModal(false);
+                      setDeactivateReason('');
+                    }}
+                    className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition-all duration-200 text-xs py-2"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      if (!deactivateReason.trim()) {
+                        setError('El motivo de desactivación es obligatorio');
+                        return;
+                      }
+                      try {
+                        await deactivateUser(parseInt(selectedUser.id), deactivateReason);
+                        setSuccess('Usuario desactivado exitosamente');
+                        setShowDeactivateModal(false);
+                        setDeactivateReason('');
+                        await loadUsers();
+                        setTimeout(() => setSuccess(null), 3000);
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : 'Error al desactivar el usuario');
+                      }
+                    }}
+                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold shadow-md transition-all duration-200 text-xs py-2"
+                  >
+                    Desactivar
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        , document.body
+      )}
+      {/* Modal de Reactivar Usuario */}
+      {showReactivateModal && selectedUser && createPortal(
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] transition-all duration-500" 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            margin: 0,
+            padding: '1rem',
+            boxSizing: 'border-box',
+            overflow: 'auto',
+            zIndex: 9999
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowReactivateModal(false);
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-lg sm:rounded-xl shadow-2xl max-w-md w-full border border-gray-300 animate-fade-in-up max-h-[90vh] overflow-y-auto my-auto"
+            onClick={(e) => e.stopPropagation()}
+            style={{ margin: 'auto' }}
+          >
+            <div className="p-0">
+              <div className="rounded-t-lg sm:rounded-t-xl mb-0 shadow-lg overflow-hidden relative" style={{
+                background: 'linear-gradient(180deg, #0a0e17 0%, #020408 50%, #000000 100%)',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)'
+              }}>
+                <div className="absolute inset-0 bg-gradient-to-tr from-gray-900/50 via-transparent to-gray-900/30"></div>
+                <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3">
+                  <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-white tracking-wide drop-shadow-lg">Reactivar Usuario</h2>
+                  <button
+                    onClick={() => setShowReactivateModal(false)}
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+                  >
+                    <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                  </button>
+                </div>
+              </div>
+              <div className="px-3 sm:px-4 py-3 sm:py-4">
+                <div className="mb-3">
+                  <p className="text-xs text-gray-700">
+                    ¿Estás seguro de que deseas reactivar al usuario <span className="font-semibold">{selectedUser.name}</span>?
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-gray-200">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowReactivateModal(false)}
+                    className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition-all duration-200 text-xs py-2"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await reactivateUser(parseInt(selectedUser.id));
+                        setSuccess('Usuario reactivado exitosamente');
+                        setShowReactivateModal(false);
+                        await loadUsers();
+                        setTimeout(() => setSuccess(null), 3000);
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : 'Error al reactivar el usuario');
+                      }
+                    }}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold shadow-md transition-all duration-200 text-xs py-2"
+                  >
+                    Reactivar
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        , document.body
+      )}
+      {/* Modal de Eliminar Usuario */}
+      {showDeleteModal && selectedUser && createPortal(
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] transition-all duration-500" 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            margin: 0,
+            padding: '1rem',
+            boxSizing: 'border-box',
+            overflow: 'auto',
+            zIndex: 9999
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowDeleteModal(false);
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-lg sm:rounded-xl shadow-2xl max-w-md w-full border border-gray-300 animate-fade-in-up max-h-[90vh] overflow-y-auto my-auto"
+            onClick={(e) => e.stopPropagation()}
+            style={{ margin: 'auto' }}
+          >
+            <div className="p-0">
+              <div className="rounded-t-lg sm:rounded-t-xl mb-0 shadow-lg overflow-hidden relative" style={{
+                background: 'linear-gradient(180deg, #7f1d1d 0%, #991b1b 50%, #dc2626 100%)',
+                boxShadow: '0 4px 20px rgba(220, 38, 38, 0.6)'
+              }}>
+                <div className="absolute inset-0 bg-gradient-to-tr from-red-900/50 via-transparent to-red-800/30"></div>
+                <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3">
+                  <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-white tracking-wide drop-shadow-lg">Eliminar Usuario</h2>
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+                  >
+                    <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                  </button>
+                </div>
+              </div>
+              <div className="px-3 sm:px-4 py-3 sm:py-4">
+                <div className="mb-3">
+                  <p className="text-xs text-gray-700 mb-2">
+                    ¿Estás seguro de que deseas eliminar permanentemente al usuario <span className="font-semibold">{selectedUser.name}</span>?
+                  </p>
+                  <p className="text-xs text-red-600 font-medium">
+                    Esta acción no se puede deshacer.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-gray-200">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowDeleteModal(false)}
+                    className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition-all duration-200 text-xs py-2"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await deleteUser(parseInt(selectedUser.id));
+                        setSuccess('Usuario eliminado exitosamente');
+                        setShowDeleteModal(false);
+                        await loadUsers();
+                        setTimeout(() => setSuccess(null), 3000);
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : 'Error al eliminar el usuario');
+                      }
+                    }}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold shadow-md transition-all duration-200 text-xs py-2"
+                  >
+                    Eliminar
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        , document.body
+      )}
+      {success && createPortal(
+        <div className="fixed top-2 xs:top-4 right-2 xs:right-4 z-[10001] animate-fade-in w-[calc(100%-1rem)] xs:w-auto max-w-md" style={{ zIndex: 10001 }}>
+          <div className={`px-3 xs:px-4 sm:px-5 py-3 xs:py-4 rounded-xl xs:rounded-2xl shadow-2xl flex items-center gap-2 xs:gap-3 min-w-0 xs:min-w-[280px] sm:min-w-[320px] backdrop-blur-sm ${
+            success.includes('Error') || success.includes('error')
+              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-2 border-red-400'
+              : 'bg-gradient-to-r from-green-500 to-green-600 text-white border-2 border-green-400'
+          }`}>
+            {success.includes('Error') || success.includes('error') ? (
+              <AlertCircle className="w-5 h-5 xs:w-6 xs:h-6 flex-shrink-0" />
+            ) : (
+              <CheckCircle className="w-5 h-5 xs:w-6 xs:h-6 flex-shrink-0" />
+            )}
+            <span className="flex-1 font-semibold text-xs xs:text-sm leading-relaxed break-words">{success}</span>
+            <button
+              onClick={() => setSuccess(null)}
+              className="text-white/90 hover:text-white hover:bg-white/20 rounded-lg p-1 transition-colors flex-shrink-0"
+            >
+              <X className="w-4 h-4 xs:w-5 xs:h-5" />
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
       </div>
       </div>
     </div>

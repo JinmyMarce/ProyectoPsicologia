@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\ChatBotController;
 use App\Http\Controllers\Api\TutorController;
 use App\Http\Controllers\Api\DerivationController;
 use App\Http\Controllers\Api\GroupSessionController;
+use App\Http\Controllers\Api\AuditLogController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -139,6 +140,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
+        Route::get('/stats', [UserController::class, 'stats']); // Debe ir antes de /{id}
         Route::get('/{id}', [UserController::class, 'show']);
         Route::put('/{id}', [UserController::class, 'update']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
@@ -148,7 +150,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/change-password', [UserController::class, 'changePassword']);
         Route::post('/{id}/send-verification', [UserController::class, 'sendVerificationEmail']);
         Route::post('/{id}/send-password-reset', [UserController::class, 'sendPasswordResetEmail']);
-        Route::get('/stats', [UserController::class, 'stats']);
     });
 
     // Ruta temporal sin middleware para probar creación de usuarios
@@ -220,6 +221,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/scheduled', [ReportController::class, 'getScheduledReports']);
         Route::delete('/scheduled/{id}', [ReportController::class, 'cancelScheduledReport']);
         Route::get('/activity', [ReportController::class, 'activity']);
+        Route::get('/system', [ReportController::class, 'systemStatus']);
+        Route::get('/download-system-pdf', [ReportController::class, 'downloadSystemReportPDF']);
+        Route::get('/admin-stats', [ReportController::class, 'adminStats']);
+        Route::get('/download-admin-stats-pdf', [ReportController::class, 'downloadAdminStatsPDF']);
     });
 
 
@@ -285,18 +290,27 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/my-psychologist', [MessageController::class, 'getMyPsychologist']);
         Route::get('/', [MessageController::class, 'index']);
         Route::get('/sent', [MessageController::class, 'sent']);
+        Route::get('/stats', [MessageController::class, 'stats']); // Debe ir antes de /{id}
+        Route::get('/recipients', [MessageController::class, 'getRecipients']);
+        Route::get('/conversation/{userId}', [MessageController::class, 'conversation']);
         Route::get('/{id}', [MessageController::class, 'show']);
         Route::post('/', [MessageController::class, 'store']);
         Route::post('/{id}/read', [MessageController::class, 'markAsRead']);
         Route::post('/mark-all-read', [MessageController::class, 'markAllAsRead']);
         Route::delete('/{id}', [MessageController::class, 'destroy']);
-        Route::get('/conversation/{userId}', [MessageController::class, 'conversation']);
-        Route::get('/recipients', [MessageController::class, 'getRecipients']);
-        Route::get('/stats', [MessageController::class, 'stats']);
     });
 
     // Ruta específica para stats de mensajes (para debugging)
     Route::get('/messages-stats-debug', [MessageController::class, 'stats']);
+
+    // Rutas para auditoría (solo para admin y super_admin)
+    Route::prefix('audit-logs')->group(function () {
+        Route::get('/', [AuditLogController::class, 'index']);
+        Route::get('/stats', [AuditLogController::class, 'stats']);
+        Route::get('/{id}', [AuditLogController::class, 'show']);
+        Route::get('/export/pdf', [AuditLogController::class, 'exportPDF']);
+        Route::get('/export/excel', [AuditLogController::class, 'exportExcel']);
+    });
 
 });
 

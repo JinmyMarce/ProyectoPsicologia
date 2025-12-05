@@ -159,7 +159,13 @@ const menuItems: MenuItem[] = [
     label: 'Reportes',
     icon: BarChart3,
     page: 'reports',
-    roles: ['super_admin', 'admin', 'psychologist']
+    roles: ['super_admin']
+  },
+  {
+    label: 'Reportes',
+    icon: BarChart3,
+    page: 'reports',
+    roles: ['admin']
   },
   {
     label: 'Estadísticas',

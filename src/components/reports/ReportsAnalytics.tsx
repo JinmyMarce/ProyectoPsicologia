@@ -71,10 +71,23 @@ export function ReportsAnalytics() {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error ${res.status}: ${res.statusText}`);
+      }
+      
       const data = await res.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Error al obtener datos del sistema');
+      }
+      
       setSystem(data.data);
     } catch (e) {
-      setError('No se pudieron cargar los datos del sistema.');
+      const errorMessage = e instanceof Error ? e.message : 'No se pudieron cargar los datos del sistema.';
+      setError(errorMessage);
+      console.error('Error fetching system data:', e);
     } finally {
       setLoading(false);
     }
