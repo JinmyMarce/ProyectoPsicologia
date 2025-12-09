@@ -10,7 +10,8 @@ import {
   Eye, 
   Loader2,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  User
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -25,6 +26,7 @@ import {
 import { approveAppointment, rejectAppointment } from '../../services/appointments';
 import { Notification } from '../../services/notifications';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface NotificationStats {
   total: number;
@@ -40,6 +42,7 @@ interface NotificationStats {
 
 export function NotificationCenter() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -54,64 +57,265 @@ export function NotificationCenter() {
   // Determinar el rol del usuario para aplicar el color correspondiente
   const userRole = user?.role || 'student';
   
-  // Configuración de colores según el rol
-  const getHeaderConfig = () => {
+  // Sistema completo de configuración de estilos por rol
+  const getRoleStyles = () => {
     switch (userRole) {
+      case 'psychologist':
+        return {
+          // Header
+          header: {
+            background: 'linear-gradient(180deg, rgba(207, 250, 254, 1) 0%, rgba(186, 230, 253, 1) 50%, rgba(165, 243, 252, 1) 100%)',
+            overlay: 'from-cyan-100/50 via-transparent to-sky-100/30',
+            decorative1: 'from-cyan-100/50 via-sky-100/30',
+            decorative2: 'from-sky-100/40',
+            textColor: 'text-cyan-800',
+            textColorAccent: 'text-cyan-700',
+            badgeText: 'SAPTA',
+            titleColor: 'text-cyan-900',
+            borderColor: 'border-cyan-200/40',
+            badgeBg: 'bg-white/70 text-cyan-700 border-cyan-300/50 hover:bg-white/80',
+            buttonStyle: 'border border-cyan-300/40 text-cyan-800 hover:bg-white/20 bg-white/80 backdrop-blur-xl shadow-sm'
+          },
+          // Notificaciones
+          notification: {
+            unreadBg: 'bg-gradient-to-r from-cyan-50/80 to-sky-50/50',
+            unreadBorder: 'border-cyan-200 hover:border-cyan-300',
+            readBg: 'bg-white',
+            readBorder: 'border-cyan-100 hover:border-cyan-200',
+            iconBg: 'bg-gradient-to-br from-cyan-100 to-sky-200 border-cyan-100',
+            iconColor: 'text-cyan-700',
+            badgeNew: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+            badgeType: 'bg-sky-100 text-sky-800 border-sky-200',
+            textTitle: 'text-cyan-900',
+            textMessage: 'text-cyan-700',
+            textDate: 'text-cyan-600'
+          },
+          // Estadísticas
+          stats: {
+            cardBg: 'bg-white',
+            cardBorder: 'border-cyan-100 hover:border-cyan-200',
+            iconBg: 'bg-gradient-to-br from-cyan-100 to-sky-200',
+            iconColor: 'text-cyan-700',
+            numberColor: 'text-cyan-900',
+            labelBg: 'bg-cyan-50',
+            labelText: 'text-cyan-700'
+          },
+          // Filtros
+          filters: {
+            bg: 'bg-white/90 backdrop-blur-sm border-cyan-100',
+            activeBg: 'bg-gradient-to-r from-cyan-300 to-sky-300 text-cyan-900',
+            inactiveBg: 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
+          },
+          // Modal
+          modal: {
+            headerBg: 'bg-gradient-to-r from-cyan-500 to-sky-500',
+            headerText: 'text-white',
+            contentBg: 'bg-gradient-to-br from-cyan-50/50 to-sky-50/30',
+            borderColor: 'border-cyan-200'
+          }
+        };
       case 'super_admin':
         return {
-          background: 'linear-gradient(180deg, #0a0e17 0%, #020408 50%, #000000 100%)',
-          overlay: 'from-[#09090b]/50 via-transparent to-[#09090b]/30',
-          decorative1: 'from-[#0a0e17]/10 via-[#020408]/5',
-          decorative2: 'from-[#020408]/8',
-          textColor: 'text-red-100',
-          textColorAccent: 'text-red-200/80',
-          badgeText: 'SUPER ADMIN'
+          header: {
+            background: 'linear-gradient(180deg, #0a0e17 0%, #020408 50%, #000000 100%)',
+            overlay: 'from-[#09090b]/50 via-transparent to-[#09090b]/30',
+            decorative1: 'from-[#0a0e17]/10 via-[#020408]/5',
+            decorative2: 'from-[#020408]/8',
+            textColor: 'text-red-100',
+            textColorAccent: 'text-red-200/80',
+            badgeText: 'SUPER ADMIN',
+            titleColor: 'text-white',
+            borderColor: 'border-white/10',
+            badgeBg: 'bg-white/15 text-white border-white/20 hover:bg-white/25',
+            buttonStyle: 'border border-white/20 text-white hover:bg-white/20'
+          },
+          notification: {
+            unreadBg: 'bg-gradient-to-r from-red-950/30 to-black/50',
+            unreadBorder: 'border-red-800/50 hover:border-red-700/70',
+            readBg: 'bg-slate-900',
+            readBorder: 'border-slate-800 hover:border-slate-700',
+            iconBg: 'bg-gradient-to-br from-red-900/30 to-black/50 border-red-800/30',
+            iconColor: 'text-red-400',
+            badgeNew: 'bg-red-900/50 text-red-200 border-red-800/50',
+            badgeType: 'bg-red-800/30 text-red-300 border-red-700/40',
+            textTitle: 'text-red-100',
+            textMessage: 'text-red-200/80',
+            textDate: 'text-red-300/60'
+          },
+          stats: {
+            cardBg: 'bg-slate-900',
+            cardBorder: 'border-slate-800 hover:border-slate-700',
+            iconBg: 'bg-gradient-to-br from-red-900/30 to-black/50',
+            iconColor: 'text-red-400',
+            numberColor: 'text-red-100',
+            labelBg: 'bg-red-950/30',
+            labelText: 'text-red-300'
+          },
+          filters: {
+            bg: 'bg-slate-900/80 backdrop-blur-sm border-slate-800',
+            activeBg: 'bg-gradient-to-r from-red-900 to-red-800 text-white',
+            inactiveBg: 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+          },
+          modal: {
+            headerBg: 'bg-gradient-to-r from-red-900 to-black',
+            headerText: 'text-white',
+            contentBg: 'bg-slate-900',
+            borderColor: 'border-slate-800'
+          }
         };
       case 'admin':
         return {
-          background: 'linear-gradient(180deg, #1e3a5f 0%, #1a2f4f 50%, #0f1b2e 100%)',
-          overlay: 'from-blue-900/50 via-transparent to-indigo-900/30',
-          decorative1: 'from-blue-600/10 via-indigo-500/5',
-          decorative2: 'from-cyan-600/8',
-          textColor: 'text-blue-100',
-          textColorAccent: 'text-blue-200/80',
-          badgeText: 'ADMINISTRADOR'
-        };
-      case 'psychologist':
-        return {
-          background: 'linear-gradient(180deg, #8e161a 0%, #6b1013 50%, #4a0b0d 100%)',
-          overlay: 'from-red-900/50 via-transparent to-rose-900/30',
-          decorative1: 'from-red-600/10 via-rose-500/5',
-          decorative2: 'from-pink-600/8',
-          textColor: 'text-red-50',
-          textColorAccent: 'text-red-100/80',
-          badgeText: 'PSICÓLOGO'
+          header: {
+            background: 'linear-gradient(180deg, #1e3a5f 0%, #1a2f4f 50%, #0f1b2e 100%)',
+            overlay: 'from-blue-900/50 via-transparent to-indigo-900/30',
+            decorative1: 'from-blue-600/10 via-indigo-500/5',
+            decorative2: 'from-cyan-600/8',
+            textColor: 'text-blue-100',
+            textColorAccent: 'text-blue-200/80',
+            badgeText: 'ADMINISTRADOR',
+            titleColor: 'text-white',
+            borderColor: 'border-white/10',
+            badgeBg: 'bg-white/15 text-white border-white/20 hover:bg-white/25',
+            buttonStyle: 'border border-white/20 text-white hover:bg-white/20'
+          },
+          notification: {
+            unreadBg: 'bg-gradient-to-r from-blue-950/30 to-indigo-950/50',
+            unreadBorder: 'border-blue-700/50 hover:border-blue-600/70',
+            readBg: 'bg-slate-800',
+            readBorder: 'border-slate-700 hover:border-slate-600',
+            iconBg: 'bg-gradient-to-br from-blue-800/30 to-indigo-900/50 border-blue-700/30',
+            iconColor: 'text-blue-300',
+            badgeNew: 'bg-blue-800/50 text-blue-200 border-blue-700/50',
+            badgeType: 'bg-indigo-800/30 text-indigo-300 border-indigo-700/40',
+            textTitle: 'text-blue-100',
+            textMessage: 'text-blue-200/80',
+            textDate: 'text-blue-300/60'
+          },
+          stats: {
+            cardBg: 'bg-slate-800',
+            cardBorder: 'border-slate-700 hover:border-slate-600',
+            iconBg: 'bg-gradient-to-br from-blue-800/30 to-indigo-900/50',
+            iconColor: 'text-blue-300',
+            numberColor: 'text-blue-100',
+            labelBg: 'bg-blue-950/30',
+            labelText: 'text-blue-300'
+          },
+          filters: {
+            bg: 'bg-slate-800/80 backdrop-blur-sm border-slate-700',
+            activeBg: 'bg-gradient-to-r from-blue-700 to-indigo-700 text-white',
+            inactiveBg: 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+          },
+          modal: {
+            headerBg: 'bg-gradient-to-r from-blue-700 to-indigo-700',
+            headerText: 'text-white',
+            contentBg: 'bg-slate-800',
+            borderColor: 'border-slate-700'
+          }
         };
       case 'tutor':
         return {
-          background: 'linear-gradient(180deg, #1f2937 0%, #111827 50%, #0f172a 100%)',
-          overlay: 'from-gray-800/50 via-transparent to-gray-900/30',
-          decorative1: 'from-gray-600/10 via-gray-500/5',
-          decorative2: 'from-slate-600/8',
-          textColor: 'text-gray-100',
-          textColorAccent: 'text-gray-200/80',
-          badgeText: 'TUTOR'
+          header: {
+            background: 'linear-gradient(180deg, #1f2937 0%, #111827 50%, #0f172a 100%)',
+            overlay: 'from-gray-800/50 via-transparent to-gray-900/30',
+            decorative1: 'from-gray-600/10 via-gray-500/5',
+            decorative2: 'from-slate-600/8',
+            textColor: 'text-gray-100',
+            textColorAccent: 'text-gray-200/80',
+            badgeText: 'TUTOR',
+            titleColor: 'text-white',
+            borderColor: 'border-white/10',
+            badgeBg: 'bg-white/15 text-white border-white/20 hover:bg-white/25',
+            buttonStyle: 'border border-white/20 text-white hover:bg-white/20'
+          },
+          notification: {
+            unreadBg: 'bg-gradient-to-r from-gray-800/30 to-slate-900/50',
+            unreadBorder: 'border-gray-700/50 hover:border-gray-600/70',
+            readBg: 'bg-slate-800',
+            readBorder: 'border-slate-700 hover:border-slate-600',
+            iconBg: 'bg-gradient-to-br from-gray-700/30 to-slate-800/50 border-gray-600/30',
+            iconColor: 'text-gray-300',
+            badgeNew: 'bg-gray-700/50 text-gray-200 border-gray-600/50',
+            badgeType: 'bg-slate-700/30 text-slate-300 border-slate-600/40',
+            textTitle: 'text-gray-100',
+            textMessage: 'text-gray-200/80',
+            textDate: 'text-gray-300/60'
+          },
+          stats: {
+            cardBg: 'bg-slate-800',
+            cardBorder: 'border-slate-700 hover:border-slate-600',
+            iconBg: 'bg-gradient-to-br from-gray-700/30 to-slate-800/50',
+            iconColor: 'text-gray-300',
+            numberColor: 'text-gray-100',
+            labelBg: 'bg-gray-800/30',
+            labelText: 'text-gray-300'
+          },
+          filters: {
+            bg: 'bg-slate-800/80 backdrop-blur-sm border-slate-700',
+            activeBg: 'bg-gradient-to-r from-gray-700 to-slate-700 text-white',
+            inactiveBg: 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+          },
+          modal: {
+            headerBg: 'bg-gradient-to-r from-gray-700 to-slate-700',
+            headerText: 'text-white',
+            contentBg: 'bg-slate-800',
+            borderColor: 'border-slate-700'
+          }
         };
       case 'student':
       default:
         return {
-          background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 50%, #020617 100%)',
-          overlay: 'from-slate-800/50 via-transparent to-slate-900/30',
-          decorative1: 'from-slate-600/10 via-slate-500/5',
-          decorative2: 'from-slate-700/8',
-          textColor: 'text-slate-100',
-          textColorAccent: 'text-slate-200/80',
-          badgeText: 'ESTUDIANTE'
+          header: {
+            background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 50%, #020617 100%)',
+            overlay: 'from-slate-800/50 via-transparent to-slate-900/30',
+            decorative1: 'from-slate-600/10 via-slate-500/5',
+            decorative2: 'from-slate-700/8',
+            textColor: 'text-slate-100',
+            textColorAccent: 'text-slate-200/80',
+            badgeText: 'ESTUDIANTE',
+            titleColor: 'text-white',
+            borderColor: 'border-white/10',
+            badgeBg: 'bg-white/15 text-white border-white/20 hover:bg-white/25',
+            buttonStyle: 'border border-white/20 text-white hover:bg-white/20'
+          },
+          notification: {
+            unreadBg: 'bg-gradient-to-r from-violet-950/30 to-slate-950/50',
+            unreadBorder: 'border-violet-700/50 hover:border-violet-600/70',
+            readBg: 'bg-slate-800',
+            readBorder: 'border-slate-700 hover:border-slate-600',
+            iconBg: 'bg-gradient-to-br from-violet-800/30 to-purple-900/50 border-violet-700/30',
+            iconColor: 'text-violet-300',
+            badgeNew: 'bg-violet-800/50 text-violet-200 border-violet-700/50',
+            badgeType: 'bg-purple-800/30 text-purple-300 border-purple-700/40',
+            textTitle: 'text-slate-100',
+            textMessage: 'text-slate-200/80',
+            textDate: 'text-slate-300/60'
+          },
+          stats: {
+            cardBg: 'bg-slate-800',
+            cardBorder: 'border-slate-700 hover:border-slate-600',
+            iconBg: 'bg-gradient-to-br from-violet-800/30 to-purple-900/50',
+            iconColor: 'text-violet-300',
+            numberColor: 'text-slate-100',
+            labelBg: 'bg-violet-950/30',
+            labelText: 'text-violet-300'
+          },
+          filters: {
+            bg: 'bg-slate-800/80 backdrop-blur-sm border-slate-700',
+            activeBg: 'bg-gradient-to-r from-violet-700 to-purple-700 text-white',
+            inactiveBg: 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+          },
+          modal: {
+            headerBg: 'bg-gradient-to-r from-violet-700 to-purple-700',
+            headerText: 'text-white',
+            contentBg: 'bg-slate-800',
+            borderColor: 'border-slate-700'
+          }
         };
     }
   };
 
-  const headerConfig = getHeaderConfig();
+  const roleStyles = getRoleStyles();
+  const headerConfig = roleStyles.header;
 
   useEffect(() => {
     loadNotifications();
@@ -286,7 +490,9 @@ export function NotificationCenter() {
     <div className="min-h-screen bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900 w-full overflow-x-hidden">
       <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
       {/* Header Section - Compact & Professional */}
-      <div className="rounded-lg sm:rounded-xl lg:rounded-2xl shadow-2xl relative overflow-hidden mt-2 sm:mt-3 lg:mt-4 border border-white/10" style={{
+      <div className={`rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg relative overflow-hidden mt-2 sm:mt-3 lg:mt-4 ${userRole === 'psychologist' ? 'border border-cyan-200/40' : 'border border-white/10'}`} style={userRole === 'psychologist' ? {
+        background: headerConfig.background
+      } : {
         background: headerConfig.background,
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
       }}>
@@ -298,35 +504,56 @@ export function NotificationCenter() {
         <div className={`absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr ${headerConfig.decorative2} to-transparent rounded-full blur-3xl -ml-12 -mb-12 pointer-events-none`}></div>
 
         {/* Subtle dots */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-12 left-16 w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-          <div className="absolute top-20 right-32 w-1 h-1 bg-slate-300 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-          <div className="absolute bottom-16 left-1/3 w-1.5 h-1.5 bg-slate-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className={`absolute inset-0 ${userRole === 'psychologist' ? 'opacity-5' : 'opacity-10'}`}>
+          <div className={`absolute top-12 left-16 w-1.5 h-1.5 ${userRole === 'psychologist' ? 'bg-cyan-400' : 'bg-white'} rounded-full animate-pulse`}></div>
+          <div className={`absolute top-20 right-32 w-1 h-1 ${userRole === 'psychologist' ? 'bg-sky-300' : 'bg-slate-300'} rounded-full animate-pulse`} style={{ animationDelay: '0.5s' }}></div>
+          <div className={`absolute bottom-16 left-1/3 w-1.5 h-1.5 ${userRole === 'psychologist' ? 'bg-cyan-300' : 'bg-slate-400'} rounded-full animate-pulse`} style={{ animationDelay: '1s' }}></div>
         </div>
 
         <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-5 lg:pt-6 pb-5 sm:pb-6 lg:pb-8 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
             <div className="animate-fade-in flex-1 min-w-0">
               <div className="flex items-center space-x-2 mb-2">
-                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-xl text-white text-[9px] sm:text-[10px] font-bold flex items-center tracking-wide uppercase shadow-lg border border-white/20 hover:bg-white/25 transition-all duration-300">
-                  <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5 animate-pulse flex-shrink-0" />
+                <span className={`px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full backdrop-blur-xl text-[9px] sm:text-[10px] font-bold flex items-center tracking-wide uppercase shadow-sm transition-all duration-300 ${
+                  userRole === 'psychologist' 
+                    ? 'bg-white/70 text-cyan-700 border border-cyan-300/50 hover:bg-white/80' 
+                    : 'bg-white/15 text-white border border-white/20 hover:bg-white/25 shadow-lg'
+                }`}>
+                  <Sparkles className={`w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5 flex-shrink-0 ${userRole === 'psychologist' ? '' : 'animate-pulse'}`} />
                   <span className="hidden xs:inline">{headerConfig.badgeText}</span>
                   <span className="xs:hidden">{headerConfig.badgeText.split(' ')[0]}</span>
                 </span>
               </div>
-              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black tracking-tight text-white mb-1 sm:mb-1.5 leading-tight drop-shadow-lg">
+              <h1 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black tracking-tight mb-1 sm:mb-1.5 leading-tight ${
+                userRole === 'psychologist' 
+                  ? 'text-cyan-900' 
+                  : 'text-white drop-shadow-lg'
+              }`}>
                 Centro de Notificaciones
               </h1>
-              <p className={`${headerConfig.textColor} text-[10px] sm:text-[11px] md:text-xs lg:text-sm max-w-2xl font-medium leading-relaxed drop-shadow-md`}>
+              <p className={`${headerConfig.textColor} text-[10px] sm:text-[11px] md:text-xs lg:text-sm max-w-2xl font-medium leading-relaxed ${userRole === 'psychologist' ? '' : 'drop-shadow-md'}`}>
                 Gestiona y revisa todas tus notificaciones.
                 <span className={`hidden sm:inline ${headerConfig.textColorAccent}`}> Mantente al día con el sistema.</span>
               </p>
             </div>
-            <div className="w-full md:w-auto">
+            <div className="flex items-center gap-3">
+              {userRole === 'psychologist' && (
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="bg-white/80 backdrop-blur-xl rounded-xl px-4 py-2 border border-cyan-300/40 text-cyan-800 hover:bg-white/90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 font-semibold text-sm"
+                >
+                  <User className="w-4 h-4" />
+                  Mi Perfil
+                </button>
+              )}
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="w-full md:w-auto text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 border border-white/20 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-1.5"
+                className={`w-full md:w-auto text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-1.5 ${
+                  userRole === 'psychologist'
+                    ? 'border border-cyan-300/40 text-cyan-800 hover:bg-white/20 bg-white/80 backdrop-blur-xl shadow-sm'
+                    : 'border border-white/20 text-white hover:bg-white/20'
+                }`}
               >
                 <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 ${refreshing ? 'animate-spin' : ''}`} />
                 Actualizar
@@ -358,56 +585,56 @@ export function NotificationCenter() {
           </div>
         )}
 
-        {/* Estadísticas mejoradas - Estilo Dashboard */}
+        {/* Estadísticas mejoradas - Estilo Dashboard con estilos por rol */}
         {stats && (
           <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 gap-2 xs:gap-3 mb-3">
             {/* Total */}
-            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+            <div className={`group relative ${roleStyles.stats.cardBg} rounded-xl shadow-md hover:shadow-lg p-3 border ${roleStyles.stats.cardBorder} overflow-hidden hover:-translate-y-0.5 transition-all duration-300`}>
               <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-slate-100/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-slate-200/60 transition-all duration-500"></div>
               <div className="flex items-center justify-between mb-2 relative z-10">
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-lg flex items-center justify-center text-indigo-700 shadow-sm group-hover:scale-110 transition-all duration-300">
+                <div className={`w-8 h-8 ${roleStyles.stats.iconBg} rounded-lg flex items-center justify-center ${roleStyles.stats.iconColor} shadow-sm group-hover:scale-110 transition-all duration-300`}>
                   <Bell className="w-4 h-4" />
                 </div>
-                <span className="text-[9px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">Total</span>
+                <span className={`text-[9px] font-bold ${roleStyles.stats.labelText} ${roleStyles.stats.labelBg} px-2 py-0.5 rounded-full uppercase tracking-wider`}>Total</span>
               </div>
               <div className="flex items-baseline gap-1.5 relative z-10">
-                <p className="text-2xl xs:text-3xl font-black text-slate-900 tracking-tight">{stats.total || 0}</p>
+                <p className={`text-2xl xs:text-3xl font-black ${roleStyles.stats.numberColor} tracking-tight`}>{stats.total || 0}</p>
               </div>
             </div>
             
             {/* No leídas */}
-            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+            <div className={`group relative ${roleStyles.stats.cardBg} rounded-xl shadow-md hover:shadow-lg p-3 border ${roleStyles.stats.cardBorder} overflow-hidden hover:-translate-y-0.5 transition-all duration-300`}>
               <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-red-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-red-100/60 transition-all duration-500"></div>
               <div className="flex items-center justify-between mb-2 relative z-10">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-100 to-red-200 rounded-lg flex items-center justify-center text-red-700 shadow-sm group-hover:scale-110 transition-all duration-300">
+                <div className={`w-8 h-8 ${roleStyles.stats.iconBg} rounded-lg flex items-center justify-center ${roleStyles.stats.iconColor} shadow-sm group-hover:scale-110 transition-all duration-300`}>
                   <AlertCircle className="w-4 h-4" />
                 </div>
-                <span className="text-[9px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Nuevas</span>
+                <span className={`text-[9px] font-bold ${roleStyles.stats.labelText} ${roleStyles.stats.labelBg} px-2 py-0.5 rounded-full uppercase tracking-wider`}>Nuevas</span>
               </div>
               <div className="flex items-baseline gap-1.5 relative z-10">
-                <p className="text-2xl xs:text-3xl font-black text-slate-900 tracking-tight">{unreadCount}</p>
+                <p className={`text-2xl xs:text-3xl font-black ${roleStyles.stats.numberColor} tracking-tight`}>{unreadCount}</p>
               </div>
             </div>
             
             {/* Leídas */}
-            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+            <div className={`group relative ${roleStyles.stats.cardBg} rounded-xl shadow-md hover:shadow-lg p-3 border ${roleStyles.stats.cardBorder} overflow-hidden hover:-translate-y-0.5 transition-all duration-300`}>
               <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-green-100/60 transition-all duration-500"></div>
               <div className="flex items-center justify-between mb-2 relative z-10">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-lg flex items-center justify-center text-emerald-700 shadow-sm group-hover:scale-110 transition-all duration-300">
+                <div className={`w-8 h-8 ${roleStyles.stats.iconBg} rounded-lg flex items-center justify-center ${roleStyles.stats.iconColor} shadow-sm group-hover:scale-110 transition-all duration-300`}>
                   <CheckCircle className="w-4 h-4" />
                 </div>
-                <span className="text-[9px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Leídas</span>
+                <span className={`text-[9px] font-bold ${roleStyles.stats.labelText} ${roleStyles.stats.labelBg} px-2 py-0.5 rounded-full uppercase tracking-wider`}>Leídas</span>
               </div>
               <div className="flex items-baseline gap-1.5 relative z-10">
-                <p className="text-2xl xs:text-3xl font-black text-slate-900 tracking-tight">{stats.read || 0}</p>
+                <p className={`text-2xl xs:text-3xl font-black ${roleStyles.stats.numberColor} tracking-tight`}>{stats.read || 0}</p>
               </div>
             </div>
             
           </div>
         )}
 
-        {/* Filtros - Diseño Moderno */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+        {/* Filtros - Diseño Moderno con estilos por rol */}
+        <div className={`${roleStyles.filters.bg} backdrop-blur-sm rounded-xl shadow-md p-4 mb-6 border`}>
           <div className="flex flex-wrap gap-2 justify-center items-center">
             {[
               { key: 'all', label: 'Todas' },
@@ -420,8 +647,8 @@ export function NotificationCenter() {
                 className={`
                   px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300
                   ${filter === key
-                    ? 'bg-gradient-to-r from-[#1e2a37] to-[#2d3e4f] text-white shadow-lg shadow-[#1e2a37]/30 transform scale-105'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
+                    ? `${roleStyles.filters.activeBg} shadow-lg transform scale-105`
+                    : `${roleStyles.filters.inactiveBg} hover:shadow-md`
                   }
                   hover:scale-105 active:scale-95
                 `}
@@ -450,10 +677,10 @@ export function NotificationCenter() {
             {filteredNotifications.map((notification) => (
               <div 
                 key={notification.id}
-                className={`group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 xs:p-4 border transition-all duration-300 hover:-translate-y-0.5 overflow-hidden ${
+                className={`group relative ${notification.read_at ? roleStyles.notification.readBg : roleStyles.notification.unreadBg} rounded-xl shadow-md hover:shadow-lg p-3 xs:p-4 border transition-all duration-300 hover:-translate-y-0.5 overflow-hidden ${
                   notification.read_at 
-                    ? 'border-slate-200 hover:border-slate-300' 
-                    : 'border-violet-200 hover:border-violet-300 bg-gradient-to-r from-violet-50/50 to-white'
+                    ? roleStyles.notification.readBorder
+                    : roleStyles.notification.unreadBorder
                 }`}
               >
                 <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-slate-50/50 to-transparent rounded-full -mr-10 -mt-10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -465,28 +692,28 @@ export function NotificationCenter() {
                         <div className={`w-8 h-8 xs:w-10 xs:h-10 rounded-lg flex items-center justify-center shadow-sm border flex-shrink-0 ${
                           notification.read_at 
                             ? 'bg-slate-100 border-slate-200' 
-                            : 'bg-gradient-to-br from-violet-100 to-purple-200 border-violet-100'
+                            : roleStyles.notification.iconBg
                         }`}>
-                          <div className={notification.read_at ? 'text-slate-600' : 'text-violet-700'}>
+                          <div className={notification.read_at ? 'text-slate-600' : roleStyles.notification.iconColor}>
                             {getNotificationIcon(notification.type)}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate">
+                            <h3 className={`text-sm sm:text-base font-bold ${roleStyles.notification.textTitle} tracking-tight truncate`}>
                               {notification.title}
                             </h3>
                             {!notification.read_at && (
-                              <Badge className="bg-red-100 text-red-700 border-red-200 px-2 py-0.5 text-[9px] xs:text-[10px] font-bold rounded-lg">
+                              <Badge className={`${roleStyles.notification.badgeNew} px-2 py-0.5 text-[9px] xs:text-[10px] font-bold rounded-lg border`}>
                                 Nueva
                               </Badge>
                             )}
-                            <Badge className="bg-violet-100 text-violet-700 border-violet-200 px-2 py-0.5 text-[9px] xs:text-[10px] font-bold rounded-lg">
+                            <Badge className={`${roleStyles.notification.badgeType} px-2 py-0.5 text-[9px] xs:text-[10px] font-bold rounded-lg border`}>
                               {getNotificationTypeText(notification.type)}
                             </Badge>
                           </div>
-                          <p className="text-xs sm:text-sm text-slate-700 mb-1.5 line-clamp-2">{notification.message}</p>
-                          <p className="text-[10px] xs:text-xs font-semibold text-slate-500">
+                          <p className={`text-xs sm:text-sm ${roleStyles.notification.textMessage} mb-1.5 line-clamp-2`}>{notification.message}</p>
+                          <p className={`text-[10px] xs:text-xs font-semibold ${roleStyles.notification.textDate}`}>
                             {formatDate(notification.created_at)}
                           </p>
                         </div>
@@ -539,12 +766,12 @@ export function NotificationCenter() {
               `
             }}
           >
-            {/* Header del Modal */}
-            <div className="bg-gradient-to-r from-violet-600 to-purple-600 p-3 xs:p-4 border-b border-violet-700/20">
+            {/* Header del Modal con estilos por rol */}
+            <div className={`${roleStyles.modal.headerBg} p-3 xs:p-4 border-b ${roleStyles.modal.borderColor}/20`}>
               <div className="flex justify-between items-center gap-2">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-base xs:text-lg font-black text-white tracking-tight">Detalles de la Notificación</h3>
-                  <p className="text-[10px] xs:text-xs text-violet-100 font-medium mt-0.5">Información completa</p>
+                  <h3 className={`text-base xs:text-lg font-black ${roleStyles.modal.headerText} tracking-tight`}>Detalles de la Notificación</h3>
+                  <p className={`text-[10px] xs:text-xs ${roleStyles.modal.headerText}/80 font-medium mt-0.5`}>Información completa</p>
                 </div>
                 <button
                   onClick={() => setShowNotificationDetails(false)}
@@ -555,47 +782,47 @@ export function NotificationCenter() {
               </div>
             </div>
 
-            {/* Contenido del Modal */}
-            <div className="p-3 xs:p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
+            {/* Contenido del Modal con estilos por rol */}
+            <div className={`p-3 xs:p-4 overflow-y-auto max-h-[calc(90vh-80px)] ${roleStyles.modal.contentBg}`}>
               <div className="space-y-3">
                 {/* Tipo y Badges */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <div className="w-10 h-10 bg-gradient-to-br from-violet-100 to-purple-200 rounded-lg flex items-center justify-center border border-violet-100">
+                  <div className={`w-10 h-10 ${roleStyles.notification.iconBg} rounded-lg flex items-center justify-center border`}>
                     {getNotificationIcon(selectedNotification.type)}
                   </div>
-                  <Badge className="bg-violet-100 text-violet-700 border-violet-200 px-2.5 py-1 text-xs font-bold rounded-lg">
+                  <Badge className={`${roleStyles.notification.badgeType} px-2.5 py-1 text-xs font-bold rounded-lg border`}>
                     {getNotificationTypeText(selectedNotification.type)}
                   </Badge>
                   {!selectedNotification.read_at && (
-                    <Badge className="bg-red-100 text-red-700 border-red-200 px-2.5 py-1 text-xs font-bold rounded-lg">
+                    <Badge className={`${roleStyles.notification.badgeNew} px-2.5 py-1 text-xs font-bold rounded-lg border`}>
                       Nueva
                     </Badge>
                   )}
                 </div>
                 
                 {/* Título */}
-                <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-3 border border-slate-200/50">
-                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Título</p>
-                  <p className="text-base font-bold text-slate-900">{selectedNotification.title}</p>
+                <div className={`${roleStyles.modal.contentBg} rounded-lg p-3 border ${roleStyles.modal.borderColor}/50`}>
+                  <p className={`text-xs font-bold ${roleStyles.notification.textDate} uppercase tracking-wide mb-1`}>Título</p>
+                  <p className={`text-base font-bold ${roleStyles.notification.textTitle}`}>{selectedNotification.title}</p>
                 </div>
                 
                 {/* Mensaje */}
-                <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-3 border border-slate-200/50">
-                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Mensaje</p>
-                  <p className="text-sm text-slate-700 leading-relaxed">{selectedNotification.message}</p>
+                <div className={`${roleStyles.modal.contentBg} rounded-lg p-3 border ${roleStyles.modal.borderColor}/50`}>
+                  <p className={`text-xs font-bold ${roleStyles.notification.textDate} uppercase tracking-wide mb-1`}>Mensaje</p>
+                  <p className={`text-sm ${roleStyles.notification.textMessage} leading-relaxed`}>{selectedNotification.message}</p>
                 </div>
                 
                 {/* Fecha */}
-                <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-3 border border-slate-200/50">
-                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Fecha</p>
-                  <p className="text-sm font-bold text-slate-900">{formatDate(selectedNotification.created_at)}</p>
+                <div className={`${roleStyles.modal.contentBg} rounded-lg p-3 border ${roleStyles.modal.borderColor}/50`}>
+                  <p className={`text-xs font-bold ${roleStyles.notification.textDate} uppercase tracking-wide mb-1`}>Fecha</p>
+                  <p className={`text-sm font-bold ${roleStyles.notification.textTitle}`}>{formatDate(selectedNotification.created_at)}</p>
                 </div>
                 
                 {/* Datos adicionales */}
                 {selectedNotification.data && (
-                  <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-lg p-3 border border-slate-200/50">
-                    <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">Datos adicionales</p>
-                    <pre className="text-xs bg-white p-2.5 rounded-lg border border-slate-200 overflow-auto max-h-40">
+                  <div className={`${roleStyles.modal.contentBg} rounded-lg p-3 border ${roleStyles.modal.borderColor}/50`}>
+                    <p className={`text-xs font-bold ${roleStyles.notification.textDate} uppercase tracking-wide mb-2`}>Datos adicionales</p>
+                    <pre className={`text-xs ${roleStyles.notification.readBg} p-2.5 rounded-lg border ${roleStyles.modal.borderColor} overflow-auto max-h-40`}>
                       {JSON.stringify(selectedNotification.data, null, 2)}
                     </pre>
                   </div>

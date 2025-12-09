@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { PersonalDataModal } from '../appointments/PersonalDataModal';
 import { EmergencyContactModal } from '../appointments/EmergencyContactModal';
 import { MedicalInfoModal } from '../appointments/MedicalInfoModal';
@@ -22,23 +22,89 @@ export const MultiStepPatientRegistrationModal: React.FC<MultiStepPatientRegistr
   patientData
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [personalData, setPersonalData] = useState<any>(patientData?.personalData || null);
-  const [emergencyContact, setEmergencyContact] = useState<any>(patientData?.emergencyContact || null);
-  const [medicalInfo, setMedicalInfo] = useState<any>(patientData?.medicalInfo || null);
+  const [personalData, setPersonalData] = useState<any>(null);
+  const [emergencyContact, setEmergencyContact] = useState<any>(null);
+  const [medicalInfo, setMedicalInfo] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
+  const isMountedRef = useRef(true);
+  const loadingRef = useRef(false);
+  const patientDataRef = useRef<any>(null);
 
-  // Precargar datos si es edición
-  React.useEffect(() => {
-    if (patientData) {
-      // Establecer todos los datos inmediatamente
-      setPersonalData(patientData.personalData || null);
-      setEmergencyContact(patientData.emergencyContact || null);
-      setMedicalInfo(patientData.medicalInfo || null);
+  // Memoizar patientData usando una clave estable para evitar cambios innecesarios
+  const memoizedPatientData = useMemo(() => {
+    if (!patientData) return null;
+    // Crear una copia estable del objeto para evitar referencias cambiantes
+    return {
+      personalData: patientData.personalData || null,
+      emergencyContact: patientData.emergencyContact || null,
+      medicalInfo: patientData.medicalInfo || null
+    };
+  }, [
+    patientData?.personalData?.dni,
+    patientData?.personalData?.fullName,
+    patientData?.personalData?.email,
+    patientData?.emergencyContact?.name,
+    patientData?.emergencyContact?.phone,
+    patientData?.medicalInfo?.medicalHistory,
+    patientId
+  ]);
+
+  // Precargar datos si es edición - solo cuando cambia patientData o se abre el modal
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      loadingRef.current = false;
+    };
+  }, []);
+
+  // Ref para rastrear si ya se cargaron los datos iniciales
+  const dataLoadedRef = useRef(false);
+  
+  useEffect(() => {
+    // Solo actualizar si el modal está abierto y no se han cargado los datos aún
+    if (!isOpen) {
+      dataLoadedRef.current = false;
+      return;
     }
-  }, [patientData]);
+
+    // Solo cargar datos una vez cuando se abre el modal
+    if (isOpen && !dataLoadedRef.current && memoizedPatientData) {
+      dataLoadedRef.current = true;
+      patientDataRef.current = memoizedPatientData;
+      if (isMountedRef.current) {
+        setPersonalData(memoizedPatientData.personalData || null);
+        setEmergencyContact(memoizedPatientData.emergencyContact || null);
+        setMedicalInfo(memoizedPatientData.medicalInfo || null);
+      }
+    } else if (isOpen && !memoizedPatientData && !dataLoadedRef.current) {
+      // Si no hay datos y el modal se abre, limpiar
+      dataLoadedRef.current = true;
+      patientDataRef.current = null;
+      if (isMountedRef.current) {
+        setPersonalData(null);
+        setEmergencyContact(null);
+        setMedicalInfo(null);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]); // Solo depender de isOpen para evitar bucles infinitos
+
+  // Resetear cuando se cierra el modal
+  useEffect(() => {
+    if (!isOpen) {
+      // Resetear solo cuando se cierra
+      setCurrentStep(1);
+      setError('');
+      setSuccess('');
+      loadingRef.current = false;
+      dataLoadedRef.current = false;
+      patientDataRef.current = null;
+    }
+  }, [isOpen]);
 
   const handlePersonalDataContinue = (data: any) => {
     setPersonalData(data);
@@ -51,10 +117,16 @@ export const MultiStepPatientRegistrationModal: React.FC<MultiStepPatientRegistr
   };
 
   const handleMedicalInfoContinue = async (data: any) => {
+    if (loadingRef.current || !isMountedRef.current) {
+      return;
+    }
+
     setMedicalInfo(data);
+    loadingRef.current = true;
     setLoading(true);
     setError('');
     setSuccess('');
+    
     try {
       // Unificar datos para registro/edición
       const payload = {
@@ -62,24 +134,48 @@ export const MultiStepPatientRegistrationModal: React.FC<MultiStepPatientRegistr
         ...emergencyContact,
         ...data,
       };
+      
       let response;
       if (patientId) {
         response = await patientsService.updatePatient(patientId, payload);
       } else {
         response = await patientsService.createPatient(payload);
       }
-      if (response.success) {
+      
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      if (response && response.success) {
         setSuccess(patientId ? 'Paciente modificado exitosamente' : 'Paciente registrado exitosamente');
-        if (onSuccess) onSuccess();
+        if (onSuccess) {
+          // Usar setTimeout para evitar conflictos con el cierre del modal
+          setTimeout(() => {
+            onSuccess();
+          }, 100);
+        }
         onClose();
-        navigate('/patients');
+        // Navegar solo si no hay onSuccess callback
+        if (!onSuccess) {
+          setTimeout(() => {
+            navigate('/patients');
+          }, 200);
+        }
       } else {
-        setError(response.message || (patientId ? 'Error al modificar paciente' : 'Error al registrar paciente'));
+        setError(response?.message || (patientId ? 'Error al modificar paciente' : 'Error al registrar paciente'));
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || (patientId ? 'Error al modificar paciente' : 'Error al registrar paciente'));
+      if (!isMountedRef.current) {
+        return;
+      }
+      const errorMessage = err?.response?.data?.message || err?.message || (patientId ? 'Error al modificar paciente' : 'Error al registrar paciente');
+      setError(errorMessage);
+      console.error('Error saving patient:', err);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
+      loadingRef.current = false;
     }
   };
 

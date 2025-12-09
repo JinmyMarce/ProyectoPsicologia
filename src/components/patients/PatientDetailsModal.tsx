@@ -1,5 +1,5 @@
 import { patientsService } from '../../services/patients';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MedicalInfoModal } from './MedicalInfoModal';
 import { User, AlertTriangle, BookOpen, X } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -13,22 +13,78 @@ interface PatientDetailsModalProps {
 export function PatientDetailsModal({ isOpen, onClose, patientId }: PatientDetailsModalProps) {
   const [patient, setPatient] = useState<any>(null);
   const [showMedicalInfo, setShowMedicalInfo] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const loadingRef = useRef(false);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
-    if (isOpen && patientId) {
-      patientsService.getPatient(patientId)
-        .then((res) => {
-          if (res && res.success && res.data) {
-            setPatient(res.data);
-          } else {
-            setPatient(null);
-          }
-        })
-        .catch(() => setPatient(null));
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      loadingRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    // Solo cargar si el modal está abierto y hay un patientId válido
+    if (!isOpen || !patientId || loadingRef.current) {
+      if (!isOpen) {
+        // Limpiar datos cuando se cierra el modal
+        setPatient(null);
+      }
+      return;
     }
+
+    // Prevenir llamadas duplicadas
+    if (loadingRef.current) {
+      return;
+    }
+
+    loadingRef.current = true;
+    setLoading(true);
+
+    patientsService.getPatient(patientId)
+      .then((res) => {
+        if (!isMountedRef.current) {
+          return;
+        }
+        if (res && res.success && res.data) {
+          setPatient(res.data);
+        } else {
+          setPatient(null);
+        }
+      })
+      .catch((err) => {
+        if (!isMountedRef.current) {
+          return;
+        }
+        console.error('Error loading patient details:', err);
+        setPatient(null);
+      })
+      .finally(() => {
+        if (isMountedRef.current) {
+          setLoading(false);
+        }
+        loadingRef.current = false;
+      });
   }, [isOpen, patientId]);
 
-  if (!isOpen || !patient) return null;
+  if (!isOpen) return null;
+  
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+        <div className="bg-white rounded-2xl p-6">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 border-3 border-[#7a0c0c] border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-gray-700 font-medium">Cargando información del paciente...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!patient) return null;
 
   const getGenderLabel = (gender: string) => {
     switch (gender) {

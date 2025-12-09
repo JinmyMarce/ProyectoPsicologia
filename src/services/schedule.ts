@@ -176,4 +176,78 @@ export const isTimeBlockBlocked = (
   }
   
   return { blocked: false };
+};
+
+// Interfaces para horarios del psicólogo
+export interface ScheduleSlot {
+  id?: number;
+  date: string;
+  start_time: string;
+  end_time: string;
+  is_available: boolean;
+  is_blocked: boolean;
+  block_reason?: string;
+}
+
+// Obtener mis horarios (para psicólogo autenticado)
+export const getMySchedule = async (params?: {
+  date_from?: string;
+  date_to?: string;
+  is_available?: boolean;
+  is_blocked?: boolean;
+}): Promise<ScheduleSlot[]> => {
+  try {
+    const response = await apiClient.get('/schedule/my-schedule', { params });
+    return response.data.data || response.data || [];
+  } catch (error) {
+    console.error('Error fetching my schedule:', error);
+    return [];
+  }
+};
+
+// Crear horario (para psicólogo autenticado)
+export const createMySchedule = async (data: {
+  date: string;
+  start_time: string;
+  end_time: string;
+  is_available?: boolean;
+  block_reason?: string;
+}): Promise<ScheduleSlot> => {
+  try {
+    const response = await apiClient.post('/schedule/my-schedule', data);
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error('Error creating schedule:', error);
+    throw error;
+  }
+};
+
+// Bloquear horario (para psicólogo autenticado)
+export const blockMySchedule = async (id: number, data: { reason: string }): Promise<void> => {
+  try {
+    await apiClient.post(`/schedule/my-schedule/${id}/block`, data);
+  } catch (error) {
+    console.error('Error blocking schedule:', error);
+    throw error;
+  }
+};
+
+// Desbloquear horario (para psicólogo autenticado)
+export const unblockMySchedule = async (id: number): Promise<void> => {
+  try {
+    await apiClient.post(`/schedule/my-schedule/${id}/unblock`);
+  } catch (error) {
+    console.error('Error unblocking schedule:', error);
+    throw error;
+  }
+};
+
+// Eliminar horario (para psicólogo autenticado)
+export const deleteMySchedule = async (id: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/schedule/my-schedule/${id}`);
+  } catch (error) {
+    console.error('Error deleting schedule:', error);
+    throw error;
+  }
 }; 

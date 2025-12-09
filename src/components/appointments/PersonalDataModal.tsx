@@ -71,19 +71,41 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
 
   const [loading, setLoading] = useState(false);
 
-  // Actualizar si cambia initialData
+  // Ref para rastrear si ya se inicializaron los datos y evitar actualizaciones innecesarias
+  const initializedRef = React.useRef(false);
+  const initialDataKeyRef = React.useRef<string | null>(null);
+
+  // Memoizar valores clave de initialData para comparación
+  const initialDataKey = React.useMemo(() => {
+    if (!initialData) return null;
+    // Crear una clave única basada en los valores importantes
+    return `${initialData.dni || ''}-${initialData.fullName || ''}-${initialData.email || ''}`;
+  }, [initialData?.dni, initialData?.fullName, initialData?.email]);
+
+  // Actualizar si cambia initialData - solo cuando realmente cambia y solo una vez
   React.useEffect(() => {
-    if (initialData) {
-      setFormData(prev => ({
-        ...prev,
-        ...initialData,
-        // Limpiar específicamente el teléfono si viene con +51
-        phone: initialData.phone ? (initialData.phone.replace('+51', '').replace(/\D/g, '')) : prev.phone,
-        // Normalizar estado civil a minúsculas para que coincida con las opciones del select
-        maritalStatus: initialData.maritalStatus ? initialData.maritalStatus.toLowerCase() : prev.maritalStatus
-      }));
+    // Solo actualizar si initialData existe, tiene una clave diferente, y no se ha inicializado aún
+    if (initialData && initialDataKey && initialDataKey !== initialDataKeyRef.current && !initializedRef.current) {
+      initialDataKeyRef.current = initialDataKey;
+      initializedRef.current = true;
+      
+      setFormData(prev => {
+        return {
+          ...prev,
+          ...initialData,
+          // Limpiar específicamente el teléfono si viene con +51
+          phone: initialData.phone ? (initialData.phone.replace('+51', '').replace(/\D/g, '')) : prev.phone,
+          // Normalizar estado civil a minúsculas para que coincida con las opciones del select
+          maritalStatus: initialData.maritalStatus ? initialData.maritalStatus.toLowerCase() : prev.maritalStatus
+        };
+      });
+    } else if (!initialData && initializedRef.current) {
+      // Resetear si initialData se elimina
+      initializedRef.current = false;
+      initialDataKeyRef.current = null;
     }
-  }, [initialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialDataKey]); // Solo depender de la clave, no del objeto completo
 
   const [errors, setErrors] = useState<Partial<PersonalData>>({});
 

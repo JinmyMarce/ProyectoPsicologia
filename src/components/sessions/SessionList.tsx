@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, Edit, Trash2, RefreshCw, Plus } from 'lucide-react';
+import { Search, Eye, Edit, Trash2, RefreshCw, Plus, Sparkles, User } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
 import { psychologicalSessionsService, PsychologicalSession } from '../../services/psychologicalSessions';
 import { SessionRegistration } from './SessionRegistration';
+import { useNavigate } from 'react-router-dom';
 
 export function SessionList() {
+  const navigate = useNavigate();
   const [sessions, setSessions] = useState<PsychologicalSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -132,19 +134,68 @@ export function SessionList() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-1">
-      <div className="max-w-full mx-auto">
-        <div className="px-0 pb-2">
-          {/* Título */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-4xl font-bold text-[#8e161a] flex-1">Sesiones Psicológicas</h1>
+    <>
+      <div className="min-h-screen bg-gray-50 font-sans selection:bg-cyan-50 selection:text-cyan-800">
+        <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Section - Compact & Professional - CELESTE SUAVE que combina con el sistema */}
+        <div className="bg-gradient-to-br from-cyan-100 via-sky-100 to-cyan-200 rounded-2xl shadow-lg relative overflow-hidden mx-2 sm:mx-3 mt-3 border border-cyan-200/40">
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-100/50 via-transparent to-sky-100/30"></div>
+
+          {/* Minimal decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-100/50 via-sky-100/30 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr from-sky-100/40 to-transparent rounded-full blur-3xl -ml-12 -mb-12 pointer-events-none"></div>
+
+          {/* Subtle dots */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-12 left-16 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
+            <div className="absolute top-20 right-32 w-1 h-1 bg-sky-300 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+            <div className="absolute bottom-16 left-1/3 w-1.5 h-1.5 bg-cyan-300 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
           </div>
 
+          <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-8 relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <div className="flex items-center space-x-2 mb-2">
+                  <span className="px-3 py-1 rounded-full bg-white/70 backdrop-blur-xl text-cyan-700 text-[10px] font-bold flex items-center tracking-wide uppercase shadow-sm border border-cyan-300/50 hover:bg-white/80 transition-all duration-300">
+                    <Sparkles className="w-3 h-3 mr-1.5" />
+                    SAPTA
+                  </span>
+                </div>
+                <h1 className="text-3xl md:text-4xl font-black tracking-tight text-cyan-900 mb-1.5 leading-tight">Sesiones Psicológicas</h1>
+                <p className="text-cyan-800 text-sm max-w-2xl font-medium leading-relaxed">
+                  Gestiona y visualiza todas tus sesiones.
+                  <span className="hidden sm:inline text-cyan-700"> Registra y administra sesiones psicológicas.</span>
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="bg-white/80 backdrop-blur-xl rounded-xl px-4 py-2 border border-cyan-300/40 text-cyan-800 hover:bg-white/90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 font-semibold text-sm"
+                >
+                  <User className="w-4 h-4" />
+                  Mi Perfil
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Wave pattern */}
+          <div className="absolute bottom-0 left-0 right-0 h-12 overflow-hidden pointer-events-none">
+            <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M0,0 C150,80 350,80 600,40 C850,0 1050,0 1200,40 L1200,120 L0,120 Z" fill="white" fillOpacity="0.08" />
+              <path d="M0,20 C200,100 400,100 600,60 C800,20 1000,20 1200,60 L1200,120 L0,120 Z" fill="white" fillOpacity="0.04" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="w-full px-3 sm:px-4 lg:px-6 -mt-4 relative z-20">
+
           {/* Filtros y búsqueda */}
-          <div className="bg-white rounded-xl p-2 mb-3 border border-[#8e161a] shadow-md">
+          <div className="bg-white rounded-xl p-2 mb-3 border border-cyan-200 shadow-md">
             <div className="flex items-center gap-2 mb-2">
-              <Search className="w-4 h-4 text-[#8e161a]" />
-              <h3 className="text-base font-bold text-[#8e161a]">Buscar Sesiones</h3>
+              <Search className="w-4 h-4 text-cyan-600" />
+              <h3 className="text-base font-bold text-cyan-700">Buscar Sesiones</h3>
             </div>
             
             <div className="flex flex-col md:flex-row gap-2">
@@ -156,7 +207,7 @@ export function SessionList() {
                 <select
                   value={searchType}
                   onChange={(e) => setSearchType(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] text-base bg-white"
+                  className="w-full px-3 py-2 border border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 text-base bg-white"
                 >
                   <option value="paciente">Paciente</option>
                   <option value="dni">DNI</option>
@@ -182,7 +233,7 @@ export function SessionList() {
                     }
                   }}
                   onKeyPress={handleKeyPress}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] text-base"
+                  className="w-full px-3 py-2 border border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 text-base"
                 />
               </div>
 
@@ -194,7 +245,7 @@ export function SessionList() {
                 <select
                   value={filters.estado}
                   onChange={(e) => handleFilterChange('estado', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] text-base bg-white"
+                  className="w-full px-3 py-2 border border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 text-base bg-white"
                 >
                   <option value="">Todos los estados</option>
                   <option value="Programada">Programada</option>
@@ -212,7 +263,7 @@ export function SessionList() {
                   type="date"
                   value={filters.date_from}
                   onChange={(e) => handleFilterChange('date_from', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] text-base bg-white"
+                  className="w-full px-3 py-2 border border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 text-base bg-white"
                 />
               </div>
 
@@ -224,7 +275,7 @@ export function SessionList() {
                   type="date"
                   value={filters.date_to}
                   onChange={(e) => handleFilterChange('date_to', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8e161a] focus:border-[#8e161a] text-base bg-white"
+                  className="w-full px-3 py-2 border border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 text-base bg-white"
                 />
               </div>
 
@@ -232,7 +283,7 @@ export function SessionList() {
               <div className="flex items-end gap-2">
                 <Button
                   onClick={handleSearch}
-                  className="bg-[#8e161a] text-white font-bold shadow-md hover:bg-[#6d1115] transition-all duration-300 px-4 py-2 text-sm rounded-lg"
+                  className="bg-gradient-to-r from-cyan-300 to-sky-300 hover:from-cyan-400 hover:to-sky-400 text-cyan-900 font-bold shadow-md transition-all duration-300 px-4 py-2 text-sm rounded-lg"
                 >
                   <Search className="w-4 h-4 mr-1" />
                   Buscar
@@ -255,14 +306,14 @@ export function SessionList() {
             <Button
               onClick={() => loadSessions(currentPage, searchTerm, filters)}
               variant="outline"
-              className="border-2 border-[#8e161a] text-[#8e161a] font-semibold bg-white hover:bg-[#8e161a] hover:text-white transition-all duration-300 px-4 py-2 text-sm rounded-lg"
+              className="border-2 border-cyan-300 text-cyan-700 font-semibold bg-white hover:bg-cyan-50 hover:border-cyan-400 transition-all duration-300 px-4 py-2 text-sm rounded-lg"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Actualizar
             </Button>
             <Button
               onClick={() => setShowRegistrationModal(true)}
-              className="bg-[#8e161a] text-white font-semibold shadow-md hover:bg-[#6d1115] transition-all duration-300 px-4 py-2 text-sm rounded-lg"
+              className="bg-gradient-to-r from-cyan-300 to-sky-300 hover:from-cyan-400 hover:to-sky-400 text-cyan-900 font-semibold shadow-md transition-all duration-300 px-4 py-2 text-sm rounded-lg"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nueva Sesión
@@ -384,6 +435,7 @@ export function SessionList() {
             </div>
           )}
         </div>
+        </div>
       </div>
 
       {/* Modal de Registro de Sesión */}
@@ -395,6 +447,6 @@ export function SessionList() {
           setShowRegistrationModal(false);
         }}
       />
-    </div>
+    </>
   );
-} 
+}
