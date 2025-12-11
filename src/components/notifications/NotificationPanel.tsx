@@ -40,22 +40,22 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
     switch (userRole) {
       case 'psychologist':
         return {
-          headerBg: 'bg-gradient-to-r from-cyan-50 to-sky-50',
-          headerBorder: 'border-cyan-200',
-          headerText: 'text-cyan-800',
-          buttonBg: 'bg-cyan-100 hover:bg-cyan-200 text-cyan-900 border-cyan-300',
-          notificationUnread: 'bg-cyan-50/80 border-cyan-100',
-          notificationRead: 'bg-white border-cyan-50',
-          iconBg: 'bg-cyan-100 border-cyan-200',
-          iconColor: 'text-cyan-700',
-          badgeNew: 'bg-cyan-200 text-cyan-900 border-cyan-300',
-          textTitle: 'text-cyan-900',
-          textMessage: 'text-cyan-700',
-          textDate: 'text-cyan-600',
-          footerBg: 'bg-gradient-to-r from-cyan-200 to-sky-200',
-          footerButton: 'bg-cyan-300 hover:bg-cyan-400 text-cyan-900 border-cyan-400',
-          emptyIcon: 'text-cyan-500',
-          errorBg: 'bg-red-50 border-red-200 text-red-700'
+          headerBg: 'bg-[#02040a]',
+          headerBorder: 'border-white/10',
+          headerText: 'text-white',
+          buttonBg: 'bg-white/10 hover:bg-white/20 text-white border-white/20',
+          notificationUnread: 'bg-white/5 border-white/10',
+          notificationRead: 'bg-transparent border-white/5',
+          iconBg: 'bg-white/10 border-white/20',
+          iconColor: 'text-slate-400',
+          badgeNew: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+          textTitle: 'text-white',
+          textMessage: 'text-slate-300',
+          textDate: 'text-slate-500',
+          footerBg: 'bg-[#02040a]',
+          footerButton: 'bg-white/10 hover:bg-white/20 text-white border-white/20',
+          emptyIcon: 'text-slate-600',
+          errorBg: 'bg-red-950/50 border-red-900/50 text-red-200'
         };
       case 'super_admin':
         return {
@@ -117,22 +117,22 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
       case 'student':
       default:
         return {
-          headerBg: 'bg-gradient-to-r from-slate-800 to-slate-900',
-          headerBorder: 'border-slate-700',
-          headerText: 'text-slate-100',
-          buttonBg: 'bg-slate-700 hover:bg-slate-600 text-slate-100 border-slate-600',
-          notificationUnread: 'bg-violet-950/30 border-violet-800/50',
-          notificationRead: 'bg-slate-800 border-slate-700',
-          iconBg: 'bg-violet-800/30 border-violet-700/30',
-          iconColor: 'text-violet-300',
-          badgeNew: 'bg-violet-800/50 text-violet-200 border-violet-700/50',
-          textTitle: 'text-slate-100',
-          textMessage: 'text-slate-200/80',
-          textDate: 'text-slate-300/60',
-          footerBg: 'bg-gradient-to-r from-slate-700 to-slate-800',
-          footerButton: 'bg-slate-600 hover:bg-slate-500 text-slate-100 border-slate-500',
-          emptyIcon: 'text-violet-500',
-          errorBg: 'bg-red-950 border-red-900 text-red-200'
+          headerBg: 'bg-[#02040a]',
+          headerBorder: 'border-white/10',
+          headerText: 'text-white',
+          buttonBg: 'bg-white/10 hover:bg-white/20 text-white border-white/20',
+          notificationUnread: 'bg-white/5 border-white/10',
+          notificationRead: 'bg-transparent border-white/5',
+          iconBg: 'bg-white/10 border-white/20',
+          iconColor: 'text-slate-400',
+          badgeNew: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+          textTitle: 'text-white',
+          textMessage: 'text-slate-300',
+          textDate: 'text-slate-500',
+          footerBg: 'bg-[#02040a]',
+          footerButton: 'bg-white/10 hover:bg-white/20 text-white border-white/20',
+          emptyIcon: 'text-slate-600',
+          errorBg: 'bg-red-950/50 border-red-900/50 text-red-200'
         };
     }
   };
@@ -232,11 +232,22 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      month: 'short',
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Ahora';
+    if (diffMins < 60) return `Hace ${diffMins}m`;
+    if (diffHours < 24) return `Hace ${diffHours}h`;
+    if (diffDays === 1) return 'Ayer';
+    if (diffDays < 7) return `Hace ${diffDays}d`;
+    
+    return date.toLocaleDateString('es-ES', {
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      month: 'short'
     });
   };
 
@@ -244,27 +255,27 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
 
   if (loading) {
     return (
-      <div className="p-4 text-center">
+      <div className="py-8 text-center">
         <Loader2 className={`w-6 h-6 animate-spin mx-auto mb-2 ${roleStyles.emptyIcon}`} />
-        <p className={`text-sm ${roleStyles.textMessage}`}>Cargando...</p>
+        <p className={`text-xs font-bold ${roleStyles.textMessage}`}>Cargando...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-0">
-      {/* Contador de notificaciones con estilos por rol */}
-      <div className={`px-4 py-3 border-b ${roleStyles.headerBg} border-b ${roleStyles.headerBorder}`}>
-        <div className="flex items-center justify-between">
-          <span className={`text-sm font-medium ${roleStyles.headerText}`}>
-            {unreadCount > 0 ? `${unreadCount} notificación${unreadCount > 1 ? 'es' : ''} sin leer` : 'Todas las notificaciones leídas'}
+    <div className="flex flex-col h-full sm:max-h-[450px] w-full">
+      {/* Contador de notificaciones con estilos por rol - Compacto */}
+      <div className={`px-3 py-2 border-b flex-shrink-0 ${roleStyles.headerBg} border-b ${roleStyles.headerBorder}`}>
+        <div className="flex items-center justify-between gap-2">
+          <span className={`text-xs font-bold ${roleStyles.headerText} leading-tight flex-1`}>
+            {unreadCount > 0 ? `${unreadCount} nueva${unreadCount > 1 ? 's' : ''}` : 'Sin notificaciones'}
           </span>
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllAsRead}
-              className={`text-xs font-medium px-2 py-1 rounded border transition-colors ${roleStyles.buttonBg}`}
+              className={`text-[10px] font-bold px-2 py-1 rounded-md border transition-all duration-200 whitespace-nowrap flex-shrink-0 ${roleStyles.buttonBg}`}
             >
-              Marcar todas
+              Leer todas
             </button>
           )}
         </div>
@@ -272,92 +283,80 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
 
       {/* Error con estilos por rol */}
       {error && (
-        <div className={`mx-4 mt-3 p-3 ${roleStyles.errorBg} border rounded text-xs`}>
-          <div className="flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4" />
-            <span className="font-medium">{error}</span>
+        <div className={`mx-3 mt-2 p-2 ${roleStyles.errorBg} border rounded-md text-[10px]`}>
+          <div className="flex items-center space-x-1.5">
+            <AlertCircle className="w-3 h-3 flex-shrink-0" />
+            <span className="font-bold">{error}</span>
           </div>
         </div>
       )}
 
       {/* Lista de notificaciones con estilos por rol */}
       {notifications.length === 0 ? (
-        <div className="text-center py-12">
-          <Bell className={`w-12 h-12 mx-auto mb-3 ${roleStyles.emptyIcon}`} />
-          <p className={`text-sm font-medium ${roleStyles.textMessage}`}>
-            No tienes notificaciones
-          </p>
-          <p className={`text-xs ${roleStyles.textDate} mt-1`}>
-            Las notificaciones aparecerán aquí cuando las recibas
+        <div className="text-center py-8 px-3">
+          <Bell className={`w-10 h-10 mx-auto mb-2 ${roleStyles.emptyIcon}`} />
+          <p className={`text-xs font-bold ${roleStyles.textMessage}`}>
+            Sin notificaciones
           </p>
         </div>
       ) : (
-        <div className="max-h-80 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
           {notifications.slice(0, 10).map((notification) => (
             <div 
               key={notification.id}
-              className={`border-b last:border-b-0 ${
+              className={`border-b last:border-b-0 transition-colors ${
                 notification.read_at ? roleStyles.notificationRead : roleStyles.notificationUnread
-              }`}
+              } hover:bg-white/10 cursor-pointer`}
+              onClick={async () => {
+                if (!notification.read_at) {
+                  await handleMarkAsRead(notification.id);
+                  await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                onClose();
+                navigate('/notifications', { state: { openNotificationId: notification.id } });
+              }}
             >
-              <div className="px-4 py-3">
-                <div className="flex items-start space-x-3">
-                  <div className={`mt-0.5 flex-shrink-0 p-1.5 rounded ${roleStyles.iconBg} border`}>
+              <div className="px-3 py-2.5">
+                <div className="flex items-center gap-2">
+                  <div className={`flex-shrink-0 p-1 rounded ${roleStyles.iconBg}`}>
                     <div className={roleStyles.iconColor}>
                       {getNotificationIcon(notification.type)}
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h4 className={`text-sm font-medium truncate ${roleStyles.textTitle}`}>
-                            {notification.title}
-                          </h4>
-                          {!notification.read_at && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${roleStyles.badgeNew}`}>
-                              Nueva
-                            </span>
-                          )}
-                        </div>
-                        <p className={`text-xs ${roleStyles.textMessage} mt-1 mb-2`}>
-                          {notification.message}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className={`text-xs ${roleStyles.textDate}`}>
-                            {formatDate(notification.created_at)}
-                          </span>
-                          <div className="flex space-x-1">
-                            {!notification.read_at && (
-                              <button
-                                onClick={() => handleMarkAsRead(notification.id)}
-                                className={`p-1 ${roleStyles.textDate} transition-colors hover:opacity-70`}
-                                title="Marcar como leída"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleDeleteNotification(notification.id)}
-                              className={`p-1 ${roleStyles.textDate} hover:text-red-600 transition-colors`}
-                              title="Eliminar"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className={`text-xs font-bold ${roleStyles.textTitle} line-clamp-1 flex-1`}>
+                        {notification.title}
+                      </h4>
+                      {!notification.read_at && (
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border ${roleStyles.badgeNew} flex-shrink-0 uppercase tracking-wide`}>
+                          Nueva
+                        </span>
+                      )}
                     </div>
+                    <span className={`text-[10px] ${roleStyles.textDate} block mt-0.5`}>
+                      {formatDate(notification.created_at)}
+                    </span>
                   </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteNotification(notification.id);
+                    }}
+                    className={`p-1 ${roleStyles.textDate} hover:text-red-400 transition-colors flex-shrink-0`}
+                    title="Eliminar"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
                 </div>
               </div>
             </div>
           ))}
           
           {notifications.length > 10 && (
-            <div className={`px-4 py-3 ${roleStyles.headerBg} border-t ${roleStyles.headerBorder}`}>
-              <p className={`text-xs ${roleStyles.textDate} text-center`}>
-                Y {notifications.length - 10} notificación{notifications.length - 10 > 1 ? 'es' : ''} más...
+            <div className={`px-3 py-2 ${roleStyles.headerBg} border-t ${roleStyles.headerBorder}`}>
+              <p className={`text-[10px] ${roleStyles.textDate} text-center`}>
+                +{notifications.length - 10} más
               </p>
             </div>
           )}
@@ -365,12 +364,12 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
       )}
 
       {/* Footer con botón de ver todas - estilos por rol */}
-      <div className={`px-4 py-3 border-t ${roleStyles.footerBg} ${roleStyles.headerBorder}`}>
+      <div className={`px-3 py-2 border-t flex-shrink-0 ${roleStyles.footerBg} ${roleStyles.headerBorder}`}>
         <button
           onClick={() => { onClose(); navigate('/notifications'); }}
-          className={`w-full py-2 px-4 rounded text-sm font-medium transition-colors border ${roleStyles.footerButton}`}
+          className={`w-full py-2 px-3 rounded-md text-xs font-bold transition-all duration-200 border ${roleStyles.footerButton}`}
         >
-          Ver todas las notificaciones
+          Ver todas
         </button>
       </div>
     </div>

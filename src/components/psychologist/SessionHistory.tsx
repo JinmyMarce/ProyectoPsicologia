@@ -483,7 +483,6 @@ export function SessionHistory() {
           open={showSessionDetails} 
           onClose={() => setShowSessionDetails(false)} 
           title={`Detalles de la Sesión con ${selectedSession?.patient_name || 'Paciente'}`}
-          className="rounded-xl shadow-2xl border border-gray-300 bg-white p-8 transition-transform transform scale-100"
         >
           <div className="space-y-8">
             {/* Información General */}

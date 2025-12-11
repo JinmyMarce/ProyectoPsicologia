@@ -174,24 +174,35 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
               >
                 <Bell className="w-5 h-5" />
                 {notificationCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-gradient-to-br from-red-500 to-red-600 rounded-full border border-[#02040a] shadow-lg">
-                    {notificationCount > 9 ? '9+' : notificationCount}
+                  <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-[#02040a]">
+                    {notificationCount > 99 ? '99+' : notificationCount}
                   </span>
                 )}
               </button>
 
               {/* Panel de notificaciones */}
               {showNotifications && (
-                <div className="absolute top-full right-0 mt-2 w-80 bg-[#02040a] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden animate-fade-in z-50">
-                  <div className="p-4 border-b border-white/5">
-                    <h3 className="text-sm font-bold text-white">Notificaciones</h3>
+                <>
+                  {/* Overlay en móvil */}
+                  <div 
+                    className="fixed inset-0 bg-black/50 z-40 sm:hidden"
+                    onClick={() => setShowNotifications(false)}
+                  />
+                  
+                  <div className="fixed sm:absolute inset-x-0 top-14 sm:top-full sm:left-auto sm:right-0 sm:inset-x-auto mt-0 sm:mt-2 w-full sm:w-80 md:w-96 bg-[#02040a] rounded-none sm:rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border-t sm:border border-white/10 overflow-hidden animate-fade-in z-50 backdrop-blur-xl max-h-[calc(100vh-56px)] sm:max-h-[450px]">
+                    <NotificationPanel 
+                      onClose={() => setShowNotifications(false)}
+                      onNotificationUpdate={async () => {
+                        try {
+                          const stats = await getNotificationStats();
+                          setNotificationCount((stats.unread as number) || 0);
+                        } catch (err) {
+                          console.log('Error actualizando contador:', err);
+                        }
+                      }}
+                    />
                   </div>
-                  <div className="max-h-96 overflow-y-auto">
-                    <div className="p-4 text-center text-slate-400 text-sm">
-                      No hay notificaciones nuevas
-                    </div>
-                  </div>
-                </div>
+                </>
               )}
             </div>
 

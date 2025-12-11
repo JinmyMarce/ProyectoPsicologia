@@ -8,12 +8,10 @@ import {
   X, 
   Trash2, 
   Eye, 
-  Loader2,
   RefreshCw,
   Sparkles,
   User
 } from 'lucide-react';
-import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { 
   getNotifications, 
@@ -23,10 +21,9 @@ import {
   deleteAllNotifications,
   getNotificationStats
 } from '../../services/notifications';
-import { approveAppointment, rejectAppointment } from '../../services/appointments';
 import { Notification } from '../../services/notifications';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface NotificationStats {
   total: number;
@@ -43,6 +40,7 @@ interface NotificationStats {
 export function NotificationCenter() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -50,8 +48,6 @@ export function NotificationCenter() {
   const [stats, setStats] = useState<NotificationStats | null>(null);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [showNotificationDetails, setShowNotificationDetails] = useState(false);
-  const [showRejectForm, setShowRejectForm] = useState(false);
-  const [rejectReason, setRejectReason] = useState('');
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
 
   // Determinar el rol del usuario para aplicar el color correspondiente
@@ -64,15 +60,13 @@ export function NotificationCenter() {
         return {
           // Header
           header: {
-            background: 'linear-gradient(180deg, rgba(207, 250, 254, 1) 0%, rgba(186, 230, 253, 1) 50%, rgba(165, 243, 252, 1) 100%)',
             overlay: 'from-cyan-100/50 via-transparent to-sky-100/30',
             decorative1: 'from-cyan-100/50 via-sky-100/30',
             decorative2: 'from-sky-100/40',
             textColor: 'text-cyan-800',
             textColorAccent: 'text-cyan-700',
-            badgeText: 'SAPTA',
+            badgeText: 'SAPTA - Psicología',
             titleColor: 'text-cyan-900',
-            borderColor: 'border-cyan-200/40',
             badgeBg: 'bg-white/70 text-cyan-700 border-cyan-300/50 hover:bg-white/80',
             buttonStyle: 'border border-cyan-300/40 text-cyan-800 hover:bg-white/20 bg-white/80 backdrop-blur-xl shadow-sm'
           },
@@ -102,8 +96,8 @@ export function NotificationCenter() {
           },
           // Filtros
           filters: {
-            bg: 'bg-white/90 backdrop-blur-sm border-cyan-100',
-            activeBg: 'bg-gradient-to-r from-cyan-300 to-sky-300 text-cyan-900',
+            bg: 'bg-white border-cyan-100',
+            activeBg: 'bg-gradient-to-r from-cyan-500 to-sky-500 text-white',
             inactiveBg: 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
           },
           // Modal
@@ -117,7 +111,6 @@ export function NotificationCenter() {
       case 'super_admin':
         return {
           header: {
-            background: 'linear-gradient(180deg, #0a0e17 0%, #020408 50%, #000000 100%)',
             overlay: 'from-[#09090b]/50 via-transparent to-[#09090b]/30',
             decorative1: 'from-[#0a0e17]/10 via-[#020408]/5',
             decorative2: 'from-[#020408]/8',
@@ -125,7 +118,6 @@ export function NotificationCenter() {
             textColorAccent: 'text-red-200/80',
             badgeText: 'SUPER ADMIN',
             titleColor: 'text-white',
-            borderColor: 'border-white/10',
             badgeBg: 'bg-white/15 text-white border-white/20 hover:bg-white/25',
             buttonStyle: 'border border-white/20 text-white hover:bg-white/20'
           },
@@ -152,9 +144,9 @@ export function NotificationCenter() {
             labelText: 'text-red-300'
           },
           filters: {
-            bg: 'bg-slate-900/80 backdrop-blur-sm border-slate-800',
-            activeBg: 'bg-gradient-to-r from-red-900 to-red-800 text-white',
-            inactiveBg: 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            bg: 'bg-white border-slate-200',
+            activeBg: 'bg-gradient-to-r from-red-900 to-black text-white',
+            inactiveBg: 'bg-slate-100 text-slate-700 hover:bg-slate-200'
           },
           modal: {
             headerBg: 'bg-gradient-to-r from-red-900 to-black',
@@ -166,15 +158,13 @@ export function NotificationCenter() {
       case 'admin':
         return {
           header: {
-            background: 'linear-gradient(180deg, #1e3a5f 0%, #1a2f4f 50%, #0f1b2e 100%)',
-            overlay: 'from-blue-900/50 via-transparent to-indigo-900/30',
-            decorative1: 'from-blue-600/10 via-indigo-500/5',
+            overlay: 'from-blue-900/50 via-transparent to-blue-900/30',
+            decorative1: 'from-blue-600/10 via-blue-500/5',
             decorative2: 'from-cyan-600/8',
             textColor: 'text-blue-100',
             textColorAccent: 'text-blue-200/80',
             badgeText: 'ADMINISTRADOR',
             titleColor: 'text-white',
-            borderColor: 'border-white/10',
             badgeBg: 'bg-white/15 text-white border-white/20 hover:bg-white/25',
             buttonStyle: 'border border-white/20 text-white hover:bg-white/20'
           },
@@ -201,9 +191,9 @@ export function NotificationCenter() {
             labelText: 'text-blue-300'
           },
           filters: {
-            bg: 'bg-slate-800/80 backdrop-blur-sm border-slate-700',
-            activeBg: 'bg-gradient-to-r from-blue-700 to-indigo-700 text-white',
-            inactiveBg: 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            bg: 'bg-white border-slate-200',
+            activeBg: 'bg-gradient-to-r from-blue-900 to-blue-950 text-white',
+            inactiveBg: 'bg-slate-100 text-slate-700 hover:bg-slate-200'
           },
           modal: {
             headerBg: 'bg-gradient-to-r from-blue-700 to-indigo-700',
@@ -215,7 +205,6 @@ export function NotificationCenter() {
       case 'tutor':
         return {
           header: {
-            background: 'linear-gradient(180deg, #1f2937 0%, #111827 50%, #0f172a 100%)',
             overlay: 'from-gray-800/50 via-transparent to-gray-900/30',
             decorative1: 'from-gray-600/10 via-gray-500/5',
             decorative2: 'from-slate-600/8',
@@ -223,7 +212,6 @@ export function NotificationCenter() {
             textColorAccent: 'text-gray-200/80',
             badgeText: 'TUTOR',
             titleColor: 'text-white',
-            borderColor: 'border-white/10',
             badgeBg: 'bg-white/15 text-white border-white/20 hover:bg-white/25',
             buttonStyle: 'border border-white/20 text-white hover:bg-white/20'
           },
@@ -250,9 +238,9 @@ export function NotificationCenter() {
             labelText: 'text-gray-300'
           },
           filters: {
-            bg: 'bg-slate-800/80 backdrop-blur-sm border-slate-700',
-            activeBg: 'bg-gradient-to-r from-gray-700 to-slate-700 text-white',
-            inactiveBg: 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            bg: 'bg-white border-slate-200',
+            activeBg: 'bg-gradient-to-r from-gray-800 to-gray-900 text-white',
+            inactiveBg: 'bg-slate-100 text-slate-700 hover:bg-slate-200'
           },
           modal: {
             headerBg: 'bg-gradient-to-r from-gray-700 to-slate-700',
@@ -265,50 +253,48 @@ export function NotificationCenter() {
       default:
         return {
           header: {
-            background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 50%, #020617 100%)',
-            overlay: 'from-slate-800/50 via-transparent to-slate-900/30',
+            overlay: 'from-slate-800/50 via-transparent to-slate-800/30',
             decorative1: 'from-slate-600/10 via-slate-500/5',
             decorative2: 'from-slate-700/8',
-            textColor: 'text-slate-100',
-            textColorAccent: 'text-slate-200/80',
-            badgeText: 'ESTUDIANTE',
+            textColor: 'text-slate-300',
+            textColorAccent: 'text-slate-400',
+            badgeText: 'SAPTA',
             titleColor: 'text-white',
-            borderColor: 'border-white/10',
             badgeBg: 'bg-white/15 text-white border-white/20 hover:bg-white/25',
             buttonStyle: 'border border-white/20 text-white hover:bg-white/20'
           },
           notification: {
-            unreadBg: 'bg-gradient-to-r from-violet-950/30 to-slate-950/50',
-            unreadBorder: 'border-violet-700/50 hover:border-violet-600/70',
-            readBg: 'bg-slate-800',
-            readBorder: 'border-slate-700 hover:border-slate-600',
-            iconBg: 'bg-gradient-to-br from-violet-800/30 to-purple-900/50 border-violet-700/30',
-            iconColor: 'text-violet-300',
-            badgeNew: 'bg-violet-800/50 text-violet-200 border-violet-700/50',
-            badgeType: 'bg-purple-800/30 text-purple-300 border-purple-700/40',
-            textTitle: 'text-slate-100',
-            textMessage: 'text-slate-200/80',
-            textDate: 'text-slate-300/60'
+            unreadBg: 'bg-white',
+            unreadBorder: 'border-slate-200 hover:border-slate-300',
+            readBg: 'bg-white',
+            readBorder: 'border-slate-200 hover:border-slate-300',
+            iconBg: 'bg-gradient-to-br from-blue-100 to-blue-200 border-blue-200',
+            iconColor: 'text-blue-700',
+            badgeNew: 'bg-blue-50 text-blue-700 border-blue-200',
+            badgeType: 'bg-slate-100 text-slate-700 border-slate-200',
+            textTitle: 'text-slate-900',
+            textMessage: 'text-slate-600',
+            textDate: 'text-slate-500'
           },
           stats: {
-            cardBg: 'bg-slate-800',
-            cardBorder: 'border-slate-700 hover:border-slate-600',
-            iconBg: 'bg-gradient-to-br from-violet-800/30 to-purple-900/50',
-            iconColor: 'text-violet-300',
-            numberColor: 'text-slate-100',
-            labelBg: 'bg-violet-950/30',
-            labelText: 'text-violet-300'
+            cardBg: 'bg-white',
+            cardBorder: 'border-slate-200 hover:border-slate-300',
+            iconBg: 'bg-gradient-to-br from-blue-100 to-blue-200',
+            iconColor: 'text-blue-700',
+            numberColor: 'text-slate-900',
+            labelBg: 'bg-slate-100',
+            labelText: 'text-slate-600'
           },
           filters: {
-            bg: 'bg-slate-800/80 backdrop-blur-sm border-slate-700',
-            activeBg: 'bg-gradient-to-r from-violet-700 to-purple-700 text-white',
-            inactiveBg: 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            bg: 'bg-white border-slate-200',
+            activeBg: 'bg-gradient-to-r from-slate-800 to-slate-900 text-white',
+            inactiveBg: 'bg-slate-100 text-slate-700 hover:bg-slate-200'
           },
           modal: {
-            headerBg: 'bg-gradient-to-r from-violet-700 to-purple-700',
+            headerBg: 'bg-gradient-to-r from-blue-500 to-cyan-500',
             headerText: 'text-white',
-            contentBg: 'bg-slate-800',
-            borderColor: 'border-slate-700'
+            contentBg: 'bg-white',
+            borderColor: 'border-slate-200'
           }
         };
     }
@@ -321,6 +307,22 @@ export function NotificationCenter() {
     loadNotifications();
     loadStats();
   }, []);
+
+  // Abrir modal automáticamente si viene el ID de notificación desde el header
+  useEffect(() => {
+    const openNotification = async () => {
+      const state = location.state as { openNotificationId?: number } | null;
+      if (state?.openNotificationId && notifications.length > 0) {
+        const notification = notifications.find(n => n.id === state.openNotificationId);
+        if (notification) {
+          await handleViewNotificationDetails(notification);
+          // Limpiar el state para no abrir el modal cada vez que se recargue
+          navigate(location.pathname, { replace: true, state: {} });
+        }
+      }
+    };
+    openNotification();
+  }, [location.state, notifications]);
 
   const loadNotifications = async () => {
     try {
@@ -357,11 +359,16 @@ export function NotificationCenter() {
   const handleMarkAsRead = async (id: number) => {
     try {
       await markNotificationAsRead(id);
+      const readAt = new Date().toISOString();
       setNotifications(prev => 
         prev.map(notif => 
-          notif.id === id ? { ...notif, read_at: new Date().toISOString() } : notif
+          notif.id === id ? { ...notif, read_at: readAt } : notif
         )
       );
+      // Actualizar también la notificación seleccionada si está abierta
+      if (selectedNotification && selectedNotification.id === id) {
+        setSelectedNotification({ ...selectedNotification, read_at: readAt });
+      }
       await loadStats(); // Recargar estadísticas
     } catch (error: unknown) {
       console.error('Error marking notification as read:', error);
@@ -408,13 +415,13 @@ export function NotificationCenter() {
     }
   };
 
-  const handleViewNotificationDetails = (notification: Notification) => {
+  const handleViewNotificationDetails = async (notification: Notification) => {
     setSelectedNotification(notification);
     setShowNotificationDetails(true);
     
     // Marcar como leída si no lo está
     if (!notification.read_at) {
-      handleMarkAsRead(notification.id);
+      await handleMarkAsRead(notification.id);
     }
   };
 
@@ -426,7 +433,7 @@ export function NotificationCenter() {
       case 'error':
         return <AlertCircle className="w-4 h-4 text-red-600" />;
       case 'appointment':
-        return <Bell className="w-4 h-4 text-violet-600" />;
+        return <Bell className="w-4 h-4" />;
       case 'reminder':
         return <Bell className="w-4 h-4 text-amber-600" />;
       default:
@@ -478,7 +485,7 @@ export function NotificationCenter() {
       <div className="h-screen overflow-hidden bg-gray-50 font-sans flex items-center justify-center">
         <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200 text-center">
           <div className="flex items-center justify-center">
-            <div className="w-7 h-7 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
+            <div className="w-7 h-7 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
             <span className="ml-3 text-slate-600 font-semibold text-sm">Cargando notificaciones...</span>
           </div>
         </div>
@@ -487,15 +494,19 @@ export function NotificationCenter() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900 w-full overflow-x-hidden">
-      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900">
       {/* Header Section - Compact & Professional */}
-      <div className={`rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg relative overflow-hidden mt-2 sm:mt-3 lg:mt-4 ${userRole === 'psychologist' ? 'border border-cyan-200/40' : 'border border-white/10'}`} style={userRole === 'psychologist' ? {
-        background: headerConfig.background
-      } : {
-        background: headerConfig.background,
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
-      }}>
+      <div className={`rounded-2xl shadow-2xl relative overflow-hidden mx-2 sm:mx-3 mt-3 ${
+        userRole === 'psychologist' 
+          ? 'bg-gradient-to-br from-cyan-50 via-sky-50 to-cyan-50 border border-cyan-200/40' 
+          : userRole === 'super_admin'
+          ? 'bg-gradient-to-br from-[#0a0e17] via-[#020408] to-black border border-white/10'
+          : userRole === 'admin'
+          ? 'bg-gradient-to-br from-blue-900 via-blue-950 to-slate-900 border border-white/10'
+          : userRole === 'tutor'
+          ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900 border border-white/10'
+          : 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-white/10'
+      }`}>
         {/* Subtle gradient overlay */}
         <div className={`absolute inset-0 bg-gradient-to-tr ${headerConfig.overlay} animate-pulse`}></div>
 
@@ -510,28 +521,27 @@ export function NotificationCenter() {
           <div className={`absolute bottom-16 left-1/3 w-1.5 h-1.5 ${userRole === 'psychologist' ? 'bg-cyan-300' : 'bg-slate-400'} rounded-full animate-pulse`} style={{ animationDelay: '1s' }}></div>
         </div>
 
-        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-5 lg:pt-6 pb-5 sm:pb-6 lg:pb-8 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
-            <div className="animate-fade-in flex-1 min-w-0">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-8 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
               <div className="flex items-center space-x-2 mb-2">
-                <span className={`px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full backdrop-blur-xl text-[9px] sm:text-[10px] font-bold flex items-center tracking-wide uppercase shadow-sm transition-all duration-300 ${
+                <span className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center tracking-wide uppercase shadow-lg ${
                   userRole === 'psychologist' 
                     ? 'bg-white/70 text-cyan-700 border border-cyan-300/50 hover:bg-white/80' 
-                    : 'bg-white/15 text-white border border-white/20 hover:bg-white/25 shadow-lg'
-                }`}>
-                  <Sparkles className={`w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5 flex-shrink-0 ${userRole === 'psychologist' ? '' : 'animate-pulse'}`} />
-                  <span className="hidden xs:inline">{headerConfig.badgeText}</span>
-                  <span className="xs:hidden">{headerConfig.badgeText.split(' ')[0]}</span>
+                    : 'bg-white/15 backdrop-blur-xl text-white border border-white/20 hover:bg-white/25'
+                } transition-all duration-300`}>
+                  <Sparkles className={`w-3 h-3 mr-1.5 ${userRole === 'psychologist' ? '' : 'animate-pulse'}`} />
+                  {headerConfig.badgeText}
                 </span>
               </div>
-              <h1 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black tracking-tight mb-1 sm:mb-1.5 leading-tight ${
+              <h1 className={`text-3xl md:text-4xl font-black tracking-tight mb-1.5 leading-tight ${
                 userRole === 'psychologist' 
                   ? 'text-cyan-900' 
                   : 'text-white drop-shadow-lg'
               }`}>
                 Centro de Notificaciones
               </h1>
-              <p className={`${headerConfig.textColor} text-[10px] sm:text-[11px] md:text-xs lg:text-sm max-w-2xl font-medium leading-relaxed ${userRole === 'psychologist' ? '' : 'drop-shadow-md'}`}>
+              <p className={`${headerConfig.textColor} text-sm max-w-2xl font-medium leading-relaxed ${userRole === 'psychologist' ? '' : 'drop-shadow-md'}`}>
                 Gestiona y revisa todas tus notificaciones.
                 <span className={`hidden sm:inline ${headerConfig.textColorAccent}`}> Mantente al día con el sistema.</span>
               </p>
@@ -549,13 +559,13 @@ export function NotificationCenter() {
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className={`w-full md:w-auto text-xs xs:text-sm font-bold rounded-lg px-3 xs:px-4 py-1.5 xs:py-2 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-1.5 ${
+                className={`text-xs font-bold rounded-lg px-4 py-2 transition-all disabled:opacity-50 flex items-center gap-1.5 ${
                   userRole === 'psychologist'
                     ? 'border border-cyan-300/40 text-cyan-800 hover:bg-white/20 bg-white/80 backdrop-blur-xl shadow-sm'
                     : 'border border-white/20 text-white hover:bg-white/20'
                 }`}
               >
-                <RefreshCw className={`w-3.5 h-3.5 xs:w-4 xs:h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
                 Actualizar
               </button>
             </div>
@@ -571,71 +581,77 @@ export function NotificationCenter() {
         </div>
       </div>
 
-      <div className="w-full -mt-4 relative z-20">
+      <div className="w-full px-3 sm:px-4 lg:px-6 -mt-4 relative z-20">
         {/* Mensajes de estado - Compactos */}
         {error && (
-          <div className="mb-3 bg-red-50 border border-red-200 rounded-xl p-3 shadow-sm flex items-center space-x-2.5 animate-fade-in">
-            <div className="bg-red-100 p-1.5 rounded-full flex-shrink-0">
-              <AlertCircle className="w-4 h-4 text-red-600" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h4 className="text-red-800 font-bold text-sm">Error</h4>
+          <div className="mb-3 bg-red-50 border border-red-200 rounded-xl p-3 shadow-sm flex items-center space-x-2">
+            <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
               <p className="text-red-700 text-sm">{error}</p>
-            </div>
           </div>
         )}
 
-        {/* Estadísticas mejoradas - Estilo Dashboard con estilos por rol */}
+        {/* Estadísticas mejoradas - Estilo Dashboard del Estudiante */}
         {stats && (
-          <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-3 gap-2 xs:gap-3 mb-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             {/* Total */}
-            <div className={`group relative ${roleStyles.stats.cardBg} rounded-xl shadow-md hover:shadow-lg p-3 border ${roleStyles.stats.cardBorder} overflow-hidden hover:-translate-y-0.5 transition-all duration-300`}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-slate-100/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-slate-200/60 transition-all duration-500"></div>
+            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-slate-100/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-slate-200/60 transition-all duration-500"></div>
+              
               <div className="flex items-center justify-between mb-2 relative z-10">
-                <div className={`w-8 h-8 ${roleStyles.stats.iconBg} rounded-lg flex items-center justify-center ${roleStyles.stats.iconColor} shadow-sm group-hover:scale-110 transition-all duration-300`}>
+                <div className={`w-9 h-9 ${roleStyles.stats.iconBg} rounded-lg flex items-center justify-center ${roleStyles.stats.iconColor} shadow-sm group-hover:scale-110 transition-all duration-300`}>
                   <Bell className="w-4 h-4" />
                 </div>
                 <span className={`text-[9px] font-bold ${roleStyles.stats.labelText} ${roleStyles.stats.labelBg} px-2 py-0.5 rounded-full uppercase tracking-wider`}>Total</span>
               </div>
+              
               <div className="flex items-baseline gap-1.5 relative z-10">
-                <p className={`text-2xl xs:text-3xl font-black ${roleStyles.stats.numberColor} tracking-tight`}>{stats.total || 0}</p>
+                <p className={`text-3xl font-black ${roleStyles.stats.numberColor} tracking-tight`}>{stats.total || 0}</p>
+                <p className="text-sm font-bold text-slate-600">Mensajes</p>
               </div>
+              <p className="text-[10px] font-semibold text-slate-500 mt-0.5 relative z-10">Todas las notificaciones recibidas</p>
             </div>
             
             {/* No leídas */}
-            <div className={`group relative ${roleStyles.stats.cardBg} rounded-xl shadow-md hover:shadow-lg p-3 border ${roleStyles.stats.cardBorder} overflow-hidden hover:-translate-y-0.5 transition-all duration-300`}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-red-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-red-100/60 transition-all duration-500"></div>
+            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-blue-100/60 transition-all duration-500"></div>
+              
               <div className="flex items-center justify-between mb-2 relative z-10">
-                <div className={`w-8 h-8 ${roleStyles.stats.iconBg} rounded-lg flex items-center justify-center ${roleStyles.stats.iconColor} shadow-sm group-hover:scale-110 transition-all duration-300`}>
+                <div className="w-9 h-9 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center text-blue-700 shadow-sm group-hover:scale-110 transition-all duration-300">
                   <AlertCircle className="w-4 h-4" />
                 </div>
-                <span className={`text-[9px] font-bold ${roleStyles.stats.labelText} ${roleStyles.stats.labelBg} px-2 py-0.5 rounded-full uppercase tracking-wider`}>Nuevas</span>
+                <span className="text-[9px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Nuevas</span>
               </div>
+              
               <div className="flex items-baseline gap-1.5 relative z-10">
-                <p className={`text-2xl xs:text-3xl font-black ${roleStyles.stats.numberColor} tracking-tight`}>{unreadCount}</p>
+                <p className="text-3xl font-black text-slate-900 tracking-tight">{unreadCount}</p>
+                <p className="text-sm font-bold text-slate-600">Alertas</p>
               </div>
+              <p className="text-[10px] font-semibold text-slate-500 mt-0.5 relative z-10">Requieren tu atención</p>
             </div>
             
             {/* Leídas */}
-            <div className={`group relative ${roleStyles.stats.cardBg} rounded-xl shadow-md hover:shadow-lg p-3 border ${roleStyles.stats.cardBorder} overflow-hidden hover:-translate-y-0.5 transition-all duration-300`}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-green-100/60 transition-all duration-500"></div>
+            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-green-100/60 transition-all duration-500"></div>
+              
               <div className="flex items-center justify-between mb-2 relative z-10">
-                <div className={`w-8 h-8 ${roleStyles.stats.iconBg} rounded-lg flex items-center justify-center ${roleStyles.stats.iconColor} shadow-sm group-hover:scale-110 transition-all duration-300`}>
+                <div className="w-9 h-9 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-lg flex items-center justify-center text-emerald-700 shadow-sm group-hover:scale-110 transition-all duration-300">
                   <CheckCircle className="w-4 h-4" />
                 </div>
-                <span className={`text-[9px] font-bold ${roleStyles.stats.labelText} ${roleStyles.stats.labelBg} px-2 py-0.5 rounded-full uppercase tracking-wider`}>Leídas</span>
+                <span className="text-[9px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Leídas</span>
               </div>
+              
               <div className="flex items-baseline gap-1.5 relative z-10">
-                <p className={`text-2xl xs:text-3xl font-black ${roleStyles.stats.numberColor} tracking-tight`}>{stats.read || 0}</p>
+                <p className="text-3xl font-black text-slate-900 tracking-tight">{stats.read || 0}</p>
+                <p className="text-sm font-bold text-slate-600">Revisadas</p>
               </div>
+              <p className="text-[10px] font-semibold text-slate-500 mt-0.5 relative z-10">Ya fueron atendidas</p>
             </div>
-            
           </div>
         )}
 
-        {/* Filtros - Diseño Moderno con estilos por rol */}
-        <div className={`${roleStyles.filters.bg} backdrop-blur-sm rounded-xl shadow-md p-4 mb-6 border`}>
-          <div className="flex flex-wrap gap-2 justify-center items-center">
+        {/* Filtros - Diseño limpio con cards blancas */}
+        <div className={`${roleStyles.filters.bg} rounded-xl shadow-md p-3 mb-4 border`}>
+          <div className="flex gap-2 justify-center flex-wrap">
             {[
               { key: 'all', label: 'Todas' },
               { key: 'unread', label: 'No leídas' },
@@ -644,14 +660,11 @@ export function NotificationCenter() {
               <button
                 key={key}
                 onClick={() => setFilter(key as any)}
-                className={`
-                  px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300
-                  ${filter === key
-                    ? `${roleStyles.filters.activeBg} shadow-lg transform scale-105`
-                    : `${roleStyles.filters.inactiveBg} hover:shadow-md`
-                  }
-                  hover:scale-105 active:scale-95
-                `}
+                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                  filter === key
+                    ? `${roleStyles.filters.activeBg} shadow-md`
+                    : `${roleStyles.filters.inactiveBg}`
+                }`}
               >
                 {label}
               </button>
@@ -661,89 +674,79 @@ export function NotificationCenter() {
 
         {/* Lista de Notificaciones */}
         {filteredNotifications.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-4 border border-slate-200 text-center">
-            <div className="text-center py-6">
-              <div className="w-14 h-14 bg-gradient-to-br from-violet-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-violet-100/50">
-                <Bell className="w-7 h-7 text-violet-500" />
+          <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200 text-center">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm">
+              <Bell className="w-7 h-7 text-blue-600" />
               </div>
               <h3 className="text-slate-900 font-bold mb-1.5 text-base">No tienes notificaciones</h3>
-              <p className="text-sm text-slate-500 leading-relaxed max-w-md mx-auto">
-                Las notificaciones aparecerán aquí cuando las recibas
-              </p>
-            </div>
+            <p className="text-sm text-slate-500">Las notificaciones aparecerán aquí cuando las recibas</p>
           </div>
         ) : (
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             {filteredNotifications.map((notification) => (
               <div 
                 key={notification.id}
-                className={`group relative ${notification.read_at ? roleStyles.notification.readBg : roleStyles.notification.unreadBg} rounded-xl shadow-md hover:shadow-lg p-3 xs:p-4 border transition-all duration-300 hover:-translate-y-0.5 overflow-hidden ${
+                className={`group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border ${
                   notification.read_at 
-                    ? roleStyles.notification.readBorder
-                    : roleStyles.notification.unreadBorder
-                }`}
+                    ? 'border-slate-200 hover:border-slate-300'
+                    : 'border-blue-200 hover:border-blue-300'
+                } transition-all duration-300 hover:-translate-y-0.5`}
               >
-                <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-slate-50/50 to-transparent rounded-full -mr-10 -mt-10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-slate-50 to-transparent rounded-full -mr-6 -mt-6 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
-                <div className="relative z-10">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3">
-                    <div className="flex-1 min-w-0 w-full">
-                      <div className="flex items-center gap-2 xs:gap-2.5 mb-2">
-                        <div className={`w-8 h-8 xs:w-10 xs:h-10 rounded-lg flex items-center justify-center shadow-sm border flex-shrink-0 ${
+                <div className="flex justify-between items-start gap-3 relative z-10">
+                  <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0 ${
                           notification.read_at 
-                            ? 'bg-slate-100 border-slate-200' 
-                            : roleStyles.notification.iconBg
+                        ? 'bg-slate-100 border border-slate-200 text-slate-600' 
+                        : `${roleStyles.notification.iconBg} ${roleStyles.notification.iconColor}`
                         }`}>
-                          <div className={notification.read_at ? 'text-slate-600' : roleStyles.notification.iconColor}>
                             {getNotificationIcon(notification.type)}
-                          </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <h3 className={`text-sm sm:text-base font-bold ${roleStyles.notification.textTitle} tracking-tight truncate`}>
+                        <h3 className={`text-sm font-bold ${roleStyles.notification.textTitle} truncate`}>
                               {notification.title}
                             </h3>
                             {!notification.read_at && (
-                              <Badge className={`${roleStyles.notification.badgeNew} px-2 py-0.5 text-[9px] xs:text-[10px] font-bold rounded-lg border`}>
+                          <Badge className={`${roleStyles.notification.badgeNew} px-2 py-0.5 text-[9px] font-bold rounded-lg border`}>
                                 Nueva
                               </Badge>
                             )}
-                            <Badge className={`${roleStyles.notification.badgeType} px-2 py-0.5 text-[9px] xs:text-[10px] font-bold rounded-lg border`}>
+                        <Badge className={`${roleStyles.notification.badgeType} px-2 py-0.5 text-[9px] font-bold rounded-lg border`}>
                               {getNotificationTypeText(notification.type)}
                             </Badge>
                           </div>
-                          <p className={`text-xs sm:text-sm ${roleStyles.notification.textMessage} mb-1.5 line-clamp-2`}>{notification.message}</p>
-                          <p className={`text-[10px] xs:text-xs font-semibold ${roleStyles.notification.textDate}`}>
+                      <p className={`text-sm ${roleStyles.notification.textMessage} mb-1 line-clamp-2`}>{notification.message}</p>
+                      <p className={`text-xs font-semibold ${roleStyles.notification.textDate}`}>
                             {formatDate(notification.created_at)}
                           </p>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 self-start sm:self-center flex-shrink-0">
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
                       <button
                         onClick={() => handleViewNotificationDetails(notification)}
                         title="Ver detalles"
-                        className="w-7 h-7 xs:w-8 xs:h-8 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-slate-100 hover:scale-110 text-slate-600 hover:text-violet-600"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-blue-50 text-slate-600 hover:text-blue-600"
                       >
-                        <Eye className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                      <Eye className="w-4 h-4" />
                       </button>
                       {!notification.read_at && (
                         <button
                           onClick={() => handleMarkAsRead(notification.id)}
                           title="Marcar como leída"
-                          className="w-7 h-7 xs:w-8 xs:h-8 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-green-100 hover:scale-110 text-green-600"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-green-50 text-green-600"
                         >
-                          <CheckCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                        <CheckCircle className="w-4 h-4" />
                         </button>
                       )}
                       <button
                         onClick={() => handleDeleteNotification(notification.id)}
                         title="Eliminar"
-                        className="w-7 h-7 xs:w-8 xs:h-8 rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-red-100 hover:scale-110 text-red-600"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-red-50 text-red-600"
                       >
-                        <Trash2 className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                      <Trash2 className="w-4 h-4" />
                       </button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -754,174 +757,235 @@ export function NotificationCenter() {
 
       {/* Modal de detalles de notificación */}
       {showNotificationDetails && selectedNotification && createPortal(
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[9999] p-3 sm:p-4" onClick={() => setShowNotificationDetails(false)}>
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center z-[9999] p-2 sm:p-3 animate-in fade-in duration-200" onClick={() => setShowNotificationDetails(false)}>
           <div 
-            className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden border border-slate-200 relative" 
+            className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-hidden border border-slate-700/50 relative animate-in zoom-in-95 duration-300" 
             onClick={(e) => e.stopPropagation()}
             style={{
               boxShadow: `
-                0 32px 64px rgba(0, 0, 0, 0.16), 
-                0 16px 32px rgba(0, 0, 0, 0.12),
-                0 8px 16px rgba(0, 0, 0, 0.08)
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                0 32px 64px rgba(0, 0, 0, 0.5), 
+                0 16px 32px rgba(0, 0, 0, 0.4),
+                0 8px 16px rgba(0, 0, 0, 0.3)
               `
             }}
           >
-            {/* Header del Modal con estilos por rol */}
-            <div className={`${roleStyles.modal.headerBg} p-3 xs:p-4 border-b ${roleStyles.modal.borderColor}/20`}>
-              <div className="flex justify-between items-center gap-2">
-                <div className="min-w-0 flex-1">
-                  <h3 className={`text-base xs:text-lg font-black ${roleStyles.modal.headerText} tracking-tight`}>Detalles de la Notificación</h3>
-                  <p className={`text-[10px] xs:text-xs ${roleStyles.modal.headerText}/80 font-medium mt-0.5`}>Información completa</p>
-                </div>
-                <button
-                  onClick={() => setShowNotificationDetails(false)}
-                  className="w-7 h-7 xs:w-8 xs:h-8 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-all duration-300 border border-white/30 hover:border-white/50 flex-shrink-0"
-                >
-                  <X className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-white" />
-                </button>
-              </div>
-            </div>
-
-            {/* Contenido del Modal con estilos por rol */}
-            <div className={`p-3 xs:p-4 overflow-y-auto max-h-[calc(90vh-80px)] ${roleStyles.modal.contentBg}`}>
-              <div className="space-y-3">
-                {/* Tipo y Badges */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className={`w-10 h-10 ${roleStyles.notification.iconBg} rounded-lg flex items-center justify-center border`}>
-                    {getNotificationIcon(selectedNotification.type)}
+            {/* Header del Modal - Compacto */}
+            <div className="relative bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-3 border-b border-slate-700/50">
+              {/* Decoración de fondo */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-purple-600/5"></div>
+              
+              <div className="flex justify-between items-center gap-2 relative z-10">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg flex items-center justify-center border border-blue-500/30 backdrop-blur-sm shadow-lg flex-shrink-0">
+                    <Bell className="w-4 h-4 text-blue-400" />
                   </div>
-                  <Badge className={`${roleStyles.notification.badgeType} px-2.5 py-1 text-xs font-bold rounded-lg border`}>
-                    {getNotificationTypeText(selectedNotification.type)}
-                  </Badge>
+                  <div className="min-w-0">
+                    <h3 className="text-base font-black text-white tracking-tight truncate">
+                      Detalles de Notificación
+                    </h3>
+                  </div>
                   {!selectedNotification.read_at && (
-                    <Badge className={`${roleStyles.notification.badgeNew} px-2.5 py-1 text-xs font-bold rounded-lg border`}>
+                    <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 text-[9px] font-bold rounded flex-shrink-0">
                       Nueva
                     </Badge>
                   )}
                 </div>
-                
-                {/* Título */}
-                <div className={`${roleStyles.modal.contentBg} rounded-lg p-3 border ${roleStyles.modal.borderColor}/50`}>
-                  <p className={`text-xs font-bold ${roleStyles.notification.textDate} uppercase tracking-wide mb-1`}>Título</p>
-                  <p className={`text-base font-bold ${roleStyles.notification.textTitle}`}>{selectedNotification.title}</p>
-                </div>
-                
-                {/* Mensaje */}
-                <div className={`${roleStyles.modal.contentBg} rounded-lg p-3 border ${roleStyles.modal.borderColor}/50`}>
-                  <p className={`text-xs font-bold ${roleStyles.notification.textDate} uppercase tracking-wide mb-1`}>Mensaje</p>
-                  <p className={`text-sm ${roleStyles.notification.textMessage} leading-relaxed`}>{selectedNotification.message}</p>
-                </div>
-                
-                {/* Fecha */}
-                <div className={`${roleStyles.modal.contentBg} rounded-lg p-3 border ${roleStyles.modal.borderColor}/50`}>
-                  <p className={`text-xs font-bold ${roleStyles.notification.textDate} uppercase tracking-wide mb-1`}>Fecha</p>
-                  <p className={`text-sm font-bold ${roleStyles.notification.textTitle}`}>{formatDate(selectedNotification.created_at)}</p>
-                </div>
-                
-                {/* Datos adicionales */}
-                {selectedNotification.data && (
-                  <div className={`${roleStyles.modal.contentBg} rounded-lg p-3 border ${roleStyles.modal.borderColor}/50`}>
-                    <p className={`text-xs font-bold ${roleStyles.notification.textDate} uppercase tracking-wide mb-2`}>Datos adicionales</p>
-                    <pre className={`text-xs ${roleStyles.notification.readBg} p-2.5 rounded-lg border ${roleStyles.modal.borderColor} overflow-auto max-h-40`}>
-                      {JSON.stringify(selectedNotification.data, null, 2)}
-                    </pre>
-                  </div>
-                )}
+                <button
+                  onClick={() => setShowNotificationDetails(false)}
+                  className="w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300 border border-slate-600/50 hover:border-slate-500/50 group flex-shrink-0"
+                  title="Cerrar"
+                >
+                  <X className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                </button>
               </div>
             </div>
 
-            {/* Botones del Modal */}
-            <div className="p-3 xs:p-4 border-t border-slate-200 bg-slate-50/50">
-              <div className="flex flex-col sm:flex-row gap-2">
+            {/* Contenido del Modal - Formal y Profesional */}
+            <div className="p-5 overflow-y-auto max-h-[calc(85vh-140px)] bg-slate-900/30">
+              <div className="space-y-4">
+                {/* Header con Tipo y Estado */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Tipo de Notificación */}
+                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-3 border border-slate-600/50 shadow-lg">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-2">Categoría</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-slate-900/60 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg">
+                    {getNotificationIcon(selectedNotification.type)}
+                  </div>
+                      <p className="text-xs font-bold text-white">{getNotificationTypeText(selectedNotification.type)}</p>
+                    </div>
+                </div>
+                
+                  {/* Estado de Lectura */}
+                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-3 border border-slate-600/50 shadow-lg">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-2">Estado</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-slate-900/60 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg">
+                        <CheckCircle className={`w-5 h-5 ${selectedNotification.read_at ? 'text-green-400' : 'text-amber-400'}`} />
+                      </div>
+                      <p className="text-xs font-bold text-white">
+                        {selectedNotification.read_at ? 'Leída' : 'No Leída'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Mensaje Principal */}
+                <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 border border-slate-600/50 shadow-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-slate-900/60 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg flex-shrink-0">
+                      <Bell className="w-5 h-5 text-slate-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Asunto</p>
+                      <p className="text-sm font-bold text-white leading-snug mb-2">{selectedNotification.title}</p>
+                      <p className="text-xs text-slate-300 leading-relaxed">{selectedNotification.message}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Información de la Cita (si es tipo appointment) */}
+                {selectedNotification.type === 'appointment' && selectedNotification.data && (
+                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg border border-slate-600/50 shadow-lg overflow-hidden">
+                    {/* Header */}
+                    <div className="bg-slate-950/60 px-4 py-3 border-b border-slate-700/50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center border-2 border-white/20 shadow">
+                          <User className="w-5 h-5 text-slate-300" />
+                        </div>
+                        <h4 className="text-sm font-bold text-white uppercase tracking-wide">Información de la Cita</h4>
+                      </div>
+                    </div>
+
+                    <div className="p-4 space-y-4">
+                      {/* FECHA - DESTACADA */}
+                      {(selectedNotification.data as any).date && (
+                        <div className="bg-slate-950/60 rounded-lg p-4 border-2 border-white/20 shadow-xl">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Fecha de la Cita</p>
+                          <p className="text-xl font-black text-white tracking-tight">{(selectedNotification.data as any).date}</p>
+                        </div>
+                      )}
+
+                      {/* Resto de información - Normal */}
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* Paciente */}
+                        {(selectedNotification.data as any).student_name && (
+                          <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/50 col-span-2">
+                            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Paciente</p>
+                            <p className="text-sm font-semibold text-white">{(selectedNotification.data as any).student_name}</p>
+                            {(selectedNotification.data as any).student_email && (
+                              <p className="text-xs text-slate-400 mt-1">{(selectedNotification.data as any).student_email}</p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Hora */}
+                        {(selectedNotification.data as any).time && (
+                          <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/50">
+                            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Hora</p>
+                            <p className="text-sm font-semibold text-white">{(selectedNotification.data as any).time}</p>
+                          </div>
+                        )}
+
+                        {/* Estado */}
+                        {(selectedNotification.data as any).status && (
+                          <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/50">
+                            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Estado</p>
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${
+                                ['aprobada', 'approved', 'confirmada', 'confirmed', 'completada', 'completed', 'activa', 'active'].includes(String((selectedNotification.data as any).status || '').toLowerCase())
+                                  ? 'bg-green-400' 
+                                  : ['rechazada', 'rejected', 'cancelada', 'cancelled', 'canceled'].includes(String((selectedNotification.data as any).status || '').toLowerCase())
+                                  ? 'bg-red-400'
+                                  : 'bg-blue-400'
+                              }`}></div>
+                              <p className="text-xs font-semibold text-white">
+                                {(() => {
+                                  const status = String((selectedNotification.data as any).status || '').toLowerCase().trim();
+                                  const translations: { [key: string]: string } = {
+                                    'pendiente': 'Pendiente',
+                                    'pending': 'Pendiente',
+                                    'programada': 'Programada',
+                                    'scheduled': 'Programada',
+                                    'agendada': 'Agendada',
+                                    'aprobada': 'Aprobada',
+                                    'approved': 'Aprobada',
+                                    'rechazada': 'Rechazada',
+                                    'rejected': 'Rechazada',
+                                    'confirmada': 'Confirmada',
+                                    'confirmed': 'Confirmada',
+                                    'cancelada': 'Cancelada',
+                                    'cancelled': 'Cancelada',
+                                    'canceled': 'Cancelada',
+                                    'completada': 'Completada',
+                                    'completed': 'Completada',
+                                    'en curso': 'En Curso',
+                                    'in progress': 'En Curso',
+                                    'activa': 'Activa',
+                                    'active': 'Activa'
+                                  };
+                                  return translations[status] || (selectedNotification.data as any).status;
+                                })()}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Motivo de Consulta */}
+                      {(selectedNotification.data as any).reason && (
+                        <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/50">
+                          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-2">Motivo de Consulta</p>
+                          <p className="text-xs font-semibold text-white leading-relaxed">{(selectedNotification.data as any).reason}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Fecha de la notificación */}
+                <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-3 border border-slate-600/50 shadow-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-slate-900/60 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg">
+                      <AlertCircle className="w-5 h-5 text-slate-300" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Fecha de Recepción</p>
+                      <p className="text-xs font-bold text-white">{formatDate(selectedNotification.created_at)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Botones del Modal - Compacto */}
+            <div className="p-2.5 border-t border-slate-700/50 bg-slate-950/80 backdrop-blur-sm">
+              <div className="flex flex-wrap gap-1.5">
                 <button
                   onClick={() => setShowNotificationDetails(false)}
-                  className="px-4 py-2 bg-white border-2 border-slate-300 hover:border-slate-400 text-slate-700 rounded-lg transition-all duration-300 flex items-center justify-center font-bold text-sm hover:bg-slate-50"
+                  className="px-3 py-1.5 bg-slate-800/80 border border-slate-600/50 hover:bg-slate-700/80 hover:border-slate-500/50 text-slate-300 hover:text-white rounded-lg transition-all duration-300 flex items-center justify-center font-bold text-xs shadow-lg"
                 >
                   Cerrar
                 </button>
                 {!selectedNotification.read_at && (
                   <button
-                    onClick={() => {
-                      handleMarkAsRead(selectedNotification.id);
+                    onClick={async () => {
+                      await handleMarkAsRead(selectedNotification.id);
                       setShowNotificationDetails(false);
                     }}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg font-bold text-sm hover:scale-105"
+                    className="flex-1 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-emerald-500/25 font-bold text-xs"
                   >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Marcar como leída
+                    <CheckCircle className="w-3.5 h-3.5 mr-1" />
+                    Marcar leída
                   </button>
                 )}
-                {/* Botones de aprobar/rechazar solo para notificaciones de cita */}
-                {selectedNotification.type === 'appointment' && selectedNotification.data && typeof (selectedNotification.data as any).appointment_id === 'number' && (
-                  <>
-                    <button
-                      onClick={async () => {
-                        try {
-                          await approveAppointment(Number((selectedNotification.data as any).appointment_id));
-                          setShowNotificationDetails(false);
-                          handleRefresh();
-                        } catch (e) {
-                          setError('Error al aprobar la cita');
-                        }
-                      }}
-                      className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg font-bold text-sm hover:scale-105"
-                    >
-                      Aprobar cita
-                    </button>
-                    <button
-                      onClick={() => setShowRejectForm(true)}
-                      className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg font-bold text-sm hover:scale-105"
-                    >
-                      Rechazar cita
-                    </button>
-                  </>
-                )}
               </div>
-              {/* Formulario para rechazar cita */}
-              {showRejectForm && selectedNotification.type === 'appointment' && selectedNotification.data && typeof (selectedNotification.data as any).appointment_id === 'number' && (
-                <div className="mt-4 p-3 bg-amber-50/50 rounded-lg border border-amber-200">
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Motivo del rechazo
-                  </label>
-                  <textarea
-                    className="w-full px-3 py-2 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm transition-all duration-300 mb-3"
-                    placeholder="Escribe el motivo del rechazo..."
-                    value={rejectReason}
-                    onChange={e => setRejectReason(e.target.value)}
-                    rows={3}
-                  />
-                  <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => setShowRejectForm(false)}
-                      className="px-4 py-2 bg-white border-2 border-slate-300 hover:border-slate-400 text-slate-700 rounded-lg transition-all duration-300 font-bold text-sm hover:bg-slate-50"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={async () => {
-                        try {
-                          await rejectAppointment(Number((selectedNotification.data as any).appointment_id), rejectReason);
-                          setShowRejectForm(false);
-                          setShowNotificationDetails(false);
-                          handleRefresh();
-                        } catch (e) {
-                          setError('Error al rechazar la cita');
-                        }
-                      }}
-                      disabled={!rejectReason.trim()}
-                      className="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 disabled:from-slate-300 disabled:to-slate-400 text-white rounded-lg transition-all duration-300 font-bold text-sm hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed"
-                    >
-                      Confirmar rechazo
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>,
         document.body
       )}
-      </div>
     </div>
   );
 }

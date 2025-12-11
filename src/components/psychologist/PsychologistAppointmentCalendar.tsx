@@ -302,11 +302,11 @@ export const PsychologistAppointmentCalendar: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans selection:bg-cyan-50 selection:text-cyan-800">
+    <div className="min-h-screen bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900">
       <div className="max-w-7xl mx-auto">
         {/* Header Section - Estilo exclusivo psicólogo */}
-        <div className="bg-gradient-to-br from-cyan-100 via-sky-100 to-cyan-200 rounded-2xl shadow-lg relative overflow-hidden mx-2 sm:mx-3 mt-3 border border-cyan-200/40">
-          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-100/50 via-transparent to-sky-100/30"></div>
+        <div className="bg-gradient-to-br from-cyan-50 via-sky-50 to-cyan-50 rounded-2xl shadow-2xl relative overflow-hidden mx-2 sm:mx-3 mt-3 border border-cyan-200/40">
+          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-100/50 via-transparent to-sky-100/30 animate-pulse"></div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-100/50 via-sky-100/30 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
           <div className="absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr from-sky-100/40 to-transparent rounded-full blur-3xl -ml-12 -mb-12 pointer-events-none"></div>
 
