@@ -14,6 +14,7 @@ import { StudentManagement } from './components/tutor/StudentManagement';
 import { DerivationManagement } from './components/tutor/DerivationManagement';
 import { GroupSessionManagement } from './components/tutor/GroupSessionManagement';
 import { UserProfile } from './components/profile/UserProfile';
+import { PsychologistProfile } from './components/psychologist/PsychologistProfile';
 import { StudentProfile } from './components/students/StudentProfile';
 import AppointmentsPage from './components/appointments';
 import { AppointmentBooking } from './components/appointments/AppointmentBooking';
@@ -33,7 +34,7 @@ import { PatientRegistration } from './components/patients/PatientRegistration';
 import PatientList from './components/patients/PatientList';
 import { SessionList } from './components/sessions/SessionList';
 import { StudentAppointmentHistory } from './components/students/StudentAppointmentHistory';
-import { UnifiedCalendar as PsychologistCalendar } from './components/ui/UnifiedCalendar';
+import { DirectAppointmentScheduler } from './components/psychologist/DirectAppointmentScheduler';
 import { SessionHistory } from './components/psychologist/SessionHistory';
 import { RescheduleAppointment } from './components/students/RescheduleAppointment';
 import MessagePanel from './components/messages/MessagePanel';
@@ -216,9 +217,9 @@ function AppContent() {
                     <Route path="/patients/registry" element={<PatientRegistration />} />
                     <Route path="/sessions" element={<SessionList />} />
                     <Route path="/sessions/history" element={<SessionHistory />} />
-                    <Route path="/appointments/direct" element={<PsychologistCalendar />} />
+                    <Route path="/appointments/direct" element={<DirectAppointmentScheduler />} />
                     <Route path="/notifications" element={<NotificationCenter />} />
-                    <Route path="/profile" element={<UserProfile />} />
+                    <Route path="/profile" element={<PsychologistProfile />} />
                   </>
                 )}
                 {/* Si es super_admin, nunca mostrar la interfaz de psicólogo */}

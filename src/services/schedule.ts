@@ -81,10 +81,35 @@ export const getAvailabilityForDate = async (psychologistId: number, date: strin
     const response = await apiClient.get(`/psychologist-dashboard/schedules/availability/${date}`, {
       params: { psychologist_id: psychologistId }
     });
-    return response.data;
+    
+    // El backend devuelve { success: true, data: {...} }
+    if (response.data && response.data.success && response.data.data) {
+      const data = response.data.data;
+      // Mapear los nombres de campos del backend al formato esperado
+      return {
+        date: data.date,
+        dayName: data.day_name || data.dayName,
+        isFullDayBlocked: data.is_full_day_blocked || data.isFullDayBlocked || false,
+        fullDayReason: data.full_day_reason || data.fullDayReason,
+        blocks: (data.blocks || []).map((block: any) => ({
+          id: block.id || `${block.start_time || block.startTime}-${block.end_time || block.endTime}`,
+          startTime: block.start_time || block.startTime,
+          endTime: block.end_time || block.endTime,
+          isAvailable: block.is_available !== undefined ? block.is_available : (block.isAvailable !== undefined ? block.isAvailable : true),
+          hasAppointment: block.has_appointment || block.hasAppointment || false,
+          isBlocked: block.is_blocked || block.isBlocked || false,
+          reason: block.reason || null
+        }))
+      };
+    }
+    
+    // Si la respuesta no tiene la estructura esperada, retornar null
+    return null;
   } catch (error) {
     console.error('Error fetching availability:', error);
-    throw error;
+    // En caso de error, retornar null en lugar de lanzar excepción
+    // para que el componente pueda continuar funcionando
+    return null;
   }
 };
 

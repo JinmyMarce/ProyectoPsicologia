@@ -137,10 +137,10 @@ export function SessionList() {
     <>
       <div className="min-h-screen bg-gray-50 font-sans selection:bg-cyan-50 selection:text-cyan-800">
         <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Section - Compact & Professional - CELESTE SUAVE que combina con el sistema */}
-        <div className="bg-gradient-to-br from-cyan-100 via-sky-100 to-cyan-200 rounded-2xl shadow-lg relative overflow-hidden mx-2 sm:mx-3 mt-3 border border-cyan-200/40">
+        {/* Header Section - Celeste Suave (igual al dashboard del psicólogo) */}
+        <div className="bg-gradient-to-br from-cyan-50 via-sky-50 to-cyan-50 rounded-2xl shadow-2xl relative overflow-hidden mx-2 sm:mx-3 mt-3 border border-cyan-200/40">
           {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-100/50 via-transparent to-sky-100/30"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-100/50 via-transparent to-sky-100/30 animate-pulse"></div>
 
           {/* Minimal decorative elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-100/50 via-sky-100/30 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
@@ -157,21 +157,23 @@ export function SessionList() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <div className="flex items-center space-x-2 mb-2">
-                  <span className="px-3 py-1 rounded-full bg-white/70 backdrop-blur-xl text-cyan-700 text-[10px] font-bold flex items-center tracking-wide uppercase shadow-sm border border-cyan-300/50 hover:bg-white/80 transition-all duration-300">
+                  <span className="px-3 py-1 rounded-full bg-white/70 text-cyan-700 text-[10px] font-bold flex items-center tracking-wide uppercase shadow-lg border border-cyan-300/50 hover:bg-white/80 transition-all duration-300 backdrop-blur-xl">
                     <Sparkles className="w-3 h-3 mr-1.5" />
-                    SAPTA
+                    SAPTA - Psicología
                   </span>
                 </div>
-                <h1 className="text-3xl md:text-4xl font-black tracking-tight text-cyan-900 mb-1.5 leading-tight">Sesiones Psicológicas</h1>
+                <h1 className="text-3xl md:text-4xl font-black tracking-tight text-cyan-900 mb-1.5 leading-tight">
+                  Sesiones Psicológicas
+                </h1>
                 <p className="text-cyan-800 text-sm max-w-2xl font-medium leading-relaxed">
                   Gestiona y visualiza todas tus sesiones.
                   <span className="hidden sm:inline text-cyan-700"> Registra y administra sesiones psicológicas.</span>
                 </p>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={() => navigate('/profile')}
-                  className="bg-white/80 backdrop-blur-xl rounded-xl px-4 py-2 border border-cyan-300/40 text-cyan-800 hover:bg-white/90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 font-semibold text-sm"
+                  className="bg-white/80 backdrop-blur-xl rounded-xl px-4 py-2 border border-cyan-200/50 text-cyan-800 hover:bg-white/90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 font-semibold text-sm"
                 >
                   <User className="w-4 h-4" />
                   Mi Perfil
@@ -189,6 +191,7 @@ export function SessionList() {
           </div>
         </div>
 
+        {/* Contenido colgando del header */}
         <div className="w-full px-3 sm:px-4 lg:px-6 -mt-4 relative z-20">
 
           {/* Filtros y búsqueda */}

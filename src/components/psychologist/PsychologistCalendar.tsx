@@ -158,20 +158,10 @@ export const PsychologistCalendar: React.FC = () => {
           </div>
         </Card>
 
-        {/* Calendario principal */}
-        <UnifiedCalendar
-          userType="psychologist"
-          onDateSelect={handleDateSelect}
-          selectedDate={selectedDate}
-          availableDates={availableDates}
-          blockedDates={blockedDates}
-          holidays={holidays}
-          appointments={appointments}
-          showStats={true}
-          showLegend={true}
-          showNavigation={true}
-          className="psychologist-theme"
-        />
+        {/* Calendario principal - ELIMINADO: Solo se usa calendario simple en agendar cita directamente */}
+        <div className="bg-white rounded-xl shadow-md border border-cyan-200 p-6 text-center">
+          <p className="text-gray-600">El calendario completo ha sido removido. Usa "Agendar Cita Directamente" para programar citas.</p>
+        </div>
 
         {/* Modal para bloquear fecha */}
         {showBlockDateModal && (

@@ -10,7 +10,9 @@ import {
   Eye, 
   RefreshCw,
   Sparkles,
-  User
+  User,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { 
@@ -22,6 +24,7 @@ import {
   getNotificationStats
 } from '../../services/notifications';
 import { Notification } from '../../services/notifications';
+import { approveAppointment, rejectAppointment } from '../../services/appointments';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -49,6 +52,14 @@ export function NotificationCenter() {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [showNotificationDetails, setShowNotificationDetails] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const notificationsPerPage = 5;
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [notificationToDelete, setNotificationToDelete] = useState<number | null>(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [appointmentToReject, setAppointmentToReject] = useState<number | null>(null);
+  const [processingAction, setProcessingAction] = useState(false);
 
   // Determinar el rol del usuario para aplicar el color correspondiente
   const userRole = user?.role || 'student';
@@ -72,40 +83,40 @@ export function NotificationCenter() {
           },
           // Notificaciones
           notification: {
-            unreadBg: 'bg-gradient-to-r from-cyan-50/80 to-sky-50/50',
-            unreadBorder: 'border-cyan-200 hover:border-cyan-300',
-            readBg: 'bg-white',
-            readBorder: 'border-cyan-100 hover:border-cyan-200',
-            iconBg: 'bg-gradient-to-br from-cyan-100 to-sky-200 border-cyan-100',
-            iconColor: 'text-cyan-700',
-            badgeNew: 'bg-cyan-100 text-cyan-800 border-cyan-200',
-            badgeType: 'bg-sky-100 text-sky-800 border-sky-200',
-            textTitle: 'text-cyan-900',
-            textMessage: 'text-cyan-700',
-            textDate: 'text-cyan-600'
+            unreadBg: 'bg-gradient-to-r from-blue-50 via-cyan-50 to-sky-50',
+            unreadBorder: 'border-blue-200 hover:border-blue-300',
+            readBg: 'bg-gradient-to-r from-emerald-50/60 via-green-50/40 to-emerald-50/60',
+            readBorder: 'border-emerald-200/60 hover:border-emerald-300/80',
+            iconBg: 'bg-gradient-to-br from-blue-100 to-cyan-200 border-blue-200',
+            iconColor: 'text-blue-700',
+            badgeNew: 'bg-blue-100 text-blue-800 border-blue-200',
+            badgeType: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+            textTitle: 'text-slate-900',
+            textMessage: 'text-slate-700',
+            textDate: 'text-slate-500'
           },
           // Estadísticas
           stats: {
             cardBg: 'bg-white',
-            cardBorder: 'border-cyan-100 hover:border-cyan-200',
-            iconBg: 'bg-gradient-to-br from-cyan-100 to-sky-200',
-            iconColor: 'text-cyan-700',
-            numberColor: 'text-cyan-900',
-            labelBg: 'bg-cyan-50',
-            labelText: 'text-cyan-700'
+            cardBorder: 'border-slate-200 hover:border-slate-300',
+            iconBg: 'bg-gradient-to-br from-blue-100 to-cyan-200',
+            iconColor: 'text-blue-700',
+            numberColor: 'text-slate-900',
+            labelBg: 'bg-slate-100',
+            labelText: 'text-slate-600'
           },
-          // Filtros
+          // Filtros - Azul marino super oscuro
           filters: {
-            bg: 'bg-white border-cyan-100',
-            activeBg: 'bg-gradient-to-r from-cyan-500 to-sky-500 text-white',
-            inactiveBg: 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
+            bg: 'bg-white border-slate-200',
+            activeBg: 'bg-gradient-to-r from-[#001f3f] to-[#003366] text-white shadow-lg',
+            inactiveBg: 'bg-slate-50 text-slate-700 hover:bg-slate-100'
           },
           // Modal
           modal: {
-            headerBg: 'bg-gradient-to-r from-cyan-500 to-sky-500',
+            headerBg: 'bg-gradient-to-r from-[#001f3f] to-[#003366]',
             headerText: 'text-white',
-            contentBg: 'bg-gradient-to-br from-cyan-50/50 to-sky-50/30',
-            borderColor: 'border-cyan-200'
+            contentBg: 'bg-gradient-to-br from-slate-50 to-blue-50',
+            borderColor: 'border-slate-200'
           }
         };
       case 'super_admin':
@@ -266,8 +277,8 @@ export function NotificationCenter() {
           notification: {
             unreadBg: 'bg-white',
             unreadBorder: 'border-slate-200 hover:border-slate-300',
-            readBg: 'bg-white',
-            readBorder: 'border-slate-200 hover:border-slate-300',
+            readBg: 'bg-gradient-to-r from-emerald-50/60 via-green-50/40 to-emerald-50/60',
+            readBorder: 'border-emerald-200/60 hover:border-emerald-300/80',
             iconBg: 'bg-gradient-to-br from-blue-100 to-blue-200 border-blue-200',
             iconColor: 'text-blue-700',
             badgeNew: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -331,6 +342,7 @@ export function NotificationCenter() {
       console.log('🔍 Cargando notificaciones...');
       const data = await getNotifications();
       console.log('📦 Notificaciones recibidas:', data);
+      console.log('📊 No leídas:', data.filter(n => !n.read).length, '/ Leídas:', data.filter(n => n.read).length);
       setNotifications(data);
     } catch (error: unknown) {
       console.error('❌ Error loading notifications:', error);
@@ -356,22 +368,42 @@ export function NotificationCenter() {
     setRefreshing(false);
   };
 
-  const handleMarkAsRead = async (id: number) => {
+  const handleMarkAsRead = async (id: number, event?: React.MouseEvent) => {
+    // Prevenir propagación si viene de un botón
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    // Actualización optimista - actualizar UI inmediatamente
+    setNotifications(prev => 
+      prev.map(notif => 
+        notif.id === id ? { ...notif, read: true } : notif
+      )
+    );
+    
+    // Actualizar estadísticas optimistamente
+    setStats(prev => ({
+      ...prev,
+      unread: Math.max(0, (prev.unread || 0) - 1),
+      read: (prev.read || 0) + 1
+    }));
+    
     try {
+      // Marcar en el servidor (sin recargar toda la interfaz)
       await markNotificationAsRead(id);
-      const readAt = new Date().toISOString();
+    } catch (error: unknown) {
+      console.error('❌ Error marking notification as read:', error);
+      // Revertir cambios si falla
       setNotifications(prev => 
         prev.map(notif => 
-          notif.id === id ? { ...notif, read_at: readAt } : notif
+          notif.id === id ? { ...notif, read: false } : notif
         )
       );
-      // Actualizar también la notificación seleccionada si está abierta
-      if (selectedNotification && selectedNotification.id === id) {
-        setSelectedNotification({ ...selectedNotification, read_at: readAt });
-      }
-      await loadStats(); // Recargar estadísticas
-    } catch (error: unknown) {
-      console.error('Error marking notification as read:', error);
+      setStats(prev => ({
+        ...prev,
+        unread: (prev.unread || 0) + 1,
+        read: Math.max(0, (prev.read || 0) - 1)
+      }));
       setError('Error al marcar como leída');
     }
   };
@@ -380,8 +412,9 @@ export function NotificationCenter() {
     try {
       await markAllNotificationsAsRead();
       setNotifications(prev => 
-        prev.map(notif => ({ ...notif, read_at: new Date().toISOString() }))
+        prev.map(notif => ({ ...notif, read: true }))
       );
+      await loadNotifications(); // Recargar desde servidor
       await loadStats(); // Recargar estadísticas
     } catch (error: unknown) {
       console.error('Error marking all notifications as read:', error);
@@ -389,26 +422,77 @@ export function NotificationCenter() {
     }
   };
 
-  const handleDeleteNotification = async (id: number) => {
+
+  const handleDeleteNotificationConfirm = async () => {
+    if (!notificationToDelete) return;
+    
     try {
-      await deleteNotification(id);
-      setNotifications(prev => prev.filter(notif => notif.id !== id));
-      await loadStats(); // Recargar estadísticas
+      await deleteNotification(notificationToDelete);
+      await loadNotifications();
+      await loadStats();
+      setShowDeleteConfirm(false);
+      setNotificationToDelete(null);
     } catch (error: unknown) {
       console.error('Error deleting notification:', error);
       setError('Error al eliminar la notificación');
     }
   };
 
-  const handleDeleteAllNotifications = async () => {
-    if (!confirm('¿Estás seguro de que quieres eliminar todas las notificaciones?')) {
+  const handleDeleteClick = (id: number) => {
+    setNotificationToDelete(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleApproveAppointment = async (appointmentId: number) => {
+    try {
+      setProcessingAction(true);
+      await approveAppointment(appointmentId);
+      await loadNotifications();
+      await loadStats();
+      setShowNotificationDetails(false);
+      setError('');
+    } catch (error: unknown) {
+      console.error('Error approving appointment:', error);
+      setError('Error al aprobar la cita');
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  const handleRejectAppointment = async () => {
+    if (!appointmentToReject || !rejectReason.trim()) {
+      setError('Debes proporcionar una razón para rechazar la cita');
       return;
     }
 
     try {
+      setProcessingAction(true);
+      await rejectAppointment(appointmentToReject, rejectReason);
+      await loadNotifications();
+      await loadStats();
+      setShowRejectModal(false);
+      setShowNotificationDetails(false);
+      setRejectReason('');
+      setAppointmentToReject(null);
+      setError('');
+    } catch (error: unknown) {
+      console.error('Error rejecting appointment:', error);
+      setError('Error al rechazar la cita');
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  const handleRejectClick = (appointmentId: number) => {
+    setAppointmentToReject(appointmentId);
+    setShowRejectModal(true);
+  };
+
+  const handleDeleteAllNotifications = async () => {
+    try {
       await deleteAllNotifications();
-      setNotifications([]);
-      await loadStats(); // Recargar estadísticas
+      await loadNotifications();
+      await loadStats();
     } catch (error: unknown) {
       console.error('Error deleting all notifications:', error);
       setError('Error al eliminar todas las notificaciones');
@@ -416,12 +500,37 @@ export function NotificationCenter() {
   };
 
   const handleViewNotificationDetails = async (notification: Notification) => {
+    // Mostrar el modal inmediatamente
     setSelectedNotification(notification);
     setShowNotificationDetails(true);
     
-    // Marcar como leída si no lo está
-    if (!notification.read_at) {
-      await handleMarkAsRead(notification.id);
+    // Marcar como leída automáticamente al abrir (sin recargar toda la interfaz)
+    if (!notification.read) {
+      // Actualización optimista
+      setNotifications(prev => 
+        prev.map(notif => 
+          notif.id === notification.id ? { ...notif, read: true } : notif
+        )
+      );
+      
+      setStats(prev => ({
+        ...prev,
+        unread: Math.max(0, (prev.unread || 0) - 1),
+        read: (prev.read || 0) + 1
+      }));
+      
+      try {
+        // Marcar en el servidor en segundo plano
+        await markNotificationAsRead(notification.id);
+      } catch (error: unknown) {
+        console.error('Error marking notification as read:', error);
+        // Revertir si falla
+        setNotifications(prev => 
+          prev.map(notif => 
+            notif.id === notification.id ? { ...notif, read: false } : notif
+          )
+        );
+      }
     }
   };
 
@@ -470,15 +579,26 @@ export function NotificationCenter() {
     });
   };
 
-  const unreadCount = notifications.filter(n => !n.read_at).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Filtrar notificaciones según el filtro seleccionado
   const filteredNotifications = notifications.filter(notification => {
     if (filter === 'all') return true;
-    if (filter === 'unread') return !notification.read_at;
-    if (filter === 'read') return !!notification.read_at;
+    if (filter === 'unread') return !notification.read;
+    if (filter === 'read') return notification.read;
     return true;
   });
+
+  // Paginación
+  const totalPages = Math.ceil(filteredNotifications.length / notificationsPerPage);
+  const startIndex = (currentPage - 1) * notificationsPerPage;
+  const endIndex = startIndex + notificationsPerPage;
+  const paginatedNotifications = filteredNotifications.slice(startIndex, endIndex);
+
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
 
   if (loading) {
     return (
@@ -521,8 +641,8 @@ export function NotificationCenter() {
           <div className={`absolute bottom-16 left-1/3 w-1.5 h-1.5 ${userRole === 'psychologist' ? 'bg-cyan-300' : 'bg-slate-400'} rounded-full animate-pulse`} style={{ animationDelay: '1s' }}></div>
         </div>
 
-        <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-8 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8 relative z-10">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
             <div>
               <div className="flex items-center space-x-2 mb-2">
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center tracking-wide uppercase shadow-lg ${
@@ -534,39 +654,31 @@ export function NotificationCenter() {
                   {headerConfig.badgeText}
                 </span>
               </div>
-              <h1 className={`text-3xl md:text-4xl font-black tracking-tight mb-1.5 leading-tight ${
+              <h1 className={`text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-1.5 leading-tight ${
                 userRole === 'psychologist' 
                   ? 'text-cyan-900' 
                   : 'text-white drop-shadow-lg'
               }`}>
                 Centro de Notificaciones
               </h1>
-              <p className={`${headerConfig.textColor} text-sm max-w-2xl font-medium leading-relaxed ${userRole === 'psychologist' ? '' : 'drop-shadow-md'}`}>
+              <p className={`${headerConfig.textColor} text-xs sm:text-sm max-w-2xl font-medium leading-relaxed ${userRole === 'psychologist' ? '' : 'drop-shadow-md'}`}>
                 Gestiona y revisa todas tus notificaciones.
-                <span className={`hidden sm:inline ${headerConfig.textColorAccent}`}> Mantente al día con el sistema.</span>
+                <span className={`hidden md:inline ${headerConfig.textColorAccent}`}> Mantente al día con el sistema.</span>
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              {userRole === 'psychologist' && (
-                <button
-                  onClick={() => navigate('/profile')}
-                  className="bg-white/80 backdrop-blur-xl rounded-xl px-4 py-2 border border-cyan-300/40 text-cyan-800 hover:bg-white/90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 font-semibold text-sm"
-                >
-                  <User className="w-4 h-4" />
-                  Mi Perfil
-                </button>
-              )}
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className={`text-xs font-bold rounded-lg px-4 py-2 transition-all disabled:opacity-50 flex items-center gap-1.5 ${
+                className={`text-xs font-bold rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 transition-all disabled:opacity-50 flex items-center gap-1.5 ${
                   userRole === 'psychologist'
                     ? 'border border-cyan-300/40 text-cyan-800 hover:bg-white/20 bg-white/80 backdrop-blur-xl shadow-sm'
                     : 'border border-white/20 text-white hover:bg-white/20'
                 }`}
               >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                Actualizar
+                <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Actualizar</span>
+                <span className="sm:hidden">Refrescar</span>
               </button>
             </div>
           </div>
@@ -590,68 +702,59 @@ export function NotificationCenter() {
           </div>
         )}
 
-        {/* Estadísticas mejoradas - Estilo Dashboard del Estudiante */}
+        {/* Estadísticas mejoradas - Compactas */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 mb-3">
             {/* Total */}
-            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-slate-100/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-slate-200/60 transition-all duration-500"></div>
-              
-              <div className="flex items-center justify-between mb-2 relative z-10">
-                <div className={`w-9 h-9 ${roleStyles.stats.iconBg} rounded-lg flex items-center justify-center ${roleStyles.stats.iconColor} shadow-sm group-hover:scale-110 transition-all duration-300`}>
-                  <Bell className="w-4 h-4" />
+            <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-md p-2.5 border border-slate-200 hover:border-slate-300 overflow-hidden transition-all duration-200">
+              <div className="flex items-center justify-between mb-1.5 relative z-10">
+                <div className={`w-8 h-8 ${roleStyles.stats.iconBg} rounded-lg flex items-center justify-center ${roleStyles.stats.iconColor} shadow-sm`}>
+                  <Bell className="w-3.5 h-3.5" />
                 </div>
-                <span className={`text-[9px] font-bold ${roleStyles.stats.labelText} ${roleStyles.stats.labelBg} px-2 py-0.5 rounded-full uppercase tracking-wider`}>Total</span>
+                <span className={`text-[8px] font-bold ${roleStyles.stats.labelText} ${roleStyles.stats.labelBg} px-1.5 py-0.5 rounded-full uppercase tracking-wider`}>Total</span>
               </div>
               
-              <div className="flex items-baseline gap-1.5 relative z-10">
-                <p className={`text-3xl font-black ${roleStyles.stats.numberColor} tracking-tight`}>{stats.total || 0}</p>
-                <p className="text-sm font-bold text-slate-600">Mensajes</p>
+              <div className="flex items-baseline gap-1 relative z-10">
+                <p className={`text-2xl font-black ${roleStyles.stats.numberColor} tracking-tight`}>{stats.total || 0}</p>
+                <p className="text-xs font-bold text-slate-600">Mensajes</p>
               </div>
-              <p className="text-[10px] font-semibold text-slate-500 mt-0.5 relative z-10">Todas las notificaciones recibidas</p>
             </div>
             
             {/* No leídas */}
-            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-blue-100/60 transition-all duration-500"></div>
-              
-              <div className="flex items-center justify-between mb-2 relative z-10">
-                <div className="w-9 h-9 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center text-blue-700 shadow-sm group-hover:scale-110 transition-all duration-300">
-                  <AlertCircle className="w-4 h-4" />
+            <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-md p-2.5 border border-slate-200 hover:border-slate-300 overflow-hidden transition-all duration-200">
+              <div className="flex items-center justify-between mb-1.5 relative z-10">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center text-blue-700 shadow-sm">
+                  <AlertCircle className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[9px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Nuevas</span>
+                <span className="text-[8px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full uppercase tracking-wider">Nuevas</span>
               </div>
               
-              <div className="flex items-baseline gap-1.5 relative z-10">
-                <p className="text-3xl font-black text-slate-900 tracking-tight">{unreadCount}</p>
-                <p className="text-sm font-bold text-slate-600">Alertas</p>
+              <div className="flex items-baseline gap-1 relative z-10">
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{unreadCount}</p>
+                <p className="text-xs font-bold text-slate-600">Alertas</p>
               </div>
-              <p className="text-[10px] font-semibold text-slate-500 mt-0.5 relative z-10">Requieren tu atención</p>
             </div>
             
             {/* Leídas */}
-            <div className="group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border border-slate-200 hover:border-slate-300 overflow-hidden hover:-translate-y-0.5 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-50/50 to-transparent rounded-full -mr-8 -mt-8 blur-2xl group-hover:from-green-100/60 transition-all duration-500"></div>
-              
-              <div className="flex items-center justify-between mb-2 relative z-10">
-                <div className="w-9 h-9 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-lg flex items-center justify-center text-emerald-700 shadow-sm group-hover:scale-110 transition-all duration-300">
-                  <CheckCircle className="w-4 h-4" />
+            <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-md p-2.5 border border-slate-200 hover:border-slate-300 overflow-hidden transition-all duration-200">
+              <div className="flex items-center justify-between mb-1.5 relative z-10">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-lg flex items-center justify-center text-emerald-700 shadow-sm">
+                  <CheckCircle className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[9px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Leídas</span>
+                <span className="text-[8px] font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full uppercase tracking-wider">Leídas</span>
               </div>
               
-              <div className="flex items-baseline gap-1.5 relative z-10">
-                <p className="text-3xl font-black text-slate-900 tracking-tight">{stats.read || 0}</p>
-                <p className="text-sm font-bold text-slate-600">Revisadas</p>
+              <div className="flex items-baseline gap-1 relative z-10">
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{stats.read || 0}</p>
+                <p className="text-xs font-bold text-slate-600">Revisadas</p>
               </div>
-              <p className="text-[10px] font-semibold text-slate-500 mt-0.5 relative z-10">Ya fueron atendidas</p>
             </div>
           </div>
         )}
 
-        {/* Filtros - Diseño limpio con cards blancas */}
-        <div className={`${roleStyles.filters.bg} rounded-xl shadow-md p-3 mb-4 border`}>
-          <div className="flex gap-2 justify-center flex-wrap">
+        {/* Filtros - Compactos y Responsivos */}
+        <div className={`${roleStyles.filters.bg} rounded-lg shadow-sm p-2 sm:p-2.5 mb-3 border`}>
+          <div className="flex gap-1 sm:gap-1.5 justify-center flex-wrap">
             {[
               { key: 'all', label: 'Todas' },
               { key: 'unread', label: 'No leídas' },
@@ -660,9 +763,9 @@ export function NotificationCenter() {
               <button
                 key={key}
                 onClick={() => setFilter(key as any)}
-                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all ${
                   filter === key
-                    ? `${roleStyles.filters.activeBg} shadow-md`
+                    ? `${roleStyles.filters.activeBg} shadow-sm`
                     : `${roleStyles.filters.inactiveBg}`
                 }`}
               >
@@ -674,233 +777,258 @@ export function NotificationCenter() {
 
         {/* Lista de Notificaciones */}
         {filteredNotifications.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200 text-center">
-            <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm">
-              <Bell className="w-7 h-7 text-blue-600" />
-              </div>
-              <h3 className="text-slate-900 font-bold mb-1.5 text-base">No tienes notificaciones</h3>
-            <p className="text-sm text-slate-500">Las notificaciones aparecerán aquí cuando las recibas</p>
+          <div className="bg-white rounded-2xl shadow-md p-8 border border-slate-200 text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <Bell className="w-8 h-8 text-blue-600" />
+            </div>
+            <h3 className="text-slate-900 font-bold mb-2 text-lg">No tienes notificaciones</h3>
+            <p className="text-sm text-slate-500 font-medium">Las notificaciones aparecerán aquí cuando las recibas</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredNotifications.map((notification) => (
-              <div 
-                key={notification.id}
-                className={`group relative bg-white rounded-xl shadow-md hover:shadow-lg p-3 border ${
-                  notification.read_at 
-                    ? 'border-slate-200 hover:border-slate-300'
-                    : 'border-blue-200 hover:border-blue-300'
-                } transition-all duration-300 hover:-translate-y-0.5`}
-              >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-slate-50 to-transparent rounded-full -mr-6 -mt-6 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                <div className="flex justify-between items-start gap-3 relative z-10">
-                  <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0 ${
-                          notification.read_at 
-                        ? 'bg-slate-100 border border-slate-200 text-slate-600' 
-                        : `${roleStyles.notification.iconBg} ${roleStyles.notification.iconColor}`
-                        }`}>
-                            {getNotificationIcon(notification.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h3 className={`text-sm font-bold ${roleStyles.notification.textTitle} truncate`}>
-                              {notification.title}
-                            </h3>
-                            {!notification.read_at && (
-                          <Badge className={`${roleStyles.notification.badgeNew} px-2 py-0.5 text-[9px] font-bold rounded-lg border`}>
-                                Nueva
-                              </Badge>
-                            )}
-                        <Badge className={`${roleStyles.notification.badgeType} px-2 py-0.5 text-[9px] font-bold rounded-lg border`}>
-                              {getNotificationTypeText(notification.type)}
-                            </Badge>
-                          </div>
-                      <p className={`text-sm ${roleStyles.notification.textMessage} mb-1 line-clamp-2`}>{notification.message}</p>
-                      <p className={`text-xs font-semibold ${roleStyles.notification.textDate}`}>
-                            {formatDate(notification.created_at)}
-                          </p>
-                        </div>
+          <>
+            <div className="space-y-2">
+              {paginatedNotifications.map((notification) => (
+                <div 
+                  key={notification.id}
+                  className={`group relative rounded-xl shadow-sm hover:shadow-md p-3 border transition-all duration-200 hover:-translate-y-0.5 ${
+                    notification.read 
+                      ? 'bg-gradient-to-r from-emerald-50/60 via-green-50/40 to-emerald-50/60 border-emerald-200/60 hover:border-emerald-300/80'
+                      : 'bg-white border-blue-200 hover:border-blue-300 bg-gradient-to-r from-blue-50/30 via-cyan-50/20 to-white'
+                  }`}
+                >
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100/20 to-transparent rounded-full -mr-6 -mt-6 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-start gap-2 sm:gap-3 relative z-10">
+                    <div className="flex items-start gap-2 sm:gap-2.5 flex-1 min-w-0 w-full">
+                      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0 transition-all duration-200 ${
+                        notification.read 
+                          ? 'bg-gradient-to-br from-emerald-100/80 to-green-100/60 border border-emerald-200/60 text-emerald-700' 
+                          : `${roleStyles.notification.iconBg} ${roleStyles.notification.iconColor} border`
+                      }`}>
+                        {getNotificationIcon(notification.type)}
                       </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`text-xs sm:text-sm font-bold ${roleStyles.notification.textTitle} line-clamp-1 mb-1`}>
+                          {notification.title}
+                        </h3>
+                        <div className="flex items-center gap-1 sm:gap-1.5 mb-1 flex-wrap">
+                          {!notification.read && (
+                            <Badge className={`${roleStyles.notification.badgeNew} px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-bold rounded-md border`}>
+                              Nueva
+                            </Badge>
+                          )}
+                          <Badge className={`${roleStyles.notification.badgeType} px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-bold rounded-md border`}>
+                            {getNotificationTypeText(notification.type)}
+                          </Badge>
+                        </div>
+                        <p className={`text-[11px] sm:text-xs ${roleStyles.notification.textMessage} mb-1 leading-snug line-clamp-1 sm:line-clamp-2 font-medium`}>
+                          {notification.message}
+                        </p>
+                        <p className={`text-[9px] sm:text-[10px] font-semibold ${roleStyles.notification.textDate}`}>
+                          {formatDate(notification.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 w-full sm:w-auto justify-end sm:justify-start">
                       <button
-                        onClick={() => handleViewNotificationDetails(notification)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewNotificationDetails(notification);
+                        }}
                         title="Ver detalles"
-                      className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-blue-50 text-slate-600 hover:text-blue-600"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all bg-gradient-to-br from-[#001f3f] to-[#003366] hover:from-[#002855] hover:to-[#004080] text-white shadow-sm hover:shadow-md"
                       >
-                      <Eye className="w-4 h-4" />
+                        <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       </button>
-                      {!notification.read_at && (
+                      {!notification.read && (
                         <button
-                          onClick={() => handleMarkAsRead(notification.id)}
+                          onClick={(e) => handleMarkAsRead(notification.id, e)}
                           title="Marcar como leída"
-                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-green-50 text-green-600"
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow-md"
                         >
-                        <CheckCircle className="w-4 h-4" />
+                          <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                         </button>
                       )}
                       <button
-                        onClick={() => handleDeleteNotification(notification.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(notification.id);
+                        }}
                         title="Eliminar"
-                      className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-red-50 text-red-600"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all bg-red-600 hover:bg-red-700 text-white shadow-sm hover:shadow-md"
                       >
-                      <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       </button>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Paginación */}
+            {totalPages > 1 && (
+              <div className="mt-4 flex items-center justify-between bg-white rounded-xl shadow-sm p-3 border border-slate-200">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-br from-[#001f3f] to-[#003366] hover:from-[#002855] hover:to-[#004080] text-white font-semibold text-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Anterior
+                </button>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-900">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-medium">
+                    ({filteredNotifications.length} notificaciones)
+                  </span>
+                </div>
+                
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-br from-[#001f3f] to-[#003366] hover:from-[#002855] hover:to-[#004080] text-white font-semibold text-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+                >
+                  Siguiente
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Modal de detalles de notificación */}
+      {/* Modal de detalles de notificación - Oscuro, ancho y responsivo */}
       {showNotificationDetails && selectedNotification && createPortal(
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center z-[9999] p-2 sm:p-3 animate-in fade-in duration-200" onClick={() => setShowNotificationDetails(false)}>
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl flex items-center justify-center z-[9999] p-2 sm:p-4 animate-in fade-in duration-200" onClick={() => setShowNotificationDetails(false)}>
           <div 
-            className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-hidden border border-slate-700/50 relative animate-in zoom-in-95 duration-300" 
+            className="bg-gradient-to-br from-slate-950 via-black to-slate-950 rounded-lg shadow-2xl w-full max-w-xs sm:max-w-md md:max-w-2xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden border border-slate-800/50 relative animate-in zoom-in-95 duration-300" 
             onClick={(e) => e.stopPropagation()}
             style={{
               boxShadow: `
-                0 0 0 1px rgba(255, 255, 255, 0.05),
-                0 32px 64px rgba(0, 0, 0, 0.5), 
-                0 16px 32px rgba(0, 0, 0, 0.4),
-                0 8px 16px rgba(0, 0, 0, 0.3)
+                0 0 0 1px rgba(255, 255, 255, 0.03),
+                0 20px 40px rgba(0, 0, 0, 0.8), 
+                0 10px 20px rgba(0, 0, 0, 0.6)
               `
             }}
           >
-            {/* Header del Modal - Compacto */}
-            <div className="relative bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-3 border-b border-slate-700/50">
-              {/* Decoración de fondo */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-purple-600/5"></div>
+            {/* Header del Modal - Oscuro y responsivo */}
+            <div className="relative bg-gradient-to-r from-[#001329] via-[#001f3f] to-[#002855] p-3 sm:p-3.5 border-b border-blue-950/50">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 via-transparent to-cyan-400/5"></div>
               
-              <div className="flex justify-between items-center gap-2 relative z-10">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg flex items-center justify-center border border-blue-500/30 backdrop-blur-sm shadow-lg flex-shrink-0">
-                    <Bell className="w-4 h-4 text-blue-400" />
+              <div className="flex justify-between items-center gap-2 sm:gap-3 relative z-10">
+                <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0">
+                  <div className="w-9 h-9 bg-gradient-to-br from-blue-500/20 to-cyan-500/10 rounded-lg flex items-center justify-center border border-blue-400/30 backdrop-blur-sm shadow-lg flex-shrink-0">
+                    <Bell className="w-4 h-4 text-blue-300" />
                   </div>
-                  <div className="min-w-0">
-                    <h3 className="text-base font-black text-white tracking-tight truncate">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm sm:text-base font-black text-white tracking-tight truncate">
                       Detalles de Notificación
                     </h3>
                   </div>
-                  {!selectedNotification.read_at && (
-                    <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 text-[9px] font-bold rounded flex-shrink-0">
-                      Nueva
-                    </Badge>
-                  )}
                 </div>
                 <button
                   onClick={() => setShowNotificationDetails(false)}
-                  className="w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300 border border-slate-600/50 hover:border-slate-500/50 group flex-shrink-0"
+                  className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-200 border border-white/20 hover:border-white/30 group flex-shrink-0"
                   title="Cerrar"
                 >
-                  <X className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                  <X className="w-4 h-4 text-blue-300 group-hover:text-white transition-colors" />
                 </button>
               </div>
             </div>
 
-            {/* Contenido del Modal - Formal y Profesional */}
-            <div className="p-5 overflow-y-auto max-h-[calc(85vh-140px)] bg-slate-900/30">
-              <div className="space-y-4">
-                {/* Header con Tipo y Estado */}
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Tipo de Notificación */}
-                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-3 border border-slate-600/50 shadow-lg">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-2">Categoría</p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-slate-900/60 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg">
-                    {getNotificationIcon(selectedNotification.type)}
-                  </div>
-                      <p className="text-xs font-bold text-white">{getNotificationTypeText(selectedNotification.type)}</p>
+            {/* Contenido del Modal - Reorganizado y claro */}
+            <div className="p-3 sm:p-4 overflow-y-auto max-h-[calc(85vh-100px)] bg-gradient-to-br from-black/80 via-slate-950/60 to-black/80">
+              <div className="space-y-3">
+                {/* Alerta de acción requerida */}
+                {selectedNotification.type === 'appointment' && 
+                 ((selectedNotification.data as any)?.status === 'pending' || (selectedNotification.data as any)?.status === 'pendiente') && (
+                  <div className="bg-gradient-to-r from-amber-950/60 to-amber-900/40 border border-amber-700/50 rounded-lg p-3 flex items-center gap-2.5 shadow-lg">
+                    <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center border border-amber-500/40">
+                      <AlertCircle className="w-4 h-4 text-amber-400" />
                     </div>
-                </div>
-                
-                  {/* Estado de Lectura */}
-                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-3 border border-slate-600/50 shadow-lg">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-2">Estado</p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-slate-900/60 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg">
-                        <CheckCircle className={`w-5 h-5 ${selectedNotification.read_at ? 'text-green-400' : 'text-amber-400'}`} />
-                      </div>
-                      <p className="text-xs font-bold text-white">
-                        {selectedNotification.read_at ? 'Leída' : 'No Leída'}
-                      </p>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-amber-200">Acción Requerida</p>
+                      <p className="text-xs text-amber-300/80">Debes aprobar o rechazar esta solicitud de cita</p>
                     </div>
                   </div>
-                </div>
-                
+                )}
+
                 {/* Mensaje Principal */}
-                <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 border border-slate-600/50 shadow-lg">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-slate-900/60 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg flex-shrink-0">
-                      <Bell className="w-5 h-5 text-slate-300" />
+                <div className="bg-gradient-to-br from-slate-900/90 to-black/80 backdrop-blur-sm rounded-lg p-3 border border-slate-700/50 shadow-lg">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-9 h-9 bg-gradient-to-br from-blue-500/20 to-cyan-500/10 rounded-lg flex items-center justify-center border border-blue-400/30 shadow-md flex-shrink-0">
+                      {getNotificationIcon(selectedNotification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Asunto</p>
-                      <p className="text-sm font-bold text-white leading-snug mb-2">{selectedNotification.title}</p>
-                      <p className="text-xs text-slate-300 leading-relaxed">{selectedNotification.message}</p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/40 px-2 py-0.5 text-[10px] font-bold rounded">
+                          {getNotificationTypeText(selectedNotification.type)}
+                        </Badge>
+                        <span className="text-[10px] text-slate-500">•</span>
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          {formatDate(selectedNotification.created_at)}
+                        </span>
+                      </div>
+                      <h4 className="text-base font-bold text-white leading-snug mb-2">{selectedNotification.title}</h4>
+                      <p className="text-sm text-slate-300 leading-relaxed">{selectedNotification.message}</p>
                     </div>
                   </div>
                 </div>
                 
                 {/* Información de la Cita (si es tipo appointment) */}
                 {selectedNotification.type === 'appointment' && selectedNotification.data && (
-                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg border border-slate-600/50 shadow-lg overflow-hidden">
+                  <div className="bg-gradient-to-br from-slate-900/90 to-black/80 backdrop-blur-sm rounded-lg border border-slate-700/50 shadow-lg overflow-hidden">
                     {/* Header */}
-                    <div className="bg-slate-950/60 px-4 py-3 border-b border-slate-700/50">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center border-2 border-white/20 shadow">
-                          <User className="w-5 h-5 text-slate-300" />
+                    <div className="bg-gradient-to-r from-[#001329] to-[#001f3f] px-3 py-2 border-b border-blue-950/50">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400/20 to-cyan-400/10 rounded-lg flex items-center justify-center border border-blue-400/40 shadow-md">
+                          <User className="w-4 h-4 text-blue-300" />
                         </div>
-                        <h4 className="text-sm font-bold text-white uppercase tracking-wide">Información de la Cita</h4>
+                        <h4 className="text-sm font-black text-white">Información de la Cita</h4>
                       </div>
                     </div>
 
-                    <div className="p-4 space-y-4">
-                      {/* FECHA - DESTACADA */}
-                      {(selectedNotification.data as any).date && (
-                        <div className="bg-slate-950/60 rounded-lg p-4 border-2 border-white/20 shadow-xl">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Fecha de la Cita</p>
-                          <p className="text-xl font-black text-white tracking-tight">{(selectedNotification.data as any).date}</p>
-                        </div>
-                      )}
-
-                      {/* Resto de información - Normal */}
-                      <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 space-y-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         {/* Paciente */}
                         {(selectedNotification.data as any).student_name && (
-                          <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/50 col-span-2">
-                            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Paciente</p>
-                            <p className="text-sm font-semibold text-white">{(selectedNotification.data as any).student_name}</p>
+                          <div className="bg-gradient-to-br from-slate-900/80 to-black/60 rounded-lg p-2.5 border border-slate-700/50 shadow-md sm:col-span-2">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">Paciente</p>
+                            <p className="text-sm font-bold text-white">{(selectedNotification.data as any).student_name}</p>
                             {(selectedNotification.data as any).student_email && (
-                              <p className="text-xs text-slate-400 mt-1">{(selectedNotification.data as any).student_email}</p>
+                              <p className="text-xs text-slate-300 mt-1 font-medium">{(selectedNotification.data as any).student_email}</p>
                             )}
                           </div>
                         )}
 
-                        {/* Hora */}
-                        {(selectedNotification.data as any).time && (
-                          <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/50">
-                            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Hora</p>
-                            <p className="text-sm font-semibold text-white">{(selectedNotification.data as any).time}</p>
+                        {/* Fecha y Hora */}
+                        {((selectedNotification.data as any).date || (selectedNotification.data as any).time) && (
+                          <div className="bg-gradient-to-br from-[#001329]/40 to-[#001f3f]/30 rounded-lg p-2.5 border border-blue-500/30 shadow-md">
+                            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wide mb-1.5">Fecha y Hora de Cita</p>
+                            <p className="text-sm font-bold text-white">
+                              {(selectedNotification.data as any).date && (selectedNotification.data as any).date}
+                              {(selectedNotification.data as any).date && (selectedNotification.data as any).time && ' a las '}
+                              {(selectedNotification.data as any).time && (selectedNotification.data as any).time}
+                            </p>
                           </div>
                         )}
 
                         {/* Estado */}
                         {(selectedNotification.data as any).status && (
-                          <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/50">
-                            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Estado</p>
-                            <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full ${
+                          <div className="bg-gradient-to-br from-slate-900/80 to-black/60 rounded-lg p-2.5 border border-slate-700/50 shadow-md">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">Estado de la Cita</p>
+                            <div className="flex items-center gap-1.5">
+                              <div className={`w-2 h-2 rounded-full shadow ${
                                 ['aprobada', 'approved', 'confirmada', 'confirmed', 'completada', 'completed', 'activa', 'active'].includes(String((selectedNotification.data as any).status || '').toLowerCase())
-                                  ? 'bg-green-400' 
+                                  ? 'bg-emerald-400' 
                                   : ['rechazada', 'rejected', 'cancelada', 'cancelled', 'canceled'].includes(String((selectedNotification.data as any).status || '').toLowerCase())
                                   ? 'bg-red-400'
                                   : 'bg-blue-400'
                               }`}></div>
-                              <p className="text-xs font-semibold text-white">
+                              <p className="text-sm font-bold text-white">
                                 {(() => {
                                   const status = String((selectedNotification.data as any).status || '').toLowerCase().trim();
                                   const translations: { [key: string]: string } = {
@@ -931,56 +1059,194 @@ export function NotificationCenter() {
                             </div>
                           </div>
                         )}
-                      </div>
 
-                      {/* Motivo de Consulta */}
-                      {(selectedNotification.data as any).reason && (
-                        <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/50">
-                          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-2">Motivo de Consulta</p>
-                          <p className="text-xs font-semibold text-white leading-relaxed">{(selectedNotification.data as any).reason}</p>
-                        </div>
-                      )}
+                        {/* Motivo de Consulta */}
+                        {(selectedNotification.data as any).reason && (
+                          <div className="bg-gradient-to-br from-slate-900/80 to-black/60 rounded-lg p-2.5 border border-slate-700/50 shadow-md sm:col-span-2">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">Motivo de Consulta</p>
+                            <p className="text-sm font-semibold text-slate-300 leading-relaxed">{(selectedNotification.data as any).reason}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
-                
-                {/* Fecha de la notificación */}
-                <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-3 border border-slate-600/50 shadow-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-slate-900/60 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg">
-                      <AlertCircle className="w-5 h-5 text-slate-300" />
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Fecha de Recepción</p>
-                      <p className="text-xs font-bold text-white">{formatDate(selectedNotification.created_at)}</p>
-                    </div>
-                  </div>
+              </div>
+            </div>
+
+            {/* Botones del Modal - Responsivos con acciones */}
+            <div className="p-3 border-t border-slate-800/50 bg-black/90 backdrop-blur-sm">
+              {selectedNotification.type === 'appointment' && (selectedNotification.data as any)?.appointment_id && 
+               ((selectedNotification.data as any)?.status === 'pending' || (selectedNotification.data as any)?.status === 'pendiente') ? (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button
+                    onClick={() => setShowNotificationDetails(false)}
+                    disabled={processingAction}
+                    className="px-4 py-2.5 bg-slate-900/80 border border-slate-700/50 hover:bg-slate-800/80 text-slate-300 hover:text-white rounded-lg transition-all duration-200 font-bold text-sm disabled:opacity-50 sm:col-span-1"
+                  >
+                    Cerrar
+                  </button>
+                  <button
+                    onClick={() => handleRejectClick((selectedNotification.data as any).appointment_id)}
+                    disabled={processingAction}
+                    className="px-4 py-2.5 bg-gradient-to-r from-red-900/90 to-red-950/80 hover:from-red-800/90 hover:to-red-900/80 border border-red-800/50 hover:border-red-700/50 text-red-200 hover:text-white rounded-lg transition-all duration-200 font-bold text-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed sm:col-span-1"
+                  >
+                    {processingAction ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4" />
+                    )}
+                    Rechazar
+                  </button>
+                  <button
+                    onClick={() => handleApproveAppointment((selectedNotification.data as any).appointment_id)}
+                    disabled={processingAction}
+                    className="px-4 py-2.5 bg-gradient-to-r from-emerald-900/90 to-teal-950/80 hover:from-emerald-800/90 hover:to-teal-900/80 border border-emerald-800/50 hover:border-emerald-700/50 text-emerald-200 hover:text-white rounded-lg transition-all duration-200 font-bold text-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed sm:col-span-1"
+                  >
+                    {processingAction ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCircle className="w-4 h-4" />
+                    )}
+                    Aprobar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowNotificationDetails(false)}
+                  className="w-full px-4 py-2.5 bg-gradient-to-r from-[#001329] to-[#001f3f] hover:from-[#001f3f] hover:to-[#002855] text-white rounded-lg transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg font-bold text-sm"
+                >
+                  Cerrar
+                </button>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Modal de confirmación de eliminación */}
+      {showDeleteConfirm && createPortal(
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" onClick={() => setShowDeleteConfirm(false)}>
+          <div 
+            className="bg-gradient-to-br from-slate-950 via-black to-slate-950 rounded-lg shadow-2xl w-full max-w-md border border-slate-800/50 relative animate-in zoom-in-95 duration-300" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="relative bg-gradient-to-r from-red-950/80 via-red-900/60 to-red-950/80 p-3 border-b border-red-900/50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 bg-gradient-to-br from-red-500/30 to-red-600/20 rounded-lg flex items-center justify-center border border-red-500/40 shadow-lg">
+                  <AlertCircle className="w-5 h-5 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white tracking-tight">Eliminar Notificación</h3>
+                  <p className="text-xs text-red-200 font-medium">Esta acción no se puede deshacer</p>
                 </div>
               </div>
             </div>
 
-            {/* Botones del Modal - Compacto */}
-            <div className="p-2.5 border-t border-slate-700/50 bg-slate-950/80 backdrop-blur-sm">
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  onClick={() => setShowNotificationDetails(false)}
-                  className="px-3 py-1.5 bg-slate-800/80 border border-slate-600/50 hover:bg-slate-700/80 hover:border-slate-500/50 text-slate-300 hover:text-white rounded-lg transition-all duration-300 flex items-center justify-center font-bold text-xs shadow-lg"
-                >
-                  Cerrar
-                </button>
-                {!selectedNotification.read_at && (
-                  <button
-                    onClick={async () => {
-                      await handleMarkAsRead(selectedNotification.id);
-                      setShowNotificationDetails(false);
-                    }}
-                    className="flex-1 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-lg transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-emerald-500/25 font-bold text-xs"
-                  >
-                    <CheckCircle className="w-3.5 h-3.5 mr-1" />
-                    Marcar leída
-                  </button>
-                )}
+            {/* Contenido */}
+            <div className="p-4">
+              <p className="text-sm text-slate-300 leading-relaxed">
+                ¿Estás seguro de que deseas eliminar esta notificación? Esta acción es permanente y no podrás recuperar la información.
+              </p>
+            </div>
+
+            {/* Botones */}
+            <div className="p-3 border-t border-slate-800/50 bg-black/90 flex gap-2">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setNotificationToDelete(null);
+                }}
+                className="flex-1 px-4 py-2 bg-slate-900/80 border border-slate-700/50 hover:bg-slate-800/80 text-slate-300 hover:text-white rounded-lg transition-all duration-200 font-bold text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteNotificationConfirm}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg transition-all duration-200 font-bold text-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Modal de rechazo de cita - Oscuro y elegante */}
+      {showRejectModal && createPortal(
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" onClick={() => setShowRejectModal(false)}>
+          <div 
+            className="bg-gradient-to-br from-slate-950 via-black to-slate-950 rounded-lg shadow-2xl w-full max-w-lg border border-slate-800/50 relative animate-in zoom-in-95 duration-300" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header - Oscuro con rojo sutil */}
+            <div className="relative bg-gradient-to-r from-slate-950 via-red-950/40 to-slate-950 p-3 border-b border-slate-800/50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 bg-gradient-to-br from-red-900/30 to-red-950/20 rounded-lg flex items-center justify-center border border-red-800/40 shadow-lg">
+                  <X className="w-5 h-5 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white tracking-tight">Rechazar Cita</h3>
+                  <p className="text-xs text-slate-400 font-medium">Proporciona el motivo del rechazo</p>
+                </div>
               </div>
+            </div>
+
+            {/* Contenido */}
+            <div className="p-4 bg-gradient-to-br from-black/80 via-slate-950/60 to-black/80">
+              <div className="bg-red-950/20 border border-red-900/30 rounded-lg p-3 mb-3">
+                <p className="text-sm text-red-300/80 leading-relaxed">
+                  El estudiante será notificado automáticamente del rechazo de su solicitud de cita.
+                </p>
+              </div>
+              
+              <label className="block text-sm font-bold text-slate-300 mb-2">
+                Motivo del rechazo <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Describe el motivo por el cual rechazas esta cita..."
+                className="w-full px-4 py-3 bg-slate-950/80 border border-slate-700/50 rounded-lg focus:ring-2 focus:ring-red-800/50 focus:border-red-800/50 text-white placeholder-slate-500 transition-all duration-200 font-medium text-sm"
+                rows={4}
+                disabled={processingAction}
+              />
+            </div>
+
+            {/* Botones - Combinando con el modal oscuro */}
+            <div className="p-3 border-t border-slate-800/50 bg-black/90 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectReason('');
+                  setAppointmentToReject(null);
+                }}
+                disabled={processingAction}
+                className="px-4 py-2.5 bg-slate-900/80 border border-slate-700/50 hover:bg-slate-800/80 text-slate-300 hover:text-white rounded-lg transition-all duration-200 font-bold text-sm disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleRejectAppointment}
+                disabled={processingAction || !rejectReason.trim()}
+                className="px-4 py-2.5 bg-gradient-to-r from-red-900/90 to-red-950/80 hover:from-red-800/90 hover:to-red-900/80 border border-red-800/50 hover:border-red-700/50 text-red-200 hover:text-white rounded-lg transition-all duration-200 font-bold text-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {processingAction ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Rechazando...
+                  </>
+                ) : (
+                  <>
+                    <X className="w-4 h-4" />
+                    Rechazar Cita
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>,

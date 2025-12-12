@@ -160,11 +160,7 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
   const handleMarkAsRead = async (id: number) => {
     try {
       await markNotificationAsRead(id);
-      setNotifications(prev => 
-        prev.map(notif => 
-          notif.id === id ? { ...notif, read_at: new Date().toISOString() } : notif
-        )
-      );
+      await loadNotifications();
       onNotificationUpdate();
     } catch (error: unknown) {
       console.error('Error marking notification as read:', error);
@@ -175,9 +171,7 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
   const handleMarkAllAsRead = async () => {
     try {
       await markAllNotificationsAsRead();
-      setNotifications(prev => 
-        prev.map(notif => ({ ...notif, read_at: new Date().toISOString() }))
-      );
+      await loadNotifications();
       onNotificationUpdate();
     } catch (error: unknown) {
       console.error('Error marking all notifications as read:', error);
@@ -188,7 +182,7 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
   const handleDeleteNotification = async (id: number) => {
     try {
       await deleteNotification(id);
-      setNotifications(prev => prev.filter(notif => notif.id !== id));
+      await loadNotifications();
       onNotificationUpdate();
     } catch (error: unknown) {
       console.error('Error deleting notification:', error);
@@ -251,7 +245,7 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
     });
   };
 
-  const unreadCount = notifications.filter(n => !n.read_at).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   if (loading) {
     return (
@@ -305,10 +299,10 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
             <div 
               key={notification.id}
               className={`border-b last:border-b-0 transition-colors ${
-                notification.read_at ? roleStyles.notificationRead : roleStyles.notificationUnread
+                notification.read ? roleStyles.notificationRead : roleStyles.notificationUnread
               } hover:bg-white/10 cursor-pointer`}
               onClick={async () => {
-                if (!notification.read_at) {
+                if (!notification.read) {
                   await handleMarkAsRead(notification.id);
                   await new Promise(resolve => setTimeout(resolve, 100));
                 }
@@ -328,7 +322,7 @@ export function NotificationPanel({ onClose, onNotificationUpdate }: Notificatio
                       <h4 className={`text-xs font-bold ${roleStyles.textTitle} line-clamp-1 flex-1`}>
                         {notification.title}
                       </h4>
-                      {!notification.read_at && (
+                      {!notification.read && (
                         <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border ${roleStyles.badgeNew} flex-shrink-0 uppercase tracking-wide`}>
                           Nueva
                         </span>

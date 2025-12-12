@@ -233,21 +233,31 @@ class ScheduleController extends Controller
         try {
             $psychologistId = $request->query('psychologist_id', 1);
 
+            // Validar y parsear la fecha
+            try {
+                $parsedDate = Carbon::parse($date);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Formato de fecha inválido: ' . $date
+                ], 422);
+            }
+
             // Verificar si es fin de semana
-            $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+            $dayOfWeek = $parsedDate->dayOfWeek;
             $isWeekend = $dayOfWeek === 0 || $dayOfWeek === 6;
 
             if ($isWeekend) {
-                            return response()->json([
-                'success' => true,
-                'data' => [
-                    'date' => $date,
-                    'day_name' => Carbon::parse($date)->format('l'),
-                    'is_full_day_blocked' => true,
-                    'full_day_reason' => 'Fin de semana',
-                    'blocks' => []
-                ]
-            ]);
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'date' => $date,
+                        'day_name' => $parsedDate->format('l'),
+                        'is_full_day_blocked' => true,
+                        'full_day_reason' => 'Fin de semana',
+                        'blocks' => []
+                    ]
+                ]);
             }
 
             // Generar bloques exactos de 45 minutos de 8:00 a 14:00
@@ -268,25 +278,35 @@ class ScheduleController extends Controller
                 $endTime = $slot['end'];
 
                 // Verificar si hay cita en este bloque
-                $hasAppointment = DB::table('citas')
-                    ->where('psychologist_id', $psychologistId)
-                    ->where('fecha', $date)
-                    ->where('hora', $startTime)
-                    ->where('status', '!=', 'cancelada')
-                    ->exists();
+                $hasAppointment = false;
+                try {
+                    $hasAppointment = DB::table('citas')
+                        ->where('psychologist_id', $psychologistId)
+                        ->where('fecha', $date)
+                        ->where('hora', $startTime)
+                        ->where('status', '!=', 'cancelada')
+                        ->exists();
+                } catch (\Exception $e) {
+                    Log::warning('Error checking appointment: ' . $e->getMessage());
+                }
 
                 // Verificar si el bloque está bloqueado
-                $isBlocked = DB::table('blocked_schedules')
-                    ->where('psychologist_id', $psychologistId)
-                    ->where('date', $date)
-                    ->where(function ($query) use ($startTime, $endTime) {
-                        $query->where('is_full_day_blocked', true)
-                              ->orWhere(function ($q) use ($startTime, $endTime) {
-                                  $q->where('start_time', '<=', $startTime)
-                                    ->where('end_time', '>', $startTime);
-                              });
-                    })
-                    ->exists();
+                $isBlocked = false;
+                try {
+                    $isBlocked = DB::table('blocked_schedules')
+                        ->where('psychologist_id', $psychologistId)
+                        ->where('date', $date)
+                        ->where(function ($query) use ($startTime, $endTime) {
+                            $query->where('is_full_day_blocked', true)
+                                  ->orWhere(function ($q) use ($startTime, $endTime) {
+                                      $q->where('start_time', '<=', $startTime)
+                                        ->where('end_time', '>', $startTime);
+                                  });
+                        })
+                        ->exists();
+                } catch (\Exception $e) {
+                    Log::warning('Error checking blocked schedule: ' . $e->getMessage());
+                }
 
                 $blocks[] = [
                     'id' => $startTime . '-' . $endTime,
@@ -300,17 +320,23 @@ class ScheduleController extends Controller
             }
 
             // Verificar si todo el día está bloqueado
-            $fullDayBlocked = DB::table('blocked_schedules')
-                ->where('psychologist_id', $psychologistId)
-                ->where('date', $date)
-                ->where('is_full_day_blocked', true)
-                ->first();
+            $fullDayBlocked = null;
+            try {
+                $fullDayBlocked = DB::table('blocked_schedules')
+                    ->where('psychologist_id', $psychologistId)
+                    ->where('date', $date)
+                    ->where('is_full_day_blocked', true)
+                    ->first();
+            } catch (\Exception $e) {
+                Log::warning('Error checking full day blocked: ' . $e->getMessage());
+                // Continuar sin bloquear todo el día si hay error
+            }
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'date' => $date,
-                    'day_name' => Carbon::parse($date)->format('l'),
+                    'day_name' => $parsedDate->format('l'),
                     'is_full_day_blocked' => $fullDayBlocked ? true : false,
                     'full_day_reason' => $fullDayBlocked ? $fullDayBlocked->reason : null,
                     'blocks' => $blocks

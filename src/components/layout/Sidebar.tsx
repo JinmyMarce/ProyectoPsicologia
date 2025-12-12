@@ -126,6 +126,12 @@ const menuItems: MenuItem[] = [
     roles: ['psychologist']
   },
   {
+    label: 'Gestión de Horarios',
+    icon: Clock,
+    page: 'schedule',
+    roles: ['psychologist']
+  },
+  {
     label: 'Gestión de Usuarios',
     icon: Users,
     page: 'users',
@@ -191,6 +197,12 @@ const menuItems: MenuItem[] = [
     icon: UserCheck,
     page: 'profile',
     roles: ['tutor']
+  },
+  {
+    label: 'Mi Perfil',
+    icon: UserCheck,
+    page: 'profile',
+    roles: ['psychologist']
   }
 ];
 

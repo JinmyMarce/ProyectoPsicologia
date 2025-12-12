@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { UnifiedCalendar } from '../ui/UnifiedCalendar';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
@@ -479,21 +478,7 @@ export const PsychologistAppointmentCalendar: React.FC = () => {
             )}
           </div>
 
-          {/* Calendario principal */}
-          <div className="bg-white rounded-xl shadow-md border border-cyan-200 mb-4 overflow-hidden">
-            <UnifiedCalendar
-              userType="psychologist"
-              onDateSelect={handleDateSelect}
-              selectedDate={selectedDate}
-              availableDates={availableDates}
-              blockedDates={blockedDates}
-              appointments={calendarAppointments}
-              showStats={true}
-              showLegend={true}
-              showNavigation={true}
-              className="psychologist-theme"
-            />
-          </div>
+          {/* Calendario principal - ELIMINADO: Solo se usa calendario simple en agendar cita directamente */}
 
           {/* Lista de citas filtradas */}
           <Card className="mb-4">

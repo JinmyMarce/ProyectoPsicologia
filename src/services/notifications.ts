@@ -6,7 +6,8 @@ export interface Notification {
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error' | 'appointment' | 'reminder';
-  read_at?: string;
+  read: boolean;
+  read_at?: string; // Mantener para compatibilidad
   created_at: string;
   updated_at: string;
   data?: Record<string, unknown>;

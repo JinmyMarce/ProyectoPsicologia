@@ -316,11 +316,15 @@ class PsychologistDashboardController extends Controller
             Notification::create([
                 'user_id' => $student->id,
                 'type' => 'appointment',
-                'title' => 'Nueva Cita Agendada',
-                'message' => "Se ha agendado una nueva cita para el {$cita->fecha->format('d/m/Y')} a las {$cita->hora->format('H:i')}.",
+                'title' => 'Cita aprobada',
+                'message' => "¡Tu cita ha sido agendada y está aprobada! La cita con el psicólogo {$psychologist->name} está programada para el día {$cita->fecha->format('d/m/Y')} a las {$cita->hora->format('H:i')}. Por favor, preséntate puntualmente. Si tienes dudas, revisa tus mensajes o contacta a tu psicólogo.",
+                'read' => false,
                 'data' => [
                     'appointment_id' => $cita->id,
-                    'status' => 'scheduled'
+                    'date' => $cita->fecha->format('Y-m-d'),
+                    'time' => $cita->hora->format('H:i'),
+                    'psychologist_name' => $psychologist->name,
+                    'status' => 'aprobada'
                 ]
             ]);
 
@@ -361,7 +365,7 @@ class PsychologistDashboardController extends Controller
                           ->orWhere('email', 'like', '%' . $request->identifier . '%')
                           ->orWhere('name', 'like', '%' . $request->identifier . '%');
                 })
-                ->select('id', 'name', 'email', 'dni', 'career', 'semester', 'student_id')
+                ->select('id', 'name', 'email', 'dni', 'career', 'semester', 'student_id', 'phone', 'avatar')
                 ->get();
 
             return response()->json([

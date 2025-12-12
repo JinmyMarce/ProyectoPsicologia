@@ -241,3 +241,5 @@ Retorna:
    - Solo usuarios con rol `admin` o `super_admin` pueden acceder a los logs
    - Las exportaciones también requieren autenticación
 
+
+

@@ -11,7 +11,10 @@ import {
   User,
   Ban,
   AlertTriangle,
-  Info
+  Info,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { 
   createScheduleBlock, 
@@ -134,16 +137,29 @@ export function ScheduleManager() {
       // Cargar datos reales del backend para cada día
       const updatedSchedule = await Promise.all(
         weeklySchedule.map(async (day) => {
-          // Obtener disponibilidad real para este día
-          const availability = await getAvailabilityForDate(1, day.date);
-          if (availability) {
-            return {
-              ...day,
-              isFullDayBlocked: availability.isFullDayBlocked,
-              fullDayReason: availability.fullDayReason,
-              blocks: availability.blocks
-            };
+          try {
+            // Obtener disponibilidad real para este día
+            const availability = await getAvailabilityForDate(1, day.date);
+            if (availability && availability.blocks) {
+              return {
+                ...day,
+                isFullDayBlocked: availability.isFullDayBlocked || false,
+                fullDayReason: availability.fullDayReason || null,
+                blocks: availability.blocks.map((block: any) => ({
+                  id: block.id,
+                  startTime: block.startTime,
+                  endTime: block.endTime,
+                  isAvailable: block.isAvailable !== undefined ? block.isAvailable : true,
+                  hasAppointment: block.hasAppointment || false,
+                  isBlocked: block.isBlocked || false,
+                  reason: block.reason || null
+                }))
+              };
+            }
+          } catch (error) {
+            console.error(`Error loading availability for ${day.date}:`, error);
           }
+          // Si hay error o no hay disponibilidad, usar el horario base generado
           return day;
         })
       );
@@ -368,47 +384,79 @@ export function ScheduleManager() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Elegante */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center shadow-xl border border-gray-700">
-                <Calendar className="w-8 h-8 text-white" />
-              </div>
-              <div className="absolute -inset-1 bg-gradient-to-br from-gray-900 to-black rounded-2xl blur opacity-20 -z-10"></div>
-            </div>
+    <div className="min-h-screen bg-gray-50 font-sans selection:bg-slate-100 selection:text-slate-900">
+      {/* Header Section - Celeste Suave (igual al dashboard del psicólogo) */}
+      <div className="bg-gradient-to-br from-cyan-50 via-sky-50 to-cyan-50 rounded-2xl shadow-2xl relative overflow-hidden mx-2 sm:mx-3 mt-3 border border-cyan-200/40">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-cyan-100/50 via-transparent to-sky-100/30 animate-pulse"></div>
+
+        {/* Minimal decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-100/50 via-sky-100/30 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-56 h-56 bg-gradient-to-tr from-sky-100/40 to-transparent rounded-full blur-3xl -ml-12 -mb-12 pointer-events-none"></div>
+
+        {/* Subtle dots */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-12 left-16 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
+          <div className="absolute top-20 right-32 w-1 h-1 bg-sky-300 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute bottom-16 left-1/3 w-1.5 h-1.5 bg-cyan-300 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
+
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-8 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-black text-gray-900 tracking-tight">Gestión de Horarios</h1>
-              <p className="text-gray-600 mt-1 font-medium">Configura tu disponibilidad semanal</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="bg-white rounded-xl px-4 py-2 shadow-sm border border-gray-200">
-              <div className="text-sm font-semibold text-gray-700">
-                Semana: {getWeekRange()}
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="px-3 py-1 rounded-full bg-white/70 text-cyan-700 text-[10px] font-bold flex items-center tracking-wide uppercase shadow-lg border border-cyan-300/50 hover:bg-white/80 transition-all duration-300 backdrop-blur-xl">
+                  <Sparkles className="w-3 h-3 mr-1.5" />
+                  SAPTA - Psicología
+                </span>
               </div>
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-cyan-900 mb-1.5 leading-tight">
+                Gestión de Horarios
+              </h1>
+              <p className="text-cyan-800 text-sm max-w-2xl font-medium leading-relaxed">
+                Configura tu disponibilidad semanal.
+                <span className="hidden sm:inline text-cyan-700"> Gestiona tus horarios de atención.</span>
+              </p>
             </div>
-            <Button
-              onClick={handleSaveSchedule}
-              disabled={saving}
-              className="bg-gradient-to-r from-gray-900 via-gray-800 to-black hover:from-black hover:to-gray-800 text-white px-6 py-3 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5 mr-2" />
-                  Guardar Cambios
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-3">
+              <div className="bg-white/80 backdrop-blur-xl rounded-xl px-4 py-2 border border-cyan-200/50 shadow-sm">
+                <div className="text-sm font-semibold text-cyan-700">
+                  Semana: {getWeekRange()}
+                </div>
+              </div>
+              <Button
+                onClick={handleSaveSchedule}
+                disabled={saving}
+                className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-xl shadow-lg transition-all duration-300"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Guardar Cambios
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* Wave pattern */}
+        <div className="absolute bottom-0 left-0 right-0 h-12 overflow-hidden pointer-events-none">
+          <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M0,0 C150,80 350,80 600,40 C850,0 1050,0 1200,40 L1200,120 L0,120 Z" fill="white" fillOpacity="0.08" />
+            <path d="M0,20 C200,100 400,100 600,60 C800,20 1000,20 1200,60 L1200,120 L0,120 Z" fill="white" fillOpacity="0.04" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Contenido colgando del header */}
+      <div className="w-full px-3 sm:px-4 lg:px-6 -mt-4 relative z-20">
+        <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Alerts Elegantes */}
         {error && (
@@ -628,6 +676,7 @@ export function ScheduleManager() {
             </div>
           </div>
         </Card>
+        </div>
       </div>
 
       {/* Modal para inhabilitar */}

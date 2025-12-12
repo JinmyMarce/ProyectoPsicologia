@@ -74,6 +74,8 @@ export interface Student {
   semester: string;
   phone?: string;
   student_id?: string;
+  avatar?: string;
+  google_avatar?: string;
 }
 
 export interface TimeSlot {
