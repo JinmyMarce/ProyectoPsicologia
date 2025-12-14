@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { Bell, ChevronDown, LogOut, Menu, User, Settings } from 'lucide-react';
+import { Bell, ChevronDown, LogOut, Menu, User, Settings, RefreshCw, UserPlus } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { getNotificationStats } from '../../services/notifications';
@@ -205,6 +205,7 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
                 </>
               )}
             </div>
+
 
             {/* Separador vertical sutil */}
             <div className="h-6 w-px bg-white/5 hidden sm:block"></div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Input } from '../ui/Input';
 import { 
   Calendar, 
@@ -19,7 +20,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, getDay, startOfWeek, endOfWeek, isPast, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { searchStudent } from '../../services/appointments';
+import { searchStudent, scheduleDirectAppointment } from '../../services/appointments';
 import { holidayService, Holiday } from '../../services/holidays';
 import { localHolidayService } from '../../services/holidaysLocal';
 import { getBlockedDatesForCalendar } from '../../services/schedule';
@@ -103,6 +104,7 @@ export function DirectAppointmentScheduler() {
       const foundStudent = students[0];
       
       // Mapear los datos de la API al formato del componente
+      console.log('Estudiante encontrado:', foundStudent);
       const studentData: Student = {
         id: foundStudent.id,
         name: foundStudent.name,
@@ -111,11 +113,13 @@ export function DirectAppointmentScheduler() {
         career: foundStudent.career || 'No especificado',
         semester: foundStudent.semester || 'N/A',
         phone: foundStudent.phone || 'No disponible',
-        avatar: (foundStudent as any).avatar,
-        google_avatar: (foundStudent as any).google_avatar
+        avatar: foundStudent.avatar || (foundStudent as any).avatar_url || null,
+        google_avatar: (foundStudent as any).google_avatar || (foundStudent as any).google_picture || null
       };
 
+      console.log('Datos mapeados del estudiante:', studentData);
       setStudent(studentData);
+      setAvatarError(false); // Resetear el error del avatar al cargar nuevo estudiante
     } catch (error: any) {
       console.error('Error searching student:', error);
       setError(error.message || 'Estudiante no encontrado. Verifica el DNI o correo electrónico.');
@@ -166,23 +170,49 @@ export function DirectAppointmentScheduler() {
 
     setSaving(true);
     setError('');
+    setSuccess('');
 
     try {
-      // Simular agendamiento de cita
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Formatear fecha y hora
+      const fecha = format(selectedDate, 'yyyy-MM-dd');
+      const hora = selectedTime;
       
-      setSuccess('Cita agendada exitosamente');
+      // Usar DNI o email como identificador
+      const studentIdentifier = searchType === 'dni' ? student.dni : student.email;
       
-      // Limpiar formulario
-      setStudent(null);
-      setSelectedDate(null);
-      setSelectedTime('');
-      setSearchTerm('');
-      setAvailableSlots([]);
-      
-      setTimeout(() => setSuccess(''), 3000);
+      // Agendar cita a través del API
+      const response = await scheduleDirectAppointment({
+        student_identifier: studentIdentifier,
+        fecha: fecha,
+        hora: hora,
+        duracion: 45, // Duración estándar de 45 minutos
+        motivo_consulta: `Cita agendada directamente por el psicólogo para ${student.name}`
+      });
+
+      if (response.success) {
+        setSuccess('Cita agendada con éxito');
+        
+        // Auto-ocultar mensaje después de 3 segundos
+        setTimeout(() => {
+          setSuccess('');
+        }, 3000);
+        
+        // Limpiar formulario después de 2 segundos
+        setTimeout(() => {
+          setStudent(null);
+          setSelectedDate(null);
+          setSelectedTime('');
+          setSearchTerm('');
+          setAvailableSlots([]);
+        }, 2000);
+      } else {
+        throw new Error(response.message || 'Error al agendar la cita');
+      }
     } catch (error: any) {
-      setError('Error al agendar la cita. Intenta de nuevo.');
+      console.error('Error scheduling appointment:', error);
+      const errorMessage = error.message || 'Error al agendar la cita. Intenta de nuevo.';
+      setError(errorMessage);
+      setSuccess('Error al agendar la cita');
     } finally {
       setSaving(false);
     }
@@ -246,6 +276,25 @@ export function DirectAppointmentScheduler() {
   useEffect(() => {
     loadHolidays();
     loadBlockedDates();
+  }, [user?.id]);
+
+  // Escuchar eventos de actualización de horarios bloqueados
+  useEffect(() => {
+    const handleScheduleUpdated = () => {
+      if (user?.id) {
+        loadBlockedDates();
+      }
+    };
+
+    window.addEventListener('scheduleUpdated', handleScheduleUpdated);
+    window.addEventListener('scheduleBlocked', handleScheduleUpdated);
+    window.addEventListener('scheduleUnblocked', handleScheduleUpdated);
+
+    return () => {
+      window.removeEventListener('scheduleUpdated', handleScheduleUpdated);
+      window.removeEventListener('scheduleBlocked', handleScheduleUpdated);
+      window.removeEventListener('scheduleUnblocked', handleScheduleUpdated);
+    };
   }, [user?.id]);
 
   // Función mejorada de selección de fecha - Psicólogo puede agendar desde mañana hasta 3 semanas
@@ -391,60 +440,62 @@ export function DirectAppointmentScheduler() {
 
       {/* Contenido que cuelga del header */}
       <div className="w-full px-3 sm:px-4 lg:px-6 -mt-4 relative z-20">
-        {/* Búsqueda de estudiante - Compacto con información al costado */}
+        {/* Búsqueda de estudiante - Reorganizado con información al costado */}
         <div className="bg-white rounded-xl shadow-lg border border-cyan-200/50 p-4 sm:p-5 mb-4 sm:mb-6">
-          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-start">
-            {/* Búsqueda - Más ancho para llenar el espacio */}
-            <div className="flex-1 min-w-0 lg:flex-[2]">
-              <h2 className="text-base sm:text-lg font-black text-cyan-900 mb-3 sm:mb-4 flex items-center">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-slate-900 rounded-lg flex items-center justify-center mr-2 sm:mr-3 shadow-md">
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <span className="text-sm sm:text-lg">Buscar Estudiante</span>
-              </h2>
+          <h2 className="text-base sm:text-lg font-black text-cyan-900 mb-4 sm:mb-5 flex items-center">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-slate-900 rounded-lg flex items-center justify-center mr-2 sm:mr-3 shadow-md">
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
+            <span className="text-sm sm:text-lg">Buscar Estudiante</span>
+          </h2>
 
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
-                <div className="flex-shrink-0 sm:w-32 lg:w-36">
+          {/* Layout: Búsqueda a la izquierda, información del estudiante al costado (desktop) */}
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+            {/* Sección de búsqueda - Izquierda */}
+            <div className="flex-1 lg:flex-[1]">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                {/* Selector de tipo */}
+                <div className="flex-shrink-0 sm:w-32">
                   <label className="block text-xs font-bold text-slate-700 mb-2">
-                    Tipo
+                    Tipo de búsqueda
                   </label>
                   <select
                     value={searchType}
                     onChange={(e) => {
                       const newType = e.target.value as 'dni' | 'email';
                       setSearchType(newType);
-                      // Limpiar el campo si cambia el tipo
                       setSearchTerm('');
                       setError('');
+                      setStudent(null);
                     }}
-                    className="w-full px-3 py-2 border-2 border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all text-sm font-semibold bg-white hover:border-cyan-300"
+                    className="w-full px-3 py-2.5 border-2 border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all text-sm font-semibold bg-white hover:border-cyan-300"
                   >
                     <option value="dni">DNI</option>
                     <option value="email">Correo</option>
                   </select>
                 </div>
 
+                {/* Campo de búsqueda */}
                 <div className="flex-1 min-w-0">
                   <label className="block text-xs font-bold text-slate-700 mb-2">
-                    {searchType === 'dni' ? 'DNI del estudiante' : 'Correo electrónico'}
+                    {searchType === 'dni' ? 'DNI del estudiante' : 'Correo electrónico del estudiante'}
                   </label>
                   <div className="flex gap-2">
                     <input
                       type={searchType === 'dni' ? 'text' : 'email'}
                       inputMode={searchType === 'dni' ? 'numeric' : 'email'}
-                      placeholder={searchType === 'dni' ? '12345678' : 'estudiante@issta.edu.pe'}
+                      placeholder={searchType === 'dni' ? '12345678' : 'estudiante@istta.edu.pe'}
                       value={searchTerm}
                       onChange={(e) => {
-                        // Solo permitir números para DNI y máximo 8 dígitos
                         if (searchType === 'dni') {
                           const value = e.target.value.replace(/\D/g, '').slice(0, 8);
                           setSearchTerm(value);
                         } else {
                           setSearchTerm(e.target.value);
                         }
+                        setError('');
                       }}
                       onKeyPress={(e) => {
-                        // Prevenir caracteres no numéricos en DNI
                         if (searchType === 'dni' && !/[0-9]/.test(e.key) && e.key !== 'Enter' && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
                           e.preventDefault();
                         }
@@ -453,81 +504,124 @@ export function DirectAppointmentScheduler() {
                         }
                       }}
                       maxLength={searchType === 'dni' ? 8 : undefined}
-                      className="flex-1 px-3 py-2 border-2 border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all text-sm font-semibold bg-white hover:border-cyan-300 focus:outline-none"
+                      className="flex-1 px-4 py-2.5 border-2 border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all text-sm font-semibold bg-white hover:border-cyan-300 focus:outline-none"
                     />
                     <button
                       onClick={handleSearch}
                       disabled={searching || !searchTerm.trim()}
-                      className="px-5 py-2 bg-slate-900 hover:bg-slate-950 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-2.5 bg-slate-900 hover:bg-slate-950 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px] justify-center"
                     >
                       {searching ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="hidden sm:inline">Buscando...</span>
+                        </>
                       ) : (
-                        <Search className="w-4 h-4" />
+                        <>
+                          <Search className="w-4 h-4" />
+                          <span>Buscar</span>
+                        </>
                       )}
-                      <span className="hidden sm:inline">Buscar</span>
                     </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Información del estudiante o error - Responsive */}
-            <div className="w-full lg:flex-1 lg:flex-initial lg:min-w-[320px] flex items-center justify-center pt-0 lg:pt-6">
-              {student ? (
-                <div className="w-full bg-gradient-to-r from-cyan-50/90 to-sky-50/90 backdrop-blur-sm border-2 border-cyan-200/60 rounded-xl p-3 sm:p-3.5 shadow-md">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    {/* Foto del estudiante a la izquierda */}
+            {/* Información del estudiante o mensajes de error - Al costado, centrado verticalmente */}
+            {student ? (
+              <div className="lg:flex-[1] lg:min-w-[250px] lg:ml-auto lg:flex lg:items-center">
+                <div className="bg-gradient-to-r from-cyan-50/90 to-sky-50/90 backdrop-blur-sm border-2 border-cyan-200/60 rounded-lg p-3 shadow-md w-full">
+                  <div className="flex items-start gap-3">
+                    {/* Avatar del estudiante - Más pequeño */}
                     <div className="flex-shrink-0">
-                      {(student.avatar || student.google_avatar) && !avatarError ? (
-                        <img
-                          src={student.avatar || student.google_avatar}
-                          alt={student.name}
-                          className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border-2 border-cyan-300 shadow-lg"
-                          onError={() => setAvatarError(true)}
-                        />
-                      ) : (
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
-                          <User className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                        </div>
-                      )}
+                      {(() => {
+                        const avatarUrl = student.avatar || student.google_avatar;
+                        if (avatarUrl && !avatarError) {
+                          return (
+                            <img
+                              src={avatarUrl}
+                              alt={student.name}
+                              className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover border-2 border-cyan-300 shadow-md"
+                              onError={() => {
+                                console.log('Error cargando avatar:', avatarUrl);
+                                setAvatarError(true);
+                              }}
+                              onLoad={() => {
+                                console.log('Avatar cargado exitosamente:', avatarUrl);
+                                setAvatarError(false);
+                              }}
+                            />
+                          );
+                        }
+                        return (
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-900 rounded-lg flex items-center justify-center shadow-md">
+                            <User className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                          </div>
+                        );
+                      })()}
                     </div>
                     
-                    {/* Información del estudiante */}
+                    {/* Información del estudiante - Compacta */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
-                        <h3 className="font-bold text-cyan-900 text-xs sm:text-sm truncate">{student.name}</h3>
-                        <span className="px-2 py-0.5 rounded-full bg-cyan-200/80 text-cyan-800 text-[10px] font-bold flex items-center gap-1 shadow-sm flex-shrink-0 w-fit">
-                          <CheckCircle className="w-3 h-3" />
-                          Encontrado
-                        </span>
+                      <div className="flex flex-col gap-1 mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-cyan-900 text-sm sm:text-base truncate">{student.name}</h3>
+                          <span className="px-2 py-0.5 rounded-full bg-green-200/80 text-green-800 text-[10px] font-bold flex items-center gap-1 shadow-sm flex-shrink-0">
+                            <CheckCircle className="w-3 h-3" />
+                            Encontrado
+                          </span>
+                        </div>
+                        <p className="text-xs text-cyan-800 font-semibold">
+                          {student.career} - {student.semester}° Semestre
+                        </p>
                       </div>
-                      <p className="text-xs text-cyan-800 font-semibold mb-0.5">
-                        {student.career} - {student.semester}° Semestre
-                      </p>
-                      <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] text-cyan-700">
-                        <span className="font-medium">DNI: {student.dni}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span className="font-medium">Tel: {student.phone}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span className="truncate font-medium block sm:inline">{student.email}</span>
+                      
+                      <div className="flex flex-wrap items-center gap-1.5 text-[10px] sm:text-xs text-cyan-700">
+                        <span className="font-medium bg-white/60 px-1.5 py-0.5 rounded border border-cyan-200">DNI: {student.dni}</span>
+                        <span className="font-medium bg-white/60 px-1.5 py-0.5 rounded border border-cyan-200">Tel: {student.phone}</span>
+                        <span className="font-medium bg-white/60 px-1.5 py-0.5 rounded border border-cyan-200 truncate max-w-full">{student.email}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              ) : error && error.includes('no encontrado') ? (
-                <div className="w-full bg-gradient-to-r from-red-50/90 to-rose-50/90 backdrop-blur-sm border-2 border-red-200/60 rounded-xl p-3 sm:p-3.5 shadow-md">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 bg-red-100/80 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-                      <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+            ) : error ? (
+              <div className="lg:flex-[1] lg:min-w-[250px] lg:ml-auto lg:flex lg:items-center">
+                <div className={`backdrop-blur-sm border-2 rounded-lg p-3 shadow-md w-full ${
+                  error.includes('no encontrado') 
+                    ? 'bg-gradient-to-r from-red-50/90 to-rose-50/90 border-red-200/60' 
+                    : 'bg-gradient-to-r from-amber-50/90 to-orange-50/90 border-amber-200/60'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm ${
+                      error.includes('no encontrado') 
+                        ? 'bg-red-100/80' 
+                        : 'bg-amber-100/80'
+                    }`}>
+                      <AlertCircle className={`w-5 h-5 ${
+                        error.includes('no encontrado') 
+                          ? 'text-red-600' 
+                          : 'text-amber-600'
+                      }`} />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-red-800 font-bold text-xs sm:text-sm">{error}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-bold text-xs sm:text-sm ${
+                        error.includes('no encontrado') 
+                          ? 'text-red-800' 
+                          : 'text-amber-800'
+                      }`}>{error}</p>
+                      {error.includes('no encontrado') && (
+                        <p className="text-red-700 text-[10px] mt-0.5">Verifica el DNI o correo</p>
+                      )}
+                      {error.includes('8 números') && (
+                        <p className="text-amber-700 text-[10px] mt-0.5">El DNI debe tener exactamente 8 dígitos</p>
+                      )}
                     </div>
                   </div>
                 </div>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -803,28 +897,24 @@ export function DirectAppointmentScheduler() {
         )}
       </div>
 
-      {/* Modal de alerta (copiado del calendario del estudiante) */}
-      {showAlert && (
+      {/* Modal de alerta - Solo para validaciones de fechas */}
+      {showAlert && alertType !== 'success' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className={`bg-white rounded-xl shadow-2xl max-w-md w-full p-6 ${
             alertType === 'error' ? 'border-2 border-red-500' :
             alertType === 'warning' ? 'border-2 border-amber-500' :
-            alertType === 'success' ? 'border-2 border-green-500' :
             'border-2 border-blue-500'
           }`}>
             <div className="flex items-start gap-4">
               <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
                 alertType === 'error' ? 'bg-red-100' :
                 alertType === 'warning' ? 'bg-amber-100' :
-                alertType === 'success' ? 'bg-green-100' :
                 'bg-blue-100'
               }`}>
                 {alertType === 'error' ? (
                   <AlertCircle className="w-6 h-6 text-red-600" />
                 ) : alertType === 'warning' ? (
                   <AlertCircle className="w-6 h-6 text-amber-600" />
-                ) : alertType === 'success' ? (
-                  <CheckCircle className="w-6 h-6 text-green-600" />
                 ) : (
                   <AlertCircle className="w-6 h-6 text-blue-600" />
                 )}
@@ -833,7 +923,6 @@ export function DirectAppointmentScheduler() {
                 <h3 className={`font-bold text-lg mb-2 ${
                   alertType === 'error' ? 'text-red-900' :
                   alertType === 'warning' ? 'text-amber-900' :
-                  alertType === 'success' ? 'text-green-900' :
                   'text-blue-900'
                 }`}>
                   {alertMessage.split('\n\n')[0]}
@@ -854,6 +943,31 @@ export function DirectAppointmentScheduler() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Notificación de éxito/error - Esquina superior derecha (como en mensajes) */}
+      {success && createPortal(
+        <div className="fixed top-2 xs:top-4 right-2 xs:right-4 z-[10001] animate-fade-in w-[calc(100%-1rem)] xs:w-auto max-w-md" style={{ zIndex: 10001 }}>
+          <div className={`px-3 xs:px-4 sm:px-5 py-3 xs:py-4 rounded-xl xs:rounded-2xl shadow-2xl flex items-center gap-2 xs:gap-3 min-w-0 xs:min-w-[280px] sm:min-w-[320px] backdrop-blur-sm ${
+            success.includes('Error') || success.includes('error')
+              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-2 border-red-400'
+              : 'bg-gradient-to-r from-green-500 to-green-600 text-white border-2 border-green-400'
+          }`}>
+            {success.includes('Error') || success.includes('error') ? (
+              <AlertCircle className="w-5 h-5 xs:w-6 xs:h-6 flex-shrink-0" />
+            ) : (
+              <CheckCircle className="w-5 h-5 xs:w-6 xs:h-6 flex-shrink-0" />
+            )}
+            <span className="flex-1 font-semibold text-xs xs:text-sm leading-relaxed break-words">{success}</span>
+            <button
+              onClick={() => setSuccess('')}
+              className="text-white/90 hover:text-white hover:bg-white/20 rounded-lg p-1 transition-colors flex-shrink-0"
+            >
+              <X className="w-4 h-4 xs:w-5 xs:h-5" />
+            </button>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

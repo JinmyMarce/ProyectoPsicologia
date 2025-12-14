@@ -19,14 +19,14 @@ export function MedicalInfoModal({ isOpen, onClose, medicalInfo, patientName }: 
   );
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-3xl sm:max-w-4xl w-full max-h-[90vh] sm:max-h-[85vh] overflow-hidden">
-        {/* Header compacto */}
-        <div className="relative bg-[#7a0c0c] p-0">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 xs:p-3 sm:p-4">
+      <div className="bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl max-w-full sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] lg:max-h-[85vh] overflow-hidden border border-slate-300 mx-2 sm:mx-4">
+        {/* Header compacto - Azul marino oscuro */}
+        <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-0">
           <div className="flex items-center justify-between px-4 sm:px-6 md:px-10 pt-4 sm:pt-6 pb-2">
             <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-white/90 rounded-full flex items-center justify-center border-2 border-white/30">
-                <Heart className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-[#7a0c0c]" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-white/90 rounded-full flex items-center justify-center border-2 border-white/30 shadow-lg">
+                <Heart className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-slate-800" />
               </div>
               <div className="text-sm sm:text-base md:text-xl font-semibold text-white/80 leading-tight ml-1 sm:ml-2">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
@@ -65,8 +65,8 @@ export function MedicalInfoModal({ isOpen, onClose, medicalInfo, patientName }: 
         <div className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6 bg-white max-h-[calc(90vh-140px)] sm:max-h-[calc(85vh-140px)] overflow-y-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {/* Antecedentes Médicos */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-              <div className="flex items-center justify-center gap-2 bg-[#7a0c0c] rounded-t-xl px-3 sm:px-4 py-2">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-slate-900 to-slate-800 rounded-t-xl px-3 sm:px-4 py-2">
                 <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 <span className="text-white font-bold uppercase text-xs sm:text-sm">Antecedentes Médicos</span>
               </div>
@@ -80,8 +80,8 @@ export function MedicalInfoModal({ isOpen, onClose, medicalInfo, patientName }: 
             </div>
 
             {/* Medicamentos Actuales */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-              <div className="flex items-center justify-center gap-2 bg-[#7a0c0c] rounded-t-xl px-3 sm:px-4 py-2">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-slate-900 to-slate-800 rounded-t-xl px-3 sm:px-4 py-2">
                 <Pill className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 <span className="text-white font-bold uppercase text-xs sm:text-sm">Medicamentos Actuales</span>
               </div>
@@ -95,8 +95,8 @@ export function MedicalInfoModal({ isOpen, onClose, medicalInfo, patientName }: 
             </div>
 
             {/* Alergias */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-              <div className="flex items-center justify-center gap-2 bg-[#7a0c0c] rounded-t-xl px-3 sm:px-4 py-2">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-slate-900 to-slate-800 rounded-t-xl px-3 sm:px-4 py-2">
                 <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 <span className="text-white font-bold uppercase text-xs sm:text-sm">Alergias</span>
               </div>
@@ -111,10 +111,10 @@ export function MedicalInfoModal({ isOpen, onClose, medicalInfo, patientName }: 
           </div>
 
           {/* Footer compacto */}
-          <div className="flex justify-end gap-2 pt-2 sm:pt-3 md:pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-2 pt-2 sm:pt-3 md:pt-4 border-t border-slate-200">
             <Button
               onClick={onClose}
-              className="bg-white border border-[#7a0c0c] text-[#7a0c0c] px-4 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-colors"
+              className="bg-white border-2 border-slate-300 text-slate-700 px-4 sm:px-6 py-2 rounded-xl font-bold text-xs sm:text-sm hover:bg-slate-50 hover:border-slate-400 transition-all duration-300"
             >
               Cerrar
             </Button>

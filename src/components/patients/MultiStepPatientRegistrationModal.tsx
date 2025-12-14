@@ -225,25 +225,25 @@ export const MultiStepPatientRegistrationModal: React.FC<MultiStepPatientRegistr
     switch (currentStep) {
       case 1:
         return (
-          <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         );
       case 2:
         return (
-          <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
           </svg>
         );
       case 3:
         return (
-          <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
         );
       default:
         return (
-          <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         );
@@ -266,25 +266,25 @@ export const MultiStepPatientRegistrationModal: React.FC<MultiStepPatientRegistr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className={`bg-white rounded-xl shadow-2xl ${getModalWidth()} w-full mx-4 max-h-[90vh] overflow-y-auto`}>
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 xs:p-3 sm:p-4">
+      <div className={`bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-slate-300 ${getModalWidth()} w-full max-w-full sm:max-w-lg lg:max-w-2xl mx-2 sm:mx-4 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto`}>
         <div className="p-6">
-          {/* Header común */}
-          <div className="flex items-center justify-between mb-6">
+          {/* Header común - Azul marino oscuro */}
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
             <div className="flex items-center space-x-3">
-              <div className="bg-blue-100 p-2 rounded-lg">
+              <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-3 rounded-xl shadow-md">
                 {getStepIcon()}
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">
+                <h2 className="text-xl font-black text-slate-900">
                   {getStepTitle()}
                 </h2>
-                <p className="text-sm text-gray-600">Paso {currentStep} de 3</p>
+                <p className="text-sm text-slate-700 font-semibold">Paso {currentStep} de 3</p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-lg p-2 transition-all duration-300"
             >
               <X className="w-6 h-6" />
             </button>
@@ -292,16 +292,16 @@ export const MultiStepPatientRegistrationModal: React.FC<MultiStepPatientRegistr
 
           {/* Nota informativa para registro de pacientes */}
           {!patientId && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-start space-x-2">
-                <div className="text-blue-600 mt-0.5">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <div className="mb-4 p-4 bg-gradient-to-r from-slate-50 to-slate-100 border-2 border-slate-200 rounded-xl">
+              <div className="flex items-start space-x-3">
+                <div className="text-slate-700 mt-0.5">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <div className="text-sm text-blue-800">
-                  <p className="font-medium">Registro por Psicólogo</p>
-                  <p className="mt-1">Este formulario es para registrar pacientes que no pueden acceder al sistema por sí mismos (sin internet, celular, etc.). Los estudiantes con email institucional pueden auto-registrarse usando Google OAuth.</p>
+                <div className="text-sm text-slate-900">
+                  <p className="font-bold">Registro por Psicólogo</p>
+                  <p className="mt-1 font-medium">Este formulario es para registrar pacientes que no pueden acceder al sistema por sí mismos (sin internet, celular, etc.). Los estudiantes con email institucional pueden auto-registrarse usando Google OAuth.</p>
                 </div>
               </div>
             </div>
@@ -309,13 +309,13 @@ export const MultiStepPatientRegistrationModal: React.FC<MultiStepPatientRegistr
 
           {/* Mensajes de error y éxito */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 font-semibold">{error}</p>
+            <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+              <p className="text-red-700 font-bold">{error}</p>
             </div>
           )}
           {success && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-600 font-semibold">{success}</p>
+            <div className="mb-4 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+              <p className="text-green-700 font-bold">{success}</p>
             </div>
           )}
 

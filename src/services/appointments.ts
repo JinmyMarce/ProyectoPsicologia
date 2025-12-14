@@ -372,4 +372,29 @@ export const searchStudent = async (identifier: string): Promise<Student[]> => {
     }
     throw new Error('Error al buscar el estudiante');
   }
+};
+
+// Agendar cita directamente para un estudiante (psicólogo)
+export interface ScheduleDirectAppointmentData {
+  student_identifier: string; // DNI o email
+  fecha: string; // Formato: YYYY-MM-DD
+  hora: string; // Formato: HH:mm
+  duracion: number; // Minutos (30-120)
+  motivo_consulta: string;
+}
+
+export const scheduleDirectAppointment = async (data: ScheduleDirectAppointmentData): Promise<any> => {
+  try {
+    const response = await apiClient.post('/psychologist-dashboard/appointments/schedule-for-student', data);
+    return response.data;
+  } catch (error: unknown) {
+    console.error('Error scheduling direct appointment:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        throw new Error(apiError.response.data.message);
+      }
+    }
+    throw new Error('Error al agendar la cita');
+  }
 }; 

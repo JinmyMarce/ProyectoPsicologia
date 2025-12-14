@@ -162,21 +162,23 @@ export const EmergencyContactModal: React.FC<EmergencyContactModalProps> = ({
         </div>
       </div>
 
-      {/* Botones de navegación */}
-      <div className="flex justify-between pt-4">
+      {/* Botones de navegación - Responsivos */}
+      <div className="flex justify-between pt-4 gap-2 xs:gap-3">
         <button
           onClick={onBack}
-          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-sm hover:shadow-md text-base"
+          className="px-3 xs:px-4 sm:px-5 py-2 border-2 border-slate-300 text-slate-700 rounded-lg sm:rounded-xl hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-sm hover:shadow-md text-xs xs:text-sm sm:text-base flex-1 xs:flex-initial justify-center"
         >
-          <ArrowLeft className="w-3 h-3" />
-          <span>Atrás</span>
+          <ArrowLeft className="w-3 h-3 xs:w-4 xs:h-4" />
+          <span className="hidden xs:inline">Atrás</span>
+          <span className="xs:hidden">←</span>
         </button>
         <button
           onClick={handleContinue}
-          className="px-4 py-2 bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white rounded-lg hover:from-black hover:to-gray-800 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg transform hover:scale-105 hover:shadow-xl text-base"
+          className="px-3 xs:px-4 sm:px-5 py-2 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-lg sm:rounded-xl hover:from-slate-800 hover:via-slate-700 hover:to-slate-800 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg transform hover:scale-105 hover:shadow-xl text-xs xs:text-sm sm:text-base flex-1 xs:flex-initial justify-center"
         >
-          <span>Continuar</span>
-          <ArrowRight className="w-3 h-3" />
+          <span className="hidden xs:inline">Continuar</span>
+          <span className="xs:hidden">→</span>
+          <ArrowRight className="w-3 h-3 xs:w-4 xs:h-4" />
         </button>
       </div>
     </div>

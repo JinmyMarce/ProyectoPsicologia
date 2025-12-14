@@ -170,7 +170,7 @@ function AppContent() {
           )}
 
           {/* Contenido principal - deshabilitado cuando hay mensaje de bienvenida */}
-          <main className={`flex-1 p-3 sm:p-4 lg:p-6 bg-gray-50 ${welcomeMessage ? 'pointer-events-none opacity-50' : ''}`}>
+          <main className={`flex-1 bg-gray-50 ${welcomeMessage ? 'pointer-events-none opacity-50' : ''} p-3 sm:p-4 lg:p-6`}>
             <div className="w-full h-full">
               <Routes>
                 {/* Rutas para Super Admin */}

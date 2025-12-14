@@ -162,9 +162,11 @@ export function AppointmentBooking() {
     };
     window.addEventListener('scheduleBlocked', handleScheduleBlocked);
     window.addEventListener('scheduleUnblocked', handleScheduleBlocked);
+    window.addEventListener('scheduleUpdated', handleScheduleBlocked);
     return () => {
       window.removeEventListener('scheduleBlocked', handleScheduleBlocked);
       window.removeEventListener('scheduleUnblocked', handleScheduleBlocked);
+      window.removeEventListener('scheduleUpdated', handleScheduleBlocked);
     };
   }, [psychologist?.id]);
 

@@ -13,7 +13,7 @@ export function PageHeader({ title, subtitle, children }: PageHeaderProps) {
   }
 
   return (
-    <div className="py-12 px-12 mb-10 shadow-2xl bg-gradient-to-r from-[#ffffff] via-[#f8fafc] to-[#f1f5f9] border-b-2 border-[#6b1013]/30 rounded-b-3xl">
+    <div className="py-8 px-2 sm:px-4 lg:px-6 mb-6 shadow-2xl bg-gradient-to-r from-[#ffffff] via-[#f8fafc] to-[#f1f5f9] border-b-2 border-[#6b1013]/30 rounded-b-3xl">
       <h1 className="text-5xl font-bold mb-6 text-[#1e293b]" style={{
         letterSpacing: '1px',
         textShadow: '0 6px 12px rgba(30, 41, 59, 0.2)',

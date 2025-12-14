@@ -219,7 +219,7 @@ export function SessionHistory() {
   const scheduledSessions = sessions.filter((s: Session) => s.estado === 'programada').length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 px-2 sm:px-3 lg:px-4">
       <PageHeader 
         title="Historial de Sesiones"
         subtitle="Visualiza todas las sesiones y filtra por estudiante"

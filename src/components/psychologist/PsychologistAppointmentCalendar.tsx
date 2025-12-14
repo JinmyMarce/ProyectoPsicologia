@@ -103,6 +103,25 @@ export const PsychologistAppointmentCalendar: React.FC = () => {
     loadSchedule();
   }, []);
 
+  // Escuchar eventos de actualización de horarios
+  useEffect(() => {
+    const handleScheduleUpdated = () => {
+      // Recargar horarios cuando se actualicen los bloqueos
+      loadSchedule();
+      loadAppointments();
+    };
+
+    window.addEventListener('scheduleUpdated', handleScheduleUpdated);
+    window.addEventListener('scheduleBlocked', handleScheduleUpdated);
+    window.addEventListener('scheduleUnblocked', handleScheduleUpdated);
+
+    return () => {
+      window.removeEventListener('scheduleUpdated', handleScheduleUpdated);
+      window.removeEventListener('scheduleBlocked', handleScheduleUpdated);
+      window.removeEventListener('scheduleUnblocked', handleScheduleUpdated);
+    };
+  }, []);
+
   const loadAppointments = async () => {
     try {
       setLoading(true);

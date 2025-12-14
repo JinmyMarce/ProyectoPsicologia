@@ -503,6 +503,58 @@ export const UnifiedCalendar: React.FC<UnifiedCalendarProps> = ({
             loadHolidaysUltraFast();
   }, [holidays]); // Se ejecuta cuando cambian los holidays o al montar
 
+  // Escuchar eventos de actualización de horarios bloqueados
+  useEffect(() => {
+    const handleScheduleBlocked = (event: CustomEvent) => {
+      const schedule = event.detail.schedule;
+      if (schedule && schedule.date) {
+        const blockedDate = dayjs(schedule.date).toDate();
+        setLocalBlockedDates(prev => {
+          // Evitar duplicados
+          const dateString = dayjs(blockedDate).format('YYYY-MM-DD');
+          const exists = prev.some(d => dayjs(d).format('YYYY-MM-DD') === dateString);
+          if (!exists) {
+            return [...prev, blockedDate];
+          }
+          return prev;
+        });
+      }
+    };
+
+    const handleScheduleUnblocked = (event: CustomEvent) => {
+      const scheduleId = event.detail.scheduleId;
+      // Si tenemos el ID, podemos removerlo, pero como no lo tenemos en localBlockedDates,
+      // mejor recargar desde el contexto o las props
+      // Por ahora, simplemente recargamos desde blockedDates prop
+    };
+
+    const handleScheduleUpdated = () => {
+      // Cuando se actualiza el horario, recargar bloqueos desde el contexto
+      // Esto se manejará mejor si el componente padre actualiza las props blockedDates
+      // Por ahora, simplemente forzamos una actualización visual
+      if (blockedDates && blockedDates.length > 0) {
+        setLocalBlockedDates(blockedDates.map(d => dayjs(d).toDate()));
+      }
+    };
+
+    window.addEventListener('scheduleBlocked', handleScheduleBlocked as EventListener);
+    window.addEventListener('scheduleUnblocked', handleScheduleUnblocked as EventListener);
+    window.addEventListener('scheduleUpdated', handleScheduleUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener('scheduleBlocked', handleScheduleBlocked as EventListener);
+      window.removeEventListener('scheduleUnblocked', handleScheduleUnblocked as EventListener);
+      window.removeEventListener('scheduleUpdated', handleScheduleUpdated as EventListener);
+    };
+  }, [blockedDates]);
+
+  // Sincronizar localBlockedDates con blockedDates prop cuando cambien
+  useEffect(() => {
+    if (blockedDates && blockedDates.length > 0) {
+      setLocalBlockedDates(blockedDates.map(d => dayjs(d).toDate()));
+    }
+  }, [blockedDates]);
+
   // Validaciones de agendamiento
   const isDateAvailableForBooking = (date: Date): boolean => {
     const today = new Date();

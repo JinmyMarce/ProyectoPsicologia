@@ -289,7 +289,7 @@ export const MedicalInfoModal: React.FC<MedicalInfoModalProps> = ({
         </button>
         <button
           onClick={handleContinue}
-          className="px-3 xs:px-4 sm:px-6 py-2 xs:py-2.5 sm:py-3 bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white rounded-lg sm:rounded-xl hover:from-black hover:to-gray-800 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg transform hover:scale-105 hover:shadow-xl text-xs xs:text-sm flex-1 xs:flex-initial justify-center"
+          className="px-3 xs:px-4 sm:px-6 py-2 xs:py-2.5 sm:py-3 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-lg sm:rounded-xl hover:from-slate-800 hover:via-slate-700 hover:to-slate-800 transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg transform hover:scale-105 hover:shadow-xl text-xs xs:text-sm flex-1 xs:flex-initial justify-center"
         >
           {isEditingMode ? (
             <>

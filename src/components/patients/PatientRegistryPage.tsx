@@ -8,14 +8,12 @@ export function PatientRegistryPage() {
   const [showRegistration, setShowRegistration] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="max-w-7xl mx-auto">
-        <PatientList onRegisterClick={() => setShowRegistration(true)} />
-      </div>
+    <>
+      <PatientList onRegisterClick={() => setShowRegistration(true)} />
       <MultiStepPatientRegistrationModal
         isOpen={showRegistration}
         onClose={() => setShowRegistration(false)}
       />
-    </div>
+    </>
   );
 }

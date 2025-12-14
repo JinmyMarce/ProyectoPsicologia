@@ -234,85 +234,9 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
     });
   };
 
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[9999]">
-      <div className="bg-gradient-to-br from-white via-gray-50 to-slate-50 rounded-lg shadow-2xl max-w-xl w-full mx-3 max-h-[85vh] border border-gray-200 relative" style={{
-        boxShadow: `
-          0 32px 64px rgba(0, 0, 0, 0.12), 
-          0 16px 32px rgba(0, 0, 0, 0.08),
-          0 8px 16px rgba(0, 0, 0, 0.04),
-          inset 0 1px 0 rgba(255, 255, 255, 0.9)
-        `,
-        zIndex: 10000,
-        overflow: 'visible'
-      }}>
-        <div className="p-3 xs:p-4 sm:p-5 max-h-[85vh] overflow-y-auto">
-          {/* Header Responsivo */}
-          <div className="flex items-center justify-between mb-3 xs:mb-4">
-            <div className="flex items-center gap-2 xs:gap-3 flex-1 min-w-0">
-              <div className="relative flex-shrink-0">
-                <div className="w-8 h-8 xs:w-10 xs:h-10 rounded-lg bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 flex items-center justify-center shadow-md border border-slate-600">
-                  <User className="w-4 h-4 xs:w-5 xs:h-5 text-white" />
-                </div>
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg blur opacity-20 -z-10"></div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg xs:text-xl font-bold text-gray-900 tracking-tight truncate">
-                  Datos Personales
-                </h2>
-                <p className="text-slate-600 text-sm xs:text-base font-medium truncate">
-                  Completa tu información
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="w-7 h-7 xs:w-8 xs:h-8 flex-shrink-0 rounded-lg bg-white hover:bg-red-50 flex items-center justify-center transition-all duration-300 shadow-sm border border-gray-200 hover:border-red-300 hover:shadow-md ml-2"
-            >
-              <X className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-gray-600 hover:text-red-600" />
-            </button>
-          </div>
-
-          {/* Información de la cita - Responsivo con hora separada */}
-          <div className="mb-3 xs:mb-4">
-            <div className="bg-gradient-to-r from-slate-50 via-gray-50 to-slate-100 rounded-lg p-2.5 xs:p-3 border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between gap-3 xs:gap-4">
-                {/* Fecha */}
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="w-6 h-6 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500 flex-shrink-0">
-                    <CalendarCheck className="w-3 h-3 text-white" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-xs xs:text-sm font-bold text-gray-900">
-                      Fecha de Cita
-                    </h3>
-                    <p className="text-gray-700 capitalize font-semibold text-xs xs:text-sm truncate">
-                      {formatDate(selectedDate)}
-                    </p>
-                  </div>
-                </div>
-                {/* Hora con icono */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 flex items-center justify-center shadow-sm border border-gray-500">
-                    <Clock3 className="w-3 h-3 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs xs:text-sm font-bold text-gray-900">
-                      Horario
-                    </h3>
-                    <p className="text-gray-700 font-semibold text-xs xs:text-sm">
-                      {selectedTime}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Formulario */}
-          <form onSubmit={handleSubmit} className="space-y-3 relative z-10">
+  // Si isOpen es false, renderizar solo el contenido (para uso en MultiStepPatientRegistrationModal)
+  const content = (
+    <form onSubmit={handleSubmit} className="space-y-3 relative z-10">
             {/* Información Personal - Compacto */}
             <div className="bg-gradient-to-br from-white to-slate-50 rounded-lg p-2.5 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
@@ -624,7 +548,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
               <button
                 type="button"
                 onClick={onBack}
-                className="px-3 xs:px-4 sm:px-5 py-1.5 xs:py-2 sm:py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-300 font-semibold text-xs xs:text-sm flex items-center gap-1.5 shadow-sm hover:shadow-md flex-1 xs:flex-initial"
+                className="px-3 xs:px-4 sm:px-5 py-1.5 xs:py-2 sm:py-2.5 border-2 border-slate-300 rounded-lg sm:rounded-xl text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all duration-300 font-semibold text-xs xs:text-sm flex items-center gap-1.5 shadow-sm hover:shadow-md flex-1 xs:flex-initial justify-center"
               >
                 <ArrowLeft className="w-3 h-3 xs:w-4 xs:h-4" />
                 <span className="hidden xs:inline">Atrás</span>
@@ -634,7 +558,7 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="px-3 xs:px-4 sm:px-5 py-1.5 xs:py-2 sm:py-2.5 bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900 text-white rounded-lg hover:from-slate-800 hover:to-slate-900 transition-all duration-300 font-semibold text-xs xs:text-sm flex items-center gap-1.5 shadow-lg transform hover:scale-105 hover:shadow-xl flex-1 xs:flex-initial justify-center"
+                className="px-3 xs:px-4 sm:px-5 py-1.5 xs:py-2 sm:py-2.5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-lg sm:rounded-xl hover:from-slate-800 hover:via-slate-700 hover:to-slate-800 transition-all duration-300 font-semibold text-xs xs:text-sm flex items-center gap-1.5 shadow-lg transform hover:scale-105 hover:shadow-xl flex-1 xs:flex-initial justify-center"
               >
                 {loading ? (
                   <>
@@ -651,9 +575,95 @@ export const PersonalDataModal: React.FC<PersonalDataModalProps> = ({
               </button>
             </div>
           </form>
-        </div>
-      </div>
-    </div>,
-    document.body
   );
+
+  // Si isOpen es true, renderizar el modal completo
+  if (isOpen) {
+    return createPortal(
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-[9999]">
+        <div className="bg-gradient-to-br from-white via-gray-50 to-slate-50 rounded-lg shadow-2xl max-w-xl w-full mx-3 max-h-[85vh] border border-gray-200 relative" style={{
+          boxShadow: `
+            0 32px 64px rgba(0, 0, 0, 0.12), 
+            0 16px 32px rgba(0, 0, 0, 0.08),
+            0 8px 16px rgba(0, 0, 0, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9)
+          `,
+          zIndex: 10000,
+          overflow: 'visible'
+        }}>
+          <div className="p-3 xs:p-4 sm:p-5 max-h-[85vh] overflow-y-auto">
+            {/* Header Responsivo */}
+            <div className="flex items-center justify-between mb-3 xs:mb-4">
+              <div className="flex items-center gap-2 xs:gap-3 flex-1 min-w-0">
+                <div className="relative flex-shrink-0">
+                  <div className="w-8 h-8 xs:w-10 xs:h-10 rounded-lg bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 flex items-center justify-center shadow-md border border-slate-600">
+                    <User className="w-4 h-4 xs:w-5 xs:h-5 text-white" />
+                  </div>
+                  <div className="absolute -inset-0.5 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg blur opacity-20 -z-10"></div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-lg xs:text-xl font-bold text-gray-900 tracking-tight truncate">
+                    Datos Personales
+                  </h2>
+                  <p className="text-slate-600 text-sm xs:text-base font-medium truncate">
+                    Completa tu información
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-7 h-7 xs:w-8 xs:h-8 flex-shrink-0 rounded-lg bg-white hover:bg-red-50 flex items-center justify-center transition-all duration-300 shadow-sm border border-gray-200 hover:border-red-300 hover:shadow-md ml-2"
+              >
+                <X className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-gray-600 hover:text-red-600" />
+              </button>
+            </div>
+
+            {/* Información de la cita - Responsivo con hora separada */}
+            {selectedDate && selectedTime && (
+              <div className="mb-3 xs:mb-4">
+                <div className="bg-gradient-to-r from-slate-50 via-gray-50 to-slate-100 rounded-lg p-2.5 xs:p-3 border border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between gap-3 xs:gap-4">
+                    {/* Fecha */}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <div className="w-6 h-6 rounded-md bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 flex items-center justify-center shadow-sm border border-slate-500 flex-shrink-0">
+                        <CalendarCheck className="w-3 h-3 text-white" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-xs xs:text-sm font-bold text-gray-900">
+                          Fecha de Cita
+                        </h3>
+                        <p className="text-gray-700 capitalize font-semibold text-xs xs:text-sm truncate">
+                          {formatDate(selectedDate)}
+                        </p>
+                      </div>
+                    </div>
+                    {/* Hora con icono */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 flex items-center justify-center shadow-sm border border-gray-500">
+                        <Clock3 className="w-3 h-3 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs xs:text-sm font-bold text-gray-900">
+                          Horario
+                        </h3>
+                        <p className="text-gray-700 font-semibold text-xs xs:text-sm">
+                          {selectedTime}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {content}
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  // Si isOpen es false, renderizar solo el contenido
+  return content;
 }; 
