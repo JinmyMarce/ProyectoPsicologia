@@ -83,7 +83,14 @@ export function LoadingScreen({
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
           }}>
-            {title}
+            {title === 'SAPTA' ? (
+              <span className="inline-flex items-baseline font-serif tracking-[0.18em]">
+                <span>SAP</span>
+                <span className="ml-[0.12em]">TA</span>
+              </span>
+            ) : (
+              title
+            )}
           </h1>
           <div className="relative">
             <p className={`${subtitleSize[size]} font-bold tracking-wide loading-shimmer text-white`} style={{

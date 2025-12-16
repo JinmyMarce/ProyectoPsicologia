@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Brain, Send, X, User, Loader2 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { chatBotService } from '../../services/chatbot';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Message {
   id: number;
@@ -27,19 +29,20 @@ interface ChatBotProps {
 }
 
 export function ChatBot({ isVisible = false, onClose }: ChatBotProps) {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hola, soy Marbot, tu asistente virtual del Sistema SAPTA (Sistema de Atención Psicológica Túpac Amaru).\n\nEstoy aquí para brindarte información clara sobre el uso del sistema. Puedo ayudarte con:\n• Agendamiento de citas\n• Funcionalidades disponibles según tu rol\n• Horarios y disponibilidad\n• Navegación en el sistema\n• Dudas sobre procedimientos\n\nRecuerda: No proporciono diagnósticos clínicos ni consejos médicos. Para emergencias, contacta directamente con los servicios correspondientes.",
+      text: "Hola, soy Marbot, tu asistente virtual del Sistema SAPTA (Sistema de Atención Psicológica Túpac Amaru).\n\nEstoy aquí para brindarte información clara y precisa sobre el uso del sistema. Puedo ayudarte con:\n• Agendamiento de citas\n• Funcionalidades disponibles según tu rol\n• Horarios y disponibilidad real del sistema\n• Navegación en el sistema\n• Procedimientos y políticas\n\nRecuerda: Solo proporciono información verificada del sistema. No proporciono diagnósticos clínicos ni consejos médicos. Para emergencias, contacta directamente con los servicios correspondientes.",
       isBot: true,
       timestamp: new Date(),
       type: 'interactive',
       category: 'bienvenida',
       options: [
         "¿Cómo agendo una cita?",
-        "¿Qué puedo hacer como estudiante?",
-        "¿Qué funciones tienen los psicólogos?",
-        "¿Cuáles son los horarios disponibles?"
+        "¿Qué puedo hacer según mi rol?",
+        "¿Cuáles son los horarios disponibles?",
+        "¿Qué información puedo ver?"
       ]
     }
   ]);
@@ -49,7 +52,7 @@ export function ChatBot({ isVisible = false, onClose }: ChatBotProps) {
     lastTopic: '',
     userIntent: '',
     conversationFlow: [],
-    userProfile: 'unknown'
+    userProfile: user?.role === 'student' ? 'estudiante' : user?.role === 'psychologist' ? 'psicologo' : user?.role === 'admin' ? 'admin' : 'unknown'
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -290,17 +293,65 @@ export function ChatBot({ isVisible = false, onClose }: ChatBotProps) {
     setInputText('');
     setIsTyping(true);
 
-    // Simular procesamiento inteligente con tiempo variable según complejidad
-    const processingTime = currentInput.toLowerCase().includes('emergencia') || currentInput.toLowerCase().includes('crisis') 
-      ? 500  // Respuesta rápida para emergencias
-      : 1000 + Math.random() * 1500; // Tiempo normal para otras consultas
+    try {
+      // Obtener perfil del usuario actual
+      const userProfile = user?.role === 'student' ? 'estudiante' : 
+                         user?.role === 'psychologist' ? 'psicologo' : 
+                         user?.role === 'admin' ? 'admin' : 'unknown';
 
-    setTimeout(() => {
+      // Llamar al servicio real del backend
+      const apiResponse = await chatBotService.sendMessage({
+        message: currentInput,
+        user_profile: userProfile,
+        context: context
+      });
+
+      if (apiResponse.success && apiResponse.data) {
+        // Convertir respuesta de API a mensaje de chat
+        // Limpiar el texto de markdown y emojis para mejor visualización
+        let cleanMessage = apiResponse.data.message || '';
+        // Convertir markdown básico a texto plano
+        cleanMessage = cleanMessage.replace(/\*\*(.*?)\*\*/g, '$1'); // Negrita
+        cleanMessage = cleanMessage.replace(/\*(.*?)\*/g, '$1'); // Cursiva
+        cleanMessage = cleanMessage.replace(/📅|🏥|⏰|🎉|🚨|🧠|👥|✅|⚠️|📞|👋|🎯|👨‍⚕️|👨‍💼|🎓/g, ''); // Remover emojis comunes
+        
+        const botResponse: Message = {
+          id: Date.now() + 1,
+          text: cleanMessage.trim(),
+          isBot: true,
+          timestamp: new Date(),
+          type: apiResponse.data.quick_replies && apiResponse.data.quick_replies.length > 0 ? 'interactive' : 'text',
+          options: apiResponse.data.quick_replies ? apiResponse.data.quick_replies.map((q: string) => q.replace(/📅|🏥|⏰|🎉|🚨|🧠|👥|✅|⚠️|📞|👋|🎯|👨‍⚕️|👨‍💼|🎓/g, '').trim()) : undefined,
+          priority: apiResponse.data.priority || 'medium',
+          category: apiResponse.data.type
+        };
+
+        // Actualizar contexto
+        const analysis = analyzeUserIntent(currentInput, context);
+        setContext({
+          ...context,
+          lastTopic: analysis.intent || apiResponse.data.type,
+          userIntent: analysis.intent || apiResponse.data.type,
+          conversationFlow: [...context.conversationFlow, analysis.intent || apiResponse.data.type],
+          userProfile: analysis.userProfile || userProfile
+        });
+
+        setMessages(prev => [...prev, botResponse]);
+      } else {
+        // Si falla la API, usar respuesta local como respaldo
+        const botResponse = getIntelligentResponse(currentInput, context);
+        botResponse.id = Date.now() + 1;
+        setMessages(prev => [...prev, botResponse]);
+      }
+    } catch (error) {
+      // En caso de error, usar respuesta local
       const botResponse = getIntelligentResponse(currentInput, context);
       botResponse.id = Date.now() + 1;
+      botResponse.text = "Lo siento, hubo un problema al procesar tu consulta. " + botResponse.text;
       setMessages(prev => [...prev, botResponse]);
+    } finally {
       setIsTyping(false);
-    }, processingTime);
+    }
   };
 
   const handleOptionClick = (option: string) => {

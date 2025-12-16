@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import {
   Calendar,
   Clock,
@@ -54,12 +54,25 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
   const [showQuickTestModal, setShowQuickTestModal] = useState(false);
   const [appointmentToCancel, setAppointmentToCancel] = useState<Appointment | null>(null);
   const [appointmentToReschedule, setAppointmentToReschedule] = useState<Appointment | null>(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
 
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // Evita re-renderizar TODO el dashboard cada segundo: el reloj vive aislado.
+  const CurrentDateTime = memo(function CurrentDateTime() {
+    const [now, setNow] = useState(new Date());
+    useEffect(() => {
+      const timer = setInterval(() => setNow(new Date()), 1000);
+      return () => clearInterval(timer);
+    }, []);
+    return (
+      <>
+        <div className="text-sm text-gray-600">
+          {now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+        </div>
+        <div className="text-2xl font-bold text-gray-900">
+          {now.toLocaleTimeString('es-ES')}
+        </div>
+      </>
+    );
+  });
 
   useEffect(() => {
     if (user?.email) {
@@ -237,10 +250,10 @@ export function StudentDashboard({ onPageChange }: StudentDashboardProps) {
                     </div>
                     <div>
                       <p className="text-[9px] font-bold text-white/70 uppercase tracking-wider">
-                        {currentTime.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                        <CurrentDateTime />
                       </p>
                       <p className="text-lg font-black text-white tabular-nums leading-none mt-0.5 drop-shadow-lg">
-                        {currentTime.toLocaleTimeString('es-ES')}
+                        {/* CurrentDateTime ya renderiza hora */}
                       </p>
                     </div>
                   </div>

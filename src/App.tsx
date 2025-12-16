@@ -1,47 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ScheduleProvider } from './contexts/ScheduleContext';
 import { LoginForm } from './components/auth/LoginForm';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
-import { AdminDashboard } from './components/admin/AdminDashboard';
-import { PsychologistDashboard } from './components/psychologist/PsychologistDashboard';
-import { SuperAdminDashboard } from './components/super-admin/SuperAdminDashboard';
-import { StudentDashboard } from './components/dashboard/StudentDashboard';
-import { TutorDashboard } from './components/tutor/TutorDashboard';
-import { StudentManagement } from './components/tutor/StudentManagement';
-import { DerivationManagement } from './components/tutor/DerivationManagement';
-import { GroupSessionManagement } from './components/tutor/GroupSessionManagement';
-import { UserProfile } from './components/profile/UserProfile';
-import { PsychologistProfile } from './components/psychologist/PsychologistProfile';
-import { StudentProfile } from './components/students/StudentProfile';
-import AppointmentsPage from './components/appointments';
-import { AppointmentBooking } from './components/appointments/AppointmentBooking';
-import { UnifiedCalendar } from './components/ui/UnifiedCalendar';
-import { AppointmentHistory } from './components/appointments/AppointmentHistory';
-import { UserManagement } from './components/admin/UserManagement';
-import { UserManagement as SuperAdminUserManagement } from './components/super-admin/UserManagement';
-import { SystemMonitoring } from './components/super-admin/SystemMonitoring';
-import { SystemSettings } from './components/super-admin/SystemSettings';
-import { AuditLog } from './components/super-admin/AuditLog';
-import { BackupManager } from './components/super-admin/BackupManager';
-import { NotificationCenter } from './components/notifications/NotificationCenter';
-import { ReportsAnalytics } from './components/reports/ReportsAnalytics';
-import { AdminReports } from './components/admin/AdminReports';
-import { ScheduleManager } from './components/psychologist/ScheduleManager';
-import { PatientRegistration } from './components/patients/PatientRegistration';
-import PatientList from './components/patients/PatientList';
-import { SessionList } from './components/sessions/SessionList';
-import { StudentAppointmentHistory } from './components/students/StudentAppointmentHistory';
-import { DirectAppointmentScheduler } from './components/psychologist/DirectAppointmentScheduler';
-import { SessionHistory } from './components/psychologist/SessionHistory';
-import { RescheduleAppointment } from './components/students/RescheduleAppointment';
-import MessagePanel from './components/messages/MessagePanel';
 import { SyncNotification } from './components/ui/SyncNotification';
 import { WelcomeMessage } from './components/auth/WelcomeMessage';
-import { AdminStats } from './components/dashboard/AdminStats';
 import { LoadingScreen } from './components/ui/LoadingScreen';
+
+// Code-splitting: cargar pantallas bajo demanda para reducir el bundle inicial.
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const PsychologistDashboard = lazy(() => import('./components/psychologist/PsychologistDashboard').then(m => ({ default: m.PsychologistDashboard })));
+const SuperAdminDashboard = lazy(() => import('./components/super-admin/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
+const StudentDashboard = lazy(() => import('./components/dashboard/StudentDashboard').then(m => ({ default: m.StudentDashboard })));
+const TutorDashboard = lazy(() => import('./components/tutor/TutorDashboard').then(m => ({ default: m.TutorDashboard })));
+const StudentManagement = lazy(() => import('./components/tutor/StudentManagement').then(m => ({ default: m.StudentManagement })));
+const DerivationManagement = lazy(() => import('./components/tutor/DerivationManagement').then(m => ({ default: m.DerivationManagement })));
+const GroupSessionManagement = lazy(() => import('./components/tutor/GroupSessionManagement').then(m => ({ default: m.GroupSessionManagement })));
+const UserProfile = lazy(() => import('./components/profile/UserProfile').then(m => ({ default: m.UserProfile })));
+const PsychologistProfile = lazy(() => import('./components/psychologist/PsychologistProfile').then(m => ({ default: m.PsychologistProfile })));
+const StudentProfile = lazy(() => import('./components/students/StudentProfile').then(m => ({ default: m.StudentProfile })));
+const AppointmentsPage = lazy(() => import('./components/appointments'));
+const AppointmentBooking = lazy(() => import('./components/appointments/AppointmentBooking').then(m => ({ default: m.AppointmentBooking })));
+const UnifiedCalendar = lazy(() => import('./components/ui/UnifiedCalendar').then(m => ({ default: m.UnifiedCalendar })));
+const AppointmentHistory = lazy(() => import('./components/appointments/AppointmentHistory').then(m => ({ default: m.AppointmentHistory })));
+const UserManagement = lazy(() => import('./components/admin/UserManagement').then(m => ({ default: m.UserManagement })));
+const SuperAdminUserManagement = lazy(() => import('./components/super-admin/UserManagement').then(m => ({ default: m.UserManagement })));
+const SystemMonitoring = lazy(() => import('./components/super-admin/SystemMonitoring').then(m => ({ default: m.SystemMonitoring })));
+const SystemSettings = lazy(() => import('./components/super-admin/SystemSettings').then(m => ({ default: m.SystemSettings })));
+const AuditLog = lazy(() => import('./components/super-admin/AuditLog').then(m => ({ default: m.AuditLog })));
+const BackupManager = lazy(() => import('./components/super-admin/BackupManager').then(m => ({ default: m.BackupManager })));
+const NotificationCenter = lazy(() => import('./components/notifications/NotificationCenter').then(m => ({ default: m.NotificationCenter })));
+const ReportsAnalytics = lazy(() => import('./components/reports/ReportsAnalytics').then(m => ({ default: m.ReportsAnalytics })));
+const AdminReports = lazy(() => import('./components/admin/AdminReports').then(m => ({ default: m.AdminReports })));
+const ScheduleManager = lazy(() => import('./components/psychologist/ScheduleManager').then(m => ({ default: m.ScheduleManager })));
+const PatientRegistration = lazy(() => import('./components/patients/PatientRegistration').then(m => ({ default: m.PatientRegistration })));
+const PatientList = lazy(() => import('./components/patients/PatientList'));
+const SessionList = lazy(() => import('./components/sessions/SessionList').then(m => ({ default: m.SessionList })));
+const StudentAppointmentHistory = lazy(() => import('./components/students/StudentAppointmentHistory').then(m => ({ default: m.StudentAppointmentHistory })));
+const DirectAppointmentScheduler = lazy(() => import('./components/psychologist/DirectAppointmentScheduler').then(m => ({ default: m.DirectAppointmentScheduler })));
+const SessionHistory = lazy(() => import('./components/psychologist/SessionHistory').then(m => ({ default: m.SessionHistory })));
+const RescheduleAppointment = lazy(() => import('./components/students/RescheduleAppointment').then(m => ({ default: m.RescheduleAppointment })));
+const MessagePanel = lazy(() => import('./components/messages/MessagePanel'));
+const AdminStats = lazy(() => import('./components/dashboard/AdminStats').then(m => ({ default: m.AdminStats })));
 
 // Componente para manejar la navegación
 function NavigationHandler({ onPageChange }: { onPageChange: (page: string) => void }) {
@@ -122,6 +124,11 @@ function AppContent() {
   }
 
   if (!user) {
+    // Mantener la URL consistente cuando no hay sesión (sin alterar el UI actual):
+    // si el usuario no está autenticado, siempre mostrar /login en la barra.
+    if (location.pathname !== '/login') {
+      navigate('/login', { replace: true });
+    }
     return <LoginForm />;
   }
 
@@ -172,7 +179,8 @@ function AppContent() {
           {/* Contenido principal - deshabilitado cuando hay mensaje de bienvenida */}
           <main className={`flex-1 bg-gray-50 ${welcomeMessage ? 'pointer-events-none opacity-50' : ''} p-3 sm:p-4 lg:p-6`}>
             <div className="w-full h-full">
-              <Routes>
+              <Suspense fallback={null}>
+                <Routes>
                 {/* Rutas para Super Admin */}
                 {user.role === 'super_admin' && user.email === 'marcelojinmy2024@gmail.com' && (
                   <>
@@ -256,13 +264,16 @@ function AppContent() {
 
                 {/* Ruta por defecto */}
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
-              </Routes>
+                </Routes>
+              </Suspense>
             </div>
           </main>
         </div>
       </div>
       {/* Panel de mensajes global */}
-      <MessagePanel isOpen={showMessagesPanel} onClose={() => setShowMessagesPanel(false)} />
+      <Suspense fallback={null}>
+        <MessagePanel isOpen={showMessagesPanel} onClose={() => setShowMessagesPanel(false)} />
+      </Suspense>
     </div>
   );
 }

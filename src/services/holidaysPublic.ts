@@ -51,7 +51,7 @@ class HolidayPublicService {
     if (holiday) {
       console.log(`🎉 Feriado detectado: ${holiday.name} en ${dateString}`);
     }
-    
+
     return holiday || null;
   }
 

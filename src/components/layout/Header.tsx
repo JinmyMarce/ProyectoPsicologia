@@ -158,9 +158,10 @@ export function Header({ onMenuClick, notifications = 0 }: HeaderProps) {
             {/* Título móvil - clickeable para ir al dashboard */}
             <h1 
               onClick={() => navigate('/dashboard')}
-              className="lg:hidden text-base font-black text-white font-sans tracking-widest cursor-pointer hover:text-blue-400 transition-colors active:scale-95"
+              className="lg:hidden text-base font-black text-white font-serif tracking-[0.18em] cursor-pointer hover:text-blue-400 transition-colors active:scale-95"
             >
-              SAPTA
+              <span className="inline-block">SAP</span>
+              <span className="inline-block ml-[0.12em]">TA</span>
             </h1>
           </div>
 

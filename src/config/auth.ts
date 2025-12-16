@@ -1,7 +1,7 @@
 // Configuración de autenticación
 export const AUTH_CONFIG = {
   // Google OAuth Client ID - Reemplazar con tu Client ID real
-  GOOGLE_CLIENT_ID: '25922165495-7ip4geihfadda3m7mph74pe76fr5ujdm.apps.googleusercontent.com',
+  GOOGLE_CLIENT_ID: '706056586338-3qbbb3i6ivvp4bncsi6k14p8u12te26u.apps.googleusercontent.com',
   
   // URL de la API
   API_BASE_URL: 'http://localhost:8000/api',

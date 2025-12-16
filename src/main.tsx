@@ -1,3 +1,6 @@
+// Silenciar todos los mensajes de consola (debe ser la primera importación)
+import './utils/silenceConsole';
+
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';

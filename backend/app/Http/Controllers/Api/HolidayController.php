@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Cache;
 
 class HolidayController extends Controller
 {
@@ -24,66 +25,80 @@ class HolidayController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $query = Holiday::active();
+            // Cache: este endpoint es altamente reutilizable (mismos filtros) y se consulta mucho.
+            $year = $request->get('year', date('Y'));
+            $region = $request->get('region');
+            $type = $request->get('type');
+            $startDate = $request->get('start_date');
+            $endDate = $request->get('end_date');
 
-            // Filtro por año
-            if ($request->has('year')) {
-                $query->forYear($request->year);
-            } else {
-                // Por defecto el año actual
-                $query->forYear(date('Y'));
-            }
+            $cacheKey = 'holidays:index:' . md5(json_encode([
+                'year' => $year,
+                'region' => $region,
+                'type' => $type,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ]));
 
-            // Filtro por región
-            if ($request->has('region')) {
-                $query->forRegion($request->region);
-            } else {
-                $query->national();
-            }
+            return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($request, $year, $region, $type, $startDate, $endDate) {
+                $query = Holiday::active();
 
-            // Filtro por tipo
-            if ($request->has('type')) {
-                $query->where('type', $request->type);
-            }
+                // Filtro por año
+                if ($year) {
+                    $query->forYear($year);
+                }
 
-            // Filtro por rango de fechas
-            if ($request->has('start_date') && $request->has('end_date')) {
-                $query->inDateRange($request->start_date, $request->end_date);
-            }
+                // Filtro por región
+                if ($request->has('region')) {
+                    $query->forRegion($region);
+                } else {
+                    $query->national();
+                }
 
-            // Ordenamiento
-            $query->orderBy('date', 'asc');
+                // Filtro por tipo
+                if ($request->has('type')) {
+                    $query->where('type', $type);
+                }
 
-            $holidays = $query->get();
+                // Filtro por rango de fechas
+                if ($request->has('start_date') && $request->has('end_date')) {
+                    $query->inDateRange($startDate, $endDate);
+                }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Feriados obtenidos exitosamente',
-                'data' => $holidays->map(function ($holiday) {
-                    return [
-                        'id' => $holiday->id,
-                        'name' => $holiday->name,
-                        'date' => $holiday->date->format('Y-m-d'),
-                        'formatted_date' => $holiday->formatted_date,
-                        'formatted_date_full' => $holiday->formatted_date_full,
-                        'type' => $holiday->type,
-                        'description' => $holiday->description,
-                        'is_national' => $holiday->is_national,
-                        'is_regional' => $holiday->is_regional,
-                        'region' => $holiday->region,
-                        'year' => $holiday->year,
-                        'is_today' => $holiday->isToday(),
-                        'is_past' => $holiday->isPast(),
-                        'is_future' => $holiday->isFuture(),
-                        'days_until' => $holiday->daysUntil()
-                    ];
-                }),
-                'meta' => [
-                    'total' => $holidays->count(),
-                    'year' => $request->get('year', date('Y')),
-                    'region' => $request->get('region', 'Nacional')
-                ]
-            ]);
+                // Ordenamiento
+                $query->orderBy('date', 'asc');
+
+                $holidays = $query->get();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Feriados obtenidos exitosamente',
+                    'data' => $holidays->map(function ($holiday) {
+                        return [
+                            'id' => $holiday->id,
+                            'name' => $holiday->name,
+                            'date' => $holiday->date->format('Y-m-d'),
+                            'formatted_date' => $holiday->formatted_date,
+                            'formatted_date_full' => $holiday->formatted_date_full,
+                            'type' => $holiday->type,
+                            'description' => $holiday->description,
+                            'is_national' => $holiday->is_national,
+                            'is_regional' => $holiday->is_regional,
+                            'region' => $holiday->region,
+                            'year' => $holiday->year,
+                            'is_today' => $holiday->isToday(),
+                            'is_past' => $holiday->isPast(),
+                            'is_future' => $holiday->isFuture(),
+                            'days_until' => $holiday->daysUntil()
+                        ];
+                    }),
+                    'meta' => [
+                        'total' => $holidays->count(),
+                        'year' => $year,
+                        'region' => $region ?? 'Nacional'
+                    ]
+                ]);
+            });
 
         } catch (\Exception $e) {
             return response()->json([
@@ -108,7 +123,14 @@ class HolidayController extends Controller
             $days = $request->get('days', 30);
             $region = $request->get('region');
 
-            $holidays = Holiday::getUpcomingHolidays($days, $region);
+            $cacheKey = 'holidays:upcoming:' . md5(json_encode([
+                'days' => (int)$days,
+                'region' => $region,
+            ]));
+
+            $holidays = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($days, $region) {
+                return Holiday::getUpcomingHolidays($days, $region);
+            });
 
             return response()->json([
                 'success' => true,
@@ -201,7 +223,15 @@ class HolidayController extends Controller
             $endDate = $request->end_date;
             $region = $request->get('region');
 
-            $holidays = Holiday::getHolidaysInRange($startDate, $endDate, $region);
+            $cacheKey = 'holidays:range:' . md5(json_encode([
+                'start' => $startDate,
+                'end' => $endDate,
+                'region' => $region,
+            ]));
+
+            $holidays = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($startDate, $endDate, $region) {
+                return Holiday::getHolidaysInRange($startDate, $endDate, $region);
+            });
 
             return response()->json([
                 'success' => true,
@@ -252,7 +282,14 @@ class HolidayController extends Controller
 
             $region = $request->get('region');
 
-            $holidays = Holiday::getHolidaysForYear($year, $region);
+            $cacheKey = 'holidays:year:' . md5(json_encode([
+                'year' => (int)$year,
+                'region' => $region,
+            ]));
+
+            $holidays = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($year, $region) {
+                return Holiday::getHolidaysForYear($year, $region);
+            });
 
             return response()->json([
                 'success' => true,
@@ -297,6 +334,13 @@ class HolidayController extends Controller
         try {
             $currentYear = date('Y');
             $region = $request->get('region');
+
+            $cacheKey = 'holidays:stats:' . md5(json_encode([
+                'year' => (int)$currentYear,
+                'region' => $region,
+            ]));
+
+            return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($currentYear, $region) {
 
             // Estadísticas del año actual
             $currentYearHolidays = Holiday::getHolidaysForYear($currentYear, $region);
@@ -353,6 +397,7 @@ class HolidayController extends Controller
                     'region' => $region ?? 'Nacional'
                 ]
             ]);
+            });
 
         } catch (\Exception $e) {
             return response()->json([

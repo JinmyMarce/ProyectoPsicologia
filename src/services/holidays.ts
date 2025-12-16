@@ -73,7 +73,33 @@ export interface HolidayStatsResponse {
 class HolidayService {
   private baseUrl = 'http://localhost:8000/api';
 
+  // Cache en memoria para evitar llamadas repetidas (no altera la funcionalidad; solo reduce requests)
+  // TTL corto para mantener datos frescos.
+  private cache = new Map<string, { expiresAt: number; value: Holiday[] }>();
+  private inFlight = new Map<string, Promise<Holiday[]>>();
+  private readonly defaultTtlMs = 5 * 60 * 1000; // 5 minutos
+
+  private getCacheKey(prefix: string, parts: Record<string, string | number | undefined>): string {
+    const normalized = Object.entries(parts)
+      .filter(([, v]) => v !== undefined && v !== null && v !== '')
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}=${String(v)}`)
+      .join('&');
+    return `${prefix}?${normalized}`;
+  }
+
   async getHolidays(year?: number, region?: string): Promise<Holiday[]> {
+    const cacheKey = this.getCacheKey('holidays', { year, region });
+    const cached = this.cache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+    const existing = this.inFlight.get(cacheKey);
+    if (existing) {
+      return existing;
+    }
+
+    const requestPromise = (async () => {
     try {
       const params = new URLSearchParams();
       if (year) params.append('year', year.toString());
@@ -88,6 +114,7 @@ class HolidayService {
       const data: HolidaysResponse = await response.json();
       
       if (data.success) {
+        this.cache.set(cacheKey, { value: data.data, expiresAt: Date.now() + this.defaultTtlMs });
         return data.data;
       } else {
         throw new Error(data.message || 'Error al obtener feriados');
@@ -95,10 +122,27 @@ class HolidayService {
     } catch (error) {
       console.error('Error fetching holidays:', error);
       return [];
+    } finally {
+      this.inFlight.delete(cacheKey);
     }
+    })();
+
+    this.inFlight.set(cacheKey, requestPromise);
+    return requestPromise;
   }
 
   async getHolidaysInRange(startDate: string, endDate: string): Promise<Holiday[]> {
+    const cacheKey = this.getCacheKey('holidays/get-in-range', { startDate, endDate });
+    const cached = this.cache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+    const existing = this.inFlight.get(cacheKey);
+    if (existing) {
+      return existing;
+    }
+
+    const requestPromise = (async () => {
     try {
       const response = await fetch(`${this.baseUrl}/holidays/get-in-range`, {
         method: 'POST',
@@ -118,6 +162,7 @@ class HolidayService {
       const data: HolidaysResponse = await response.json();
       
       if (data.success) {
+        this.cache.set(cacheKey, { value: data.data, expiresAt: Date.now() + this.defaultTtlMs });
         return data.data;
       } else {
         throw new Error(data.message || 'Error al obtener feriados');
@@ -125,7 +170,13 @@ class HolidayService {
     } catch (error) {
       console.error('Error fetching holidays in range:', error);
       return [];
+    } finally {
+      this.inFlight.delete(cacheKey);
     }
+    })();
+
+    this.inFlight.set(cacheKey, requestPromise);
+    return requestPromise;
   }
 
   async checkDate(date: string): Promise<boolean> {

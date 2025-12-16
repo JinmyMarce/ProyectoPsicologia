@@ -9,6 +9,7 @@ use App\Models\Cita;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class ChatBotController extends Controller
 {
@@ -54,7 +55,11 @@ class ChatBotController extends Controller
         try {
             $category = $request->get('category', 'all');
 
-            $knowledgeBase = [
+            // Cache: la base de conocimiento es (casi) estática. Incluye feriados dinámicos.
+            $cacheKey = 'chatbot:knowledge-base:' . md5((string)$category);
+
+            $result = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($category) {
+                $knowledgeBase = [
                 'horarios' => [
                     'title' => 'Horarios de Atención',
                     'content' => [
@@ -119,11 +124,11 @@ class ChatBotController extends Controller
                 'feriados' => $this->getHolidayInfo()
             ];
 
-            if ($category !== 'all' && isset($knowledgeBase[$category])) {
-                $result = [$category => $knowledgeBase[$category]];
-            } else {
-                $result = $knowledgeBase;
-            }
+                if ($category !== 'all' && isset($knowledgeBase[$category])) {
+                    return [$category => $knowledgeBase[$category]];
+                }
+                return $knowledgeBase;
+            });
 
             return response()->json([
                 'success' => true,
@@ -181,29 +186,32 @@ class ChatBotController extends Controller
     public function getStats(Request $request): JsonResponse
     {
         try {
-            // Estadísticas básicas del sistema
-            $stats = [
-                'sistema' => [
-                    'usuarios_activos' => User::where('active', true)->count(),
-                    'psicologos_disponibles' => User::where('role', 'psychologist')->where('active', true)->count(),
-                    'estudiantes_registrados' => User::where('role', 'student')->where('active', true)->count()
-                ],
-                'citas' => [
-                    'total_mes' => Cita::whereYear('fecha', date('Y'))->whereMonth('fecha', date('m'))->count(),
-                    'pendientes' => Cita::where('status', 'pendiente')->count(),
-                    'confirmadas_hoy' => Cita::where('status', 'confirmada')->whereDate('fecha', today())->count()
-                ],
-                'feriados' => [
-                    'proximos_30_dias' => Holiday::getUpcomingHolidays(30)->count(),
-                    'total_año' => Holiday::getHolidaysForYear(date('Y'))->count()
-                ],
-                'horarios' => [
-                    'bloques_disponibles' => 8,
-                    'horario_inicio' => '08:00',
-                    'horario_fin' => '14:00',
-                    'dias_atencion' => 5
-                ]
-            ];
+            // Cache corto: evita counts repetidos con alta concurrencia.
+            $cacheKey = 'chatbot:stats:' . date('Y-m-d-H-i'); // 1 min de granularidad
+            $stats = Cache::remember($cacheKey, now()->addMinute(), function () {
+                return [
+                    'sistema' => [
+                        'usuarios_activos' => User::where('active', true)->count(),
+                        'psicologos_disponibles' => User::where('role', 'psychologist')->where('active', true)->count(),
+                        'estudiantes_registrados' => User::where('role', 'student')->where('active', true)->count()
+                    ],
+                    'citas' => [
+                        'total_mes' => Cita::whereYear('fecha', date('Y'))->whereMonth('fecha', date('m'))->count(),
+                        'pendientes' => Cita::where('status', 'pendiente')->count(),
+                        'confirmadas_hoy' => Cita::where('status', 'confirmada')->whereDate('fecha', today())->count()
+                    ],
+                    'feriados' => [
+                        'proximos_30_dias' => Holiday::getUpcomingHolidays(30)->count(),
+                        'total_año' => Holiday::getHolidaysForYear(date('Y'))->count()
+                    ],
+                    'horarios' => [
+                        'bloques_disponibles' => 8,
+                        'horario_inicio' => '08:00',
+                        'horario_fin' => '14:00',
+                        'dias_atencion' => 5
+                    ]
+                ];
+            });
 
             return response()->json([
                 'success' => true,
