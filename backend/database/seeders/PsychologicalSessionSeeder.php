@@ -87,7 +87,14 @@ class PsychologicalSessionSeeder extends Seeder
         ];
 
         foreach ($sessions as $session) {
-            PsychologicalSession::create($session);
+            PsychologicalSession::updateOrCreate(
+                [
+                    'patient_id' => $session['patient_id'],
+                    'psychologist_id' => $session['psychologist_id'],
+                    'temas_tratados' => $session['temas_tratados'],
+                ],
+                $session
+            );
         }
 
         $this->command->info('Sesiones psicológicas creadas exitosamente!');

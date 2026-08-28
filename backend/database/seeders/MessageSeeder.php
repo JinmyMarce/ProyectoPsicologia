@@ -118,7 +118,14 @@ class MessageSeeder extends Seeder
         ];
 
         foreach ($messages as $message) {
-            Message::create($message);
+            Message::updateOrCreate(
+                [
+                    'sender_id' => $message['sender_id'],
+                    'recipient_id' => $message['recipient_id'],
+                    'subject' => $message['subject'],
+                ],
+                $message
+            );
         }
 
         $this->command->info('Mensajes de prueba creados exitosamente');

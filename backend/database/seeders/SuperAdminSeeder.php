@@ -15,14 +15,16 @@ class SuperAdminSeeder extends Seeder
     public function run(): void
     {
         // Crear super administrador
-        User::create([
-            'name' => 'Super Administrador',
-            'email' => 'superadmin@tupac-amaru.edu.pe',
-            'password' => Hash::make('superadmin123'),
-            'role' => 'super_admin',
-            'verified' => true,
-            'active' => true,
-        ]);
+        User::updateOrCreate(
+            ['email' => 'superadmin@tpac-amaru.edu.pe'],
+            [
+                'name' => 'Super Administrador',
+                'password' => Hash::make('superadmin123'),
+                'role' => 'super_admin',
+                'verified' => true,
+                'active' => true,
+            ]
+        );
 
         $this->command->info('Super administrador creado exitosamente!');
         $this->command->info('Email: superadmin@tupac-amaru.edu.pe');

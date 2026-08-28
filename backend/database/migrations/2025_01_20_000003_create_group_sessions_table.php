@@ -21,8 +21,10 @@ return new class extends Migration
             $table->enum('day_of_week', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'])->comment('Día de la semana');
             $table->string('topic')->comment('Tema de la sesión');
             $table->integer('max_students')->default(30)->comment('Máximo número de estudiantes');
-            $table->json('registered_students')->default('[]')->comment('IDs de estudiantes registrados');
-            $table->enum('status', ['scheduled', 'in_progress', 'completed', 'cancelled'])->default('scheduled')->comment('Estado de la sesión');
+          //  $table->json('registered_students')->default('[]')->comment('IDs de estudiantes registrados');
+          $table->json('registered_students')
+    ->comment('IDs de estudiantes registrados');  
+          $table->enum('status', ['scheduled', 'in_progress', 'completed', 'cancelled'])->default('scheduled')->comment('Estado de la sesión');
             $table->text('notes')->nullable()->comment('Notas adicionales sobre la sesión');
             $table->text('session_summary')->nullable()->comment('Resumen de la sesión completada');
             $table->timestamps();

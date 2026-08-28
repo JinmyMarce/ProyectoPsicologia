@@ -41,7 +41,10 @@ class PsychologistSeeder extends Seeder
         ];
 
         foreach ($psychologists as $psychologist) {
-            User::create($psychologist);
+            User::updateOrCreate(
+                ['email' => $psychologist['email']],
+                $psychologist
+            );
         }
 
         $this->command->info('Psicólogos creados exitosamente!');

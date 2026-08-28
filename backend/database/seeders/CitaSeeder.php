@@ -56,7 +56,15 @@ class CitaSeeder extends Seeder
         ];
 
         foreach ($citas as $cita) {
-            Cita::create($cita);
+            Cita::updateOrCreate(
+                [
+                    'student_id' => $cita['student_id'],
+                    'psychologist_id' => $cita['psychologist_id'],
+                    'fecha' => $cita['fecha'],
+                    'hora' => $cita['hora'],
+                ],
+                $cita
+            );
         }
     }
 }

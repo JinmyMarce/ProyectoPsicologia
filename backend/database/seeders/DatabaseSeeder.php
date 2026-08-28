@@ -15,10 +15,13 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'test2@example.com'],
+            User::factory()->raw([
+                'name' => 'Test User',
+                'email' => 'test2@example.com',
+            ])
+        );
 
         // Superadministrador
         \App\Models\User::updateOrCreate(

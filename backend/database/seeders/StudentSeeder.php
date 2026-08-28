@@ -57,7 +57,10 @@ class StudentSeeder extends Seeder
         ];
 
         foreach ($students as $student) {
-            User::create($student);
+            User::updateOrCreate(
+                ['email' => $student['email']],
+                $student
+            );
         }
 
         $this->command->info('Estudiantes creados exitosamente!');
